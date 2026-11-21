@@ -24,7 +24,7 @@
       h_lead: "Photographiez une feuille d'olivier, de palmier dattier ou d'agrume. GAIA vérifie d'abord la photo, reconnaît l'arbre, puis donne la maladie probable — ou dit qu'il n'est pas sûr.",
       up_t: 'Ajouter une photo de feuille', up_p: 'Une seule feuille, à plat, bien éclairée, qui remplit le cadre.',
       up_file: 'Choisir une image', up_cam: 'Prendre une photo', up_drop: 'ou déposez une image ici',
-      up_change: 'Changer de photo', up_privacy: "L'image est analysée dans votre navigateur. Elle n'est envoyée nulle part.",
+      up_change: 'Changer de photo', up_privacy: "L'image est analysée dans votre navigateur. Elle n'est envoyée nulle part, sauf si vous choisissez vous-même l'identification Pl@ntNet (bouton avec votre accord).",
       s1: 'Qualité de la photo', s2: "Identification de l'arbre", s3: 'Maladie probable', s4: 'Confiance', s5: 'Refus si incertain', s6: 'Conseil validé',
       st_wait: 'En attente', st_done: 'Calculé', st_off: 'Modèle non connecté', st_skip: 'Non exécuté',
       q_res: 'Résolution', q_light: 'Luminosité', q_sharp: 'Netteté', q_leaf: 'Part de végétation',
@@ -64,7 +64,7 @@
       h_lead: 'صوّر ورقة زيتون أو نخيل أو قوارص. تتحقق غايا أولاً من جودة الصورة، ثم تتعرف على الشجرة، ثم تقترح المرض المحتمل — أو تقول إنها غير متأكدة.',
       up_t: 'أضف صورة ورقة', up_p: 'ورقة واحدة، مسطحة، جيدة الإضاءة، تملأ الإطار.',
       up_file: 'اختر صورة', up_cam: 'التقط صورة', up_drop: 'أو اسحب الصورة إلى هنا',
-      up_change: 'تغيير الصورة', up_privacy: 'تُحلَّل الصورة داخل متصفحك ولا تُرسل إلى أي مكان.',
+      up_change: 'تغيير الصورة', up_privacy: 'تُحلَّل الصورة داخل متصفحك ولا تُرسل إلى أي مكان، إلا إذا اخترتَ بنفسك التعرّف عبر Pl@ntNet (زر بموافقتك).',
       s1: 'جودة الصورة', s2: 'التعرف على الشجرة', s3: 'المرض المحتمل', s4: 'درجة الثقة', s5: 'الامتناع عند الشك', s6: 'نصيحة مصادق عليها',
       st_wait: 'في الانتظار', st_done: 'تم الحساب', st_off: 'النموذج غير متصل', st_skip: 'لم يُنفَّذ',
       q_res: 'الدقة', q_light: 'الإضاءة', q_sharp: 'الوضوح', q_leaf: 'نسبة النبات',
@@ -104,7 +104,7 @@
       h_lead: 'Photograph an olive, date palm or citrus leaf. GAIA first checks the photo, recognises the tree, then gives the likely disease — or says it is not sure.',
       up_t: 'Add a photo of a leaf', up_p: 'A single leaf, flat, well lit, filling the frame.',
       up_file: 'Choose an image', up_cam: 'Take a photo', up_drop: 'or drop an image here',
-      up_change: 'Change photo', up_privacy: 'The image is analysed in your browser. It is not sent anywhere.',
+      up_change: 'Change photo', up_privacy: 'The image is analysed in your browser. It is not sent anywhere, unless you choose the Pl@ntNet identification yourself (button, with your consent).',
       s1: 'Photo quality', s2: 'Tree identification', s3: 'Likely disease', s4: 'Confidence', s5: 'Refusal when unsure', s6: 'Validated advice',
       st_wait: 'Waiting', st_done: 'Calculated', st_off: 'Model not connected', st_skip: 'Not run',
       q_res: 'Resolution', q_light: 'Brightness', q_sharp: 'Sharpness', q_leaf: 'Share of vegetation',
@@ -144,7 +144,7 @@
       h_lead: 'オリーブ、ナツメヤシ、柑橘の葉を撮影してください。GAIAはまず写真を確認し、木を識別してから、考えられる病気を示します。確信がなければそう伝えます。',
       up_t: '葉の写真を追加', up_p: '葉は1枚、平らにして明るく、画面いっぱいに。',
       up_file: '画像を選ぶ', up_cam: '写真を撮る', up_drop: 'または画像をここにドロップ',
-      up_change: '写真を変更', up_privacy: '画像はブラウザ内で分析され、どこにも送信されません。',
+      up_change: '写真を変更', up_privacy: '画像はブラウザ内で分析され、どこにも送信されません。ただし、ご自身でPl@ntNetによる同定を選んだ場合のみ、同意のうえで送信されます。',
       s1: '写真の画質', s2: '樹種の識別', s3: '考えられる病気', s4: '信頼度', s5: '不確かなら回答しない', s6: '検証済みの助言',
       st_wait: '待機中', st_done: '計算済み', st_off: 'モデル未接続', st_skip: '未実行',
       q_res: '解像度', q_light: '明るさ', q_sharp: 'シャープさ', q_leaf: '植物の割合',
@@ -184,7 +184,34 @@
   G.mountShell('health');
   var app = document.getElementById('app');
 
-  var state = { img: null, quality: null, model: { status: 'checking', manifest: null, error: null }, result: null, running: false };
+  var state = { img: null, quality: null, model: { status: 'checking', manifest: null, error: null }, result: null, running: false, file: null, pn: { status: 'idle' } };
+
+  G.addStrings({
+    fr: { pn_t: "Identifier la plante avec Pl@ntNet (service externe)", pn_p: "GAIA ne connaît pas encore cette plante, ou n'est pas sûr. Avec votre accord, la photo (réduite, sans position GPS) est envoyée à Pl@ntNet, un service scientifique, pour trouver le nom de l'espèce et d'éventuelles anomalies.",
+          pn_send: 'Oui, envoyer la photo', pn_no: 'Non merci', pn_loading: 'Pl@ntNet analyse la photo…', pn_declined: "Photo non envoyée. Vous pouvez changer d'avis :", pn_again: 'Identifier avec Pl@ntNet',
+          pn_res_t: 'Résultat Pl@ntNet (externe)', pn_species: 'Espèce probable', pn_none: "Aucune espèce trouvée.", pn_not_plant: "Pl@ntNet ne reconnaît pas de plante sur cette photo.",
+          pn_dis: 'Anomalies possibles', pn_dis_none: "Pl@ntNet ne signale aucune anomalie connue.", pn_dis_unavail: "La recherche d'anomalies n'est pas disponible pour le moment.",
+          pn_ext: "Résultat externe, non validé par un agronome GAIA. GAIA ne donne aucun conseil de traitement pour cette plante : demandez l'avis d'un technicien.",
+          pn_err_key: "Pl@ntNet n'est pas configuré sur le serveur (clé API manquante).", pn_err_quota: "Quota Pl@ntNet du jour atteint. Réessayez demain.", pn_err: "Pl@ntNet n'a pas pu répondre.", pn_retry: 'Réessayer', pn_left: 'demandes restantes aujourd’hui' },
+    ar: { pn_t: 'التعرّف على النبتة عبر Pl@ntNet (خدمة خارجية)', pn_p: 'لا تعرف غايا هذه النبتة بعد أو أنها غير متأكدة. بموافقتك تُرسل الصورة (مصغّرة وبدون موقع GPS) إلى Pl@ntNet، وهي خدمة علمية، لمعرفة اسم النوع وأي أمراض محتملة.',
+          pn_send: 'نعم، أرسل الصورة', pn_no: 'لا، شكراً', pn_loading: 'Pl@ntNet يحلّل الصورة…', pn_declined: 'لم تُرسل الصورة. يمكنك تغيير رأيك:', pn_again: 'التعرّف عبر Pl@ntNet',
+          pn_res_t: 'نتيجة Pl@ntNet (خارجية)', pn_species: 'النوع المحتمل', pn_none: 'لم يُعثر على أي نوع.', pn_not_plant: 'لا يتعرّف Pl@ntNet على نبتة في هذه الصورة.',
+          pn_dis: 'أمراض أو أضرار محتملة', pn_dis_none: 'لا يشير Pl@ntNet إلى أي مرض معروف.', pn_dis_unavail: 'البحث عن الأمراض غير متاح حالياً.',
+          pn_ext: 'نتيجة خارجية لم يصادق عليها مهندس فلاحي من غايا. لا تقدّم غايا أي نصيحة علاج لهذه النبتة: استشر تقنياً.',
+          pn_err_key: 'Pl@ntNet غير مُعدّ على الخادم (مفتاح API مفقود).', pn_err_quota: 'بلغتَ حصة Pl@ntNet اليومية. أعد المحاولة غداً.', pn_err: 'تعذّر على Pl@ntNet الردّ.', pn_retry: 'إعادة المحاولة', pn_left: 'طلبات متبقية اليوم' },
+    en: { pn_t: 'Identify the plant with Pl@ntNet (external service)', pn_p: 'GAIA does not know this plant yet, or is unsure. With your consent, the photo (downsized, without GPS data) is sent to Pl@ntNet, a scientific service, to find the species name and possible anomalies.',
+          pn_send: 'Yes, send the photo', pn_no: 'No thanks', pn_loading: 'Pl@ntNet is analysing the photo…', pn_declined: 'Photo not sent. You can change your mind:', pn_again: 'Identify with Pl@ntNet',
+          pn_res_t: 'Pl@ntNet result (external)', pn_species: 'Likely species', pn_none: 'No species found.', pn_not_plant: 'Pl@ntNet does not recognise a plant in this photo.',
+          pn_dis: 'Possible anomalies', pn_dis_none: 'Pl@ntNet reports no known anomaly.', pn_dis_unavail: 'Anomaly search is not available right now.',
+          pn_ext: 'External result, not validated by a GAIA agronomist. GAIA gives no treatment advice for this plant: ask a technician.',
+          pn_err_key: 'Pl@ntNet is not configured on the server (API key missing).', pn_err_quota: "Today's Pl@ntNet quota is reached. Try again tomorrow.", pn_err: 'Pl@ntNet could not answer.', pn_retry: 'Retry', pn_left: 'requests left today' },
+    ja: { pn_t: 'Pl@ntNet（外部サービス）で植物を同定する', pn_p: 'GAIAはこの植物をまだ知らないか、確信が持てません。同意いただければ、写真（縮小・GPS情報なし）を科学サービスPl@ntNetに送り、種名と考えられる異常を調べます。',
+          pn_send: 'はい、写真を送る', pn_no: '送らない', pn_loading: 'Pl@ntNetが写真を解析中…', pn_declined: '写真は送信されていません。気が変わったら：', pn_again: 'Pl@ntNetで同定',
+          pn_res_t: 'Pl@ntNetの結果（外部）', pn_species: '可能性の高い種', pn_none: '種が見つかりませんでした。', pn_not_plant: 'この写真にPl@ntNetは植物を認識できません。',
+          pn_dis: '考えられる異常', pn_dis_none: 'Pl@ntNetは既知の異常を報告していません。', pn_dis_unavail: '現在、異常の検索は利用できません。',
+          pn_ext: '外部の結果で、GAIAの農学者による検証はありません。この植物についてGAIAは処置の助言をしません。技術者に相談してください。',
+          pn_err_key: 'サーバーでPl@ntNetが設定されていません（APIキーなし）。', pn_err_quota: '本日のPl@ntNetの上限に達しました。明日もう一度お試しください。', pn_err: 'Pl@ntNetが応答できませんでした。', pn_retry: '再試行', pn_left: '本日の残り回数' }
+  });
 
   /* ---------------------------------------------------------- manifest */
   var EXAMPLE_MANIFEST = {
@@ -256,7 +283,7 @@
 
     var q = {
       res: { value: w + ' × ' + h, level: minSide >= 448 ? 'pass' : minSide >= 224 ? 'warn' : 'fail' },
-      light: { value: fmt(mean), level: mean >= 60 && mean <= 200 ? 'pass' : mean >= 35 && mean <= 225 ? 'warn' : 'fail' },
+      light: { value: fmt(mean), level: mean >= 60 && mean <= 235 ? 'pass' : mean >= 35 && mean <= 248 ? 'warn' : 'fail' },
       sharp: { value: fmt(lapVar), level: lapVar >= 120 ? 'pass' : lapVar >= 40 ? 'warn' : 'fail' },
       leaf: { value: fmt(leafShare * 100) + ' %', level: leafShare >= 0.25 ? 'pass' : leafShare >= 0.1 ? 'warn' : 'fail' }
     };
@@ -393,6 +420,7 @@
 
   function use(file) {
     if (!file || !/^image\//.test(file.type)) return;
+    state.file = file; state.pn = { status: 'idle' };
     var reader = new FileReader();
     reader.onload = function () {
       var img = new Image();
@@ -465,6 +493,71 @@
     }));
   }
 
+  /* ---------------------------------------------------------- Pl@ntNet (optional, consent-based) */
+  // Only for photos GAIA's own models cannot handle (other / unsure / no model yet). Needs CONFIG.plantnetEndpoint
+  // (the backend POST /plantnet: the Pl@ntNet API key stays on the server). The photo is downsized and re-encoded
+  // in the browser first, which also drops EXIF (GPS).
+  function pnSend() {
+    var ep = G.CONFIG.plantnetEndpoint, img = state.img;
+    state.pn = { status: 'loading' }; render();
+    var k = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(function (blob) {
+      if (!blob) { state.pn = { status: 'error', error: 'pn_err' }; render(); return; }
+      var fd = new FormData();
+      fd.append('image', blob, 'leaf.jpg'); fd.append('organ', 'leaf'); fd.append('lang', G.lang()); fd.append('diseases', 'true');
+      fetch(ep, { method: 'POST', body: fd }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+      }).then(function (x) {
+        if (x.ok) { state.pn = { status: 'done', data: x.j }; return; }
+        var s = x.j && x.j.detail && x.j.detail.status;
+        state.pn = { status: 'error', error: s === 'no_api_key' ? 'pn_err_key' : s === 'quota_exceeded' ? 'pn_err_quota' : 'pn_err' };
+      }).catch(function () { state.pn = { status: 'error', error: 'pn_err' }; }).then(render);
+    }, 'image/jpeg', 0.85);
+  }
+
+  function pnBlock() {
+    if (!G.CONFIG.plantnetEndpoint || !state.img) return null;
+    var pn = state.pn;
+    if (pn.status === 'loading') return el('div', { class: 'gp-card', role: 'status' }, [el('span', { class: 'gp-spin' }), ' ' + t('pn_loading')]);
+    if (pn.status === 'declined') return el('p', { class: 'muted small' }, [t('pn_declined') + ' ', el('button', { class: 'gp-btn ghost sm', type: 'button', onclick: function () { state.pn = { status: 'idle' }; render(); } }, [t('pn_again')])]);
+    if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error)), el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);
+    if (pn.status === 'done') {
+      var d = pn.data || {}, sp = d.species || [], kids = [el('h3', null, [t('pn_res_t')])];
+      if (d.not_a_plant) kids.push(el('p', { style: 'margin-top:6px' }, [t('pn_not_plant')]));
+      else {
+        kids.push(el('p', { class: 'eyebrow', style: 'margin-top:8px' }, [t('pn_species')]));
+        if (!sp.length) kids.push(el('p', null, [t('pn_none')]));
+        sp.slice(0, 3).forEach(function (s, i) {
+          var common = (s.common_names || []).filter(Boolean).slice(0, 2).join(', ');
+          kids.push(el('p', { style: i ? 'margin-top:4px' : 'margin-top:2px' }, [
+            el('i', { style: i ? '' : 'font-family:var(--g-display);font-size:20px;font-weight:600' }, [s.scientific_name]),
+            common ? ' (' + common + ')' : '',
+            s.score != null ? el('span', { class: 'small muted' }, [' · ' + fmt(s.score * 100) + ' %']) : ''
+          ]));
+        });
+        kids.push(el('p', { class: 'eyebrow', style: 'margin-top:12px' }, [t('pn_dis')]));
+        if (d.disease_status === 'unavailable') kids.push(el('p', { class: 'small muted' }, [t('pn_dis_unavail')]));
+        else if (!d.diseases || !d.diseases.length) kids.push(el('p', null, [t('pn_dis_none')]));
+        else d.diseases.slice(0, 3).forEach(function (x) {
+          kids.push(el('p', { style: 'margin-top:2px' }, [x.label, x.score != null ? el('span', { class: 'small muted' }, [' · ' + fmt(x.score * 100) + ' %']) : '']));
+        });
+      }
+      kids.push(el('div', { style: 'margin-top:12px' }, [G.note('info', t('pn_ext'))]));
+      kids.push(el('p', { class: 'small muted', style: 'margin-top:8px' }, [(d.attribution || 'Powered by Pl@ntNet') + (d.remaining_requests != null ? ' · ' + d.remaining_requests + ' ' + t('pn_left') : '')]));
+      return el('div', { class: 'gp-card' }, kids);
+    }
+    return el('div', { class: 'gp-card' }, [
+      el('h3', null, [t('pn_t')]),
+      el('p', { style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('pn_p')]),
+      el('div', { class: 'btns', style: 'margin-top:10px' }, [
+        el('button', { class: 'gp-btn primary', type: 'button', onclick: pnSend }, [t('pn_send')]),
+        el('button', { class: 'gp-btn ghost', type: 'button', onclick: function () { state.pn = { status: 'declined' }; render(); } }, [t('pn_no')])
+      ])
+    ]);
+  }
+
   function render() {
     G.clear(app);
     var ready = state.model.status === 'ready';
@@ -484,10 +577,11 @@
 
     var right = [pipe];
     if (state.model.status === 'checking') right.unshift(el('p', { class: 'muted small' }, [el('span', { class: 'gp-spin' }), ' …']));
-    else if (!ready) right.push(boundaryBlock());
+    else if (!ready) { if (hasImg) { var pb0 = pnBlock(); if (pb0) right.push(pb0); } right.push(boundaryBlock()); }
     else if (hasImg) {
       right.push(el('button', { class: 'gp-btn primary', type: 'button', disabled: state.running || state.quality.overall === 'fail', onclick: diagnose }, [state.running ? t('running') : t('run')]));
       var rb = resultBlocks(); if (rb) right = right.concat(rb);
+      if (ran && (state.result.stage1.abstain || state.result.stage1.top.label === 'other')) { var pb1 = pnBlock(); if (pb1) right.push(pb1); }
     }
     right.push(el('div', { class: 'gp-card' }, [
       el('h3', null, [t('limits_t')]),
