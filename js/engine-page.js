@@ -18,7 +18,8 @@
       draft: 'Fiche en brouillon, non validée par un expert', rejected_list: 'Techniques écartées pour cette parcelle',
       to_check: 'À vérifier', mat_cost: 'Coût', mat: 'Matériaux', actors: 'Acteurs locaux', reg: 'Réglementation',
       open_rec: 'Ouvrir la fiche', none_dim: '—',
-      e_note: "Ces verdicts viennent de règles explicites appliquées au profil de la parcelle. Ils ne remplacent pas l'avis d'un agronome."
+      e_note: "Ces verdicts viennent de règles explicites appliquées au profil de la parcelle. Ils ne remplacent pas l'avis d'un agronome.",
+      e_core_missing: 'Données essentielles manquantes : {f}. Les verdicts qui en dépendent restent « non évalué ».', e_filter: 'Filtre'
     },
     ar: {
       e_title: 'محرك التوافق',
@@ -34,12 +35,57 @@
       draft: 'بطاقة مسودة غير مصادق عليها', rejected_list: 'التقنيات المستبعدة لهذه القطعة',
       to_check: 'للتحقق', mat_cost: 'التكلفة', mat: 'المواد', actors: 'الفاعلون المحليون', reg: 'التنظيمات',
       open_rec: 'فتح البطاقة', none_dim: '—',
-      e_note: 'هذه الأحكام ناتجة عن قواعد صريحة مطبّقة على ملف القطعة، ولا تعوّض رأي مهندس فلاحي.'
+      e_note: 'هذه الأحكام ناتجة عن قواعد صريحة مطبّقة على ملف القطعة، ولا تعوّض رأي مهندس فلاحي.',
+      e_core_missing: 'Données essentielles manquantes : {f}. Les verdicts qui en dépendent restent « non évalué ».', e_filter: 'Filtre'
+    },
+    en: {
+      e_title: 'Compatibility engine',
+      e_lead: 'Each practice is tested on six dimensions. A mandatory condition that is not met rules the practice out, unless its record provides an adaptation.',
+      e_parcel: 'Plot assessed', e_change: 'Change plot',
+      e_n_ok: 'feasible', e_n_adapt: 'with adaptation', e_n_no: 'not recommended',
+      f_all: 'All', f_jp: 'From Japan', f_tn: 'From Tunisia',
+      why_ok: 'Why it fits', what_adapt: 'What must be adapted', why_no: 'Why it is ruled out', actions: 'Three actions',
+      sources: 'Sources', not_eval: 'Not assessed for lack of data', score: 'Match',
+      score_m: 'Weighted share of the secondary conditions met. Shown only when all of them could be assessed.',
+      no_score: 'No score: a secondary condition could not be assessed.',
+      provisional: 'At least one threshold in this record is provisional and must be validated by an agronomist.',
+      draft: 'Draft record, not validated by an expert', rejected_list: 'Practices ruled out for this plot',
+      to_check: 'To check', mat_cost: 'Cost', mat: 'Materials', actors: 'Local actors', reg: 'Regulation',
+      open_rec: 'Open the record', none_dim: '—',
+      e_note: 'These verdicts come from explicit rules applied to the plot profile. They do not replace an agronomist’s advice.',
+      e_core_missing: 'Essential data missing: {f}. Verdicts that depend on it stay “not assessed”.', e_filter: 'Filter'
+    },
+    ja: {
+      e_title: '適合性エンジン',
+      e_lead: '各技術を6つの観点で検証します。必須条件を満たさない技術は除外されます。ただし、記録に調整方法がある場合は除きます。',
+      e_parcel: '評価した区画', e_change: '区画を変更',
+      e_n_ok: '実施可能', e_n_adapt: '調整すれば可能', e_n_no: '推奨しない',
+      f_all: 'すべて', f_jp: '日本発', f_tn: 'チュニジア発',
+      why_ok: '適している理由', what_adapt: '調整が必要な点', why_no: '除外した理由', actions: '3つの行動',
+      sources: '出典', not_eval: 'データ不足のため未評価', score: '適合度',
+      score_m: '満たした副次条件の加重割合。すべて評価できた場合のみ表示します。',
+      no_score: 'スコアなし：評価できない副次条件があります。',
+      provisional: 'この記録には暫定的なしきい値が少なくとも1つあり、農業技術者による検証が必要です。',
+      draft: '下書きの記録（専門家未検証）', rejected_list: 'この区画で除外した技術',
+      to_check: '要確認', mat_cost: 'コスト', mat: '資材', actors: '地域の関係者', reg: '規制',
+      open_rec: '記録を開く', none_dim: '—',
+      e_note: 'これらの判定は、区画プロファイルに明示的なルールを適用した結果です。農業技術者の助言に代わるものではありません。',
+      e_core_missing: '重要なデータが欠けています：{f}。これに依存する判定は「未評価」のままです。', e_filter: '絞り込み'
     }
   });
   G.addStrings({
-    fr: { e_missing: 'Ce qui manque pour décider', e_complete: 'Compléter le profil de la parcelle' },
-    ar: { e_missing: 'ما ينقص لاتخاذ القرار', e_complete: 'أكمل ملف القطعة' }
+    fr: { e_missing: 'Ce qui manque pour décider', e_complete: 'Compléter le profil de la parcelle', no_cond: 'Sans contrainte',
+      no_cond_tip: 'La fiche ne fixe aucune condition sur cette dimension.', none_passed: 'Aucune condition confirmée pour l’instant : les données de la parcelle manquent pour les vérifier.',
+      missing_soft: 'Aucune condition obligatoire ne manque ; les conditions secondaires ci-dessous restent à vérifier.', unknown_tip: 'Donnée manquante : ' },
+    ar: { e_missing: 'ما ينقص لاتخاذ القرار', e_complete: 'أكمل ملف القطعة', no_cond: 'بلا قيد',
+      no_cond_tip: 'لا تحدد البطاقة أي شرط في هذا البعد.', none_passed: 'لا يوجد شرط مؤكد بعد: تنقص بيانات القطعة للتحقق منها.',
+      missing_soft: 'لا ينقص أي شرط إلزامي؛ الشروط الثانوية أدناه تبقى للتحقق.', unknown_tip: 'بيانات ناقصة: ' },
+    en: { e_missing: 'What is missing to decide', e_complete: 'Complete the plot profile', no_cond: 'No constraint',
+      no_cond_tip: 'The record sets no condition on this dimension.', none_passed: 'No condition confirmed yet: the plot data needed to check them is missing.',
+      missing_soft: 'No mandatory condition is missing; the secondary conditions below remain to be checked.', unknown_tip: 'Missing data: ' },
+    ja: { e_missing: '判断に足りない情報', e_complete: '区画プロファイルを補う', no_cond: '制約なし',
+      no_cond_tip: 'この観点について記録に条件はありません。', none_passed: 'まだ確認できた条件はありません。確認に必要な区画データが不足しています。',
+      missing_soft: '必須条件に不足はありません。以下の副次条件は引き続き確認が必要です。', unknown_tip: '欠けているデータ：' }
   });
   G.mountShell('engine');
 
@@ -49,16 +95,20 @@
   function vLabel(v) { return t(v === 'feasible' ? 'verdict_ok' : v === 'adapt' ? 'verdict_adapt' : v === 'insufficient' ? 'verdict_unk' : 'verdict_no'); }
   function dimLabel(d) { return t({ climate: 'dim_climate', terrain: 'dim_terrain', water: 'dim_water', materials: 'dim_materials', org: 'dim_org', reg: 'dim_reg' }[d]); }
 
-  function dimBox(d, info) {
+  function dimBox(d, info, rec) {
     var st = info.status, txt, ic;
+    var notes = (rec && rec.dimNotes) || {};
     if (st === 'pass') { txt = t('pass'); ic = 'ok'; }
     else if (st === 'fail') { txt = t('fail'); ic = 'no'; }
     else if (st === 'partial') { txt = t('pass') + ' / ' + t('fail'); ic = 'adapt'; }
     else if (st === 'unknown') { txt = t('unknown'); ic = 'unk'; }
     else if (st === 'info') { txt = t('to_check'); ic = 'info'; }
-    else { txt = t('none_dim'); ic = 'info'; }
+    else { txt = t('no_cond'); ic = 'info'; }
     var box = el('div', { class: 'dim ' + st }, [el('b', null, [dimLabel(d)]), el('span', null, [G.icon(ic), txt])]);
-    var tip = info.checks.map(E.describe).join(' · ');
+    var tip = info.checks.map(function (x) { return (x.result === 'unknown' ? t('unknown_tip') : '') + E.describe(x); }).join(' · ');
+    if (!tip && st === 'info' && rec) tip = { materials: rec.materials + ' — ' + rec.cost, org: rec.actors, reg: rec.regulation }[d] || '';
+    if (!tip) tip = notes[d] || t('no_cond_tip');
+    else if (notes[d]) tip += ' · ' + notes[d];
     if (tip) G.bindTip(box, tip);
     return box;
   }
@@ -80,7 +130,7 @@
       if (r.score !== null) G.bindTip(scoreBox, t('score_m'));
     }
 
-    var dims = el('div', { class: 'dims' }, E.DIMS.map(function (d) { return dimBox(d, r.dims[d]); }));
+    var dims = el('div', { class: 'dims' }, E.DIMS.map(function (d) { return dimBox(d, r.dims[d], rec); }));
 
     var passed = r.checks.filter(function (x) { return x.result === 'pass'; });
     var cols = [];
@@ -91,21 +141,25 @@
     } else {
       cols.push(el('div', null, [el('h4', null, [t('why_ok')]), passed.length ? el('ul', null, passed.map(function (x) {
         return el('li', null, [E.describe(x)]);
-      })) : el('p', { class: 'small muted' }, ['—'])]));
-      if (r.verdict === 'insufficient') cols.push(el('div', null, [el('h4', null, [t('e_missing')]), el('ul', null, r.unknown.filter(function (x) { return x.cond.hard; }).map(function (x) {
-        return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
-      })), el('a', { class: 'small', href: 'land.html' }, [t('e_complete') + ' →'])]));
+      })) : el('p', { class: 'small muted' }, [t('none_passed')])]));
+      if (r.verdict === 'insufficient') {
+        var need = r.unknown.filter(function (x) { return x.cond.hard; });
+        if (!need.length) need = r.unknown;
+        cols.push(el('div', null, [el('h4', null, [t('e_missing')]), el('ul', null, need.map(function (x) {
+          return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
+        })), el('a', { class: 'small', href: 'land.html' }, [t('e_complete') + ' →'])]));
+      }
       if (r.adaptation) cols.push(el('div', null, [el('h4', null, [t('what_adapt')]), el('p', { class: 'small', style: 'color:var(--g-ink-2)' }, [r.adaptation.text])]));
-      cols.push(el('div', null, [el('h4', null, [t('actions')]), el('ol', null, rec.actions.map(function (a) { return el('li', null, [a]); }))]));
+      if (rec.actions && rec.actions.length) cols.push(el('div', null, [el('h4', null, [t('actions')]), el('ol', null, rec.actions.map(function (a) { return el('li', null, [a]); }))]));
     }
     if (r.unknown.length) cols.push(el('div', null, [el('h4', null, [t('not_eval')]), el('ul', null, r.unknown.map(function (x) { return el('li', null, [E.describe(x)]); }))]));
 
     var more = el('details', { class: 'gp-more' }, [
       el('summary', null, [t('to_check') + ' : ' + t('dim_materials') + ', ' + t('dim_org') + ', ' + t('dim_reg')]),
       el('div', { class: 'tcols', style: 'margin-top:4px' }, [
-        el('div', null, [el('h4', null, [t('mat')]), el('p', { class: 'small' }, [rec.materials]), el('h4', { style: 'margin-top:10px' }, [t('mat_cost')]), el('p', { class: 'small' }, [rec.cost])]),
-        el('div', null, [el('h4', null, [t('actors')]), el('p', { class: 'small' }, [rec.actors])]),
-        el('div', null, [el('h4', null, [t('reg')]), el('p', { class: 'small' }, [rec.regulation])])
+        el('div', null, [el('h4', null, [t('mat')]), el('p', { class: 'small' }, [rec.materials || '—']), el('h4', { style: 'margin-top:10px' }, [t('mat_cost')]), el('p', { class: 'small' }, [rec.cost || '—'])]),
+        el('div', null, [el('h4', null, [t('actors')]), el('p', { class: 'small' }, [rec.actors || '—'])].concat(rec.dimNotes && rec.dimNotes.org ? [el('p', { class: 'small muted' }, [rec.dimNotes.org])] : [])),
+        el('div', null, [el('h4', null, [t('reg')]), el('p', { class: 'small' }, [rec.regulation || '—'])])
       ])
     ]);
 
@@ -143,10 +197,10 @@
     ]));
     app.appendChild(el('div', { style: 'margin-top:14px' }, [G.note('info', t('e_note'))]));
     if (p.dna.quality.coreMissing.length) {
-      app.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('warn', 'Données essentielles manquantes : ' + p.dna.quality.coreMissing.join(', ') + '. Les verdicts qui en dépendent restent « non évalué ».')]));
+      app.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('warn', t('e_core_missing').replace('{f}', p.dna.quality.coreMissing.map(G.fieldLabel).join(', ')))]));
     }
 
-    var fbar = el('div', { class: 'filters', role: 'group', 'aria-label': 'Filtre' });
+    var fbar = el('div', { class: 'filters', role: 'group', 'aria-label': t('e_filter') });
     [['all', 'f_all'], ['jp', 'f_jp'], ['tn', 'f_tn']].forEach(function (f) {
       fbar.appendChild(el('button', { type: 'button', 'aria-pressed': String(filter === f[0]), onclick: function () { filter = f[0]; render(); } }, [t(f[1])]));
     });

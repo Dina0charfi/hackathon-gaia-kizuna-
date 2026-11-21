@@ -20,7 +20,18 @@
       m_lab: 'AI Lab', m_lab_p: 'Un assistant qui connaît votre parcelle et cite ses fiches. Il dit quand les preuves manquent.',
       m_health: 'Santé des plantes', m_health_p: "Photo d'une feuille, contrôle de qualité, puis diagnostic — ou « je ne suis pas sûr ».",
       m_nexus: 'Eau & énergie', m_nexus_p: "Besoin en eau FAO-56, énergie de pompage, champ solaire et quota d'eau mensuel.",
+      m_farm: 'Tableau de bord', m_farm_p: "Eau pompée face au quota, énergie solaire, économies, alertes et irrigation conseillée pour 7 jours.",
       m_agv: 'Agrivoltaïsme', m_agv_p: 'Hauteur, espacement et orientation des panneaux : électricité et lumière restante pour la culture.',
+      m_biz: 'Modèle économique', m_biz_p: 'Kit de pompage solaire payé à l’usage par paiement mobile, pompe partagée en coopérative, quatre tests d’adoption.',
+      m_season: 'Ma saison', m_season_p: 'Les actions du mois pour votre culture, les alertes sécheresse, pluie, chaleur et gel sur les vraies prévisions, et l’eau utilisée face au quota.',
+      m_cal: 'Calendrier cultural', m_cal_p: 'Olivier, palmier dattier, agrumes, céréales : les étapes de l’année croisées avec la pluie et le besoin en eau de votre parcelle.',
+      m_soil: 'Mon sol', m_soil_p: 'Tests du bocal, du vinaigre et du trou d’eau : texture, calcaire et infiltration, enregistrés dans votre profil.',
+      m_mott: 'Mottainai', m_mott_p: 'Bois de taille, grignons, margines, palmes, paille : la seconde vie de chaque résidu, avec les précautions.',
+      st_data: 'Données réelles', st_declared: 'Saisie agriculteur', st_rules2: 'Règles sourcées',
+      d_season: 'Prévisions Open-Meteo en direct et relevés de compteur saisis ; aucune valeur simulée.',
+      d_cal: 'Étapes sourcées quand une source existe, sinon marquées « à valider » ; climat de la parcelle (ERA5).',
+      d_soil: 'Triangle des textures USDA, FAO-56 tableau 19 ; données enregistrées comme déclarées.',
+      d_mott: 'Fiches de résidus avec sources ; aucune quantité inventée.',
       m_lib: 'Bibliothèque', m_lib_p: 'Les fiches techniques sourcées qui alimentent le moteur et l’assistant.',
       open: 'Ouvrir →',
       st_live: 'Fonctionnel', st_sim: 'Simulation', st_rules: 'Mode règles', st_partial: 'Partiel', st_off: 'Modèle non connecté', st_concept: 'Concept',
@@ -41,6 +52,7 @@
       d_engine: 'Règles explicites sur 11 fiches sourcées, toutes en brouillon tant qu’un agronome ne les a pas validées.',
       d_lab: 'Réponses composées à partir des fiches et du profil ; branchement LLM prévu côté serveur.',
       d_health: 'Contrôle de qualité de la photo dans le navigateur ; aucun modèle entraîné pour l’instant.',
+      d_biz: 'Mensualités calculées à partir du gazole économisé ; aucun prix inventé.',
       d_nexus: 'Calcul FAO-56 et énergie de pompage sur les données climatiques de la parcelle.',
       d_agv: 'Modèle physique simplifié dans le navigateur ; version pvlib côté serveur.',
       d_kaizen: 'Corrections enregistrées sur l’appareil et exportables ; relecture experte à organiser.',
@@ -62,7 +74,18 @@
       m_lab: 'مختبر الذكاء', m_lab_p: 'مساعد يعرف قطعتك ويستشهد ببطاقاته، ويقول متى تنقص الأدلة.',
       m_health: 'صحة النبات', m_health_p: 'صورة ورقة، فحص للجودة، ثم تشخيص — أو «لست متأكدة».',
       m_nexus: 'الماء والطاقة', m_nexus_p: 'حاجة الماء حسب FAO-56، طاقة الضخ، الحقل الشمسي، والحصة الشهرية للماء.',
+      m_farm: 'لوحة المتابعة', m_farm_p: 'الماء المضخوخ مقابل الحصة، الطاقة الشمسية، التوفير، التنبيهات والري المنصوح به لسبعة أيام.',
       m_agv: 'الزراعة الضوئية', m_agv_p: 'ارتفاع الألواح وتباعدها واتجاهها: الكهرباء والضوء المتبقي للزراعة.',
+      m_biz: 'النموذج الاقتصادي', m_biz_p: 'منظومة ضخ شمسية بالدفع حسب الاستعمال عبر الهاتف، مضخة مشتركة في تعاضدية، وأربعة اختبارات للتبنّي.',
+      m_season: 'موسمي', m_season_p: 'أعمال الشهر لزراعتك، تنبيهات الجفاف والمطر والحرارة والصقيع من التوقعات الحقيقية، والماء المستعمل مقارنة بالحصة.',
+      m_cal: 'الرزنامة الفلاحية', m_cal_p: 'الزيتون ونخيل التمر والقوارص والحبوب: مراحل السنة مع أمطار قطعتك وحاجتها للماء.',
+      m_soil: 'تربتي', m_soil_p: 'اختبارات الإناء والخل والحفرة: القوام والكلس والتسرّب، تُحفظ في ملفك.',
+      m_mott: 'موتايناي', m_mott_p: 'أغصان التقليم والفيتورة والمرجين والجريد والتبن: الحياة الثانية لكل بقايا، مع الاحتياطات.',
+      st_data: 'بيانات حقيقية', st_declared: 'إدخال الفلاح', st_rules2: 'قواعد موثقة',
+      d_season: 'توقعات Open-Meteo مباشرة وقراءات عداد يُدخلها الفلاح؛ لا قيمة محاكاة.',
+      d_cal: 'مراحل موثقة عند وجود مصدر، وإلا مؤشَّر عليها «للتثبت»؛ مناخ القطعة (ERA5).',
+      d_soil: 'مثلث القوام USDA، الجدول 19 من FAO-56؛ تُحفظ البيانات كمصرّح بها.',
+      d_mott: 'بطاقات بقايا بمصادرها؛ لا كميات مختلقة.',
       m_lib: 'المكتبة', m_lib_p: 'البطاقات التقنية الموثقة بمصادر التي تغذي المحرك والمساعد.',
       open: 'افتح ←',
       st_live: 'يعمل', st_sim: 'محاكاة', st_rules: 'وضع القواعد', st_partial: 'جزئي', st_off: 'النموذج غير متصل', st_concept: 'مفهوم',
@@ -83,10 +106,119 @@
       d_engine: 'قواعد صريحة على 11 بطاقة موثقة، كلها مسودات إلى أن يصادق عليها مهندس فلاحي.',
       d_lab: 'إجابات مركبة من البطاقات والملف؛ ربط نموذج لغوي مخطط على الخادم.',
       d_health: 'فحص جودة الصورة في المتصفح؛ لا يوجد نموذج مدرَّب حالياً.',
+      d_biz: 'أقساط محسوبة من الغازوال الموفَّر؛ دون أسعار مخترعة.',
       d_nexus: 'حساب FAO-56 وطاقة الضخ على البيانات المناخية للقطعة.',
       d_agv: 'نموذج فيزيائي مبسط في المتصفح؛ نسخة pvlib على الخادم.',
       d_kaizen: 'تُحفظ التصحيحات على الجهاز ويمكن تصديرها؛ مراجعة الخبراء لم تُنظَّم بعد.',
       d_kizuna: 'تعلّم موزّع بين المزارع: رؤية غير مبرمجة.'
+    },
+    en: {
+      hero_h: 'Every piece of land has a story. GAIA helps you understand it.',
+      hero_p: 'Linking Japanese innovation and Tunisian farming heritage through smart, sustainable, evidence-based decisions.',
+      cta_1: 'Discover GAIA: choose my plot', cta_2: 'Explore the modules',
+      hero_principle: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
+      map_hint: 'Click the map to build the profile of that place', map_aria: 'Map of Tunisia: click to choose a plot',
+      dna_t: 'GAIA LAND DNA', dna_p: 'Each plot gets an identity: climate, relief, sun, soil, water and crop, every value with its source, resolution and confidence. What is missing is shown, never invented.',
+      dna_yours: 'Your plot', dna_example: 'Profile structure (no plot chosen)', dna_open: 'Open the full profile', dna_build: 'Build my first profile',
+      f_rain: 'Annual rainfall', f_slope: 'Slope', f_ghi: 'Solar radiation', f_soil: 'Soil', f_water: 'Water source', f_crop: 'Crop',
+      src_rain: 'Open-Meteo · ERA5', src_slope: 'Copernicus DEM', src_ghi: 'NASA POWER', src_soil: 'SoilGrids (local rasters)', src_water: 'Farmer', src_crop: 'Farmer',
+      mods_t: 'The intelligence modules', mods_p: 'Every module reads the same plot profile. Their real state is shown: working, simulation or not connected.',
+      m_land: 'Land Intelligence', m_land_p: 'Map of Tunisia, plot selection, and a profile built live from open data.',
+      m_engine: 'Compatibility', m_engine_p: 'Each practice tested on six dimensions: feasible, feasible with adaptation, or not recommended, with the reasons.',
+      m_lab: 'AI Lab', m_lab_p: 'An assistant that knows your plot and cites its records. It says when the evidence is missing.',
+      m_health: 'Plant health', m_health_p: 'A photo of a leaf, a quality check, then a diagnosis — or “I am not sure”.',
+      m_nexus: 'Water & energy', m_nexus_p: 'FAO-56 water need, pumping energy, solar array and a monthly water quota.',
+      m_farm: 'Dashboard', m_farm_p: 'Water pumped against the quota, solar energy, savings, alerts and advised irrigation for 7 days.',
+      m_agv: 'Agrivoltaics', m_agv_p: 'Panel height, spacing and orientation: electricity and the light left for the crop.',
+      m_biz: 'Business model', m_biz_p: 'Pay-as-you-go solar pumping kit paid by mobile money, a pump shared in a cooperative, four adoption tests.',
+      m_season: 'My season', m_season_p: 'This month’s actions for your crop, drought, rain, heat and frost alerts from real forecasts, and water used against the quota.',
+      m_cal: 'Crop calendar', m_cal_p: 'Olive, date palm, citrus, cereals: the stages of the year set against your parcel’s rain and water need.',
+      m_soil: 'My soil', m_soil_p: 'Jar, vinegar and water-hole tests: texture, lime and infiltration, saved to your profile.',
+      m_mott: 'Mottainai', m_mott_p: 'Pruning wood, pomace, mill wastewater, fronds, straw: the second life of each residue, with the cautions.',
+      st_data: 'Real data', st_declared: 'Farmer input', st_rules2: 'Sourced rules',
+      d_season: 'Live Open-Meteo forecasts and meter readings you enter; no simulated values.',
+      d_cal: 'Sourced stages where a source exists, otherwise marked “to check”; parcel climate (ERA5).',
+      d_soil: 'USDA texture triangle, FAO-56 table 19; data saved as declared.',
+      d_mott: 'Residue sheets with sources; no invented quantities.',
+      m_lib: 'Library', m_lib_p: 'The sourced technical records that feed the engine and the assistant.',
+      open: 'Open →',
+      st_live: 'Working', st_sim: 'Simulation', st_rules: 'Rules mode', st_partial: 'Partial', st_off: 'Model not connected', st_concept: 'Concept',
+      bridge_t: 'Japan × Tunisia, without copying', bridge_p: 'GAIA never assumes a Japanese method works everywhere. It keeps what transfers and says what does not.',
+      b_jp: 'Japan · Okuizumo', b_jp_h: 'Flooded terraced rice fields', b_jp_p: 'Flat steps, gravity canals, a customary watering order.',
+      b_tn: 'Tunisia · Medenine', b_tn_h: 'Jessour on an arid slope', b_tn_p: 'Earth dams that trap the runoff of a few storms a year.',
+      b_out: 'What GAIA proposes', b_out_h: 'Dry terrace with an overflow sill', b_out_p: 'Keep the geometry, drop the flooding: impossible with so little rain.',
+      con_t: 'Five Japanese ideas, five concrete functions',
+      kaizen: 'Kaizen — continuous improvement', kaizen_p: 'Farmers’ corrections, reviewed by an expert, improve the models.',
+      satoyama: 'Satoyama — landscapes in harmony', satoyama_p: 'The plot seen as layers that support each other; the image read with its context.',
+      mottainai: 'Mottainai — waste nothing', mottainai_p: 'Pruning residues as mulch; not one drop pumped beyond the need.',
+      kizuna: 'Kizuna — the bond', kizuna_p: 'A future network where Tunisian and Japanese farms learn together without sharing their data.',
+      wabisabi: 'Wabi-sabi — accepting imperfection', wabisabi_p: 'Calibrated confidence, and the right to say “I am not sure”.',
+      see: 'See it in GAIA →', future: 'Future',
+      status_t: 'What works today', status_p: 'GAIA always separates what is built from what is planned.',
+      th_feat: 'Feature', th_state: 'State', th_detail: 'Detail',
+      d_land: 'Open-Meteo, Copernicus DEM (via Open-Meteo) and NASA POWER queried live. Soil: local service to connect (SoilGrids API paused).',
+      d_engine: 'Explicit rules on 11 sourced records, all drafts until an agronomist validates them.',
+      d_lab: 'Answers composed from the records and the profile; LLM connection planned on the server.',
+      d_health: 'Photo quality check in the browser; no trained model yet.',
+      d_biz: 'Instalments computed from the diesel saved; no invented prices.',
+      d_nexus: 'FAO-56 calculation and pumping energy on the plot’s climate data.',
+      d_agv: 'Simplified physical model in the browser; pvlib version on the server.',
+      d_kaizen: 'Corrections saved on the device and exportable; expert review still to organise.',
+      d_kizuna: 'Federated learning between farms: a vision, not scheduled.'
+    },
+    ja: {
+      hero_h: 'すべての土地には物語がある。GAIAはそれを読み解く手助けをします。',
+      hero_p: '日本のイノベーションとチュニジアの農業遺産を、賢く持続可能で根拠に基づく判断で結びます。',
+      cta_1: 'GAIAを体験：区画を選ぶ', cta_2: 'モジュールを見る',
+      hero_principle: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
+      map_hint: '地図をクリックすると、その場所のプロファイルを作成します', map_aria: 'チュニジアの地図：クリックして区画を選ぶ',
+      dna_t: 'GAIA LAND DNA', dna_p: '区画ごとに「個性」を持たせます。気候・起伏・日射・土壌・水・作物。すべての値に出典・解像度・信頼度を付け、欠けている情報は作らずにそのまま示します。',
+      dna_yours: 'あなたの区画', dna_example: 'プロファイルの構成（区画未選択）', dna_open: 'プロファイル全体を開く', dna_build: '最初のプロファイルを作る',
+      f_rain: '年間降水量', f_slope: '傾斜', f_ghi: '日射量', f_soil: '土壌', f_water: '水源', f_crop: '作物',
+      src_rain: 'Open-Meteo · ERA5', src_slope: 'Copernicus DEM', src_ghi: 'NASA POWER', src_soil: 'SoilGrids（ローカルラスター）', src_water: '農家', src_crop: '農家',
+      mods_t: 'インテリジェンス・モジュール', mods_p: 'すべてのモジュールが同じ区画プロファイルを読み込みます。稼働中・シミュレーション・未接続など、実際の状態を表示します。',
+      m_land: 'ランド・インテリジェンス', m_land_p: 'チュニジアの地図で区画を選び、オープンデータからリアルタイムでプロファイルを作成。',
+      m_engine: '適合性', m_engine_p: '各技術を6つの観点で検証：実施可能、調整すれば実施可能、推奨しない。理由も示します。',
+      m_lab: 'AIラボ', m_lab_p: '区画を理解し、記録を引用するアシスタント。根拠がないときはそう伝えます。',
+      m_health: '植物の健康', m_health_p: '葉の写真を撮り、画質を確認してから診断。または「確信がありません」と答えます。',
+      m_nexus: '水とエネルギー', m_nexus_p: 'FAO-56による必要水量、揚水エネルギー、太陽光アレイ、月ごとの水の割当量。',
+      m_farm: 'ダッシュボード', m_farm_p: '割当量に対する揚水量、太陽光エネルギー、節約額、アラート、7日間の推奨灌漑。',
+      m_agv: '営農型太陽光', m_agv_p: 'パネルの高さ・間隔・向きから、発電量と作物に届く光を計算。',
+      m_biz: 'ビジネスモデル', m_biz_p: 'モバイル決済で使った分だけ払う太陽光揚水キット、協同組合で共有するポンプ、4つの導入テスト。',
+      m_season: 'わたしの季節', m_season_p: '作物の今月の作業、実際の予報にもとづく干ばつ・雨・暑さ・霜のアラート、割当量に対する使用水量。',
+      m_cal: '作物暦', m_cal_p: 'オリーブ、ナツメヤシ、柑橘、穀物：一年の段階を、あなたの区画の雨と必要水量に重ねて。',
+      m_soil: 'わたしの土', m_soil_p: '瓶・酢・水穴のテストで、土性、石灰分、浸透をプロファイルに保存。',
+      m_mott: 'もったいない', m_mott_p: '剪定枝、搾りかす、搾油廃水、ヤシの葉、わら：それぞれの残さの第二の生き方と注意点。',
+      st_data: '実データ', st_declared: '農家の入力', st_rules2: '出典つきのルール',
+      d_season: 'Open-Meteoのリアルタイム予報と、入力されたメーター記録。シミュレーション値はありません。',
+      d_cal: '出典がある段階は出典つき、ない段階は「要確認」と表示。区画の気候（ERA5）。',
+      d_soil: 'USDAの土性三角図、FAO-56 表19。データは申告値として保存。',
+      d_mott: '出典つきの残さシート。量はでっち上げません。',
+      m_lib: 'ライブラリ', m_lib_p: 'エンジンとアシスタントを支える、出典付きの技術記録。',
+      open: '開く →',
+      st_live: '稼働中', st_sim: 'シミュレーション', st_rules: 'ルールモード', st_partial: '一部', st_off: 'モデル未接続', st_concept: '構想',
+      bridge_t: '日本 × チュニジア、コピーではなく', bridge_p: 'GAIAは日本の手法がどこでも通用するとは考えません。移せるものは残し、合わないものは合わないと伝えます。',
+      b_jp: '日本 · 奥出雲', b_jp_h: '水を張った棚田', b_jp_p: '平らな段、重力式の水路、慣習的な配水の順番。',
+      b_tn: 'チュニジア · メドニン', b_tn_h: '乾燥した斜面のジェスール', b_tn_p: '年に数回の嵐の流出水をせき止める土の堤。',
+      b_out: 'GAIAの提案', b_out_h: '越流堰を備えた乾式テラス', b_out_p: '形は生かし、湛水はやめる。これほど雨が少ないと湛水は不可能です。',
+      con_t: '5つの日本の考え方、5つの具体的な機能',
+      kaizen: 'カイゼン — 継続的改善', kaizen_p: '農家の修正を専門家が確認し、モデルを改善します。',
+      satoyama: '里山 — 調和する風景', satoyama_p: '区画を支え合う層として捉え、画像も文脈とともに読み取ります。',
+      mottainai: 'もったいない — 無駄にしない', mottainai_p: '剪定くずをマルチに。必要以上の水は一滴も汲み上げません。',
+      kizuna: '絆 — つながり', kizuna_p: 'チュニジアと日本の農場が、データを共有せずに共に学ぶ未来のネットワーク。',
+      wabisabi: '侘寂 — 不完全を受け入れる', wabisabi_p: '調整された信頼度と、「確信がありません」と言う権利。',
+      see: 'GAIAで見る →', future: '将来',
+      status_t: '現在動いているもの', status_p: 'GAIAは、できているものと予定のものを常に区別します。',
+      th_feat: '機能', th_state: '状態', th_detail: '詳細',
+      d_land: 'Open-Meteo、Copernicus DEM（Open-Meteo経由）、NASA POWERにリアルタイムで問い合わせ。土壌：ローカルサービスの接続待ち（SoilGrids APIは停止中）。',
+      d_engine: '出典付きの11件の記録に明示的なルールを適用。農業技術者が検証するまではすべて下書き。',
+      d_lab: '記録とプロファイルから回答を構成。サーバー側でのLLM接続を予定。',
+      d_health: 'ブラウザで写真の画質を確認。学習済みモデルはまだありません。',
+      d_biz: '節約できた軽油代から月々の支払いを計算。価格は作りません。',
+      d_nexus: '区画の気候データでFAO-56と揚水エネルギーを計算。',
+      d_agv: 'ブラウザ上の簡易物理モデル。サーバー側にpvlib版。',
+      d_kaizen: '修正は端末に保存され、エクスポート可能。専門家による確認体制はこれから。',
+      d_kizuna: '農場間の連合学習：構想段階で、予定は未定。'
     }
   });
 
@@ -145,7 +277,7 @@
     });
     box.appendChild(svg);
     box.appendChild(hint);
-    box.appendChild(el('nav', { class: 'regions', 'aria-label': 'Régions' }, CITIES.map(function (c) {
+    box.appendChild(el('nav', { class: 'regions', 'aria-label': t('regions') }, CITIES.map(function (c) {
       return el('a', { href: 'land.html?lat=' + c[1] + '&lon=' + c[2] }, [c[0]]);
     })));
   }
@@ -154,7 +286,7 @@
   function dnaPreview() {
     var p = G.getParcel(), dna = p && p.dna;
     var rows = [
-      ['f_rain', 'climate.rain_mm', 'mm/an', 0, 'src_rain'], ['f_slope', 'terrain.slope_pct', '%', 1, 'src_slope'], ['f_ghi', 'solar.ghi_kwh', 'kWh/m²/j', 2, 'src_ghi'],
+      ['f_rain', 'climate.rain_mm', t('u_mm_yr'), 0, 'src_rain'], ['f_slope', 'terrain.slope_pct', '%', 1, 'src_slope'], ['f_ghi', 'solar.ghi_kwh', t('u_kwh_day'), 2, 'src_ghi'],
       ['f_soil', 'soil.texture', '', 0, 'src_soil'], ['f_water', 'water.source', '', 0, 'src_water'], ['f_crop', 'crop', '', 0, 'src_crop']
     ];
     var card = el('div', { class: 'gp-card' }, [
@@ -162,7 +294,7 @@
     ]);
     rows.forEach(function (r) {
       var f = dna ? D.fieldAt(dna, r[1]) : null, ok = f && f.status === 'ok';
-      var v = ok ? (typeof f.value === 'number' ? fmt(f.value, r[3]) + (r[2] ? ' ' + r[2] : '') : String(f.value)) : '—';
+      var v = ok ? (typeof f.value === 'number' ? fmt(f.value, r[3]) + (r[2] ? ' ' + r[2] : '') : (Array.isArray(f.value) ? f.value.join(', ') : G.valueText(f.value))) : '—';
       card.appendChild(el('div', { class: 'dna-row' }, [
         el('span', { class: 'k' }, [t(r[0])]),
         el('span', { class: 'v' }, [v]),
@@ -182,6 +314,10 @@
     ['land.html', 'm_land', 'm_land_p', 'live', 'st_live', '地'], ['engine.html', 'm_engine', 'm_engine_p', 'live', 'st_live', '橋'],
     ['lab.html', 'm_lab', 'm_lab_p', 'demo', 'st_rules', '知'], ['health.html', 'm_health', 'm_health_p', 'plan', 'st_off', '葉'],
     ['nexus.html', 'm_nexus', 'm_nexus_p', 'live', 'st_live', '水'], ['agrivoltaic.html', 'm_agv', 'm_agv_p', 'demo', 'st_sim', '陽'],
+    ['farm.html', 'm_farm', 'm_farm_p', 'demo', 'st_sim', '測'],
+    ['season.html', 'm_season', 'm_season_p', 'live', 'st_data', '季'], ['calendar.html', 'm_cal', 'm_cal_p', 'live', 'st_rules2', '暦'],
+    ['soil.html', 'm_soil', 'm_soil_p', 'live', 'st_declared', '土'], ['mottainai.html', 'm_mott', 'm_mott_p', 'live', 'st_rules2', '惜'],
+    ['business.html', 'm_biz', 'm_biz_p', 'live', 'st_live', '結'],
     ['library.html', 'm_lib', 'm_lib_p', 'live', 'st_live', '書']
   ];
   function modules() {
@@ -213,7 +349,7 @@
   }
 
   function concepts() {
-    var C = [['改善', 'kaizen', 'health.html'], ['里山', 'satoyama', 'engine.html'], ['もったいない', 'mottainai', 'nexus.html'], ['絆', 'kizuna', null], ['侘寂', 'wabisabi', 'health.html']];
+    var C = [['改善', 'kaizen', 'health.html'], ['里山', 'satoyama', 'engine.html'], ['もったいない', 'mottainai', 'mottainai.html'], ['絆', 'kizuna', null], ['侘寂', 'wabisabi', 'health.html']];
     return el('section', { class: 'sec', 'aria-labelledby': 'h-con' }, [
       el('h2', { id: 'h-con' }, [t('con_t')]),
       el('div', { class: 'concepts' }, C.map(function (c) {
@@ -227,7 +363,7 @@
 
   function status() {
     var R = [['m_land', 'live', 'st_live', 'd_land'], ['m_engine', 'live', 'st_live', 'd_engine'], ['m_lab', 'demo', 'st_rules', 'd_lab'], ['m_health', 'plan', 'st_off', 'd_health'],
-      ['m_nexus', 'live', 'st_live', 'd_nexus'], ['m_agv', 'demo', 'st_sim', 'd_agv'], ['kaizen', 'demo', 'st_partial', 'd_kaizen'], ['kizuna', 'plan', 'st_concept', 'd_kizuna']];
+      ['m_nexus', 'live', 'st_live', 'd_nexus'], ['m_biz', 'live', 'st_live', 'd_biz'], ['m_agv', 'demo', 'st_sim', 'd_agv'], ['m_season', 'live', 'st_data', 'd_season'], ['m_cal', 'live', 'st_rules2', 'd_cal'], ['m_soil', 'live', 'st_declared', 'd_soil'], ['m_mott', 'live', 'st_rules2', 'd_mott'], ['kaizen', 'demo', 'st_partial', 'd_kaizen'], ['kizuna', 'plan', 'st_concept', 'd_kizuna']];
     return el('section', { class: 'sec', 'aria-labelledby': 'h-st' }, [
       el('h2', { id: 'h-st' }, [t('status_t')]), el('p', { class: 'lead' }, [t('status_p')]),
       el('div', { class: 'gp-card status gp-table-wrap' }, [el('table', { class: 'gp-table' }, [

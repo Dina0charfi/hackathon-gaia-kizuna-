@@ -164,13 +164,14 @@ FOOT = u'''</main>
       <a href="home.html">GAIA platform</a>
     </nav>
     <div class="footer-row">
-      <p style="flex-grow:1">Team Gaia <span class="jp">&#22823;&#22320;</span> &mdash; [TEAM MEMBERS]</p>
-      <p>[CONTACT EMAIL]</p>
+      <p style="flex-grow:1">Team Gaia <span class="jp">&#22823;&#22320;</span> &mdash; Kizuna Challenge 2026, Tunisia &times; Japan</p>
+      <p><a href="https://github.com/sarahboussaidi/kizuna-gaia">Source on GitHub</a></p>
       <p lang="ja">&#20108;&#12388;&#12398;&#25991;&#21270;&#12289;&#19968;&#12388;&#12398;&#22823;&#22320;</p>
     </div>
   </div>
 </footer>
 
+<script src="js/story-i18n.js"></script>
 <script src="app.js"></script>
 {extra}</body>
 </html>
@@ -812,6 +813,9 @@ for path in ('login.html',):
     if 'class="hanko"' not in html and 'class="brand"' in html:
         html = html.replace('<span class="brand-word"',
                             '<span class="hanko" aria-hidden="true">&#32070;</span>\n      <span class="brand-word"', 1)
+    if 'js/story-i18n.js' not in html:
+        html = html.replace('<script src="app.js"></script>',
+                            '<script src="js/story-i18n.js"></script>\n<script src="app.js"></script>', 1)
     io.open(path, 'w', encoding='utf-8').write(html)
     print('patched', path)
 

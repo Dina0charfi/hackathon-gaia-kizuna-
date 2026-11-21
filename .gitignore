@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
+.venv/
+backend/data/feedback.jsonl
 .pytest_cache/

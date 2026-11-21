@@ -18,6 +18,11 @@
       no_solar: 'Rayonnement solaire indisponible pour cette parcelle : reconstruisez le profil sur la page Land Intelligence.',
       crop_t: 'Lecture pour la culture', crop_p: "GAIA ne compare pas cette lumière aux besoins de la culture tant qu'aucune fiche sourcée ne documente la tolérance à l'ombre de cette culture.",
       method_t: 'Méthode', method_p: "Position du soleil (déclinaison de Spencer, angle horaire), fraction diffuse journalière d'Erbs à partir de l'indice de clarté, ciel isotrope sur le plan des panneaux, ombre portée en coupe 2-D. L'énergie applique le ratio de performance, qui regroupe pertes thermiques et pertes système. La version serveur utilise pvlib.",
+      gw_t: 'Si ce champ alimente une pompe : le garde-nappe',
+      gw_p: "Ces panneaux pourraient pomper {c} m³ d'eau par an, soit {x} fois ce que la culture demande ({n} m³). Le garde-nappe plafonne la pompe à {a} m³ : {b} m³ restent dans la nappe et {f} kWh restent disponibles pour d'autres usages.",
+      gw_ok: "Ce champ ne dépasse pas le besoin de la culture : pas de surpompage possible.",
+      gw_none: "Renseignez la page Eau & énergie (surface, hauteur de pompage) pour voir combien d'eau ce champ pourrait pomper et le plafond qui protège la nappe.",
+      gw_go: 'Voir le garde-nappe',
       sun_el: 'hauteur du soleil', sun_az: 'azimut', src: 'Rayonnement :', src_om: 'Open-Meteo (rayonnement de courte longueur d’onde)'
     },
     ar: {
@@ -34,7 +39,54 @@
       no_solar: 'الإشعاع الشمسي غير متاح لهذه القطعة: أعد بناء الملف في صفحة ذكاء الأرض.',
       crop_t: 'قراءة للزراعة', crop_p: 'لا تقارن غايا هذا الضوء بحاجة الزراعة ما دامت لا توجد بطاقة موثقة بمصادر عن تحمّل هذه الزراعة للظل.',
       method_t: 'المنهجية', method_p: 'موقع الشمس (ميل سبنسر والزاوية الساعية)، الجزء المنتشر اليومي حسب إربس انطلاقاً من مؤشر الصفاء، سماء متجانسة على مستوى الألواح، ظل في مقطع ثنائي الأبعاد. تطبّق الطاقة نسبة الأداء التي تجمع الخسائر الحرارية وخسائر المنظومة. تستعمل نسخة الخادم مكتبة pvlib.',
+      gw_t: 'إذا شغّل هذا الحقل مضخة: حارس المائدة المائية',
+      gw_p: 'يمكن لهذه الألواح ضخ {c} م³ من الماء سنوياً، أي {x} مرة ما تحتاجه الزراعة ({n} م³). يحدد الحارس سقف المضخة بـ {a} م³: يبقى {b} م³ في المائدة و{f} ك.و.س متاحة لاستعمالات أخرى.',
+      gw_ok: 'هذا الحقل لا يتجاوز حاجة الزراعة: لا ضخ مفرط ممكن.',
+      gw_none: 'أكمل صفحة الماء والطاقة (المساحة، ارتفاع الضخ) لترى كم يمكن لهذا الحقل أن يضخ والسقف الذي يحمي المائدة.',
+      gw_go: 'عرض حارس المائدة',
       sun_el: 'ارتفاع الشمس', sun_az: 'السمت', src: 'الإشعاع:', src_om: 'Open-Meteo (إشعاع الموجة القصيرة)'
+    },
+    en: {
+      a_title: 'Agrivoltaics',
+      a_lead: 'Set the height, spacing, tilt and orientation of the panels: GAIA estimates the electricity produced and the light left for the crop, month by month.',
+      sim_badge: 'Simulation', sim_note: 'Every value on this page is a model estimate, not a measurement. No real installation is shown.',
+      in_t: 'Configuration', h: 'Panel height', p: 'Row spacing', w: 'Panel width', tilt: 'Tilt', az: 'Orientation',
+      az_s: 'due south', az_e: 'towards the east', az_w: 'towards the west', area: 'Area covered (ha)', area_h: 'Plot area if known; otherwise the calculation is for 1 ha.',
+      dens: 'Module power (Wp/m²)', pr: 'Performance ratio', assumption: 'Editable assumption',
+      k_cap: 'Installed power', k_energy: 'Electricity per year', k_yield: 'Specific yield', k_light: 'Light for the crop', k_light_s: 'in summer (June–August)', k_gcr: 'Ground coverage ratio',
+      c_energy: 'Estimated electricity by month', c_light: 'Share of light reaching the crop, by month',
+      xs_t: 'Cross-section: where the shade falls', xs_month: 'Month', xs_hour: 'Solar time', xs_south: 'panel face →', xs_shade: 'direct shade on the ground at this hour',
+      insight_h: 'In this long-row model, height moves the shade without changing its average share: it mainly helps machines pass under and makes the shade move more over the day. To give the crop more light, space the rows further apart or narrow the panels.',
+      no_solar: 'Solar radiation unavailable for this plot: rebuild the profile on the Land Intelligence page.',
+      crop_t: 'Reading for the crop', crop_p: 'GAIA does not compare this light with the crop’s needs until a sourced record documents the crop’s shade tolerance.',
+      method_t: 'Method', method_p: 'Sun position (Spencer declination, hour angle), Erbs daily diffuse fraction from the clearness index, isotropic sky on the panel plane, cast shade in a 2-D cross-section. The energy applies the performance ratio, which groups thermal and system losses. The server version uses pvlib.',
+      gw_t: 'If this array powers a pump: the groundwater guard',
+      gw_p: 'These panels could pump {c} m³ of water a year, {x} times what the crop needs ({n} m³). The groundwater guard caps the pump at {a} m³: {b} m³ stay in the aquifer and {f} kWh stay available for other uses.',
+      gw_ok: 'This array does not exceed the crop’s need: no over-pumping is possible.',
+      gw_none: 'Fill in the Water & energy page (area, pumping head) to see how much water this array could pump and the ceiling that protects the aquifer.',
+      gw_go: 'See the groundwater guard',
+      sun_el: 'sun elevation', sun_az: 'azimuth', src: 'Radiation:', src_om: 'Open-Meteo (shortwave radiation)'
+    },
+    ja: {
+      a_title: '営農型太陽光',
+      a_lead: 'パネルの高さ・間隔・傾き・向きを設定すると、GAIAが発電量と作物に届く光を月ごとに推定します。',
+      sim_badge: 'シミュレーション', sim_note: 'このページの値はすべてモデルによる推定で、実測ではありません。実在の設備は表示していません。',
+      in_t: '設定', h: 'パネルの高さ', p: '列の間隔', w: 'パネルの幅', tilt: '傾斜角', az: '向き',
+      az_s: '真南', az_e: '東向き', az_w: '西向き', area: '対象面積（ha）', area_h: 'わかれば区画の面積。なければ1 haとして計算します。',
+      dens: 'モジュール出力（Wp/m²）', pr: '性能比', assumption: '変更できる前提',
+      k_cap: '設置容量', k_energy: '年間発電量', k_yield: '発電量（kWpあたり）', k_light: '作物に届く光', k_light_s: '夏（6〜8月）', k_gcr: '被覆率',
+      c_energy: '月別の推定発電量', c_light: '作物に届く光の割合（月別）',
+      xs_t: '断面図：影の落ちる場所', xs_month: '月', xs_hour: '太陽時', xs_south: 'パネルの正面 →', xs_shade: 'この時刻の地面への直射の影',
+      insight_h: 'この長い列のモデルでは、高さは影の位置を動かしますが、平均的な割合は変えません。主に機械が下を通れるようにし、一日の中で影が動きやすくなる効果です。作物の光を増やすには、列の間隔を広げるか、パネルの幅を狭くしてください。',
+      no_solar: 'この区画の日射量を取得できません。ランド・インテリジェンスでプロファイルを作り直してください。',
+      crop_t: '作物にとっての意味', crop_p: 'この作物の耐陰性を記した出典つきの記録がない限り、GAIAはこの光を作物の必要量と比較しません。',
+      method_t: '方法', method_p: '太陽位置（Spencerの赤緯、時角）、晴天指数からのErbsの日別散乱成分比、パネル面での等方性天空、2次元断面での影。発電量には熱損失とシステム損失をまとめた性能比を適用しています。サーバー版はpvlibを使用します。',
+      gw_t: 'このアレイでポンプを動かす場合：地下水ガード',
+      gw_p: 'このパネルは年間{c} m³の水を汲み上げられ、作物の必要量（{n} m³）の{x}倍です。地下水ガードはポンプを{a} m³までに制限し、{b} m³は帯水層に残り、{f} kWhは他の用途に使えます。',
+      gw_ok: 'このアレイは作物の必要量を超えないため、過剰揚水は起こりません。',
+      gw_none: '「水とエネルギー」ページ（面積、揚程）を入力すると、このアレイで汲める水の量と、帯水層を守る上限を確認できます。',
+      gw_go: '地下水ガードを見る',
+      sun_el: '太陽高度', sun_az: '方位角', src: '日射：', src_om: 'Open-Meteo（短波放射）'
     }
   });
 
@@ -71,7 +123,27 @@
     ]);
   }
 
-  var kpiBox, c1, c2, xs, xsCaption;
+  var kpiBox, c1, c2, xs, xsCaption, gwBox;
+
+  // Groundwater guard: what this array could pump if it drove the farm's well.
+  function drawGuard(kwp) {
+    if (!gwBox) return;
+    G.clear(gwBox);
+    var saved = G.load('gaia.nexus.inputs', null), v = saved && saved.parcelAt === dna.builtAt ? saved.values : null;
+    var N = window.GAIA_NEXUS, GG = window.GAIA_GUARD;
+    var nb = function (x) { var y = parseFloat(String(x).replace(',', '.')); return isNaN(y) ? null : y; };
+    var g = v && CM && N && GG ? GG.guard({ et0: CM.et0, rain: CM.rain, ghi: ghi, kc: nb(v.kc), months: v.months, area_ha: nb(v.area), ea: nb(v.ea),
+      head_m: nb(v.head), pump_eff: nb(v.pump_eff), pr: nb(v.pr), pv_kwp: kwp, safe_yield_m3_year: nb(v.safe_yield) }) : null;
+    gwBox.appendChild(el('h2', null, [t('gw_t')]));
+    if (!g || g.status === 'incomplete') { gwBox.appendChild(el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('gw_none')])); }
+    else {
+      var T = g.totals;
+      gwBox.appendChild(el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [T.blocked > 0 ? t('gw_p')
+        .replace('{c}', fmt(T.capacity)).replace('{x}', fmt(T.over_ratio, 1)).replace('{n}', fmt(T.need)).replace('{a}', fmt(T.allowed))
+        .replace('{b}', fmt(T.blocked)).replace('{f}', fmt(T.freed_kwh)) : t('gw_ok')]));
+    }
+    gwBox.appendChild(el('a', { class: 'gp-btn ghost', href: 'nexus.html', style: 'margin-top:10px' }, [t('gw_go')]));
+  }
   function geom() { return { lat: dna.location.lat, ghi: ghi, tilt: C.tilt, azimuth: C.azimuth, height: C.height, width: C.width, pitch: C.pitch, area_ha: C.area, density_wp_m2: C.density, pr: C.pr }; }
 
   function update() {
@@ -84,6 +156,8 @@
     G.barChart(c1, { labels: months, unit: 'kWh', title: t('c_energy'), series: [{ name: t('k_energy'), color: '#A88746', values: r.months.map(function (x) { return x ? x.energy_kwh : null; }) }] });
     G.barChart(c2, { labels: months, unit: '%', title: t('c_light'), series: [{ name: t('k_light'), color: '#7C9455', values: r.months.map(function (x) { return x ? x.lightShare * 100 : null; }) }] });
     drawSection();
+    drawGuard(r.kwp);
+    if (window.GAIA_AGV_UI) window.GAIA_AGV_UI.onUpdate();
   }
 
   function drawSection() {
@@ -136,9 +210,23 @@
     var hourOut = el('output', { for: 'xs-h' }, [fmt(C.hour, 1) + ' h']);
     var hourIn = el('input', { id: 'xs-h', type: 'range', min: 5, max: 19, step: 0.25, value: C.hour, oninput: function (e) { C.hour = +e.target.value; hourOut.textContent = fmt(C.hour, 1) + ' h'; persist(); drawSection(); } });
 
+    gwBox = el('div', { class: 'gp-card', style: 'border:2px solid #2F5A75' });
+    var aiBox = el('section', { class: 'gp-card ai-box', id: 'solar-brain' });
+    var playing = null, playBtn = el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () {
+      if (playing) { clearInterval(playing); playing = null; playBtn.textContent = t('play'); return; }
+      playBtn.textContent = t('pause');
+      if (C.hour >= 18.75) C.hour = 5;
+      playing = setInterval(function () {
+        if (!document.body.contains(playBtn)) { clearInterval(playing); return; }
+        C.hour = Math.round((C.hour + 0.25) * 4) / 4;
+        if (C.hour > 19) { C.hour = 19; clearInterval(playing); playing = null; playBtn.textContent = t('play'); }
+        hourIn.value = C.hour; hourOut.textContent = fmt(C.hour, 1) + ' h'; drawSection();
+      }, 90);
+    } }, [t('play')]);
     kpiBox = el('div', { class: 'kpis' }); c1 = el('div'); c2 = el('div'); xs = el('div', { class: 'xs-wrap' }); xsCaption = el('p', { class: 'small muted', style: 'margin-top:6px', 'aria-live': 'polite' });
 
     app.appendChild(el('div', { style: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px' }, [G.pill('demo', t('sim_badge')), el('span', { class: 'small muted' }, [t('sim_note')])]));
+    app.appendChild(aiBox);
     app.appendChild(el('div', { class: 'av' }, [
       el('div', { class: 'gp-card av-in' }, [
         el('h2', null, [t('in_t')]),
@@ -154,9 +242,10 @@
       el('div', { class: 'gp-grid' }, [
         kpiBox,
         el('p', { class: 'insight' }, [t('insight_h')]),
+        gwBox,
         el('div', { class: 'gp-card' }, [
           el('h2', null, [t('xs_t')]), el('div', { style: 'margin-top:10px' }, [xs]), xsCaption,
-          el('div', { class: 'xs-ctl' }, [el('label', { for: 'xs-m' }, [t('xs_month'), monthSel]), el('label', { for: 'xs-h' }, [t('xs_hour'), hourIn, hourOut])])
+          el('div', { class: 'xs-ctl' }, [el('label', { for: 'xs-m' }, [t('xs_month'), monthSel]), el('label', { for: 'xs-h' }, [t('xs_hour'), hourIn, hourOut]), playBtn])
         ]),
         el('div', { class: 'gp-card' }, [el('h2', null, [t('c_energy')]), c1]),
         el('div', { class: 'gp-card' }, [el('h2', null, [t('c_light')]), c2]),
@@ -165,6 +254,8 @@
       ])
     ]));
     update();
+    if (window.GAIA_AGV_UI) window.GAIA_AGV_UI.mount(aiBox, { C: C, dna: dna, ghi: ghi, CM: CM, geom: geom, persist: persist, render: render,
+      sim: function () { return S.simulate(geom()); } });
   }
 
   render();

@@ -105,8 +105,10 @@
         </div>
       </div>
 
-      <details class="gp-more">
-        <summary data-i18n="l_more">Informations complémentaires (facultatif)</summary>
+      <details class="gp-more" id="farmbox" open>
+        <summary data-i18n="l_more">Votre exploitation</summary>
+        <p class="small muted" style="margin:4px 0 10px" data-i18n="l_more_hint">Ces informations affinent le profil. Sans elles, GAIA les marque « manquantes ».</p>
+        <button class="gp-btn ghost sm" id="demo" type="button" style="margin-bottom:10px;height:auto;min-height:36px;padding:6px 12px;white-space:normal" data-i18n="l_demo">Pré-remplir avec des valeurs de démonstration</button>
         <div class="gp-row">
           <div class="gp-field"><label for="area" data-i18n="l_area">Surface (ha)</label><input id="area" type="number" min="0" step="0.1"></div>
           <div class="gp-field"><label for="well" data-i18n="l_well">Profondeur du puits (m)</label><input id="well" type="number" min="0" step="1"></div>
@@ -135,10 +137,11 @@
         <fieldset style="border:0;padding:0;margin:12px 0 0">
           <legend class="small" style="font-weight:600;color:var(--g-ink-2)" data-i18n="l_struct">Ouvrages déjà présents</legend>
           <div class="checks">
-            <label><input type="checkbox" value="jessour" name="st"> Jessour</label>
+            <label><input type="checkbox" value="jessour" name="st" id="st-first"> Jessour</label>
             <label><input type="checkbox" value="tabia" name="st"> Tabia</label>
             <label><input type="checkbox" value="meskat" name="st"> Meskat</label>
             <label><input type="checkbox" value="terraces" name="st"> <span data-i18n="st_terr">Terrasses</span></label>
+            <label><input type="checkbox" value="none" name="st"> <span data-i18n="st_none">Aucun</span></label>
           </div>
         </fieldset>
       </details>
@@ -149,9 +152,9 @@
     </section>
 
     <!-- Map -->
-    <section class="map-wrap" aria-label="Carte de la Tunisie">
+    <section class="map-wrap" aria-label="Carte de la Tunisie" data-i18n-aria="l_map_aria">
       <div id="map" dir="ltr"></div>
-      <div class="map-ctl" role="group" aria-label="Fond de carte">
+      <div class="map-ctl" role="group" aria-label="Fond de carte" data-i18n-aria="l_base_aria">
         <button class="gp-btn sm" type="button" id="b-plan" aria-pressed="true" data-i18n="l_plan">Plan</button>
         <button class="gp-btn sm" type="button" id="b-sat" aria-pressed="false" data-i18n="l_sat">Satellite</button>
       </div>
@@ -167,8 +170,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="js/gaia-core.js"></script>
+<script src="js/i18n-data.js"></script>
 <script src="js/tunisia.js"></script>
 <script src="js/kb.js"></script>
+<script src="js/kb-i18n.js"></script>
+<script src="js/soil-tn.js"></script>
 <script src="js/landdna.js"></script>
 <script src="js/engine-core.js"></script>
 <script src="js/land.js"></script>
