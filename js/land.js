@@ -357,6 +357,9 @@
       dnaBox.appendChild(el('div', { class: 'dna-group' }, [el('h3', null, [t(g[0])])].concat(g[1])));
     });
 
+    // vegetation from space (Sentinel-2 NDVI, js/ndvi.js)
+    if (window.GAIA_NDVI) dnaBox.appendChild(ndviGroup(dna));
+
     // missing info
     var miss = dna.quality.missing;
     dnaBox.appendChild(el('div', { class: 'dna-group' }, [
@@ -370,8 +373,60 @@
     dnaBox.appendChild(el('div', { class: 'next-actions' }, [
       el('a', { class: 'gp-btn primary', href: 'engine.html' }, [t('a_engine')]),
       el('a', { class: 'gp-btn ghost', href: 'lab.html' }, [t('a_lab')]),
-      el('a', { class: 'gp-btn ghost', href: 'nexus.html' }, [t('a_nexus')])
+      el('a', { class: 'gp-btn ghost', href: 'nexus.html' }, [t('a_nexus')]),
+      el('a', { class: 'gp-btn ghost', href: 'agent.html' }, [NV_T().agent])
     ]));
+  }
+
+  /* ---------------------------------------------------------- Sentinel-2 NDVI */
+  function NV_T() {
+    return ({
+      fr: { h: 'Végétation vue du ciel (Sentinel-2)', load: 'Lecture des images Sentinel-2 des 12 derniers mois…', none: 'Aucune image claire de la parcelle sur 12 mois.', err: 'Images satellite indisponibles : ',
+        last: 'NDVI le {d} : {v}', med: 'médiane 12 mois {m} · min {a} · max {b} · {n} images claires', st: { stable: 'végétation stable', greening: 'végétation en hausse', declining: 'végétation en baisse', drop: 'chute récente : à vérifier sur place' },
+        read: 'Sol nu ≈ 0,1 · oliveraie peu dense 0,2–0,4 · culture irriguée dense 0,6–0,85', src: 'ESA Copernicus Sentinel-2 L2A, 10 m, nuages masqués (AWS Open Data, Element 84 Earth Search)', agent: 'Agent agricole' },
+      ar: { h: 'الغطاء النباتي من السماء (Sentinel-2)', load: 'قراءة صور Sentinel-2 لآخر 12 شهراً…', none: 'لا صورة واضحة للقطعة خلال 12 شهراً.', err: 'صور القمر الصناعي غير متاحة: ',
+        last: 'NDVI في {d}: {v}', med: 'الوسيط {m} · الأدنى {a} · الأعلى {b} · {n} صور واضحة', st: { stable: 'غطاء نباتي مستقر', greening: 'غطاء نباتي في تحسن', declining: 'غطاء نباتي في تراجع', drop: 'تراجع حديث: تحقّق في الحقل' },
+        read: 'تربة عارية ≈ 0.1 · زيتون متباعد 0.2–0.4 · زراعة مروية كثيفة 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A، 10 م، دون سحب', agent: 'الوكيل الفلاحي' },
+      en: { h: 'Vegetation from space (Sentinel-2)', load: 'Reading the Sentinel-2 images of the last 12 months…', none: 'No clear image of the plot in 12 months.', err: 'Satellite images unavailable: ',
+        last: 'NDVI on {d}: {v}', med: '12-month median {m} · min {a} · max {b} · {n} clear images', st: { stable: 'vegetation stable', greening: 'vegetation greening', declining: 'vegetation declining', drop: 'recent drop: check on the ground' },
+        read: 'Bare soil ≈ 0.1 · sparse olive grove 0.2–0.4 · dense irrigated crop 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A, 10 m, clouds masked (AWS Open Data, Element 84 Earth Search)', agent: 'Farm Agent' },
+      ja: { h: '宇宙から見た植生（Sentinel-2）', load: '過去12か月のSentinel-2画像を読み込み中…', none: '12か月間に区画の晴天画像がありません。', err: '衛星画像を利用できません：',
+        last: '{d}のNDVI：{v}', med: '12か月中央値 {m} · 最小 {a} · 最大 {b} · 晴天画像 {n}枚', st: { stable: '植生は安定', greening: '植生は増加', declining: '植生は減少', drop: '最近の急低下：現地で確認' },
+        read: '裸地 ≈ 0.1 · 疎なオリーブ園 0.2–0.4 · 密な灌漑作物 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A、10 m、雲をマスク（AWS Open Data、Element 84 Earth Search）', agent: '農場エージェント' }
+    })[G.lang()] || null;
+  }
+  var ndviCache = {};
+  function ndviGroup(dna) {
+    var T = NV_T() || {}, box = el('div', { 'aria-live': 'polite' }, [el('p', { class: 'small muted' }, [el('span', { class: 'gp-spin' }), ' ' + T.load])]);
+    var lat = dna.location.lat, lon = dna.location.lon, area = GAIA_DNA.value(dna, 'area_ha'), key = lat + ',' + lon;
+    var r = area > 0 ? Math.max(15, Math.min(100, Math.sqrt(area * 10000) / 2)) : 25;
+    function draw(x) {
+      G.clear(box);
+      if (x.error) { box.appendChild(el('p', { class: 'small muted' }, [T.err + x.error])); return; }
+      if (!x.latest) { box.appendChild(el('p', { class: 'small muted' }, [T.none])); return; }
+      var col = x.status === 'drop' || x.status === 'declining' ? 'warn' : 'ok';
+      box.appendChild(el('p', { style: 'margin-top:6px' }, [el('b', null, [T.last.replace('{d}', x.latest.date).replace('{v}', fmt(x.latest.ndvi, 2))]), ' ', G.pill(col, T.st[x.status])]));
+      box.appendChild(el('p', { class: 'small muted' }, [T.med.replace('{m}', fmt(x.median12, 2)).replace('{a}', fmt(x.min12, 2)).replace('{b}', fmt(x.max12, 2)).replace('{n}', x.scenes.length)]));
+      box.appendChild(spark(x.scenes));
+      box.appendChild(el('p', { class: 'small muted', style: 'margin-top:4px' }, [T.read]));
+      box.appendChild(el('p', { class: 'small muted' }, [T.src]));
+    }
+    if (ndviCache[key]) setTimeout(function () { draw(ndviCache[key]); }, 0);
+    else window.GAIA_NDVI.series(lat, lon, { radius_m: r }).then(function (x) { ndviCache[key] = x; draw(x); }, function (e) { draw({ error: e.message || String(e) }); });
+    return el('div', { class: 'dna-group' }, [el('h3', null, [T.h]), box]);
+  }
+  function spark(sc) {
+    var NS = 'http://www.w3.org/2000/svg', W = 320, H = 70, svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', '100%'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'NDVI');
+    svg.style.maxWidth = '420px'; svg.style.display = 'block'; svg.style.marginTop = '6px';
+    var t0 = Date.parse(sc[0].date), t1 = Date.parse(sc[sc.length - 1].date) || t0 + 1, lo = 0, hi = Math.max(0.5, Math.max.apply(null, sc.map(function (s) { return s.ndvi; })) + 0.05);
+    var X = function (d) { return 8 + (W - 16) * (Date.parse(d) - t0) / Math.max(1, t1 - t0); }, Y = function (v) { return H - 6 - (H - 12) * (Math.max(lo, v) - lo) / (hi - lo); };
+    var pts = sc.map(function (s) { return X(s.date).toFixed(1) + ',' + Y(s.ndvi).toFixed(1); }).join(' ');
+    function add(tag, a) { var n = document.createElementNS(NS, tag); Object.keys(a).forEach(function (k) { n.setAttribute(k, a[k]); }); svg.appendChild(n); return n; }
+    add('line', { x1: 8, x2: W - 8, y1: Y(0.2), y2: Y(0.2), stroke: '#D8D2C2', 'stroke-dasharray': '3 3' });
+    add('polyline', { points: pts, fill: 'none', stroke: '#5E7B3A', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+    sc.forEach(function (s) { var c = add('circle', { cx: X(s.date), cy: Y(s.ndvi), r: 2.6, fill: '#5E7B3A' }); var tt = document.createElementNS(NS, 'title'); tt.textContent = s.date + ' · NDVI ' + s.ndvi.toFixed(2); c.appendChild(tt); });
+    return svg;
   }
 
   /* ---------------------------------------------------------- restore */

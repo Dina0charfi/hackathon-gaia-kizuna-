@@ -128,6 +128,7 @@
     step('water_need', P.crop ? { crop: P.crop } : {}, W({ fr: 'Besoin en eau FAO-56 et calendrier d\'irrigation', en: 'FAO-56 water need and irrigation schedule', ar: 'حاجة الماء حسب الفاو وجدول الري', ja: 'FAO-56の水需要と灌漑スケジュール' }));
     step('groundwater_guard', {}, W({ fr: 'Vérifier le risque de surpompage', en: 'Check the over-pumping risk', ar: 'التحقق من خطر الضخ المفرط', ja: '過剰揚水のリスクを確認' }));
     step('disease_risk', P.crop ? { crop: P.crop } : {}, W({ fr: 'Risque de maladie selon la météo', en: 'Weather-driven disease risk', ar: 'خطر الأمراض حسب الطقس', ja: '天気による病害リスク' }));
+    step('satellite_ndvi', {}, W({ fr: 'Vigueur de la culture vue par satellite (Sentinel-2)', en: 'Crop vigour from satellite (Sentinel-2)', ar: 'قوة الزراعة من القمر الصناعي (Sentinel-2)', ja: '衛星で見る作物の活力（Sentinel-2）' }));
     step('plant_health_last', {}, W({ fr: 'Dernière photo analysée', en: 'Last photo check', ar: 'آخر صورة محللة', ja: '最新の写真診断' }));
     step('check_practices', {}, W({ fr: 'Pratiques tunisiennes et japonaises compatibles', en: 'Compatible Tunisian and Japanese practices', ar: 'الممارسات التونسية واليابانية الملائمة', ja: '適合するチュニジアと日本の技術' }));
     if (P.solar || ['tomato', 'potato', 'pepper', 'veg', 'cereal'].indexOf(P.crop) !== -1) {
@@ -154,10 +155,10 @@
     (wx && wx.alerts || []).forEach(function (a) {
       if (a.kind === 'heat' && heatSeen++) return;     // one action for a run of hot days
       if (a.kind === 'heat') add(W({ fr: 'avant le ', en: 'before ', ar: 'قبل ', ja: '' }) + day(a.date) + (L() === 'ja' ? 'まで' : ''), a.date, W({
-        fr: 'Vague de chaleur (' + n0(a.value) + ' °C) : arroser à l\'aube la veille et le jour même (+20 % de la dose), aucune taille ni traitement ce jour-là, pailler le pied des arbres',
-        en: 'Heat wave (' + n0(a.value) + ' °C): irrigate at dawn the day before and on the day (+20 % of the dose), no pruning or spraying that day, mulch the tree basins',
+        fr: 'Vague de chaleur (' + n0(a.value) + ' °C) : arroser à l\'aube la veille et le jour même (+20 % de la dose), aucune taille ni traitement ce jour-là, pailler le sol',
+        en: 'Heat wave (' + n0(a.value) + ' °C): irrigate at dawn the day before and on the day (+20 % of the dose), no pruning or spraying that day, mulch the soil',
         ar: 'موجة حر (' + n0(a.value) + ' °م): اسقِ فجراً في اليوم السابق وفي اليوم نفسه (+20 % من الجرعة)، لا تقليم ولا رش ذلك اليوم، غطِّ أحواض الأشجار',
-        ja: '熱波（' + n0(a.value) + ' °C）：前日と当日の夜明けに灌水（量を20%増）、その日は剪定・散布をしない、株元をマルチング' }), 'weather_forecast', 1);
+        ja: '熱波（' + n0(a.value) + ' °C）：前日と当日の夜明けに灌水（量を20%増）、その日は剪定・散布をしない、土をマルチング' }), 'weather_forecast', 1);
       if (a.kind === 'sirocco') add(day(a.date), a.date, W({ fr: 'Sirocco (' + n0(a.value) + ' °C, vent ' + n0(a.wind) + ' km/h) : irriguer de nuit, pas de pulvérisation', en: 'Sirocco (' + n0(a.value) + ' °C, wind ' + n0(a.wind) + ' km/h): irrigate at night, no spraying', ar: 'شهيلي (' + n0(a.value) + ' °م، رياح ' + n0(a.wind) + ' كم/س): اسقِ ليلاً ولا ترش', ja: 'シロッコ（' + n0(a.value) + ' °C、風' + n0(a.wind) + ' km/h）：夜に灌水、散布しない' }), 'weather_forecast', 2);
       if (a.kind === 'frost') add(day(a.date), a.date, W({ fr: 'Gel (' + n0(a.value) + ' °C) : irriguer la veille au soir (un sol humide garde la chaleur), protéger les jeunes plants', en: 'Frost (' + n0(a.value) + ' °C): irrigate the evening before (moist soil holds heat), cover young plants', ar: 'صقيع (' + n0(a.value) + ' °م): اسقِ مساء اليوم السابق وغطِّ الشتلات', ja: '霜（' + n0(a.value) + ' °C）：前日の夕方に灌水し、苗を覆う' }), 'weather_forecast', 1);
       if (a.kind === 'heavy_rain') add(day(a.date), a.date, W({ fr: 'Forte pluie (' + n0(a.value) + ' mm) : sauter l\'irrigation ce jour et le lendemain, vérifier les déversoirs des jessour / tabias pour capter le ruissellement', en: 'Heavy rain (' + n0(a.value) + ' mm): skip irrigation that day and the next, check the jessour / tabia spillways to catch the runoff', ar: 'أمطار غزيرة (' + n0(a.value) + ' مم): أوقف الري يومين وتفقّد مفيضات الجسور والطوابي', ja: '大雨（' + n0(a.value) + ' mm）：当日と翌日は灌水を止め、ジェスール／タビアの余水吐を点検' }), 'weather_forecast', 2);
@@ -188,9 +189,10 @@
     // groundwater guard
     if (gd && gd.totals && gd.months) {
       var m = new Date().getMonth(), mo = gd.months[m];
-      if (gd.totals.blocked > 0 && mo) add(W({ fr: 'ce mois-ci', en: 'this month', ar: 'هذا الشهر', ja: '今月' }), null, W({
-        fr: 'Régler le contrôleur de pompe à ' + G.fmt(mo.daily_cap_m3, 1) + ' m³/jour : les panneaux pourraient remonter ' + G.fmt(gd.over_ratio, 1) + '× le besoin de la culture sur l\'année (' + n0(gd.totals.blocked) + ' m³ bloqués pour la nappe)',
-        en: 'Set the pump controller to ' + G.fmt(mo.daily_cap_m3, 1) + ' m³/day: the panels could lift ' + G.fmt(gd.over_ratio, 1) + '× the crop need over the year (' + n0(gd.totals.blocked) + ' m³ kept in the aquifer)',
+      var solarPump = pr && pr.pump === 'solar';
+      if (gd.totals.blocked > 0 && mo) add(solarPump ? W({ fr: 'ce mois-ci', en: 'this month', ar: 'هذا الشهر', ja: '今月' }) : W({ fr: 'si pompe solaire', en: 'if solar pump', ar: 'عند الضخ الشمسي', ja: '太陽光ポンプなら' }), null, W({
+        fr: 'Régler le contrôleur de pompe à ' + G.fmt(mo.daily_cap_m3, 1) + ' m³/jour en moyenne (quota FAO-56 du mois) : les panneaux pourraient remonter ' + G.fmt(gd.over_ratio, 1) + '× le besoin de la culture sur l\'année (' + n0(gd.totals.blocked) + ' m³ bloqués pour la nappe)',
+        en: 'Set the pump controller to ' + G.fmt(mo.daily_cap_m3, 1) + ' m³/day on average (this month\'s FAO-56 quota): the panels could lift ' + G.fmt(gd.over_ratio, 1) + '× the crop need over the year (' + n0(gd.totals.blocked) + ' m³ kept in the aquifer)',
         ar: 'اضبط وحدة التحكم في المضخة على ' + G.fmt(mo.daily_cap_m3, 1) + ' م³/يوم: الألواح قادرة على رفع ' + G.fmt(gd.over_ratio, 1) + ' مرة حاجة الزراعة (' + n0(gd.totals.blocked) + ' م³ تبقى في المائدة)',
         ja: 'ポンプ制御を' + G.fmt(mo.daily_cap_m3, 1) + ' m³/日に設定：パネルは年間で作物需要の' + G.fmt(gd.over_ratio, 1) + '倍を汲み上げられる（' + n0(gd.totals.blocked) + ' m³を帯水層に残す）' }), 'groundwater_guard', 2);
       if (gd.totals.freed_kwh > 0) add(W({ fr: 'cette saison', en: 'this season', ar: 'هذا الموسم', ja: '今シーズン' }), null, W({ fr: 'Valoriser les ' + n0(gd.totals.freed_kwh) + ' kWh solaires libérés (froid pour la récolte, broyage, recharge) au lieu de pomper plus', en: 'Use the ' + n0(gd.totals.freed_kwh) + ' kWh of freed solar energy (cooling the harvest, milling, charging) instead of pumping more', ar: 'استعمل ' + n0(gd.totals.freed_kwh) + ' ك.و.س المحررة (تبريد المحصول، الطحن) بدل الضخ أكثر', ja: '余剰の' + n0(gd.totals.freed_kwh) + ' kWhを（収穫物の冷却、製粉、充電に）活用し、余計に汲まない' }), 'groundwater_guard', 8);
@@ -207,6 +209,20 @@
         ja: r.disease + '：リスク' + (r.level === 'high' ? '高' : '中') + '（' + dts + '）。' + r.scout + '。確認され普及員が認めた場合のみ処置' }), 'disease_risk', r.level === 'high' ? 2 : 4);
     });
     if (ph && ph.disease && ph.disease !== 'healthy') add(W({ fr: 'maintenant', en: 'now', ar: 'الآن', ja: '今すぐ' }), null, W({ fr: 'Dernière photo : ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). La montrer à un technicien pour confirmation', en: 'Last photo: ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). Show it to a technician to confirm', ar: 'آخر صورة: ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). اعرضها على تقني للتأكيد', ja: '最新の写真：' + ph.disease.replace(/_/g, ' ') + '（' + n0(100 * ph.confidence) + '%）。技術者に確認してもらう' }), 'plant_health_last', 3);
+
+    // satellite vigour
+    var nd = res.satellite_ndvi && res.satellite_ndvi.data;
+    if (nd && nd.latest) {
+      if (nd.status === 'drop' || nd.status === 'declining') add(W({ fr: 'cette semaine', en: 'this week', ar: 'هذا الأسبوع', ja: '今週' }), null, W({
+        fr: 'Le satellite voit la végétation baisser (NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' le ' + day(nd.latest.date) + ', ' + (nd.change_vs_previous_3 !== null ? G.fmt(nd.change_vs_previous_3, 2) + ' par rapport aux 3 images précédentes' : 'tendance ' + G.fmt(nd.trend_per_month_90d, 2) + '/mois') + ') : vérifier sur place l\'irrigation, les fuites et les ravageurs',
+        en: 'The satellite sees vegetation falling (NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' on ' + day(nd.latest.date) + ', ' + (nd.change_vs_previous_3 !== null ? G.fmt(nd.change_vs_previous_3, 2) + ' vs the 3 previous images' : 'trend ' + G.fmt(nd.trend_per_month_90d, 2) + '/month') + '): check irrigation, leaks and pests on the ground',
+        ar: 'يرى القمر الصناعي تراجع الغطاء النباتي (NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' في ' + day(nd.latest.date) + '): تفقّد الري والتسربات والآفات في الحقل',
+        ja: '衛星が植生の低下を検出（' + day(nd.latest.date) + 'のNDVI ' + G.fmt(nd.latest.ndvi, 2) + '）：現地で灌漑・漏水・害虫を確認' }), 'satellite_ndvi', 2);
+      else watch.push(W({ fr: 'Satellite : NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' le ' + day(nd.latest.date) + ' (médiane 12 mois ' + G.fmt(nd.median_12m, 2) + ', ' + nd.n_scenes + ' images claires), végétation ' + (nd.status === 'greening' ? 'en hausse' : 'stable') + '.',
+        en: 'Satellite: NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' on ' + day(nd.latest.date) + ' (12-month median ' + G.fmt(nd.median_12m, 2) + ', ' + nd.n_scenes + ' clear images), vegetation ' + (nd.status === 'greening' ? 'greening' : 'stable') + '.',
+        ar: 'القمر الصناعي: NDVI ' + G.fmt(nd.latest.ndvi, 2) + ' في ' + day(nd.latest.date) + ' (الوسيط ' + G.fmt(nd.median_12m, 2) + ')، الغطاء النباتي ' + (nd.status === 'greening' ? 'في تحسن' : 'مستقر') + '.',
+        ja: '衛星：' + day(nd.latest.date) + 'のNDVI ' + G.fmt(nd.latest.ndvi, 2) + '（12か月中央値' + G.fmt(nd.median_12m, 2) + '、晴天画像' + nd.n_scenes + '枚）、植生は' + (nd.status === 'greening' ? '増加' : '安定') + '。' }));
+    }
 
     // practices
     if (cp && cp.results) {
@@ -240,7 +256,7 @@
       ar: (pr.name || 'القطعة') + ': ' + (pr.crop || '?') + '، ' + (pr.area_ha ? pr.area_ha + ' هكتار' : '?') + '، ' + n0(pr.climate.rain_mm) + ' مم أمطار سنوياً مقابل تبخر ' + n0(pr.climate.et0_mm) + ' مم' + (wx ? '؛ الأيام الـ14 القادمة: ' + n0(wx.rain_next_mm) + ' مم أمطار.' : '.'),
       ja: (pr.name || '区画') + '：' + (pr.crop || '作物?') + '、' + (pr.area_ha ? pr.area_ha + ' ha' : '面積?') + '、年間降水' + n0(pr.climate.rain_mm) + ' mmに対しET0 ' + n0(pr.climate.et0_mm) + ' mm' + (wx ? '。今後14日：降水' + n0(wx.rain_next_mm) + ' mm、ET0 ' + n0(wx.et0_next_mm) + ' mm。' : '。')
     }) : '';
-    return { situation: situation, actions: acts.slice(0, 8), watch: watch.slice(0, 4), source: 'planner' };
+    return { situation: situation, actions: acts.slice(0, 8), watch: watch.slice(0, 5), source: 'planner' };
   }
 
   /* ------------------------------------------------------------------ 2. language model with tool calling (server) */
@@ -339,7 +355,7 @@
   /* ------------------------------------------------------------------ page */
   G.mountShell('agent');
   var app = document.getElementById('app'), traceBox, planBox, modeBox, form, input, goBtn;
-  var ICON = { find_place: '📍', build_land_dna: '🧬', plot_profile: '🗺️', weather_forecast: '🌦️', water_need: '💧', groundwater_guard: '🛡️', check_practices: '⚖️', solar_brain: '☀️', disease_risk: '🦠', plant_health_last: '🌿', search_knowledge: '📚' };
+  var ICON = { satellite_ndvi: '🛰️', find_place: '📍', build_land_dna: '🧬', plot_profile: '🗺️', weather_forecast: '🌦️', water_need: '💧', groundwater_guard: '🛡️', check_practices: '⚖️', solar_brain: '☀️', disease_risk: '🦠', plant_health_last: '🌿', search_knowledge: '📚' };
 
   function modeLine() {
     G.clear(modeBox);

@@ -22,8 +22,8 @@ from typing import Any
 
 import httpx
 
-from .assistant import (MODEL, OLLAMA_URL, AssistantUnavailable, anthropic_configured, env, ollama_model,
-                        openai_config)
+from . import assistant as A
+from .assistant import AssistantUnavailable
 
 SYSTEM = """You are the GAIA Farm Agent, for small farms in Tunisia (water, solar energy, agriculture; Tunisian \
 and Japanese practices). The farmer gives you a goal for their plot. Work like an agronomist with instruments:
@@ -78,11 +78,11 @@ def _claude(messages: list[dict[str, Any]], tools: list[dict[str, Any]], client:
     except ImportError as e:  # pragma: no cover
         raise AssistantUnavailable({"status": "sdk_missing", "message": "pip install anthropic"}) from e
     if client is None:
-        key = env("ANTHROPIC_API_KEY")
+        key = A.env("ANTHROPIC_API_KEY")
         client = anthropic.Anthropic(api_key=key) if key else anthropic.Anthropic()
     try:
         msg = client.messages.create(
-            model=MODEL, max_tokens=MAX_TOKENS * 3, system=SYSTEM,
+            model=A.MODEL, max_tokens=MAX_TOKENS * 3, system=SYSTEM,
             tools=[{"name": t["name"], "description": t.get("description", ""), "input_schema": t.get("parameters") or {"type": "object", "properties": {}}} for t in tools],
             messages=_to_claude(messages),
         )
@@ -154,22 +154,22 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
 def step(messages: list[dict[str, Any]], tools: list[dict[str, Any]], client: Any = None, http: Any = None) -> dict[str, Any]:
     """Next move of the agent, from the first provider that answers. Raises AssistantUnavailable when none does."""
     errors: list[dict[str, Any]] = []
-    if client is not None or anthropic_configured():
+    if client is not None or A.anthropic_configured():
         try:
             return _claude(messages, tools, client)
         except AssistantUnavailable as e:
             errors.append({"provider": "claude", **e.detail})
-    cfg = openai_config()
+    cfg = A.openai_config()
     if cfg:
         try:
             return _openai(messages, tools, cfg, http)
         except AssistantUnavailable as e:
             errors.append({"provider": cfg["provider"], **e.detail})
     if not cfg or cfg["provider"] != "ollama":
-        local = ollama_model()
+        local = A.ollama_model()
         if local:
             try:
-                return _openai(messages, tools, {"provider": "ollama-local", "base_url": OLLAMA_URL + "/v1", "key": "", "model": local}, http)
+                return _openai(messages, tools, {"provider": "ollama-local", "base_url": A.OLLAMA_URL + "/v1", "key": "", "model": local}, http)
             except AssistantUnavailable as e:
                 errors.append({"provider": "ollama-local", **e.detail})
     if errors:

@@ -37,7 +37,7 @@
     ['kairouan', 35.678, 10.096], ['kasserine', 35.168, 8.836], ['sidi bouzid', 35.038, 9.484], ['gabes', 33.881, 10.098], ['medenine', 33.355, 10.505],
     ['tataouine', 32.929, 10.452], ['gafsa', 34.425, 8.784], ['tozeur', 33.919, 8.134], ['kebili', 33.705, 8.969], ['djerba', 33.807, 10.845],
     ['matmata', 33.543, 9.968], ['nefta', 33.873, 7.877], ['douz', 33.457, 9.021], ['zarzis', 33.504, 11.112], ['cap bon', 36.85, 10.9],
-    ['testour', 36.551, 9.443], ['chebika', 34.317, 7.937], ['beni khedache', 33.25, 10.2]
+    ['testour', 36.551, 9.443], ['chebika', 34.317, 7.937], ['el jem', 35.296, 10.707], ['msaken', 35.729, 10.58], ['beni khedache', 33.25, 10.2]
   ];
   var AR_PLACES = { 'تونس': 'tunis', 'صفاقس': 'sfax', 'سوسة': 'sousse', 'القيروان': 'kairouan', 'سيدي بوزيد': 'sidi bouzid', 'قابس': 'gabes', 'مدنين': 'medenine',
     'تطاوين': 'tataouine', 'قفصة': 'gafsa', 'توزر': 'tozeur', 'قبلي': 'kebili', 'جربة': 'djerba', 'نابل': 'nabeul', 'بنزرت': 'bizerte', 'باجة': 'beja', 'الكاف': 'kef',
@@ -382,6 +382,26 @@
           });
           return { summary: res.map(function (r) { return r.disease.split(' (')[0] + ' : ' + r.level; }).join(' · '),
             data: { crop: ck, horizon_days: 10, results: res, note: 'indicative weather rules; confirm in the field (Plant health photo check) before any treatment' } };
+        });
+      }
+    },
+    {
+      name: 'satellite_ndvi',
+      description: 'Crop vigour from space: Sentinel-2 NDVI (10 m) of the plot over the last 12 months (cloud-masked), with the latest value, the 12-month median, the 90-day trend and any sudden drop (early sign of water stress, disease or damage).',
+      parameters: { type: 'object', properties: { months: { type: 'integer', minimum: 3, maximum: 24 } } },
+      run: function (a) {
+        var p = needPlot(), NV = global.GAIA_NDVI, area = V(p.dna, 'area_ha');
+        if (!NV) return Promise.resolve({ summary: 'NDVI module not loaded', data: { status: 'unavailable' } });
+        var r = area > 0 ? Math.max(15, Math.min(100, Math.sqrt(area * 10000) / 2)) : 25;
+        return NV.series(p.lat, p.lon, { months: a.months || 12, radius_m: r }).then(function (x) {
+          if (!x.latest) return { summary: W({ fr: 'aucune image claire', en: 'no clear image', ar: 'لا صورة واضحة', ja: '晴天画像なし' }), data: { status: 'no_clear_scene', source: x.source } };
+          return {
+            summary: 'NDVI ' + r1(x.latest.ndvi, 2) + ' (' + x.latest.date + ') · ' + W({ fr: 'médiane 12 mois ', en: '12-month median ', ar: 'وسيط 12 شهراً ', ja: '12か月中央値 ' }) + r1(x.median12, 2) + ' · ' + x.status + ' · ' + x.scenes.length + ' images',
+            data: { latest: { date: x.latest.date, ndvi: r1(x.latest.ndvi, 3) }, median_12m: r1(x.median12, 3), min_12m: r1(x.min12, 3), max_12m: r1(x.max12, 3),
+              change_vs_previous_3: r1(x.drop, 3), trend_per_month_90d: r1(x.trend_per_month, 3), status: x.status, window_m: x.window_m, n_scenes: x.scenes.length,
+              series: x.scenes.map(function (s) { return [s.date, r1(s.ndvi, 3)]; }), source: x.source,
+              reading: 'bare soil ~0.1, sparse olive grove 0.2-0.4, dense irrigated crop 0.6-0.85' }
+          };
         });
       }
     },
