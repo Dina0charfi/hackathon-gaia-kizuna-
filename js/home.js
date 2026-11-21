@@ -48,9 +48,9 @@
       see: 'Voir dans GAIA →', future: 'Futur',
       status_t: 'Ce qui fonctionne aujourd’hui', status_p: 'GAIA distingue toujours ce qui est construit de ce qui est prévu.',
       th_feat: 'Fonction', th_state: 'État', th_detail: 'Détail',
-      d_land: 'Open-Meteo, Copernicus DEM (via Open-Meteo) et NASA POWER interrogés en direct. Sol : service local à brancher (API SoilGrids en pause).',
+      d_land: 'Open-Meteo, Copernicus DEM (via Open-Meteo) et NASA POWER interrogés en direct. Sol : SoilGrids 2.0 à 250 m (API de nouveau en ligne), sinon grille de secours. Eau réellement utilisée : FAO WaPOR (satellite, 100 m).',
       d_engine: 'Règles explicites sur 11 fiches sourcées, toutes en brouillon tant qu’un agronome ne les a pas validées.',
-      d_lab: 'Réponses composées à partir des fiches et du profil ; branchement LLM prévu côté serveur.',
+      d_lab: 'Modèle de langage réel : gratuit dans le navigateur (Qwen2.5), Ollama, Groq, Hugging Face ou Claude ; il s’appuie sur les fiches et le profil, chiffres vérifiés.',
       d_health: 'Contrôle de qualité de la photo dans le navigateur ; aucun modèle entraîné pour l’instant.',
       d_biz: 'Mensualités calculées à partir du gazole économisé ; aucun prix inventé.',
       d_nexus: 'Calcul FAO-56 et énergie de pompage sur les données climatiques de la parcelle.',
@@ -102,9 +102,9 @@
       see: 'شاهده في غايا ←', future: 'مستقبلاً',
       status_t: 'ما يعمل اليوم', status_p: 'تميّز غايا دائماً بين ما بُني وما هو مخطط.',
       th_feat: 'الوظيفة', th_state: 'الحالة', th_detail: 'التفاصيل',
-      d_land: 'استعلام مباشر من Open-Meteo وCopernicus DEM (عبر Open-Meteo) وNASA POWER. التربة: خدمة محلية يجب ربطها (واجهة SoilGrids متوقفة).',
+      d_land: 'استعلام مباشر من Open-Meteo وCopernicus DEM (عبر Open-Meteo) وNASA POWER. التربة: SoilGrids 2.0 بدقة 250 م (الواجهة تعمل من جديد)، وإلا شبكة احتياطية. الماء المستعمل فعلاً: FAO WaPOR (قمر صناعي، 100 م).',
       d_engine: 'قواعد صريحة على 11 بطاقة موثقة، كلها مسودات إلى أن يصادق عليها مهندس فلاحي.',
-      d_lab: 'إجابات مركبة من البطاقات والملف؛ ربط نموذج لغوي مخطط على الخادم.',
+      d_lab: 'نموذج لغوي حقيقي: مجاني داخل المتصفح (Qwen2.5) أو Ollama أو Groq أو Hugging Face أو Claude؛ يعتمد على البطاقات والملف مع التحقق من الأرقام.',
       d_health: 'فحص جودة الصورة في المتصفح؛ لا يوجد نموذج مدرَّب حالياً.',
       d_biz: 'أقساط محسوبة من الغازوال الموفَّر؛ دون أسعار مخترعة.',
       d_nexus: 'حساب FAO-56 وطاقة الضخ على البيانات المناخية للقطعة.',
@@ -156,9 +156,9 @@
       see: 'See it in GAIA →', future: 'Future',
       status_t: 'What works today', status_p: 'GAIA always separates what is built from what is planned.',
       th_feat: 'Feature', th_state: 'State', th_detail: 'Detail',
-      d_land: 'Open-Meteo, Copernicus DEM (via Open-Meteo) and NASA POWER queried live. Soil: local service to connect (SoilGrids API paused).',
+      d_land: 'Open-Meteo, Copernicus DEM (via Open-Meteo) and NASA POWER queried live. Soil: SoilGrids 2.0 at 250 m (API back online), else a fallback grid. Water actually used: FAO WaPOR (satellite, 100 m).',
       d_engine: 'Explicit rules on 11 sourced records, all drafts until an agronomist validates them.',
-      d_lab: 'Answers composed from the records and the profile; LLM connection planned on the server.',
+      d_lab: 'A real language model: free in the browser (Qwen2.5), Ollama, Groq, Hugging Face or Claude; grounded in the records and the profile, figures checked.',
       d_health: 'Photo quality check in the browser; no trained model yet.',
       d_biz: 'Instalments computed from the diesel saved; no invented prices.',
       d_nexus: 'FAO-56 calculation and pumping energy on the plot’s climate data.',
@@ -210,9 +210,9 @@
       see: 'GAIAで見る →', future: '将来',
       status_t: '現在動いているもの', status_p: 'GAIAは、できているものと予定のものを常に区別します。',
       th_feat: '機能', th_state: '状態', th_detail: '詳細',
-      d_land: 'Open-Meteo、Copernicus DEM（Open-Meteo経由）、NASA POWERにリアルタイムで問い合わせ。土壌：ローカルサービスの接続待ち（SoilGrids APIは停止中）。',
+      d_land: 'Open-Meteo、Copernicus DEM（Open-Meteo経由）、NASA POWERにリアルタイムで問い合わせ。土壌：SoilGrids 2.0（250 m、APIは再稼働）、なければ予備グリッド。実際の水使用量：FAO WaPOR（衛星、100 m）。',
       d_engine: '出典付きの11件の記録に明示的なルールを適用。農業技術者が検証するまではすべて下書き。',
-      d_lab: '記録とプロファイルから回答を構成。サーバー側でのLLM接続を予定。',
+      d_lab: '実際の言語モデル：ブラウザ内の無料モデル（Qwen2.5）、Ollama、Groq、Hugging Face、またはClaude。記録とプロファイルに基づき、数値を検証。',
       d_health: 'ブラウザで写真の画質を確認。学習済みモデルはまだありません。',
       d_biz: '節約できた軽油代から月々の支払いを計算。価格は作りません。',
       d_nexus: '区画の気候データでFAO-56と揚水エネルギーを計算。',
@@ -312,9 +312,9 @@
 
   var MODS = [
     ['land.html', 'm_land', 'm_land_p', 'live', 'st_live', '地'], ['engine.html', 'm_engine', 'm_engine_p', 'live', 'st_live', '橋'],
-    ['lab.html', 'm_lab', 'm_lab_p', 'demo', 'st_rules', '知'], ['health.html', 'm_health', 'm_health_p', 'plan', 'st_off', '葉'],
+    ['lab.html', 'm_lab', 'm_lab_p', 'live', 'st_live', '知'], ['health.html', 'm_health', 'm_health_p', 'plan', 'st_off', '葉'],
     ['nexus.html', 'm_nexus', 'm_nexus_p', 'live', 'st_live', '水'], ['agrivoltaic.html', 'm_agv', 'm_agv_p', 'demo', 'st_sim', '陽'],
-    ['farm.html', 'm_farm', 'm_farm_p', 'demo', 'st_sim', '測'],
+    ['farm.html', 'm_farm', 'm_farm_p', 'live', 'st_data', '測'],
     ['business.html', 'm_biz', 'm_biz_p', 'live', 'st_live', '結'],
     ['library.html', 'm_lib', 'm_lib_p', 'live', 'st_live', '書']
   ];
@@ -360,7 +360,7 @@
   }
 
   function status() {
-    var R = [['m_land', 'live', 'st_live', 'd_land'], ['m_engine', 'live', 'st_live', 'd_engine'], ['m_lab', 'demo', 'st_rules', 'd_lab'], ['m_health', 'plan', 'st_off', 'd_health'],
+    var R = [['m_land', 'live', 'st_live', 'd_land'], ['m_engine', 'live', 'st_live', 'd_engine'], ['m_lab', 'live', 'st_live', 'd_lab'], ['m_health', 'plan', 'st_off', 'd_health'],
       ['m_nexus', 'live', 'st_live', 'd_nexus'], ['m_biz', 'live', 'st_live', 'd_biz'], ['m_agv', 'demo', 'st_sim', 'd_agv'], ['m_season', 'live', 'st_data', 'd_season'], ['m_cal', 'live', 'st_rules2', 'd_cal'], ['m_soil', 'live', 'st_declared', 'd_soil'], ['m_mott', 'live', 'st_rules2', 'd_mott'], ['kaizen', 'demo', 'st_partial', 'd_kaizen'], ['kizuna', 'plan', 'st_concept', 'd_kizuna']];
     return el('section', { class: 'sec', 'aria-labelledby': 'h-st' }, [
       el('h2', { id: 'h-st' }, [t('status_t')]), el('p', { class: 'lead' }, [t('status_p')]),

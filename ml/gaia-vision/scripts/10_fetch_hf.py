@@ -10,7 +10,8 @@ Olive (not on Hugging Face): the public olive leaf set of Uguz & Uysal (2021), 3
 Turkey (healthy / Aculus olearius / peacock spot), from github.com/sinanuguz/CNN_olive_dataset. Extract its five .rar
 files (each is a separate archive: Train1 = healthy, Train2 = aculus, train3 + train4 = peacock spot, test = all three)
 into one folder and pass it with --olive; class = the folder name, mapped by OLIVE below:
-    python scripts/10_fetch_hf.py --hf hf --out raw_hf --index data/index.csv --olive olive_raw
+    python scripts/10_fetch_hf.py --hf hf --out raw_hf --index data/index.csv --olive olive_raw \
+        --tomato-village "Tomato-Village/Variant-a(Multiclass Classification)"
 
 Download the parquet files first (needs huggingface.co):
     huggingface-cli download --repo-type dataset Project-AgML/plant_village_classification --local-dir hf/plant_village_classification
@@ -88,11 +89,35 @@ def olive_rows(root, out, short):
         if p.suffix.lower() not in (".jpg", ".jpeg", ".png"): continue
         dis = OLIVE.get(p.parent.name.lower())
         if not dis: continue
-        img = Image.open(p).convert("RGB"); s = short / min(img.size)
+        try: img = Image.open(p).convert("RGB")
+        except OSError: continue   # a few files in the archive are truncated
+        s = short / min(img.size)
         if s < 1: img = img.resize((max(1, round(img.width * s)), max(1, round(img.height * s))), Image.BICUBIC)
         q = out / "olive" / dis / f"olive_tr_{slug(str(p.relative_to(root)))}.jpg"; q.parent.mkdir(parents=True, exist_ok=True)
         img.save(q, quality=90); rows.append([str(q.resolve()), "olive", dis, "olive_tr", "field"])
     print(f"olive_tr       field {len(rows):6d} images")
+    return rows
+
+# Tomato-Village (Gehlot et al. 2023, Multimedia Systems): field photos of tomato leaves from Rajasthan farms,
+# github.com/mamta-joshi-gehlot/Tomato-Village, folder "Variant-a(Multiclass Classification)". Real-world photos
+# are what the tomato head lacked (48 % on PlantDoc). Potassium deficiency (72 photos) is left out: too few.
+TOMATO_VILLAGE = {"Early_blight": "early_blight", "Late_blight": "late_blight", "Healthy": "healthy",
+                  "Leaf Miner": "leaf_miner", "Spotted Wilt Virus": "spotted_wilt_virus",
+                  "Magnesium Deficiency": "magnesium_deficiency", "Nitrogen Deficiency": "nitrogen_deficiency"}
+
+def folder_rows(root, plant, mapping, src, out, short):
+    rows = []
+    for p in sorted(root.rglob("*")):
+        if p.suffix.lower() not in (".jpg", ".jpeg", ".png"): continue
+        dis = mapping.get(p.parent.name)
+        if not dis: continue
+        try: img = Image.open(p).convert("RGB")
+        except OSError: continue
+        s = short / min(img.size)
+        if s < 1: img = img.resize((max(1, round(img.width * s)), max(1, round(img.height * s))), Image.BICUBIC)
+        q = out / plant / dis / f"{src}_{slug(str(p.relative_to(root)))}.jpg"; q.parent.mkdir(parents=True, exist_ok=True)
+        img.save(q, quality=90); rows.append([str(q.resolve()), plant, dis, src, "field"])
+    print(f"{src:14s} field {len(rows):6d} images")
     return rows
 
 OTHER_CAP = 120   # per "other" sub-class, so refusals do not swamp the real plants
@@ -102,7 +127,18 @@ def main():
     ap.add_argument("--hf", type=Path, default=Path("hf")); ap.add_argument("--out", type=Path, default=Path("raw_hf"))
     ap.add_argument("--index", type=Path, default=Path("data/index.csv")); ap.add_argument("--short", type=int, default=288)
     ap.add_argument("--olive", type=Path, default=None, help="folder with the extracted olive leaf archives")
+    ap.add_argument("--tomato-village", type=Path, default=None, help="Tomato-Village 'Variant-a(Multiclass Classification)' folder")
+    ap.add_argument("--append", action="store_true", help="only add --olive / --tomato-village rows to an existing index")
     a = ap.parse_args(); rows = []; random.seed(0)
+    if a.append:
+        with open(a.index) as fh: rows = list(csv.reader(fh))[1:]
+        have = {r[3] for r in rows}
+        if a.olive and "olive_tr" not in have: rows += olive_rows(a.olive, a.out, a.short)
+        if a.tomato_village and "tomato_village" not in have:
+            rows += folder_rows(a.tomato_village, "tomato", TOMATO_VILLAGE, "tomato_village", a.out, a.short)
+        with open(a.index, "w", newline="") as fh:
+            w = csv.writer(fh); w.writerow(["path", "plant", "disease", "source", "domain"]); w.writerows(rows)
+        print("total", len(rows), "->", a.index); return
     for folder, src, domain, mapper, cap in SOURCES:
         files = sorted(glob.glob(str(a.hf / folder / "data" / "*.parquet")))
         if not files: print("missing", folder); continue
@@ -139,6 +175,7 @@ def main():
                 off += len(batch)
         print(f"{src:14s} {domain:5s} {n:6d} images  {len(by)} classes")
     if a.olive: rows += olive_rows(a.olive, a.out, a.short)
+    if a.tomato_village: rows += folder_rows(a.tomato_village, "tomato", TOMATO_VILLAGE, "tomato_village", a.out, a.short)
     a.index.parent.mkdir(parents=True, exist_ok=True)
     with open(a.index, "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["path", "plant", "disease", "source", "domain"]); w.writerows(rows)
