@@ -180,9 +180,28 @@
     });
   }
 
+  // Open-Meteo forecast calls from the other pages (Dashboard, My season, Agrivoltaics) go through this:
+  // a short browser cache (the forecast changes a few times a day) and the same 429 skip flag as the
+  // climate archive, so a used-up quota is not hit again from every page.
+  function forecastJSON(url, ttlMin, timeoutMs) {
+    var key = 'wx:' + url, x = null;
+    try { x = JSON.parse(global.localStorage.getItem('gaia.cache.' + key)); } catch (e) { /* no storage */ }
+    if (x && Date.now() - x.t < (ttlMin || 60) * 6e4) return Promise.resolve(x.v);
+    if (flagGet('om429')) { var err = new Error('HTTP 429'); err.status = 429; return Promise.reject(err); }
+    return getJSON(url, timeoutMs || 15000).then(function (j) { cacheSet(key, j); return j; }, function (e) {
+      if (e.status === 429) flagSet('om429', e.daily ? 360 : 15);
+      throw e;
+    });
+  }
+
   /* ---------------------------------------------------------- terrain */
   // Five elevation samples (centre + 4 neighbours) → slope by central differences.
   function terrain(lat, lon) {
+    var tkey = 'terrain:' + cell(lat, lon, 4), thit = cacheGet(tkey);   // ≈ 10 m: the same plot rebuilt costs no call
+    if (thit && thit.slope_pct && thit.slope_pct.status === 'ok') return Promise.resolve(thit);
+    return terrainLive(lat, lon).then(function (r) { if (r.slope_pct && r.slope_pct.status === 'ok') cacheSet(tkey, r); return r; });
+  }
+  function terrainLive(lat, lon) {
     var dLat = 0.0015, dLon = 0.0015;
     var lats = [lat, lat + dLat, lat - dLat, lat, lat], lons = [lon, lon, lon, lon + dLon, lon - dLon];
     var url = 'https://api.open-meteo.com/v1/elevation?latitude=' + lats.join(',') + '&longitude=' + lons.join(',');
@@ -376,5 +395,5 @@
     return node || null;
   }
 
-  global.GAIA_DNA = { build: build, value: value, fieldAt: fieldAt, walk: walk };
+  global.GAIA_DNA = { build: build, value: value, fieldAt: fieldAt, walk: walk, forecastJSON: forecastJSON };
 }(window));

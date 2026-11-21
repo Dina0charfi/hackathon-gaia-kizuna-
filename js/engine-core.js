@@ -7,6 +7,11 @@
      the record covers that failure → "adapt"
    - the score is the weighted share of SOFT conditions met, and is only
      returned when every soft condition could be evaluated
+   - every mandatory condition met but fewer than half of the weighted soft
+     conditions met (score < 0.5) → "adapt": the practice is possible, but the
+     unmet secondary conditions are listed as what must be adapted, so a
+     "feasible" verdict never comes with a weak fit
+   - crop conditions are shown in their own "crop" dimension
    - materials, organisation and regulation come from the record: they are
      shown as "to check", never silently passed
    ========================================================================== */
@@ -14,7 +19,9 @@
 (function (global) {
   'use strict';
 
-  var DIMS = ['climate', 'terrain', 'water', 'materials', 'org', 'reg'];
+  var DIMS = ['climate', 'terrain', 'water', 'crop', 'materials', 'org', 'reg'];
+  var WEAK_FIT = 0.5;
+  function dimOf(c) { return c.field === 'crop' ? 'crop' : c.dim; }
   var V = function (dna, path) { return global.GAIA_DNA.value(dna, path); };
 
   function test(c, v) {
@@ -61,27 +68,36 @@
       var wMet = soft.reduce(function (s, x) { return s + (x.result === 'pass' ? (x.cond.weight || 1) : 0); }, 0);
       score = wSum ? wMet / wSum : null;
     }
+    var softFails = soft.filter(function (x) { return x.result === 'fail'; });
+    if (verdict === 'feasible' && score !== null && score < WEAK_FIT) {
+      verdict = 'adapt';
+      adaptation = { auto: true, when: softFails.map(function (x) { return x.cond.field; }), checks: softFails };
+      Object.defineProperty(adaptation, 'text', { enumerable: true, get: function () { return weakText(softFails); } });
+    }
 
     // per-dimension status
     var dims = {};
     DIMS.forEach(function (d) { dims[d] = { status: 'info', checks: [] }; });
+    var adaptedFields = adaptation && !adaptation.auto ? adaptation.when : [];
     checks.forEach(function (x) {
-      var d = x.cond.dim === 'materials' ? 'materials' : x.cond.dim;
+      var d = dimOf(x.cond);
       if (!dims[d]) return;
       dims[d].checks.push(x);
     });
     DIMS.forEach(function (d) {
       var cs = dims[d].checks;
       if (!cs.length) { dims[d].status = (d === 'materials' || d === 'org' || d === 'reg') ? 'info' : 'none'; return; }
-      if (cs.some(function (x) { return x.result === 'fail' && x.cond.hard; })) dims[d].status = 'fail';
+      var hardFail = cs.filter(function (x) { return x.result === 'fail' && x.cond.hard; });
+      if (hardFail.length) dims[d].status = hardFail.every(function (x) { return adaptedFields.indexOf(x.cond.field) !== -1; }) ? 'adapted' : 'fail';
       else if (cs.some(function (x) { return x.result === 'unknown'; })) dims[d].status = 'unknown';
-      else if (cs.some(function (x) { return x.result === 'fail'; })) dims[d].status = 'partial';
+      else if (cs.some(function (x) { return x.result === 'fail'; })) dims[d].status = cs.some(function (x) { return x.result === 'pass'; }) ? 'partial' : 'below';
       else dims[d].status = 'pass';
     });
 
     return {
       record: rec, verdict: verdict, adaptation: adaptation, score: score,
-      checks: checks, hardFails: hardFails, unknown: unknown, dims: dims,
+      checks: checks, hardFails: hardFails, softFails: softFails, unknown: unknown, dims: dims,
+      softTotal: soft.length, softMet: soft.filter(function (x) { return x.result === 'pass'; }).length,
       provisional: checks.some(function (x) { return x.cond.provisional; }),
       conditional: unknown.length > 0
     };
@@ -96,12 +112,13 @@
     });
   }
 
-  // plain-language reason for a single check (FR, EN, JA; AR shows the French wording, as before)
+  // plain-language reason for a single check (FR, AR, EN, JA)
   var WORDS = {
     fr: {
       label: { 'climate.rain_mm': 'pluie annuelle', 'terrain.slope_pct': 'pente', 'water.source': "source d'eau",
         'crop': 'culture', 'energy.pump': 'pompage', 'climate.tmax_hot': 'température max. estivale',
         'climate.et0_mm': 'évapotranspiration de référence', 'solar.ghi_kwh': 'rayonnement solaire', 'climate.tmin_cold': 'température min. hivernale' },
+      weak: function (l) { return 'Les conditions obligatoires sont remplies, mais la plupart des conditions secondaires ne le sont pas : ' + l + '. Adapter la pratique sur ces points, ou l’essayer d’abord sur une petite surface.'; },
       ghi: ' kWh/m²/j', unknown: 'inconnu', sep: ' : ', req: function (t) { return ' (requis ' + t + ')'; },
       values: { rainfed: 'pluviale', well: 'puits', network: 'réseau', shared: 'source partagée',
         olive: 'olivier', palm: 'palmier dattier', citrus: 'agrumes', cereal: 'céréales', veg: 'maraîchage', other: 'autre',
@@ -111,15 +128,27 @@
       label: { 'climate.rain_mm': 'annual rainfall', 'terrain.slope_pct': 'slope', 'water.source': 'water source',
         'crop': 'crop', 'energy.pump': 'pumping', 'climate.tmax_hot': 'summer max. temperature',
         'climate.et0_mm': 'reference evapotranspiration', 'solar.ghi_kwh': 'solar radiation', 'climate.tmin_cold': 'winter min. temperature' },
+      weak: function (l) { return 'The mandatory conditions are met, but most secondary conditions are not: ' + l + '. Adapt the practice on these points, or try it on a small area first.'; },
       ghi: ' kWh/m²/day', unknown: 'unknown', sep: ': ', req: function (t) { return ' (required ' + t + ')'; },
       values: { rainfed: 'rainfed', well: 'well', network: 'network', shared: 'shared source',
         olive: 'olive', palm: 'date palm', citrus: 'citrus', cereal: 'cereals', veg: 'vegetables', other: 'other',
         none: 'none', diesel: 'diesel pump', grid: 'grid pump', solar: 'solar pump' }
     },
+    ar: {
+      label: { 'climate.rain_mm': 'الأمطار السنوية', 'terrain.slope_pct': 'الانحدار', 'water.source': 'مصدر الماء',
+        'crop': 'الزراعة', 'energy.pump': 'الضخ', 'climate.tmax_hot': 'أقصى حرارة صيفية',
+        'climate.et0_mm': 'التبخر النتحي المرجعي', 'solar.ghi_kwh': 'الإشعاع الشمسي', 'climate.tmin_cold': 'أدنى حرارة شتوية' },
+      weak: function (l) { return 'الشروط الإلزامية مستوفاة، لكن أغلب الشروط الثانوية غير مستوفاة: ' + l + '. كيّف التقنية في هذه النقاط أو جرّبها أولاً على مساحة صغيرة.'; },
+      ghi: ' kWh/m²/يوم', unknown: 'غير معروف', sep: ': ', req: function (t) { return ' (المطلوب ' + t + ')'; },
+      values: { rainfed: 'بعلية', well: 'بئر', network: 'شبكة ري', shared: 'مصدر مشترك',
+        olive: 'زيتون', palm: 'نخيل', citrus: 'قوارص', cereal: 'حبوب', veg: 'خضر', other: 'أخرى',
+        none: 'لا شيء', diesel: 'مضخة ديزل', grid: 'مضخة على الشبكة', solar: 'مضخة شمسية' }
+    },
     ja: {
       label: { 'climate.rain_mm': '年間降水量', 'terrain.slope_pct': '傾斜', 'water.source': '水源',
         'crop': '作物', 'energy.pump': '揚水', 'climate.tmax_hot': '夏の最高気温',
         'climate.et0_mm': '基準蒸発散量', 'solar.ghi_kwh': '日射量', 'climate.tmin_cold': '冬の最低気温' },
+      weak: function (l) { return '必須条件は満たしていますが、副次条件の多くを満たしていません：' + l + '。これらの点を調整するか、まず小さな面積で試してください。'; },
       ghi: ' kWh/m²/日', unknown: '不明', sep: '：', req: function (t) { return '（必要条件 ' + t + '）'; },
       values: { rainfed: '天水', well: '井戸', network: '灌漑網', shared: '共同水源',
         olive: 'オリーブ', palm: 'ナツメヤシ', citrus: '柑橘', cereal: '穀物', veg: '野菜', other: 'その他',
@@ -136,7 +165,8 @@
     var got = x.value === null ? W.unknown : (typeof x.value === 'number' ? f(x.value, c.field === 'terrain.slope_pct' || c.field === 'solar.ghi_kwh' ? 1 : 0) + unit : valueLabel(x.value));
     return label + W.sep + got + W.req(target);
   }
+  function weakText(fails) { var W = words(); return W.weak(fails.map(describe).join(W === WORDS.ja ? '、' : ' ; ')); }
   function valueLabel(v) { return words().values[v] || String(v); }
 
-  global.GAIA_ENGINE = { evaluate: evaluate, evaluateAll: evaluateAll, describe: describe, valueLabel: valueLabel, DIMS: DIMS };
+  global.GAIA_ENGINE = { evaluate: evaluate, evaluateAll: evaluateAll, describe: describe, valueLabel: valueLabel, DIMS: DIMS, WEAK_FIT: WEAK_FIT };
 }(window));

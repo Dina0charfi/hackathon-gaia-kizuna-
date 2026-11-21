@@ -203,13 +203,8 @@
   function fetchWeather() {
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + farm.lat.toFixed(3) + '&longitude=' + farm.lon.toFixed(3) +
       '&daily=et0_fao_evapotranspiration,precipitation_sum,shortwave_radiation_sum,temperature_2m_max&past_days=30&forecast_days=8&timezone=auto';
-    var ctl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
-    return fetch(url, ctl ? { signal: ctl.signal } : undefined).then(function (r) {
-      clearTimeout(timer);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    }).then(function (j) {
+    var timer = null;
+    return window.GAIA_DNA.forecastJSON(url, 60, 12000).then(function (j) {
       var d = j.daily, rows = d.time.map(function (date, i) {
         return { date: date, et0: d.et0_fao_evapotranspiration[i], rain: d.precipitation_sum[i] || 0,
           ghi: d.shortwave_radiation_sum[i] !== null ? d.shortwave_radiation_sum[i] / 3.6 : null, tmax: d.temperature_2m_max[i] };

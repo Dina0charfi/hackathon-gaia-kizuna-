@@ -348,8 +348,8 @@
     var key = loc.lat + ',' + loc.lon;
     if (weatherCache[key]) { done(weatherCache[key]); return; }
     G.clear(pilotBox).appendChild(el('p', { class: 'small muted' }, [el('span', { class: 'gp-spin' }), ' ', t('p_loading')]));
-    var ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 9000);
-    fetch(A.forecastUrl(loc.lat, loc.lon), ctl ? { signal: ctl.signal } : {}).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    var timer = null;
+    window.GAIA_DNA.forecastJSON(A.forecastUrl(loc.lat, loc.lon), 60, 9000)
       .then(function (d) {
         clearTimeout(timer);
         var rows = A.parseOpenMeteo(d); if (!rows || rows.length < 24) throw new Error('empty');

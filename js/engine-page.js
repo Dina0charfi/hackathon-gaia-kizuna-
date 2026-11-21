@@ -6,14 +6,16 @@
   G.addStrings({
     fr: {
       e_title: 'Moteur de compatibilité',
-      e_lead: 'Chaque technique est testée sur six dimensions. Une condition obligatoire non remplie écarte la technique, sauf si sa fiche prévoit une adaptation.',
+      e_lead: 'Chaque technique est testée sur sept dimensions. Une condition obligatoire non remplie écarte la technique, sauf si sa fiche prévoit une adaptation.',
       e_parcel: 'Parcelle évaluée', e_change: 'Changer de parcelle',
       e_n_ok: 'faisables', e_n_adapt: 'avec adaptation', e_n_no: 'non recommandées',
       f_all: 'Toutes', f_jp: 'Origine Japon', f_tn: 'Origine Tunisie',
       why_ok: 'Pourquoi elle convient', what_adapt: 'Ce qui doit être adapté', why_no: 'Pourquoi elle est écartée', actions: 'Trois actions',
-      sources: 'Sources', not_eval: 'Non évalué faute de donnée', score: 'Correspondance',
+      sources: 'Sources', not_eval: 'Non évalué faute de donnée', score: 'Adéquation',
       score_m: 'Part pondérée des conditions secondaires remplies. Affichée seulement si toutes ont pu être évaluées.',
-      no_score: 'Pas de score : une condition secondaire n’a pas pu être évaluée.',
+      no_score: 'Pas de score : une condition secondaire n’a pas pu être évaluée.', no_soft: 'Pas de score : la fiche n’a que des conditions obligatoires, et le verdict repose sur elles.',
+      of_soft: '{m} sur {n} conditions secondaires remplies', soft_miss: 'Conditions secondaires non remplies', st_partial: 'Partiellement rempli', st_below: 'En dessous de l’idéal', st_adapted: 'Non rempli · adaptation prévue', dim_crop: 'Culture',
+      tip_below: 'Condition secondaire : elle réduit le score sans écarter la pratique.', tip_adapted: 'Condition obligatoire non remplie, couverte par l’adaptation de la fiche.',
       provisional: 'Au moins un seuil de cette fiche est provisoire et doit être validé par un agronome.',
       draft: 'Fiche en brouillon, non validée par un expert', rejected_list: 'Techniques écartées pour cette parcelle',
       to_check: 'À vérifier', mat_cost: 'Coût', mat: 'Matériaux', actors: 'Acteurs locaux', reg: 'Réglementation',
@@ -23,31 +25,35 @@
     },
     ar: {
       e_title: 'محرك التوافق',
-      e_lead: 'تُختبر كل تقنية على ستة أبعاد. إذا لم يُستوفَ شرط إلزامي تُستبعد التقنية، إلا إذا نصّت بطاقتها على تكييف.',
+      e_lead: 'تُختبر كل تقنية على سبعة أبعاد. إذا لم يُستوفَ شرط إلزامي تُستبعد التقنية، إلا إذا نصّت بطاقتها على تكييف.',
       e_parcel: 'القطعة المقيّمة', e_change: 'تغيير القطعة',
       e_n_ok: 'ممكنة', e_n_adapt: 'مع التكييف', e_n_no: 'غير موصى بها',
       f_all: 'الكل', f_jp: 'من اليابان', f_tn: 'من تونس',
       why_ok: 'لماذا تناسب', what_adapt: 'ما يجب تكييفه', why_no: 'سبب الاستبعاد', actions: 'ثلاث خطوات',
-      sources: 'المصادر', not_eval: 'لم يُقيَّم لنقص البيانات', score: 'نسبة التوافق',
+      sources: 'المصادر', not_eval: 'لم يُقيَّم لنقص البيانات', score: 'درجة الملاءمة',
       score_m: 'النسبة الموزونة للشروط الثانوية المستوفاة، تُعرض فقط إذا أمكن تقييمها كلها.',
-      no_score: 'لا توجد نسبة: تعذّر تقييم أحد الشروط الثانوية.',
+      no_score: 'لا توجد نسبة: تعذّر تقييم أحد الشروط الثانوية.', no_soft: 'لا توجد نسبة: البطاقة لا تضم إلا شروطاً إلزامية، والحكم مبني عليها.',
+      of_soft: '{m} من {n} شروط ثانوية مستوفاة', soft_miss: 'شروط ثانوية غير مستوفاة', st_partial: 'مستوفى جزئياً', st_below: 'دون المستوى المثالي', st_adapted: 'غير مستوفى · مع تكييف', dim_crop: 'الزراعة',
+      tip_below: 'شرط ثانوي: يخفّض النسبة دون استبعاد التقنية.', tip_adapted: 'شرط إلزامي غير مستوفى، يغطيه التكييف المذكور في البطاقة.',
       provisional: 'عتبة واحدة على الأقل في هذه البطاقة مؤقتة ويجب أن يصادق عليها مهندس فلاحي.',
       draft: 'بطاقة مسودة غير مصادق عليها', rejected_list: 'التقنيات المستبعدة لهذه القطعة',
       to_check: 'للتحقق', mat_cost: 'التكلفة', mat: 'المواد', actors: 'الفاعلون المحليون', reg: 'التنظيمات',
       open_rec: 'فتح البطاقة', none_dim: '—',
       e_note: 'هذه الأحكام ناتجة عن قواعد صريحة مطبّقة على ملف القطعة، ولا تعوّض رأي مهندس فلاحي.',
-      e_core_missing: 'Données essentielles manquantes : {f}. Les verdicts qui en dépendent restent « non évalué ».', e_filter: 'Filtre'
+      e_core_missing: 'بيانات أساسية ناقصة: {f}. الأحكام التي تعتمد عليها تبقى «لم تُقيَّم».', e_filter: 'تصفية'
     },
     en: {
       e_title: 'Compatibility engine',
-      e_lead: 'Each practice is tested on six dimensions. A mandatory condition that is not met rules the practice out, unless its record provides an adaptation.',
+      e_lead: 'Each practice is tested on seven dimensions. A mandatory condition that is not met rules the practice out, unless its record provides an adaptation.',
       e_parcel: 'Plot assessed', e_change: 'Change plot',
       e_n_ok: 'feasible', e_n_adapt: 'with adaptation', e_n_no: 'not recommended',
       f_all: 'All', f_jp: 'From Japan', f_tn: 'From Tunisia',
       why_ok: 'Why it fits', what_adapt: 'What must be adapted', why_no: 'Why it is ruled out', actions: 'Three actions',
-      sources: 'Sources', not_eval: 'Not assessed for lack of data', score: 'Match',
+      sources: 'Sources', not_eval: 'Not assessed for lack of data', score: 'Fit score',
       score_m: 'Weighted share of the secondary conditions met. Shown only when all of them could be assessed.',
-      no_score: 'No score: a secondary condition could not be assessed.',
+      no_score: 'No score: a secondary condition could not be assessed.', no_soft: 'No score: this record only has mandatory conditions, and the verdict rests on them.',
+      of_soft: '{m} of {n} secondary conditions met', soft_miss: 'Secondary conditions not met', st_partial: 'Partly met', st_below: 'Below ideal', st_adapted: 'Not met · adaptation given', dim_crop: 'Crop',
+      tip_below: 'Secondary condition: it lowers the score without ruling the practice out.', tip_adapted: 'Mandatory condition not met, covered by the record’s adaptation.',
       provisional: 'At least one threshold in this record is provisional and must be validated by an agronomist.',
       draft: 'Draft record, not validated by an expert', rejected_list: 'Practices ruled out for this plot',
       to_check: 'To check', mat_cost: 'Cost', mat: 'Materials', actors: 'Local actors', reg: 'Regulation',
@@ -57,14 +63,16 @@
     },
     ja: {
       e_title: '適合性エンジン',
-      e_lead: '各技術を6つの観点で検証します。必須条件を満たさない技術は除外されます。ただし、記録に調整方法がある場合は除きます。',
+      e_lead: '各技術を7つの観点で検証します。必須条件を満たさない技術は除外されます。ただし、記録に調整方法がある場合は除きます。',
       e_parcel: '評価した区画', e_change: '区画を変更',
       e_n_ok: '実施可能', e_n_adapt: '調整すれば可能', e_n_no: '推奨しない',
       f_all: 'すべて', f_jp: '日本発', f_tn: 'チュニジア発',
       why_ok: '適している理由', what_adapt: '調整が必要な点', why_no: '除外した理由', actions: '3つの行動',
       sources: '出典', not_eval: 'データ不足のため未評価', score: '適合度',
       score_m: '満たした副次条件の加重割合。すべて評価できた場合のみ表示します。',
-      no_score: 'スコアなし：評価できない副次条件があります。',
+      no_score: 'スコアなし：評価できない副次条件があります。', no_soft: 'スコアなし：この記録には必須条件しかなく、判定はそれに基づきます。',
+      of_soft: '副次条件 {n} 件中 {m} 件を満たす', soft_miss: '満たしていない副次条件', st_partial: '一部満たす', st_below: '理想以下', st_adapted: '満たさない・調整あり', dim_crop: '作物',
+      tip_below: '副次条件：スコアを下げますが、技術を除外はしません。', tip_adapted: '必須条件を満たしていませんが、記録の調整方法で対応できます。',
       provisional: 'この記録には暫定的なしきい値が少なくとも1つあり、農業技術者による検証が必要です。',
       draft: '下書きの記録（専門家未検証）', rejected_list: 'この区画で除外した技術',
       to_check: '要確認', mat_cost: 'コスト', mat: '資材', actors: '地域の関係者', reg: '規制',
@@ -93,20 +101,24 @@
   var filter = 'all';
 
   function vLabel(v) { return t(v === 'feasible' ? 'verdict_ok' : v === 'adapt' ? 'verdict_adapt' : v === 'insufficient' ? 'verdict_unk' : 'verdict_no'); }
-  function dimLabel(d) { return t({ climate: 'dim_climate', terrain: 'dim_terrain', water: 'dim_water', materials: 'dim_materials', org: 'dim_org', reg: 'dim_reg' }[d]); }
+  function dimLabel(d) { return t({ climate: 'dim_climate', terrain: 'dim_terrain', water: 'dim_water', crop: 'dim_crop', materials: 'dim_materials', org: 'dim_org', reg: 'dim_reg' }[d]); }
 
   function dimBox(d, info, rec) {
     var st = info.status, txt, ic;
     var notes = (rec && rec.dimNotes) || {};
     if (st === 'pass') { txt = t('pass'); ic = 'ok'; }
     else if (st === 'fail') { txt = t('fail'); ic = 'no'; }
-    else if (st === 'partial') { txt = t('pass') + ' / ' + t('fail'); ic = 'adapt'; }
+    else if (st === 'adapted') { txt = t('st_adapted'); ic = 'adapt'; }
+    else if (st === 'partial') { txt = t('st_partial'); ic = 'adapt'; }
+    else if (st === 'below') { txt = t('st_below'); ic = 'adapt'; }
     else if (st === 'unknown') { txt = t('unknown'); ic = 'unk'; }
     else if (st === 'info') { txt = t('to_check'); ic = 'info'; }
     else { txt = t('no_cond'); ic = 'info'; }
     var box = el('div', { class: 'dim ' + st }, [el('b', null, [dimLabel(d)]), el('span', null, [G.icon(ic), txt])]);
     var tip = info.checks.map(function (x) { return (x.result === 'unknown' ? t('unknown_tip') : '') + E.describe(x); }).join(' · ');
     if (!tip && st === 'info' && rec) tip = { materials: rec.materials + ' — ' + rec.cost, org: rec.actors, reg: rec.regulation }[d] || '';
+    if (tip && (st === 'below' || st === 'partial')) tip += ' — ' + t('tip_below');
+    if (tip && st === 'adapted') tip += ' — ' + t('tip_adapted');
     if (!tip) tip = notes[d] || t('no_cond_tip');
     else if (notes[d]) tip += ' · ' + notes[d];
     if (tip) G.bindTip(box, tip);
@@ -125,8 +137,9 @@
     var scoreBox = null;
     if (r.verdict !== 'rejected') {
       scoreBox = r.score !== null
-        ? el('p', { class: 'small', style: 'margin-top:8px' }, [t('score') + ' : ', el('span', { class: 'score' }, [fmt(r.score * 100) + ' %'])])
-        : el('p', { class: 'small muted', style: 'margin-top:8px' }, [t('no_score')]);
+        ? el('p', { class: 'small', style: 'margin-top:8px' }, [t('score') + (G.lang() === 'fr' ? ' : ' : ': '), el('span', { class: 'score' }, [fmt(r.score * 100) + ' %']),
+            el('span', { class: 'muted' }, [' · ' + t('of_soft').replace('{m}', r.softMet).replace('{n}', r.softTotal)])])
+        : el('p', { class: 'small muted', style: 'margin-top:8px' }, [t(r.softTotal ? 'no_score' : 'no_soft')]);
       if (r.score !== null) G.bindTip(scoreBox, t('score_m'));
     }
 
@@ -149,6 +162,9 @@
           return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
         })), el('a', { class: 'small', href: 'land.html' }, [t('e_complete') + ' →'])]));
       }
+      if (r.softFails.length && !(r.adaptation && r.adaptation.auto)) cols.push(el('div', null, [el('h4', null, [t('soft_miss')]), el('ul', null, r.softFails.map(function (x) {
+        return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
+      }))]));
       if (r.adaptation) cols.push(el('div', null, [el('h4', null, [t('what_adapt')]), el('p', { class: 'small', style: 'color:var(--g-ink-2)' }, [r.adaptation.text])]));
       if (rec.actions && rec.actions.length) cols.push(el('div', null, [el('h4', null, [t('actions')]), el('ol', null, rec.actions.map(function (a) { return el('li', null, [a]); }))]));
     }

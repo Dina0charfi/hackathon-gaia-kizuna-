@@ -21,11 +21,11 @@
   G.addStrings({
     fr: {
       h_title: 'Santé des plantes',
-      h_lead: "Photographiez une feuille d'olivier, de palmier dattier ou d'agrume. GAIA vérifie d'abord la photo, reconnaît l'arbre, puis donne la maladie probable — ou dit qu'il n'est pas sûr.",
+      h_lead: "Photographiez une feuille d'agrume, de palmier dattier, de vigne, de tomate, de pomme de terre ou de poivron. GAIA vérifie d'abord la photo, reconnaît la plante, puis donne la maladie probable — ou dit qu'il n'est pas sûr.",
       up_t: 'Ajouter une photo de feuille', up_p: 'Une seule feuille, à plat, bien éclairée, qui remplit le cadre.',
       up_file: 'Choisir une image', up_cam: 'Prendre une photo', up_drop: 'ou déposez une image ici',
       up_change: 'Changer de photo', up_privacy: "L'image est analysée dans votre navigateur. Elle n'est envoyée nulle part, sauf si vous choisissez vous-même l'identification Pl@ntNet (bouton avec votre accord).",
-      s1: 'Qualité de la photo', s2: "Identification de l'arbre", s3: 'Maladie probable', s4: 'Confiance', s5: 'Refus si incertain', s6: 'Conseil validé',
+      s1: 'Qualité de la photo', s2: 'Identification de la plante', s3: 'Maladie probable', s4: 'Confiance', s5: 'Refus si incertain', s6: 'Conseil validé',
       st_wait: 'En attente', st_done: 'Calculé', st_off: 'Modèle non connecté', st_skip: 'Non exécuté',
       q_res: 'Résolution', q_light: 'Luminosité', q_sharp: 'Netteté', q_leaf: 'Part de végétation',
       q_ok: 'Correcte', q_warn: 'Limite', q_bad: 'Insuffisante',
@@ -43,16 +43,18 @@
       off_manifest: 'Exemple de manifeste',
       off_err: 'Manifeste trouvé mais inutilisable : ',
       run: 'Lancer le diagnostic', running: 'Analyse en cours…',
-      tree: 'Arbre reconnu', disease: 'Maladie probable', conf: 'Confiance calibrée', top: 'Probabilités',
+      tree: 'Plante reconnue', disease: 'Maladie probable', conf: 'Confiance calibrée', top: 'Probabilités',
       unsure_t: 'Je ne suis pas sûr', unsure_p: 'La confiance est sous le seuil fixé pour ce modèle. GAIA préfère ne pas répondre. Reprenez une photo d’une autre feuille, ou montrez la plante à un technicien.',
-      other_t: 'Arbre non pris en charge', other_p: 'Cette feuille ne ressemble pas à un olivier, un palmier dattier ou un agrume. GAIA ne diagnostique que ces trois arbres pour l’instant.',
+      other_t: 'Plante non reconnue', other_p: 'Cette feuille ne ressemble à aucune des plantes que le modèle connaît ({l}). L’olivier n’est pas encore dans le modèle.',
+      hes_t: 'GAIA hésite', hes_p: 'Le modèle penche pour « autre plante » mais n’exclut pas : {c}. Reprenez une seule feuille, à plat, sur un fond uni, puis relancez.',
+      tr_other_res: 'Autre plante (hors modèle)', supported_t: 'Plantes reconnues par le modèle actuel : {l}.',
       g_none: "Aucune fiche de conseil validée par un expert n'est encore associée à ce résultat.",
       g_by: 'Validée par', limits_t: 'Limites de ce diagnostic',
       lim1: "Les images d'entraînement ne viennent pas de Tunisie : le résultat doit être confirmé sur le terrain.",
       lim2: 'Un symptôme peut avoir plusieurs causes (carence, sécheresse, ravageur).',
       lim3: 'GAIA ne prescrit aucun traitement chimique.',
       kz_t: 'GAIA Kaizen — corriger le résultat', kz_p: "Si vous savez ce qu'a la plante, dites-le. Chaque correction est relue par un agronome avant de servir à réentraîner un modèle.",
-      kz_tree: 'Arbre', kz_label: 'Ce que vous observez', kz_label_ph: 'ex. œil de paon, carence, rien de grave…', kz_note: 'Commentaire (facultatif)', kz_send: 'Enregistrer la correction',
+      kz_tree: 'Plante', kz_label: 'Ce que vous observez', kz_label_ph: 'ex. œil de paon, carence, rien de grave…', kz_note: 'Commentaire (facultatif)', kz_send: 'Enregistrer la correction',
       kz_saved: 'Correction enregistrée sur cet appareil, en attente de relecture.', kz_sent: 'Correction envoyée au serveur GAIA pour relecture.',
       kz_q: 'Corrections en attente sur cet appareil :', kz_export: 'Exporter (JSON)', kz_need_img: 'Ajoutez d’abord une photo.',
       tr_kaki: 'Kaki (plaqueminier)', tr_apple: 'Pommier', tr_blueberry: 'Myrtillier', tr_cherry: 'Cerisier', tr_corn: 'Maïs', tr_grape: 'Vigne', tr_peach: 'Pêcher', tr_pepper: 'Poivron', tr_potato: 'Pomme de terre', tr_raspberry: 'Framboisier', tr_soybean: 'Soja', tr_squash: 'Courge', tr_strawberry: 'Fraisier', tr_tomato: 'Tomate',
@@ -61,11 +63,11 @@
     },
     ar: {
       h_title: 'صحة النبات',
-      h_lead: 'صوّر ورقة زيتون أو نخيل أو قوارص. تتحقق غايا أولاً من جودة الصورة، ثم تتعرف على الشجرة، ثم تقترح المرض المحتمل — أو تقول إنها غير متأكدة.',
+      h_lead: 'صوّر ورقة قوارص أو نخيل أو عنب أو طماطم أو بطاطا أو فلفل. تتحقق غايا أولاً من جودة الصورة، ثم تتعرف على النبتة، ثم تقترح المرض المحتمل — أو تقول إنها غير متأكدة.',
       up_t: 'أضف صورة ورقة', up_p: 'ورقة واحدة، مسطحة، جيدة الإضاءة، تملأ الإطار.',
       up_file: 'اختر صورة', up_cam: 'التقط صورة', up_drop: 'أو اسحب الصورة إلى هنا',
       up_change: 'تغيير الصورة', up_privacy: 'تُحلَّل الصورة داخل متصفحك ولا تُرسل إلى أي مكان، إلا إذا اخترتَ بنفسك التعرّف عبر Pl@ntNet (زر بموافقتك).',
-      s1: 'جودة الصورة', s2: 'التعرف على الشجرة', s3: 'المرض المحتمل', s4: 'درجة الثقة', s5: 'الامتناع عند الشك', s6: 'نصيحة مصادق عليها',
+      s1: 'جودة الصورة', s2: 'التعرف على النبتة', s3: 'المرض المحتمل', s4: 'درجة الثقة', s5: 'الامتناع عند الشك', s6: 'نصيحة مصادق عليها',
       st_wait: 'في الانتظار', st_done: 'تم الحساب', st_off: 'النموذج غير متصل', st_skip: 'لم يُنفَّذ',
       q_res: 'الدقة', q_light: 'الإضاءة', q_sharp: 'الوضوح', q_leaf: 'نسبة النبات',
       q_ok: 'جيدة', q_warn: 'على الحد', q_bad: 'غير كافية',
@@ -83,16 +85,18 @@
       off_manifest: 'مثال على ملف التعريف',
       off_err: 'ملف التعريف موجود لكنه غير صالح: ',
       run: 'ابدأ التشخيص', running: 'جارٍ التحليل…',
-      tree: 'الشجرة', disease: 'المرض المحتمل', conf: 'الثقة بعد المعايرة', top: 'الاحتمالات',
+      tree: 'النبتة', disease: 'المرض المحتمل', conf: 'الثقة بعد المعايرة', top: 'الاحتمالات',
       unsure_t: 'لست متأكدة', unsure_p: 'الثقة أقل من العتبة المحددة لهذا النموذج، لذلك تفضّل غايا عدم الإجابة. صوّر ورقة أخرى أو اعرض النبتة على تقني.',
-      other_t: 'شجرة غير مدعومة', other_p: 'لا تشبه هذه الورقة الزيتون أو النخيل أو القوارص. لا تشخّص غايا حالياً إلا هذه الأشجار الثلاث.',
+      other_t: 'نبتة غير معروفة', other_p: 'لا تشبه هذه الورقة أيّاً من النباتات التي يعرفها النموذج ({l}). الزيتون ليس في النموذج بعد.',
+      hes_t: 'غايا مترددة', hes_p: 'يميل النموذج إلى «نبتة أخرى» لكنه لا يستبعد: {c}. صوّر ورقة واحدة مسطحة على خلفية موحدة ثم أعد المحاولة.',
+      tr_other_res: 'نبتة أخرى (خارج النموذج)', supported_t: 'النباتات التي يتعرف عليها النموذج الحالي: {l}.',
       g_none: 'لا توجد بعد بطاقة نصح مصادق عليها من خبير لهذه النتيجة.',
       g_by: 'صادق عليها', limits_t: 'حدود هذا التشخيص',
       lim1: 'صور التدريب ليست من تونس: يجب تأكيد النتيجة في الحقل.',
       lim2: 'قد يكون للعَرَض الواحد عدة أسباب (نقص غذائي، جفاف، آفة).',
       lim3: 'لا تصف غايا أي علاج كيميائي.',
       kz_t: 'غايا كايزن — تصحيح النتيجة', kz_p: 'إذا كنت تعرف ما تعانيه النبتة فأخبرنا. يراجع مهندس فلاحي كل تصحيح قبل استعماله لإعادة تدريب النموذج.',
-      kz_tree: 'الشجرة', kz_label: 'ما تلاحظه', kz_label_ph: 'مثال: عين الطاووس، نقص غذائي، لا شيء خطير…', kz_note: 'تعليق (اختياري)', kz_send: 'حفظ التصحيح',
+      kz_tree: 'النبتة', kz_label: 'ما تلاحظه', kz_label_ph: 'مثال: عين الطاووس، نقص غذائي، لا شيء خطير…', kz_note: 'تعليق (اختياري)', kz_send: 'حفظ التصحيح',
       kz_saved: 'حُفظ التصحيح على هذا الجهاز في انتظار المراجعة.', kz_sent: 'أُرسل التصحيح إلى خادم غايا للمراجعة.',
       kz_q: 'تصحيحات في الانتظار على هذا الجهاز:', kz_export: 'تصدير (JSON)', kz_need_img: 'أضف صورة أولاً.',
       tr_kaki: 'كاكا', tr_apple: 'تفاح', tr_blueberry: 'توت أزرق', tr_cherry: 'كرز', tr_corn: 'ذرة', tr_grape: 'عنب', tr_peach: 'خوخ', tr_pepper: 'فلفل', tr_potato: 'بطاطا', tr_raspberry: 'توت العليق', tr_soybean: 'صويا', tr_squash: 'قرع', tr_strawberry: 'فراولة', tr_tomato: 'طماطم',
@@ -101,11 +105,11 @@
     },
     en: {
       h_title: 'Plant health',
-      h_lead: 'Photograph an olive, date palm or citrus leaf. GAIA first checks the photo, recognises the tree, then gives the likely disease — or says it is not sure.',
+      h_lead: 'Photograph a leaf of citrus, date palm, grape, tomato, potato or pepper. GAIA first checks the photo, recognises the plant, then gives the likely disease — or says it is not sure.',
       up_t: 'Add a photo of a leaf', up_p: 'A single leaf, flat, well lit, filling the frame.',
       up_file: 'Choose an image', up_cam: 'Take a photo', up_drop: 'or drop an image here',
       up_change: 'Change photo', up_privacy: 'The image is analysed in your browser. It is not sent anywhere, unless you choose the Pl@ntNet identification yourself (button, with your consent).',
-      s1: 'Photo quality', s2: 'Tree identification', s3: 'Likely disease', s4: 'Confidence', s5: 'Refusal when unsure', s6: 'Validated advice',
+      s1: 'Photo quality', s2: 'Plant identification', s3: 'Likely disease', s4: 'Confidence', s5: 'Refusal when unsure', s6: 'Validated advice',
       st_wait: 'Waiting', st_done: 'Calculated', st_off: 'Model not connected', st_skip: 'Not run',
       q_res: 'Resolution', q_light: 'Brightness', q_sharp: 'Sharpness', q_leaf: 'Share of vegetation',
       q_ok: 'Good', q_warn: 'Borderline', q_bad: 'Insufficient',
@@ -123,16 +127,18 @@
       off_manifest: 'Example manifest',
       off_err: 'Manifest found but unusable: ',
       run: 'Run the diagnosis', running: 'Analysing…',
-      tree: 'Tree recognised', disease: 'Likely disease', conf: 'Calibrated confidence', top: 'Probabilities',
+      tree: 'Plant recognised', disease: 'Likely disease', conf: 'Calibrated confidence', top: 'Probabilities',
       unsure_t: 'I am not sure', unsure_p: 'Confidence is below the threshold set for this model. GAIA prefers not to answer. Take a photo of another leaf, or show the plant to a technician.',
-      other_t: 'Tree not supported', other_p: 'This leaf does not look like an olive, date palm or citrus. GAIA only diagnoses these three trees for now.',
+      other_t: 'Plant not recognised', other_p: 'This leaf does not look like any of the plants the model knows ({l}). Olive is not in the model yet.',
+      hes_t: 'GAIA is hesitating', hes_p: 'The model leans towards “other plant” but does not rule out: {c}. Take a single leaf, flat, on a plain background, and run it again.',
+      tr_other_res: 'Other plant (not in the model)', supported_t: 'Plants the current model recognises: {l}.',
       g_none: 'No advice record validated by an expert is linked to this result yet.',
       g_by: 'Validated by', limits_t: 'Limits of this diagnosis',
       lim1: 'The training images do not come from Tunisia: the result must be confirmed in the field.',
       lim2: 'A symptom can have several causes (deficiency, drought, pest).',
       lim3: 'GAIA prescribes no chemical treatment.',
       kz_t: 'GAIA Kaizen — correct the result', kz_p: 'If you know what the plant has, say so. Every correction is reviewed by an agronomist before it is used to retrain a model.',
-      kz_tree: 'Tree', kz_label: 'What you observe', kz_label_ph: 'e.g. peacock spot, deficiency, nothing serious…', kz_note: 'Comment (optional)', kz_send: 'Save the correction',
+      kz_tree: 'Plant', kz_label: 'What you observe', kz_label_ph: 'e.g. peacock spot, deficiency, nothing serious…', kz_note: 'Comment (optional)', kz_send: 'Save the correction',
       kz_saved: 'Correction saved on this device, waiting for review.', kz_sent: 'Correction sent to the GAIA server for review.',
       kz_q: 'Corrections waiting on this device:', kz_export: 'Export (JSON)', kz_need_img: 'Add a photo first.',
       tr_kaki: 'Persimmon', tr_apple: 'Apple', tr_blueberry: 'Blueberry', tr_cherry: 'Cherry', tr_corn: 'Corn', tr_grape: 'Grape', tr_peach: 'Peach', tr_pepper: 'Pepper', tr_potato: 'Potato', tr_raspberry: 'Raspberry', tr_soybean: 'Soybean', tr_squash: 'Squash', tr_strawberry: 'Strawberry', tr_tomato: 'Tomato',
@@ -141,11 +147,11 @@
     },
     ja: {
       h_title: '植物の健康',
-      h_lead: 'オリーブ、ナツメヤシ、柑橘の葉を撮影してください。GAIAはまず写真を確認し、木を識別してから、考えられる病気を示します。確信がなければそう伝えます。',
+      h_lead: '柑橘、ナツメヤシ、ブドウ、トマト、ジャガイモ、ピーマンの葉を撮影してください。GAIAはまず写真を確認し、植物を識別してから、考えられる病気を示します。確信がなければそう伝えます。',
       up_t: '葉の写真を追加', up_p: '葉は1枚、平らにして明るく、画面いっぱいに。',
       up_file: '画像を選ぶ', up_cam: '写真を撮る', up_drop: 'または画像をここにドロップ',
       up_change: '写真を変更', up_privacy: '画像はブラウザ内で分析され、どこにも送信されません。ただし、ご自身でPl@ntNetによる同定を選んだ場合のみ、同意のうえで送信されます。',
-      s1: '写真の画質', s2: '樹種の識別', s3: '考えられる病気', s4: '信頼度', s5: '不確かなら回答しない', s6: '検証済みの助言',
+      s1: '写真の画質', s2: '植物の識別', s3: '考えられる病気', s4: '信頼度', s5: '不確かなら回答しない', s6: '検証済みの助言',
       st_wait: '待機中', st_done: '計算済み', st_off: 'モデル未接続', st_skip: '未実行',
       q_res: '解像度', q_light: '明るさ', q_sharp: 'シャープさ', q_leaf: '植物の割合',
       q_ok: '良好', q_warn: 'ぎりぎり', q_bad: '不十分',
@@ -163,16 +169,18 @@
       off_manifest: 'マニフェストの例',
       off_err: 'マニフェストは見つかりましたが使用できません：',
       run: '診断を実行', running: '分析中…',
-      tree: '識別した樹種', disease: '考えられる病気', conf: '調整済みの信頼度', top: '確率',
+      tree: '識別した植物', disease: '考えられる病気', conf: '調整済みの信頼度', top: '確率',
       unsure_t: '確信がありません', unsure_p: '信頼度がこのモデルのしきい値を下回っています。GAIAは回答を控えます。別の葉を撮影するか、技術者に植物を見てもらってください。',
-      other_t: '対象外の樹種', other_p: 'この葉はオリーブ、ナツメヤシ、柑橘のようには見えません。現在GAIAが診断できるのはこの3種だけです。',
+      other_t: '認識できない植物', other_p: 'この葉は、モデルが知っている植物（{l}）のどれにも似ていません。オリーブはまだモデルに含まれていません。',
+      hes_t: 'GAIAは迷っています', hes_p: 'モデルは「その他の植物」に傾いていますが、次の可能性も残ります：{c}。葉を1枚、平らにして無地の背景で撮り直し、もう一度実行してください。',
+      tr_other_res: 'その他の植物（モデル外）', supported_t: '現在のモデルが認識できる植物：{l}。',
       g_none: 'この結果に結びついた、専門家検証済みの助言記録はまだありません。',
       g_by: '検証者', limits_t: 'この診断の限界',
       lim1: '学習用の画像はチュニジアのものではありません。結果は現地で確認する必要があります。',
       lim2: '1つの症状に複数の原因がありえます（栄養欠乏、干ばつ、害虫）。',
       lim3: 'GAIAは化学的な処置を指示しません。',
       kz_t: 'GAIAカイゼン — 結果を修正する', kz_p: '植物の状態がわかる場合は教えてください。修正はすべて農業技術者が確認してから、モデルの再学習に使われます。',
-      kz_tree: '樹種', kz_label: '観察したこと', kz_label_ph: '例：クジャク病、栄養欠乏、深刻ではない…', kz_note: 'コメント（任意）', kz_send: '修正を保存',
+      kz_tree: '植物', kz_label: '観察したこと', kz_label_ph: '例：クジャク病、栄養欠乏、深刻ではない…', kz_note: 'コメント（任意）', kz_send: '修正を保存',
       kz_saved: '修正はこの端末に保存され、確認待ちです。', kz_sent: '修正を確認のためGAIAサーバーに送信しました。',
       kz_q: 'この端末で確認待ちの修正：', kz_export: 'エクスポート（JSON）', kz_need_img: 'まず写真を追加してください。',
       tr_kaki: '柿', tr_apple: 'リンゴ', tr_blueberry: 'ブルーベリー', tr_cherry: 'サクランボ', tr_corn: 'トウモロコシ', tr_grape: 'ブドウ', tr_peach: 'モモ', tr_pepper: 'ピーマン', tr_potato: 'ジャガイモ', tr_raspberry: 'ラズベリー', tr_soybean: '大豆', tr_squash: 'カボチャ', tr_strawberry: 'イチゴ', tr_tomato: 'トマト',
@@ -184,7 +192,7 @@
   G.mountShell('health');
   var app = document.getElementById('app');
 
-  var state = { img: null, quality: null, model: { status: 'checking', manifest: null, error: null }, result: null, running: false, file: null, pn: { status: 'idle' } };
+  var state = { img: null, quality: null, model: { status: 'checking', manifest: null, error: null }, result: null, running: false, file: null, pn: { status: 'idle' }, pnAvail: 'checking' };
 
   G.addStrings({
     fr: { pn_t: "Identifier la plante avec Pl@ntNet (service externe)", pn_p: "GAIA ne connaît pas encore cette plante, ou n'est pas sûr. Avec votre accord, la photo (réduite, sans position GPS) est envoyée à Pl@ntNet, un service scientifique, pour trouver le nom de l'espèce et d'éventuelles anomalies.",
@@ -192,25 +200,45 @@
           pn_res_t: 'Résultat Pl@ntNet (externe)', pn_species: 'Espèce probable', pn_none: "Aucune espèce trouvée.", pn_not_plant: "Pl@ntNet ne reconnaît pas de plante sur cette photo.",
           pn_dis: 'Anomalies possibles', pn_dis_none: "Pl@ntNet ne signale aucune anomalie connue.", pn_dis_unavail: "La recherche d'anomalies n'est pas disponible pour le moment.",
           pn_ext: "Résultat externe, non validé par un agronome GAIA. GAIA ne donne aucun conseil de traitement pour cette plante : demandez l'avis d'un technicien.",
-          pn_err_key: "Pl@ntNet n'est pas configuré sur le serveur (clé API manquante).", pn_err_quota: "Quota Pl@ntNet du jour atteint. Réessayez demain.", pn_err: "Pl@ntNet n'a pas pu répondre.", pn_retry: 'Réessayer', pn_left: 'demandes restantes aujourd’hui' },
+          pn_err_key: "Pl@ntNet n'est pas configuré sur le serveur (clé API manquante) : ajoutez PLANTNET_API_KEY dans backend/.env puis redémarrez le serveur.",
+          pn_err_server: "Le serveur GAIA ne répond pas ({u}). Pl@ntNet passe par ce serveur : lancez-le dans backend/ avec « uvicorn gaia.main:app --port 8765 ».",
+          pn_err_badkey: 'Pl@ntNet a refusé la clé API du serveur : vérifiez PLANTNET_API_KEY.', pn_err_up: 'Le serveur GAIA ne parvient pas à joindre Pl@ntNet (réseau).',
+          pn_err_http: 'Pl@ntNet a répondu par une erreur : {m}', pn_err_img: 'Image refusée : {m}',
+          pn_off_server: 'Identification Pl@ntNet indisponible : le serveur GAIA ne tourne pas. Lancez-le dans backend/ avec « uvicorn gaia.main:app --port 8765 ».',
+          pn_off_key: 'Identification Pl@ntNet indisponible : le serveur GAIA tourne, mais sans clé Pl@ntNet (PLANTNET_API_KEY dans backend/.env).', pn_err_quota: "Quota Pl@ntNet du jour atteint. Réessayez demain.", pn_err: "Pl@ntNet n'a pas pu répondre.", pn_retry: 'Réessayer', pn_left: 'demandes restantes aujourd’hui' },
     ar: { pn_t: 'التعرّف على النبتة عبر Pl@ntNet (خدمة خارجية)', pn_p: 'لا تعرف غايا هذه النبتة بعد أو أنها غير متأكدة. بموافقتك تُرسل الصورة (مصغّرة وبدون موقع GPS) إلى Pl@ntNet، وهي خدمة علمية، لمعرفة اسم النوع وأي أمراض محتملة.',
           pn_send: 'نعم، أرسل الصورة', pn_no: 'لا، شكراً', pn_loading: 'Pl@ntNet يحلّل الصورة…', pn_declined: 'لم تُرسل الصورة. يمكنك تغيير رأيك:', pn_again: 'التعرّف عبر Pl@ntNet',
           pn_res_t: 'نتيجة Pl@ntNet (خارجية)', pn_species: 'النوع المحتمل', pn_none: 'لم يُعثر على أي نوع.', pn_not_plant: 'لا يتعرّف Pl@ntNet على نبتة في هذه الصورة.',
           pn_dis: 'أمراض أو أضرار محتملة', pn_dis_none: 'لا يشير Pl@ntNet إلى أي مرض معروف.', pn_dis_unavail: 'البحث عن الأمراض غير متاح حالياً.',
           pn_ext: 'نتيجة خارجية لم يصادق عليها مهندس فلاحي من غايا. لا تقدّم غايا أي نصيحة علاج لهذه النبتة: استشر تقنياً.',
-          pn_err_key: 'Pl@ntNet غير مُعدّ على الخادم (مفتاح API مفقود).', pn_err_quota: 'بلغتَ حصة Pl@ntNet اليومية. أعد المحاولة غداً.', pn_err: 'تعذّر على Pl@ntNet الردّ.', pn_retry: 'إعادة المحاولة', pn_left: 'طلبات متبقية اليوم' },
+          pn_err_key: 'Pl@ntNet غير مُعدّ على الخادم (مفتاح API مفقود): أضف PLANTNET_API_KEY في backend/.env ثم أعد تشغيل الخادم.',
+          pn_err_server: 'خادم غايا لا يستجيب ({u}). يمرّ Pl@ntNet عبر هذا الخادم: شغّله في backend/ بالأمر «uvicorn gaia.main:app --port 8765».',
+          pn_err_badkey: 'رفض Pl@ntNet مفتاح API الخاص بالخادم: تحقق من PLANTNET_API_KEY.', pn_err_up: 'لا يستطيع خادم غايا الوصول إلى Pl@ntNet (الشبكة).',
+          pn_err_http: 'ردّ Pl@ntNet بخطأ: {m}', pn_err_img: 'الصورة مرفوضة: {m}',
+          pn_off_server: 'التعرف عبر Pl@ntNet غير متاح: خادم غايا لا يعمل. شغّله في backend/ بالأمر «uvicorn gaia.main:app --port 8765».',
+          pn_off_key: 'التعرف عبر Pl@ntNet غير متاح: خادم غايا يعمل لكن دون مفتاح Pl@ntNet (PLANTNET_API_KEY في backend/.env).', pn_err_quota: 'بلغتَ حصة Pl@ntNet اليومية. أعد المحاولة غداً.', pn_err: 'تعذّر على Pl@ntNet الردّ.', pn_retry: 'إعادة المحاولة', pn_left: 'طلبات متبقية اليوم' },
     en: { pn_t: 'Identify the plant with Pl@ntNet (external service)', pn_p: 'GAIA does not know this plant yet, or is unsure. With your consent, the photo (downsized, without GPS data) is sent to Pl@ntNet, a scientific service, to find the species name and possible anomalies.',
           pn_send: 'Yes, send the photo', pn_no: 'No thanks', pn_loading: 'Pl@ntNet is analysing the photo…', pn_declined: 'Photo not sent. You can change your mind:', pn_again: 'Identify with Pl@ntNet',
           pn_res_t: 'Pl@ntNet result (external)', pn_species: 'Likely species', pn_none: 'No species found.', pn_not_plant: 'Pl@ntNet does not recognise a plant in this photo.',
           pn_dis: 'Possible anomalies', pn_dis_none: 'Pl@ntNet reports no known anomaly.', pn_dis_unavail: 'Anomaly search is not available right now.',
           pn_ext: 'External result, not validated by a GAIA agronomist. GAIA gives no treatment advice for this plant: ask a technician.',
-          pn_err_key: 'Pl@ntNet is not configured on the server (API key missing).', pn_err_quota: "Today's Pl@ntNet quota is reached. Try again tomorrow.", pn_err: 'Pl@ntNet could not answer.', pn_retry: 'Retry', pn_left: 'requests left today' },
+          pn_err_key: 'Pl@ntNet is not configured on the server (API key missing): add PLANTNET_API_KEY to backend/.env and restart the server.',
+          pn_err_server: 'The GAIA server is not responding ({u}). Pl@ntNet goes through this server: start it in backend/ with “uvicorn gaia.main:app --port 8765”.',
+          pn_err_badkey: 'Pl@ntNet refused the server’s API key: check PLANTNET_API_KEY.', pn_err_up: 'The GAIA server cannot reach Pl@ntNet (network).',
+          pn_err_http: 'Pl@ntNet answered with an error: {m}', pn_err_img: 'Image refused: {m}',
+          pn_off_server: 'Pl@ntNet identification unavailable: the GAIA server is not running. Start it in backend/ with “uvicorn gaia.main:app --port 8765”.',
+          pn_off_key: 'Pl@ntNet identification unavailable: the GAIA server is running, but without a Pl@ntNet key (PLANTNET_API_KEY in backend/.env).', pn_err_quota: "Today's Pl@ntNet quota is reached. Try again tomorrow.", pn_err: 'Pl@ntNet could not answer.', pn_retry: 'Retry', pn_left: 'requests left today' },
     ja: { pn_t: 'Pl@ntNet（外部サービス）で植物を同定する', pn_p: 'GAIAはこの植物をまだ知らないか、確信が持てません。同意いただければ、写真（縮小・GPS情報なし）を科学サービスPl@ntNetに送り、種名と考えられる異常を調べます。',
           pn_send: 'はい、写真を送る', pn_no: '送らない', pn_loading: 'Pl@ntNetが写真を解析中…', pn_declined: '写真は送信されていません。気が変わったら：', pn_again: 'Pl@ntNetで同定',
           pn_res_t: 'Pl@ntNetの結果（外部）', pn_species: '可能性の高い種', pn_none: '種が見つかりませんでした。', pn_not_plant: 'この写真にPl@ntNetは植物を認識できません。',
           pn_dis: '考えられる異常', pn_dis_none: 'Pl@ntNetは既知の異常を報告していません。', pn_dis_unavail: '現在、異常の検索は利用できません。',
           pn_ext: '外部の結果で、GAIAの農学者による検証はありません。この植物についてGAIAは処置の助言をしません。技術者に相談してください。',
-          pn_err_key: 'サーバーでPl@ntNetが設定されていません（APIキーなし）。', pn_err_quota: '本日のPl@ntNetの上限に達しました。明日もう一度お試しください。', pn_err: 'Pl@ntNetが応答できませんでした。', pn_retry: '再試行', pn_left: '本日の残り回数' }
+          pn_err_key: 'サーバーでPl@ntNetが設定されていません（APIキーなし）。backend/.env に PLANTNET_API_KEY を追加し、サーバーを再起動してください。',
+          pn_err_server: 'GAIAサーバーが応答しません（{u}）。Pl@ntNetはこのサーバーを経由します。backend/ で「uvicorn gaia.main:app --port 8765」を実行してください。',
+          pn_err_badkey: 'Pl@ntNetがサーバーのAPIキーを拒否しました。PLANTNET_API_KEY を確認してください。', pn_err_up: 'GAIAサーバーがPl@ntNetに接続できません（ネットワーク）。',
+          pn_err_http: 'Pl@ntNetがエラーを返しました：{m}', pn_err_img: '画像が受け付けられませんでした：{m}',
+          pn_off_server: 'Pl@ntNetによる同定は利用できません。GAIAサーバーが起動していません。backend/ で「uvicorn gaia.main:app --port 8765」を実行してください。',
+          pn_off_key: 'Pl@ntNetによる同定は利用できません。GAIAサーバーは起動していますが、Pl@ntNetのキーがありません（backend/.env の PLANTNET_API_KEY）。', pn_err_quota: '本日のPl@ntNetの上限に達しました。明日もう一度お試しください。', pn_err: 'Pl@ntNetが応答できませんでした。', pn_retry: '再試行', pn_left: '本日の残り回数' }
   });
 
   /* ---------------------------------------------------------- manifest */
@@ -397,9 +425,18 @@
     ]);
   }
   var TREE_KEYS = ['olive', 'palm', 'citrus', 'kaki', 'tomato', 'potato', 'pepper', 'grape', 'apple', 'peach', 'cherry', 'strawberry', 'corn', 'soybean', 'squash', 'blueberry', 'raspberry', 'other'];
-  function label(x) {
+  function label(x, inResult) {
+    if (x === 'other' && inResult) return t('tr_other_res');
     return TREE_KEYS.indexOf(x) >= 0 ? t('tr_' + x) : String(x).replace(/_/g, ' ');
   }
+  // the plants the loaded model really knows (stage 1 classes), never a fixed list
+  function modelPlants() {
+    var m = state.model && state.model.manifest;
+    if (!m || !m.stage1) return [];
+    return m.stage1.classes.filter(function (c) { return c !== 'other'; }).map(function (c) { return label(c); });
+  }
+  function listJoin(a) { return a.join(G.lang() === 'ja' ? '、' : G.lang() === 'ar' ? '، ' : ', '); }
+  function supportedText() { var l = modelPlants(); return l.length ? t('supported_t').replace('{l}', listJoin(l)) : ''; }
 
   function uploader() {
     var input = el('input', { type: 'file', accept: 'image/*', id: 'f-file', class: 'sr', onchange: function (e) { use(e.target.files[0]); } });
@@ -422,7 +459,7 @@
     box.addEventListener('drop', function (e) { e.preventDefault(); box.classList.remove('over'); if (e.dataTransfer.files[0]) use(e.dataTransfer.files[0]); });
     return el('div', null, [input, cam, box,
       el('p', { class: 'muted small', style: 'margin-top:8px' }, [t('up_privacy')]),
-      el('p', { class: 'muted small' }, [t('supported')])]);
+      el('p', { class: 'muted small' }, [supportedText()])]);
   }
 
   function use(file) {
@@ -475,11 +512,17 @@
     var s1 = r.stage1, out = [];
     out.push(el('div', { class: 'gp-card' }, [
       el('p', { class: 'eyebrow' }, [t('tree')]),
-      el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(s1.top.label)]),
+      el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(s1.top.label, true)]),
       probs(s1.ranked)
     ]));
     if (s1.abstain) { out.push(el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('unsure_t')]), el('p', { style: 'margin-top:6px' }, [t('unsure_p')])])); return out; }
-    if (s1.top.label === 'other') { out.push(el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('other_t')]), el('p', { style: 'margin-top:6px' }, [t('other_p')])])); return out; }
+    if (s1.top.label === 'other') {
+      var close = s1.ranked.filter(function (x) { return x.label !== 'other' && x.p >= 0.2; });
+      out.push(close.length
+        ? el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('hes_t')]), el('p', { style: 'margin-top:6px' }, [t('hes_p').replace('{c}', listJoin(close.map(function (x) { return label(x.label) + ' (' + fmt(x.p * 100) + ' %)'; })))])])
+        : el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('other_t')]), el('p', { style: 'margin-top:6px' }, [t('other_p').replace('{l}', listJoin(modelPlants()))])]));
+      return out;
+    }
     if (!r.stage2) { out.push(G.note('info', t('st_off') + ' — ' + label(s1.top.label))); return out; }
     var s2 = r.stage2;
     if (s2.abstain) { out.push(el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('unsure_t')]), el('p', { style: 'margin-top:6px' }, [t('unsure_p')]), probs(s2.ranked)])); return out; }
@@ -496,11 +539,26 @@
   function probs(ranked) {
     return el('div', { class: 'probs', 'aria-label': t('top') }, ranked.slice(0, 4).map(function (x) {
       var bar = el('i'); bar.style.width = (x.p * 100).toFixed(1) + '%';
-      return el('div', { class: 'prob' }, [el('span', null, [label(x.label)]), el('span', { class: 'bar' }, [bar]), el('span', { class: 'p' }, [fmt(x.p * 100) + ' %'])]);
+      return el('div', { class: 'prob' }, [el('span', null, [label(x.label, true)]), el('span', { class: 'bar' }, [bar]), el('span', { class: 'p' }, [fmt(x.p * 100) + ' %'])]);
     }));
   }
 
   /* ---------------------------------------------------------- Pl@ntNet (optional, consent-based) */
+  // Before offering the button, ask the backend whether it runs and has a Pl@ntNet key (GET /health).
+  // On localhost the backend may run on :8765 (documented) or uvicorn's default :8000: try both.
+  function checkPlantnet() {
+    var ep = G.CONFIG.plantnetEndpoint;
+    if (!ep) { state.pnAvail = 'off'; return; }
+    var local = /^https?:\/\/(127\.0\.0\.1|localhost):\d+\/plantnet$/.test(ep);
+    var cands = local ? [ep, ep.replace(/:\d+\/plantnet$/, ':8000/plantnet')] : [ep];
+    (function next(i) {
+      if (i >= cands.length) { state.pnAvail = 'no_server'; render(); return; }
+      var ctl = window.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;
+      fetch(cands[i].replace(/\/plantnet$/, '/health'), ctl ? { signal: ctl.signal } : {}).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function (h) { clearTimeout(timer); G.CONFIG.plantnetEndpoint = cands[i]; state.pnAvail = h && h.plantnet === false ? 'no_key' : 'ok'; render(); })
+        .catch(function () { clearTimeout(timer); next(i + 1); });
+    }(0));
+  }
   // Only for photos GAIA's own models cannot handle (other / unsure / no model yet). Needs CONFIG.plantnetEndpoint
   // (the backend POST /plantnet: the Pl@ntNet API key stays on the server). The photo is downsized and re-encoded
   // in the browser first, which also drops EXIF (GPS).
@@ -515,12 +573,14 @@
       var fd = new FormData();
       fd.append('image', blob, 'leaf.jpg'); fd.append('organ', 'leaf'); fd.append('lang', G.lang()); fd.append('diseases', 'true');
       fetch(ep, { method: 'POST', body: fd }).then(function (r) {
-        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j, status: r.status }; });
       }).then(function (x) {
         if (x.ok) { state.pn = { status: 'done', data: x.j }; return; }
-        var s = x.j && x.j.detail && x.j.detail.status;
-        state.pn = { status: 'error', error: s === 'no_api_key' ? 'pn_err_key' : s === 'quota_exceeded' ? 'pn_err_quota' : 'pn_err' };
-      }).catch(function () { state.pn = { status: 'error', error: 'pn_err' }; }).then(render);
+        var dt = (x.j && x.j.detail) || {}, s = dt.status;
+        var key = { no_api_key: 'pn_err_key', quota_exceeded: 'pn_err_quota', bad_api_key: 'pn_err_badkey', upstream_unreachable: 'pn_err_up', upstream_error: 'pn_err_http', bad_image: 'pn_err_img' }[s] || 'pn_err_http';
+        state.pn = { status: 'error', error: key, msg: dt.message || ('HTTP ' + x.status) };
+        if (s === 'no_api_key') state.pnAvail = 'no_key';
+      }).catch(function () { state.pn = { status: 'error', error: 'pn_err_server', msg: ep.replace(/\/plantnet$/, '') }; }).then(render);
     }, 'image/jpeg', 0.85);
   }
 
@@ -529,7 +589,10 @@
     var pn = state.pn;
     if (pn.status === 'loading') return el('div', { class: 'gp-card', role: 'status' }, [el('span', { class: 'gp-spin' }), ' ' + t('pn_loading')]);
     if (pn.status === 'declined') return el('p', { class: 'muted small' }, [t('pn_declined') + ' ', el('button', { class: 'gp-btn ghost sm', type: 'button', onclick: function () { state.pn = { status: 'idle' }; render(); } }, [t('pn_again')])]);
-    if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error)), el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);
+    if (state.pnAvail === 'no_server' && pn.status !== 'error') return G.note('info', t('pn_off_server'));
+    if (state.pnAvail === 'no_key') return G.note('info', t('pn_off_key'));
+    if (state.pnAvail === 'checking') return null;
+    if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error).replace('{m}', pn.msg || '').replace('{u}', pn.msg || '')), el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);
     if (pn.status === 'done') {
       var d = pn.data || {}, sp = d.species || [], kids = [el('h3', null, [t('pn_res_t')])];
       if (d.not_a_plant) kids.push(el('p', { style: 'margin-top:6px' }, [t('pn_not_plant')]));
@@ -624,5 +687,6 @@
 
   render();
   checkManifest();
+  checkPlantnet();
   G.onLang(render);
 }());

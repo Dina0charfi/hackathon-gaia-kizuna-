@@ -2,7 +2,9 @@
 
 Verdicts:
   feasible      every mandatory condition is met
-  adapt         a mandatory condition fails, and the record defines an adaptation for it
+  adapt         a mandatory condition fails, and the record defines an adaptation for it;
+                or every mandatory condition is met but the score is below 0.5 (weak fit):
+                the unmet secondary conditions are then what must be adapted
   insufficient  no mandatory condition fails, but at least one could not be evaluated
   rejected      a mandatory condition fails with no adaptation
 The score (weighted share of secondary conditions met) is only returned when
@@ -12,7 +14,8 @@ from __future__ import annotations
 
 from typing import Any
 
-DIMS = ["climate", "terrain", "water", "materials", "org", "reg"]
+DIMS = ["climate", "terrain", "water", "crop", "materials", "org", "reg"]
+WEAK_FIT = 0.5
 ORDER = {"feasible": 0, "adapt": 1, "insufficient": 2, "rejected": 3}
 
 
@@ -50,7 +53,7 @@ def evaluate(record: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
     checks = []
     for c in record["conditions"]:
         v = value(profile, c["field"])
-        checks.append({"field": c["field"], "dim": c["dim"], "hard": bool(c.get("hard")), "value": v,
+        checks.append({"field": c["field"], "dim": "crop" if c["field"] == "crop" else c["dim"], "hard": bool(c.get("hard")), "value": v,
                        "result": test(c, v), "why": c.get("why"), "provisional": bool(c.get("provisional"))})
 
     hard_fails = [x for x in checks if x["hard"] and x["result"] == "fail"]
@@ -79,6 +82,13 @@ def evaluate(record: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
         w = [(r.get("weight", 1)) for r in (c for c in record["conditions"] if not c.get("hard"))]
         met = [wi for wi, x in zip(w, soft) if x["result"] == "pass"]
         score = sum(met) / sum(w) if sum(w) else None
+    soft_fails = [x for x in soft if x["result"] == "fail"]
+    weak = verdict == "feasible" and score is not None and score < WEAK_FIT
+    if weak:
+        verdict = "adapt"
+        adaptation = {"when": [], "text": "The mandatory conditions are met, but most secondary conditions are not ("
+                      + ", ".join(x["field"] for x in soft_fails) + "): adapt the practice on these points, or try it on a small area first."}
+    adapted = set(adaptation["when"]) if adaptation else set()
 
     dims = {}
     for d in DIMS:
@@ -86,11 +96,12 @@ def evaluate(record: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
         if not cs:
             status = "info" if d in ("materials", "org", "reg") else "none"
         elif any(x["result"] == "fail" and x["hard"] for x in cs):
-            status = "fail"
+            hf = [x for x in cs if x["result"] == "fail" and x["hard"]]
+            status = "adapted" if all(x["field"] in adapted for x in hf) else "fail"
         elif any(x["result"] == "unknown" for x in cs):
             status = "unknown"
         elif any(x["result"] == "fail" for x in cs):
-            status = "partial"
+            status = "partial" if any(x["result"] == "pass" for x in cs) else "below"
         else:
             status = "pass"
         dims[d] = status
@@ -98,6 +109,7 @@ def evaluate(record: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
     return {
         "technique": record["id"], "version": record.get("version"), "origin": record["origin"], "name": record["name"],
         "verdict": verdict, "score": score, "adaptation": adaptation["text"] if adaptation else None,
+        "weak_fit": [x["field"] for x in soft_fails] if weak else None,
         "checks": checks, "missing": [x["field"] for x in unknown], "dims": dims,
         "provisional": any(x["provisional"] for x in checks),
         "review_status": record.get("review", {}).get("status", "draft"),

@@ -162,11 +162,8 @@
     wxPending = true;
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + p.lat.toFixed(3) + '&longitude=' + p.lon.toFixed(3) +
       '&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&past_days=92&forecast_days=7&timezone=auto';
-    var ctl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
-    fetch(url, ctl ? { signal: ctl.signal } : undefined).then(function (r) {
-      clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
-    }).then(function (j) {
+    var timer = null;
+    window.GAIA_DNA.forecastJSON(url, 60, 15000).then(function (j) {
       var d = j.daily;
       WX = d.time.map(function (date, i) { return { date: date, rain: d.precipitation_sum[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] }; });
     }).catch(function (e) { clearTimeout(timer); wxErr = e.name === 'AbortError' ? 'timeout' : e.message; })

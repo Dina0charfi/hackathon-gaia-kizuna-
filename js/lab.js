@@ -19,7 +19,7 @@
       s_reco: 'Recommandation', s_expl: 'Explication', s_rec: 'Fiche technique', s_data: 'Données utilisées', s_conf: 'Confiance',
       s_miss: 'Informations manquantes', s_act: 'Actions', s_llm: 'Formulation (modèle de langage)',
       q1: 'Quelles techniques japonaises pourraient marcher ici ?', q2: 'Comment adapter les jessour à cette parcelle ?', q3: "Quelles sont les contraintes en eau ?",
-      q4: "L'agrivoltaïsme peut-il convenir ici ?", q5: 'Pourquoi GAIA a-t-il écarté les terrasses japonaises ?', q6: 'Explique la recommandation en arabe.', q7: 'Quelles informations manquent ?',
+      q4: "L'agrivoltaïsme peut-il convenir ici ?", q5: 'Pourquoi GAIA a-t-il écarté les terrasses japonaises ?', q6: 'Explique la recommandation en arabe.', q7: 'Quelles informations manquent ?', q0: 'Comment gagner plus avec cette parcelle ?',
       k_rain: 'Pluie', k_slope: 'Pente', k_water: 'Eau', k_crop: 'Culture', k_ghi: 'Soleil',
       insufficient: 'Preuves insuffisantes', insufficient_p: "Je n'ai pas de fiche ni de donnée qui permette de répondre à cette question sans inventer. Essayez une des questions proposées, ou ajoutez la technique à la bibliothèque.",
       none_missing: 'Aucune information essentielle ne manque.',
@@ -34,7 +34,7 @@
       s_reco: 'التوصية', s_expl: 'الشرح', s_rec: 'البطاقة التقنية', s_data: 'البيانات المستعملة', s_conf: 'درجة الثقة',
       s_miss: 'معلومات ناقصة', s_act: 'الخطوات', s_llm: 'الصياغة (نموذج لغوي)',
       q1: 'ما التقنيات اليابانية التي قد تنجح هنا؟', q2: 'كيف أكيّف الجسور مع هذه القطعة؟', q3: 'ما هي قيود الماء؟',
-      q4: 'هل تناسب الزراعة الضوئية هذه القطعة؟', q5: 'لماذا استبعدت غايا المدرجات اليابانية؟', q6: 'اشرح التوصية بالعربية.', q7: 'ما المعلومات الناقصة؟',
+      q4: 'هل تناسب الزراعة الضوئية هذه القطعة؟', q5: 'لماذا استبعدت غايا المدرجات اليابانية؟', q6: 'اشرح التوصية بالعربية.', q7: 'ما المعلومات الناقصة؟', q0: 'كيف أربح أكثر من هذه القطعة؟',
       k_rain: 'الأمطار', k_slope: 'الانحدار', k_water: 'الماء', k_crop: 'الزراعة', k_ghi: 'الشمس',
       insufficient: 'أدلة غير كافية', insufficient_p: 'لا توجد بطاقة ولا بيانات تسمح بالإجابة عن هذا السؤال دون اختلاق. جرّب أحد الأسئلة المقترحة.',
       none_missing: 'لا تنقص أي معلومة أساسية.',
@@ -49,7 +49,7 @@
       s_reco: 'Recommendation', s_expl: 'Explanation', s_rec: 'Technical record', s_data: 'Data used', s_conf: 'Confidence',
       s_miss: 'Missing information', s_act: 'Actions', s_llm: 'Wording (language model)',
       q1: 'Which Japanese practices could work here?', q2: 'How can jessour be adapted to this plot?', q3: 'What are the water constraints?',
-      q4: 'Could agrivoltaics fit here?', q5: 'Why did GAIA rule out the Japanese terraces?', q6: 'Explain the recommendation in Arabic.', q7: 'What information is missing?',
+      q4: 'Could agrivoltaics fit here?', q5: 'Why did GAIA rule out the Japanese terraces?', q6: 'Explain the recommendation in Arabic.', q7: 'What information is missing?', q0: 'How can I earn more from this plot?',
       k_rain: 'Rainfall', k_slope: 'Slope', k_water: 'Water', k_crop: 'Crop', k_ghi: 'Sun',
       insufficient: 'Not enough evidence', insufficient_p: 'I have no record or data that lets me answer this question without inventing. Try one of the suggested questions, or add the practice to the library.',
       none_missing: 'No essential information is missing.',
@@ -64,7 +64,7 @@
       s_reco: '推奨', s_expl: '説明', s_rec: '技術記録', s_data: '使用したデータ', s_conf: '信頼度',
       s_miss: '欠けている情報', s_act: '行動', s_llm: '文章化（言語モデル）',
       q1: 'ここで使えそうな日本の技術は？', q2: 'ジェスールをこの区画に合わせるには？', q3: 'この区画の水の制約は？',
-      q4: '営農型太陽光はここに向いていますか？', q5: 'GAIAはなぜ日本の棚田を除外したのですか？', q6: 'おすすめをアラビア語で説明して。', q7: '足りない情報は？',
+      q4: '営農型太陽光はここに向いていますか？', q5: 'GAIAはなぜ日本の棚田を除外したのですか？', q6: 'おすすめをアラビア語で説明して。', q7: '足りない情報は？', q0: 'この区画でもっと稼ぐには？',
       k_rain: '降水量', k_slope: '傾斜', k_water: '水', k_crop: '作物', k_ghi: '日射',
       insufficient: '根拠不足', insufficient_p: '推測せずにこの質問に答えられる記録やデータがありません。質問の例を試すか、ライブラリに技術を追加してください。',
       none_missing: '欠けている重要な情報はありません。',
@@ -94,6 +94,7 @@
     if (/arabe|arabic|عرب|アラビア/i.test(q)) return { kind: 'arabic' };
     if (/manqu|missing|ناقص|نقص|足りな|不足|欠け/i.test(q)) return { kind: 'missing' };
     if (/pourquoi|why|rejet|écart|ecart|refus|ruled out|لماذا|استبعد|なぜ|どうして|理由|除外/i.test(q)) return { kind: 'why', rec: rec };
+    if (!rec && GOAL.test(q)) return { kind: 'goal', an: an };
     if (an.facets.length) return { kind: 'facet', facets: an.facets, rec: rec, an: an };
     if (/agrivolta|solar sharing|panneau|ضوئي|営農型|ソーラー/i.test(q)) return { kind: 'record', rec: 'jp-solar-sharing' };
     if (/adapt|كيّف|كيف أكيف|تكييف|合わせ|調整/i.test(q) && rec) return { kind: 'record', rec: rec };
@@ -104,8 +105,16 @@
     if (/\b(eau|water|irrigation)\b|ماء|مياه|سقي|\bالري\b|水|灌漑/i.test(q) && !an.parcelTopics.filter(function (k) { return k !== 'water' && k !== 'et0' && k !== 'rain'; }).length) return { kind: 'water' };
     if (an.parcelTopics.length) return { kind: 'facts', an: an };
     if (an.hits.length && an.hits[0].score >= 2) return { kind: 'search', an: an };
+    // a greeting, a test or a one- or two-word message is not off-topic: show the plot overview and what to ask
+    if (an.tokens.length <= 2 || /^\s*(test|hi|hello|hey|salut|bonjour|merci|thanks|مرحبا|سلام|السلام|こんにちは|テスト)\b/i.test(q0)) return { kind: 'overview' };
     return { kind: 'unknown', an: an };
   }
+  // broad goal questions: earn more, produce more, improve the farm, what to do
+  var GOAL = new RegExp(['gain', 'income', 'revenue', 'profit', 'earn', 'money', 'yield', 'productiv', 'improve', 'increase', 'boost', 'make more', 'more from',
+    'what (should|can|could) i do', 'advice', 'help me', 'grow more', 'better harvest',
+    'revenu', 'gagner', 'b[eé]n[eé]fice', 'rendement', 'am[eé]liorer', 'augmenter', 'rentab', 'que (dois|puis|peux)[- ]je faire', 'produire plus', 'récolte', 'recolte',
+    'ربح', 'أرباح', 'ارباح', 'دخل', 'مدخول', 'مردود', 'إنتاج', 'انتاج', 'تحسين', 'زيادة', 'زياده', 'ماذا (أفعل|افعل)', 'نصيحة', 'نصيحه',
+    '収入', '収益', '利益', '収量', '増や', '改善', '儲', '何をすれば', '生産性', 'もうけ'].join('|'), 'i');
 
   /* ---------------------------------------------------------- evidence helpers */
   // W(L, { fr, ar, en, ja }): the answer's wording in its language (French when missing)
@@ -144,6 +153,18 @@
     var paths = {};
     results.forEach(function (r) { r.unknown.forEach(function (x) { paths[x.cond.field] = 1; }); });
     return Object.keys(paths).map(function (p) { return noteOf(dna, p); });
+  }
+
+  // annual rain, ET0 and the crop's net irrigation need (FAO-56 Kc, USDA-SCS effective rain), from the plot's monthly climate
+  function waterBalance(dna) {
+    var rain = D.value(dna, 'climate.rain_mm'), et0 = D.value(dna, 'climate.et0_mm');
+    if (rain === null || et0 === null) return null;
+    var out = { rain: rain, et0: et0, irn: null }, N = window.GAIA_NEXUS, CM = dna.climateMonthly, crop = D.value(dna, 'crop');
+    if (N && CM && CM.et0 && CM.rain && crop && N.CROPS[crop] && N.CROPS[crop].kc) {
+      var r = N.compute({ et0: CM.et0, rain: CM.rain, kc: N.CROPS[crop].kc, months: N.CROPS[crop].months, ea: 1, pump_eff: 0.45, pr: 0.75 });
+      if (r.totals && typeof r.totals.irn === 'number') out.irn = r.totals.irn;
+    }
+    return out;
   }
 
   /* ---------------------------------------------------------- answer builders */
@@ -333,6 +354,75 @@
       a.data = dataUsed(dna, top3[0].checks.map(function (x) { return x.cond.field; }));
     }
 
+    else if (intent.kind === 'goal' || intent.kind === 'overview') {
+      var mm = W(L, { fr: ' mm/an', ar: ' mm/سنة', en: ' mm/yr', ja: ' mm/年' }), dot = L === 'ja' ? '。' : '.';
+      var ok = all.filter(function (r) { return r.verdict === 'feasible' || r.verdict === 'adapt'; });
+      var byFam = function (f) { return ok.filter(function (r) { return r.record.families.indexOf(f) !== -1; })[0] || null; };
+      var lbl = function (r) { return nameOf(r.record, L) + ' (' + verdictText(r.verdict, L) + (r.score !== null ? ', ' + fmt(r.score * 100) + ' %' : '') + ')'; };
+      var wb = waterBalance(dna);
+      var crop = D.value(dna, 'crop'), src2 = D.value(dna, 'water.source'), pump = D.value(dna, 'energy.pump'), ghi2 = D.value(dna, 'solar.ghi_kwh'), area = D.value(dna, 'area_ha');
+      var waterRec = ok.filter(function (r) { return r.record.families.indexOf('water') !== -1 && r.verdict === 'feasible'; })[0] || byFam('water');
+      var mulch = ok.filter(function (r) { return r.record.id === 'x-mulch'; })[0] || null;
+      var layers = ok.filter(function (r) { return r.record.id === 'jp-satoyama-layers'; })[0] || null;
+      var solarR = all.filter(function (r) { return r.record.id === 'jp-solar-sharing'; })[0];
+
+      if (intent.kind === 'goal') {
+        a.title = W(L, { fr: 'Comment tirer plus de cette parcelle', ar: 'كيف تحصل على مردود أكبر من هذه القطعة', en: 'How to get more from this plot', ja: 'この区画からもっと収益を上げるには' });
+        var levers = [];
+        if (waterRec) levers.push(W(L, { fr: 'capter plus d’eau de pluie avec ', ar: 'جمع مزيد من مياه الأمطار بـ', en: 'capture more rainwater with ', ja: '雨水をより多く集める（' }) + nameOf(waterRec.record, L) + (L === 'ja' ? '）' : ''));
+        if (mulch) levers.push(W(L, { fr: 'réduire l’évaporation par le paillage', ar: 'تقليل التبخر بالتغطية', en: 'cut evaporation with mulch', ja: 'マルチングで蒸発を減らす' }));
+        if (pump && pump !== 'solar' && ghi2 !== null && ghi2 >= 4.5) levers.push(W(L, { fr: 'remplacer le diesel par le solaire, dans un quota d’eau', ar: 'استبدال الديزل بالطاقة الشمسية ضمن حصة ماء', en: 'replace diesel with solar, within a water quota', ja: '水の割当量の範囲でディーゼルを太陽光に置き換える' }));
+        if (layers) levers.push(W(L, { fr: 'diversifier avec des cultures en étages', ar: 'التنويع بزراعات متعددة الطبقات', en: 'diversify with layered crops', ja: '多層の作付けで多角化する' }));
+        a.reco = levers.length
+          ? W(L, { fr: 'Sur cette parcelle, les leviers appuyés par les données sont : ', ar: 'في هذه القطعة، الروافع المدعومة بالبيانات هي: ', en: 'On this plot, the levers backed by the data are: ', ja: 'この区画でデータに裏付けられた手段は：' }) + levers.join(L === 'ja' ? '、' : L === 'ar' ? '، ' : ', ') + dot
+          : W(L, { fr: 'Aucune technique de la bibliothèque ne remplit ses conditions ici : commencez par compléter le profil de la parcelle.', ar: 'لا توجد تقنية في المكتبة تستوفي شروطها هنا: ابدأ بإكمال ملف القطعة.', en: 'No practice in the library meets its conditions here: start by completing the plot profile.', ja: 'ライブラリのどの技術もここでは条件を満たしません。まず区画プロファイルを補ってください。' });
+        // 1. water: the first limit on yield in a dry climate
+        if (wb) {
+          a.expl.push(W(L, { fr: 'Eau, premier facteur limitant : ', ar: 'الماء، العامل المحدِّد الأول: ', en: 'Water is the first limit: ', ja: '最大の制約は水：' }) +
+            W(L, { fr: 'pluie ', ar: 'الأمطار ', en: 'rainfall ', ja: '降水量 ' }) + fmt(wb.rain) + mm + ', ET0 ' + fmt(wb.et0) + mm +
+            (wb.irn !== null ? W(L, { fr: ' ; besoin net non couvert par la pluie pour ', ar: '؛ الحاجة الصافية غير المغطاة بالمطر لـ', en: '; net need not covered by rain for ', ja: '。雨で賄えない正味の必要水量（' }) + E.valueLabel(crop) + (L === 'ja' ? '）：' : S) + fmt(wb.irn) + ' mm ' + W(L, { fr: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ar: '(≈ ' + fmt(wb.irn * 10) + ' م³/هكتار، FAO-56)', en: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ja: '（約' + fmt(wb.irn * 10) + ' m³/ha、FAO-56）' }) : '') + dot);
+          a.expl.push(W(L, { fr: 'Chaque millimètre capté compte : 1 mm sur 1 ha = 10 m³. La pluie qui tombe sur 1 ha ici représente ' + fmt(wb.rain * 10) + ' m³/an.', ar: 'كل مليمتر يُجمع مهم: 1 مم على هكتار واحد = 10 م³. الأمطار على هكتار واحد هنا تعادل ' + fmt(wb.rain * 10) + ' م³ في السنة.', en: 'Every millimetre captured counts: 1 mm on 1 ha = 10 m³. The rain falling on 1 ha here is ' + fmt(wb.rain * 10) + ' m³/yr.', ja: '集めた1 mmが大切です。1 haで1 mm = 10 m³。ここで1 haに降る雨は年' + fmt(wb.rain * 10) + ' m³です。' }));
+        }
+        if (waterRec) a.expl.push(W(L, { fr: 'Collecte de l’eau : ', ar: 'جمع الماء: ', en: 'Water harvesting: ', ja: '集水：' }) + ok.filter(function (r) { return r.record.families.indexOf('water') !== -1; }).slice(0, 3).map(lbl).join(L === 'ja' ? '、' : ', ') + dot);
+        if (mulch) a.expl.push(W(L, { fr: 'Moins de pertes : ', ar: 'خسائر أقل: ', en: 'Fewer losses: ', ja: '損失を減らす：' }) + lbl(mulch) + W(L, { fr: ' — le paillage réduit l’évaporation du sol nu (FAO-56, chap. 11).', ar: ' — التغطية تقلل تبخر التربة العارية (FAO-56، الفصل 11).', en: ' — mulch reduces bare-soil evaporation (FAO-56, ch. 11).', ja: ' — マルチングは裸地からの蒸発を減らします（FAO-56 第11章）。' }));
+        // 2. energy: the cost line a solar pump can remove
+        if (pump === 'diesel' || pump === 'grid') {
+          a.expl.push(W(L, { fr: 'Énergie : pompage déclaré ', ar: 'الطاقة: الضخ المصرّح به ', en: 'Energy: declared pumping ', ja: 'エネルギー：申告された揚水 ' }) + E.valueLabel(pump) + (ghi2 !== null ? W(L, { fr: ', soleil ' + fmt(ghi2, 1) + ' kWh/m²/j', ar: '، الإشعاع ' + fmt(ghi2, 1) + ' kWh/m²/يوم', en: ', sun ' + fmt(ghi2, 1) + ' kWh/m²/day', ja: '、日射 ' + fmt(ghi2, 1) + ' kWh/m²/日' }) : '') +
+            W(L, { fr: '. Une pompe solaire dimensionnée sur le quota d’eau de la culture supprime la facture de carburant sans pousser au surpompage (page Eau & énergie).', ar: '. مضخة شمسية محسوبة على حصة ماء الزراعة تلغي فاتورة الوقود دون تشجيع الإفراط في الضخ (صفحة الماء والطاقة).', en: '. A solar pump sized to the crop’s water quota removes the fuel bill without encouraging over-pumping (Water & energy page).', ja: '。作物の水割当量に合わせた太陽光ポンプなら、過剰揚水を招かずに燃料費をなくせます（「水とエネルギー」ページ）。' }));
+          if (src2 === 'rainfed') a.expl.push(W(L, { fr: 'Attention : la parcelle est déclarée pluviale ; sans puits ni réseau, une pompe n’a pas d’eau à pomper. Vérifiez ces deux champs.', ar: 'تنبيه: القطعة مصرّح بها بعلية؛ بلا بئر ولا شبكة لا تجد المضخة ماءً. تحقق من هذين الحقلين.', en: 'Note: the plot is declared rainfed; without a well or network a pump has no water to lift. Check these two fields.', ja: '注意：区画は天水と申告されています。井戸も灌漑網もなければポンプでくみ上げる水がありません。この2項目を確認してください。' }));
+        }
+        if (solarR && solarR.verdict !== 'rejected') a.expl.push(W(L, { fr: 'Revenu en plus : ', ar: 'دخل إضافي: ', en: 'Extra income: ', ja: '追加の収入：' }) + lbl(solarR) + W(L, { fr: ' — l’électricité des panneaux au-dessus de la culture, voir Agrivoltaïsme.', ar: ' — كهرباء الألواح فوق الزراعة، انظر صفحة الزراعة الضوئية.', en: ' — electricity from panels above the crop, see Agrivoltaics.', ja: ' — 作物の上のパネルによる電力。「営農型太陽光」を参照。' }));
+        if (layers) a.expl.push(W(L, { fr: 'Diversifier : ', ar: 'التنويع: ', en: 'Diversify: ', ja: '多角化：' }) + lbl(layers) + W(L, { fr: ' — plusieurs productions sur la même surface répartissent le risque d’une mauvaise année.', ar: ' — عدة منتوجات على نفس المساحة توزّع خطر السنة السيئة.', en: ' — several products on the same area spread the risk of a bad year.', ja: ' — 同じ面積で複数の生産を行うと、不作の年のリスクが分散されます。' }));
+        // 3. business model: no price is invented
+        a.expl.push(W(L, { fr: 'Argent : la page Modèle économique calcule si un kit solaire payé à l’usage (PAYG) se rembourse par les économies de carburant, avec vos prix ; GAIA n’invente aucun prix ni rendement.', ar: 'المال: صفحة النموذج الاقتصادي تحسب إن كان طقم شمسي بالدفع حسب الاستعمال يسدَّد من توفير الوقود، بأسعارك أنت؛ غايا لا تخترع أي سعر أو مردود.', en: 'Money: the Business model page calculates whether a pay-as-you-go solar kit pays for itself from fuel savings, with your prices; GAIA does not invent any price or yield.', ja: 'お金：「ビジネスモデル」ページでは、従量課金（PAYG）の太陽光キットが燃料費の節約で回収できるかを、あなたの価格で計算します。GAIAは価格や収量を推測しません。' }));
+        var demo = ['crop', 'area_ha', 'water.source', 'energy.pump'].filter(function (p) { var f = D.fieldAt(dna, p); return f && f.source === 'Valeur de démonstration'; });
+        if (demo.length) a.expl.push(W(L, { fr: 'Valeurs de démonstration à remplacer : ', ar: 'قيم تجريبية يجب تعويضها: ', en: 'Demo values to replace: ', ja: '置き換えるべきデモ値：' }) + demo.map(G.fieldLabel).join(', ') + dot);
+        a.actions = [];
+        if (waterRec && waterRec.record.actions[0]) a.actions.push(nameOf(waterRec.record, L) + S + waterRec.record.actions[0]);
+        a.actions = a.actions.concat(W(L, {
+          fr: ['Calculer le besoin en eau mensuel et le quota dans Eau & énergie.', 'Saisir votre facture de carburant et le prix d’un kit dans Modèle économique.'],
+          ar: ['احسب الحاجة الشهرية للماء والحصة في صفحة الماء والطاقة.', 'أدخل فاتورة الوقود وسعر الطقم في صفحة النموذج الاقتصادي.'],
+          en: ['Calculate the monthly water need and quota in Water & energy.', 'Enter your fuel bill and a kit price in Business model.'],
+          ja: ['「水とエネルギー」で月ごとの必要水量と割当量を計算する。', '「ビジネスモデル」に燃料費とキット価格を入力する。']
+        }));
+        a.records = [waterRec, mulch, solarR && solarR.verdict !== 'rejected' ? solarR : null, layers].filter(Boolean).map(function (r) { return r.record; });
+        a.results = [waterRec, mulch, layers].filter(Boolean);
+        a.data = dataUsed(dna, ['climate.rain_mm', 'climate.et0_mm', 'terrain.slope_pct', 'solar.ghi_kwh', 'crop', 'water.source', 'energy.pump']);
+      } else {
+        var count = function (v) { return all.filter(function (r) { return r.verdict === v; }).length; };
+        a.title = W(L, { fr: 'Votre parcelle en bref', ar: 'قطعتك باختصار', en: 'Your plot at a glance', ja: '区画の概要' });
+        a.reco = ok.length ? W(L, { fr: 'Technique la mieux adaptée : ', ar: 'أنسب تقنية: ', en: 'Best-suited practice: ', ja: '最も適した技術：' }) + lbl(ok[0]) + dot
+          : W(L, { fr: 'Aucune technique retenue pour l’instant.', ar: 'لا توجد تقنية مناسبة حالياً.', en: 'No practice retained for now.', ja: '現時点で該当する技術はありません。' });
+        a.expl.push(W(L, { fr: count('feasible') + ' faisables, ' + count('adapt') + ' avec adaptation, ' + count('rejected') + ' non recommandées.', ar: count('feasible') + ' ممكنة، ' + count('adapt') + ' مع التكييف، ' + count('rejected') + ' غير موصى بها.', en: count('feasible') + ' feasible, ' + count('adapt') + ' with adaptation, ' + count('rejected') + ' not recommended.', ja: '実施可能 ' + count('feasible') + '、調整すれば可能 ' + count('adapt') + '、推奨しない ' + count('rejected') + '。' }));
+        if (wb) a.expl.push(W(L, { fr: 'Pluie ', ar: 'الأمطار ', en: 'Rainfall ', ja: '降水量 ' }) + fmt(wb.rain) + mm + ', ET0 ' + fmt(wb.et0) + mm + (wb.irn !== null ? W(L, { fr: ', besoin net non couvert ', ar: '، حاجة صافية غير مغطاة ', en: ', net need not covered ', ja: '、雨で賄えない正味の必要水量 ' }) + fmt(wb.irn) + ' mm' : '') + dot);
+        a.expl.push(W(L, { fr: 'Vous pouvez demander par exemple : « Comment gagner plus avec cette parcelle ? », « Quelles sont les contraintes en eau ? », « Combien coûtent les jessour ? », « Quelles informations manquent ? »', ar: 'يمكنك أن تسأل مثلاً: «كيف أربح أكثر من هذه القطعة؟»، «ما هي قيود الماء؟»، «كم تكلف الجسور؟»، «ما المعلومات الناقصة؟»', en: 'You can ask, for example: “How can I earn more from this plot?”, “What are the water constraints?”, “How much do jessour cost?”, “What information is missing?”', ja: '例えば次のように質問できます：「この区画でもっと稼ぐには？」「水の制約は？」「ジェスールの費用は？」「足りない情報は？」' }));
+        a.records = ok.slice(0, 3).map(function (r) { return r.record; });
+        a.results = ok.slice(0, 3);
+        a.actions = ok.length ? ok[0].record.actions.slice() : [];
+        a.data = dataUsed(dna, ['climate.rain_mm', 'climate.et0_mm', 'terrain.slope_pct', 'water.source', 'crop']);
+      }
+    }
+
     else return insufficient(L);
 
     var res = a.results || [];
@@ -346,10 +436,10 @@
       title: W(L, { fr: 'Preuves insuffisantes', ar: 'أدلة غير كافية', en: 'Not enough evidence', ja: '根拠不足' }),
       reco: W(L, { fr: 'GAIA ne peut pas répondre sans inventer.', ar: 'لا أستطيع الإجابة دون اختلاق.', en: 'GAIA cannot answer without inventing.', ja: 'GAIAは推測で答えることはしません。' }),
       expl: [W(L, {
-        fr: "Aucune fiche ni donnée de la parcelle ne couvre cette question. GAIA sait répondre sur : le sol, la pluie, la pente, le soleil, le pompage, la surface, et le coût, les risques, les acteurs ou les étapes d'une technique (jessour, tabia, meskat, oasis, citerne, paillage, tanada, solar sharing…).",
-        ar: 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. يمكنك السؤال عن: التربة، الأمطار، الانحدار، الشمس، الضخ، تكلفة أو مخاطر تقنية (الجسور، الطابية، المسقاة، الواحة…).',
-        en: 'No record and no plot data cover this question. GAIA can answer about: soil, rainfall, slope, sun, pumping, area, and the cost, risks, actors or steps of a practice (jessour, tabia, meskat, oasis, cistern, mulching, tanada, solar sharing…).',
-        ja: 'この質問に対応する記録も区画データもありません。GAIAが答えられるのは、土壌・降水量・傾斜・日射・揚水・面積と、各技術（ジェスール、タビア、メスカット、オアシス、貯水槽、マルチング、棚田、ソーラーシェアリングなど）のコスト・リスク・関係者・手順です。'
+        fr: "Aucune fiche ni donnée de la parcelle ne couvre cette question. GAIA sait répondre sur : comment gagner plus ou quoi faire sur la parcelle, le sol, la pluie, la pente, le soleil, le pompage, la surface, et le coût, les risques, les acteurs ou les étapes d'une technique (jessour, tabia, meskat, oasis, citerne, paillage, tanada, solar sharing…).",
+        ar: 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. يمكنك السؤال عن: كيف تربح أكثر أو ماذا تفعل في القطعة، التربة، الأمطار، الانحدار، الشمس، الضخ، تكلفة أو مخاطر تقنية (الجسور، الطابية، المسقاة، الواحة…).',
+        en: 'No record and no plot data cover this question. GAIA can answer about: how to earn more or what to do on the plot, soil, rainfall, slope, sun, pumping, area, and the cost, risks, actors or steps of a practice (jessour, tabia, meskat, oasis, cistern, mulching, tanada, solar sharing…).',
+        ja: 'この質問に対応する記録も区画データもありません。GAIAが答えられるのは、収益を上げる方法や区画でやるべきこと、土壌・降水量・傾斜・日射・揚水・面積と、各技術（ジェスール、タビア、メスカット、オアシス、貯水槽、マルチング、棚田、ソーラーシェアリングなど）のコスト・リスク・関係者・手順です。'
       })],
       records: [], data: [], actions: [], missing: [], conf: { level: 'low', why: W(L, { fr: 'aucune preuve', ar: 'لا توجد أدلة', en: 'no evidence', ja: '根拠なし' }) }, lang: L, insufficient: true };
   }
@@ -438,7 +528,7 @@
         el('a', { class: 'small', href: 'land.html', style: 'display:inline-block;margin-top:10px' }, [t('nav_land') + ' →'])
       ]),
       el('div', { class: 'gp-card' }, [el('p', { class: 'eyebrow' }, [t('ask')]),
-        el('div', { class: 'qs', style: 'margin-top:8px' }, ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'].map(function (k) {
+        el('div', { class: 'qs', style: 'margin-top:8px' }, ['q0', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'].map(function (k) {
           return el('button', { type: 'button', onclick: function () { ask(t(k)); } }, [t(k)]);
         }))])
     ]);
