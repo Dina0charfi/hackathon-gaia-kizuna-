@@ -201,10 +201,10 @@
           pn_dis: 'Anomalies possibles', pn_dis_none: "Pl@ntNet ne signale aucune anomalie connue.", pn_dis_unavail: "La recherche d'anomalies n'est pas disponible pour le moment.",
           pn_ext: "Résultat externe, non validé par un agronome GAIA. GAIA ne donne aucun conseil de traitement pour cette plante : demandez l'avis d'un technicien.",
           pn_err_key: "Pl@ntNet n'est pas configuré sur le serveur (clé API manquante) : ajoutez PLANTNET_API_KEY dans backend/.env puis redémarrez le serveur.",
-          pn_err_server: "Le serveur GAIA ne répond pas ({u}). Pl@ntNet passe par ce serveur : lancez-le dans backend/ avec « uvicorn gaia.main:app --port 8765 ».",
+          pn_err_server: "Le serveur GAIA ne répond pas ({u}). Pl@ntNet passe par ce serveur (la clé reste côté serveur) : dans backend/, lancez « uvicorn gaia.main:app --reload » (port 8000 ; 8765 marche aussi), puis Réessayer.",
           pn_err_badkey: 'Pl@ntNet a refusé la clé API du serveur : vérifiez PLANTNET_API_KEY.', pn_err_up: 'Le serveur GAIA ne parvient pas à joindre Pl@ntNet (réseau).',
           pn_err_http: 'Pl@ntNet a répondu par une erreur : {m}', pn_err_img: 'Image refusée : {m}',
-          pn_off_server: 'Identification Pl@ntNet indisponible : le serveur GAIA ne tourne pas. Lancez-le dans backend/ avec « uvicorn gaia.main:app --port 8765 ».',
+          pn_off_server: 'Identification Pl@ntNet indisponible : le serveur GAIA ne tourne pas (cherché sur les ports 8000 et 8765). Tout le reste de la page marche sans lui. Pour Pl@ntNet : dans backend/, lancez « uvicorn gaia.main:app --reload », puis Vérifier à nouveau.', pn_recheck: 'Vérifier à nouveau',
           pn_off_key: 'Identification Pl@ntNet indisponible : le serveur GAIA tourne, mais sans clé Pl@ntNet (PLANTNET_API_KEY dans backend/.env).', pn_err_quota: "Quota Pl@ntNet du jour atteint. Réessayez demain.", pn_err: "Pl@ntNet n'a pas pu répondre.", pn_retry: 'Réessayer', pn_left: 'demandes restantes aujourd’hui' },
     ar: { pn_t: 'التعرّف على النبتة عبر Pl@ntNet (خدمة خارجية)', pn_p: 'لا تعرف غايا هذه النبتة بعد أو أنها غير متأكدة. بموافقتك تُرسل الصورة (مصغّرة وبدون موقع GPS) إلى Pl@ntNet، وهي خدمة علمية، لمعرفة اسم النوع وأي أمراض محتملة.',
           pn_send: 'نعم، أرسل الصورة', pn_no: 'لا، شكراً', pn_loading: 'Pl@ntNet يحلّل الصورة…', pn_declined: 'لم تُرسل الصورة. يمكنك تغيير رأيك:', pn_again: 'التعرّف عبر Pl@ntNet',
@@ -212,10 +212,10 @@
           pn_dis: 'أمراض أو أضرار محتملة', pn_dis_none: 'لا يشير Pl@ntNet إلى أي مرض معروف.', pn_dis_unavail: 'البحث عن الأمراض غير متاح حالياً.',
           pn_ext: 'نتيجة خارجية لم يصادق عليها مهندس فلاحي من غايا. لا تقدّم غايا أي نصيحة علاج لهذه النبتة: استشر تقنياً.',
           pn_err_key: 'Pl@ntNet غير مُعدّ على الخادم (مفتاح API مفقود): أضف PLANTNET_API_KEY في backend/.env ثم أعد تشغيل الخادم.',
-          pn_err_server: 'خادم غايا لا يستجيب ({u}). يمرّ Pl@ntNet عبر هذا الخادم: شغّله في backend/ بالأمر «uvicorn gaia.main:app --port 8765».',
+          pn_err_server: 'خادم غايا لا يستجيب ({u}). يمرّ Pl@ntNet عبر هذا الخادم (المفتاح يبقى فيه): في backend/ شغّل «uvicorn gaia.main:app --reload» (المنفذ 8000؛ 8765 يعمل أيضاً) ثم أعد المحاولة.',
           pn_err_badkey: 'رفض Pl@ntNet مفتاح API الخاص بالخادم: تحقق من PLANTNET_API_KEY.', pn_err_up: 'لا يستطيع خادم غايا الوصول إلى Pl@ntNet (الشبكة).',
           pn_err_http: 'ردّ Pl@ntNet بخطأ: {m}', pn_err_img: 'الصورة مرفوضة: {m}',
-          pn_off_server: 'التعرف عبر Pl@ntNet غير متاح: خادم غايا لا يعمل. شغّله في backend/ بالأمر «uvicorn gaia.main:app --port 8765».',
+          pn_off_server: 'التعرف عبر Pl@ntNet غير متاح: خادم غايا لا يعمل (بحثنا في المنفذين 8000 و8765). بقية الصفحة تعمل دونه. من أجل Pl@ntNet: في backend/ شغّل «uvicorn gaia.main:app --reload» ثم اضغط «تحقق مجدداً».', pn_recheck: 'تحقق مجدداً',
           pn_off_key: 'التعرف عبر Pl@ntNet غير متاح: خادم غايا يعمل لكن دون مفتاح Pl@ntNet (PLANTNET_API_KEY في backend/.env).', pn_err_quota: 'بلغتَ حصة Pl@ntNet اليومية. أعد المحاولة غداً.', pn_err: 'تعذّر على Pl@ntNet الردّ.', pn_retry: 'إعادة المحاولة', pn_left: 'طلبات متبقية اليوم' },
     en: { pn_t: 'Identify the plant with Pl@ntNet (external service)', pn_p: 'GAIA does not know this plant yet, or is unsure. With your consent, the photo (downsized, without GPS data) is sent to Pl@ntNet, a scientific service, to find the species name and possible anomalies.',
           pn_send: 'Yes, send the photo', pn_no: 'No thanks', pn_loading: 'Pl@ntNet is analysing the photo…', pn_declined: 'Photo not sent. You can change your mind:', pn_again: 'Identify with Pl@ntNet',
@@ -223,10 +223,10 @@
           pn_dis: 'Possible anomalies', pn_dis_none: 'Pl@ntNet reports no known anomaly.', pn_dis_unavail: 'Anomaly search is not available right now.',
           pn_ext: 'External result, not validated by a GAIA agronomist. GAIA gives no treatment advice for this plant: ask a technician.',
           pn_err_key: 'Pl@ntNet is not configured on the server (API key missing): add PLANTNET_API_KEY to backend/.env and restart the server.',
-          pn_err_server: 'The GAIA server is not responding ({u}). Pl@ntNet goes through this server: start it in backend/ with “uvicorn gaia.main:app --port 8765”.',
+          pn_err_server: 'The GAIA server is not responding ({u}). Pl@ntNet goes through this server (the key stays there): in backend/, run “uvicorn gaia.main:app --reload” (port 8000; 8765 also works), then Retry.',
           pn_err_badkey: 'Pl@ntNet refused the server’s API key: check PLANTNET_API_KEY.', pn_err_up: 'The GAIA server cannot reach Pl@ntNet (network).',
           pn_err_http: 'Pl@ntNet answered with an error: {m}', pn_err_img: 'Image refused: {m}',
-          pn_off_server: 'Pl@ntNet identification unavailable: the GAIA server is not running. Start it in backend/ with “uvicorn gaia.main:app --port 8765”.',
+          pn_off_server: 'Pl@ntNet identification unavailable: the GAIA server is not running (looked on ports 8000 and 8765). The rest of this page works without it. For Pl@ntNet: in backend/, run “uvicorn gaia.main:app --reload”, then Check again.', pn_recheck: 'Check again',
           pn_off_key: 'Pl@ntNet identification unavailable: the GAIA server is running, but without a Pl@ntNet key (PLANTNET_API_KEY in backend/.env).', pn_err_quota: "Today's Pl@ntNet quota is reached. Try again tomorrow.", pn_err: 'Pl@ntNet could not answer.', pn_retry: 'Retry', pn_left: 'requests left today' },
     ja: { pn_t: 'Pl@ntNet（外部サービス）で植物を同定する', pn_p: 'GAIAはこの植物をまだ知らないか、確信が持てません。同意いただければ、写真（縮小・GPS情報なし）を科学サービスPl@ntNetに送り、種名と考えられる異常を調べます。',
           pn_send: 'はい、写真を送る', pn_no: '送らない', pn_loading: 'Pl@ntNetが写真を解析中…', pn_declined: '写真は送信されていません。気が変わったら：', pn_again: 'Pl@ntNetで同定',
@@ -234,10 +234,10 @@
           pn_dis: '考えられる異常', pn_dis_none: 'Pl@ntNetは既知の異常を報告していません。', pn_dis_unavail: '現在、異常の検索は利用できません。',
           pn_ext: '外部の結果で、GAIAの農学者による検証はありません。この植物についてGAIAは処置の助言をしません。技術者に相談してください。',
           pn_err_key: 'サーバーでPl@ntNetが設定されていません（APIキーなし）。backend/.env に PLANTNET_API_KEY を追加し、サーバーを再起動してください。',
-          pn_err_server: 'GAIAサーバーが応答しません（{u}）。Pl@ntNetはこのサーバーを経由します。backend/ で「uvicorn gaia.main:app --port 8765」を実行してください。',
+          pn_err_server: 'GAIAサーバーが応答しません（{u}）。Pl@ntNetはこのサーバーを経由します（キーはサーバー側に保管）。backend/ で「uvicorn gaia.main:app --reload」を実行し（ポート8000、8765も可）、再試行してください。',
           pn_err_badkey: 'Pl@ntNetがサーバーのAPIキーを拒否しました。PLANTNET_API_KEY を確認してください。', pn_err_up: 'GAIAサーバーがPl@ntNetに接続できません（ネットワーク）。',
           pn_err_http: 'Pl@ntNetがエラーを返しました：{m}', pn_err_img: '画像が受け付けられませんでした：{m}',
-          pn_off_server: 'Pl@ntNetによる同定は利用できません。GAIAサーバーが起動していません。backend/ で「uvicorn gaia.main:app --port 8765」を実行してください。',
+          pn_off_server: 'Pl@ntNetによる同定は利用できません。GAIAサーバーが起動していません（ポート8000と8765を確認）。このページの他の機能はサーバーなしで動きます。Pl@ntNetを使うには backend/ で「uvicorn gaia.main:app --reload」を実行し、「再確認」を押してください。', pn_recheck: '再確認',
           pn_off_key: 'Pl@ntNetによる同定は利用できません。GAIAサーバーは起動していますが、Pl@ntNetのキーがありません（backend/.env の PLANTNET_API_KEY）。', pn_err_quota: '本日のPl@ntNetの上限に達しました。明日もう一度お試しください。', pn_err: 'Pl@ntNetが応答できませんでした。', pn_retry: '再試行', pn_left: '本日の残り回数' }
   });
 
@@ -546,11 +546,12 @@
   /* ---------------------------------------------------------- Pl@ntNet (optional, consent-based) */
   // Before offering the button, ask the backend whether it runs and has a Pl@ntNet key (GET /health).
   // On localhost the backend may run on :8765 (documented) or uvicorn's default :8000: try both.
+  var PN_DEFAULT = G.CONFIG.plantnetEndpoint;
   function checkPlantnet() {
     var ep = G.CONFIG.plantnetEndpoint;
     if (!ep) { state.pnAvail = 'off'; return; }
     var local = /^https?:\/\/(127\.0\.0\.1|localhost):\d+\/plantnet$/.test(ep);
-    var cands = local ? [ep, ep.replace(/:\d+\/plantnet$/, ':8000/plantnet')] : [ep];
+    var cands = local ? [ep.replace(/:\d+\/plantnet$/, ':8000/plantnet'), ep.replace(/:\d+\/plantnet$/, ':8765/plantnet')] : [ep];
     (function next(i) {
       if (i >= cands.length) { state.pnAvail = 'no_server'; render(); return; }
       var ctl = window.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;
@@ -589,7 +590,8 @@
     var pn = state.pn;
     if (pn.status === 'loading') return el('div', { class: 'gp-card', role: 'status' }, [el('span', { class: 'gp-spin' }), ' ' + t('pn_loading')]);
     if (pn.status === 'declined') return el('p', { class: 'muted small' }, [t('pn_declined') + ' ', el('button', { class: 'gp-btn ghost sm', type: 'button', onclick: function () { state.pn = { status: 'idle' }; render(); } }, [t('pn_again')])]);
-    if (state.pnAvail === 'no_server' && pn.status !== 'error') return G.note('info', t('pn_off_server'));
+    if (state.pnAvail === 'no_server' && pn.status !== 'error') return el('div', null, [G.note('info', t('pn_off_server')),
+      el('button', { class: 'gp-btn ghost sm', type: 'button', style: 'margin-top:8px', onclick: function () { state.pnAvail = 'checking'; G.CONFIG.plantnetEndpoint = PN_DEFAULT; render(); checkPlantnet(); } }, [t('pn_recheck')])]);
     if (state.pnAvail === 'no_key') return G.note('info', t('pn_off_key'));
     if (state.pnAvail === 'checking') return null;
     if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error).replace('{m}', pn.msg || '').replace('{u}', pn.msg || '')), el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);

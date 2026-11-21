@@ -94,7 +94,12 @@
     if (/arabe|arabic|عرب|アラビア/i.test(q)) return { kind: 'arabic' };
     if (/manqu|missing|ناقص|نقص|足りな|不足|欠け/i.test(q)) return { kind: 'missing' };
     if (/pourquoi|why|rejet|écart|ecart|refus|ruled out|لماذا|استبعد|なぜ|どうして|理由|除外/i.test(q)) return { kind: 'why', rec: rec };
-    if (!rec && GOAL.test(q)) return { kind: 'goal', an: an };
+    var crop = cropIn(q);
+    if (!namedRecord(q) && HEALTH.test(q)) return { kind: 'health', crop: crop };
+    // a short follow-up that only names another crop ("not olives but peach") keeps the previous question
+    if (crop && lastIntent && an.tokens.length <= 5 && !GOAL.test(q) && ['health', 'goal'].indexOf(lastIntent.kind) !== -1)
+      return Object.assign({}, lastIntent, { crop: crop, followUp: true });
+    if (!rec && GOAL.test(q)) return { kind: 'goal', an: an, crop: crop };
     if (an.facets.length) return { kind: 'facet', facets: an.facets, rec: rec, an: an };
     if (/agrivolta|solar sharing|panneau|ضوئي|営農型|ソーラー/i.test(q)) return { kind: 'record', rec: 'jp-solar-sharing' };
     if (/adapt|كيّف|كيف أكيف|تكييف|合わせ|調整/i.test(q) && rec) return { kind: 'record', rec: rec };
@@ -109,6 +114,37 @@
     if (an.tokens.length <= 2 || /^\s*(test|hi|hello|hey|salut|bonjour|merci|thanks|مرحبا|سلام|السلام|こんにちは|テスト)\b/i.test(q0)) return { kind: 'overview' };
     return { kind: 'unknown', an: an };
   }
+  // plant health and disease prevention
+  var HEALTH = new RegExp(['health', 'healthy', 'disease', 'sick', 'pest', 'insect', 'fung', 'mildew', 'blight', 'rot\\b', 'infect', 'leaf spot', 'yellow', 'wilt',
+    'sant[eé]', 'maladi', 'malade', 'ravageur', 'insecte', 'champignon', 'parasite', 'jaunis', 'traitement',
+    'صحة', 'صحه', 'مرض', 'أمراض', 'امراض', 'آفة', 'آفات', 'افات', 'حشر', 'فطر', 'اصفرار',
+    '病気', '病害', '害虫', '健康', 'カビ', '害'].join('|'), 'i');
+  // crops a farmer may name, in the profile's keys where GAIA has them (others keep their own key)
+  var CROP_WORDS = [
+    ['olive', /olive|olivier|زيتون|オリーブ/i], ['palm', /date palm|palm|dattier|palmier|datte|نخيل|نخل|تمر|ナツメヤシ/i],
+    ['citrus', /citrus|orange|lemon|mandarin|agrume|citron|قوارص|برتقال|ليمون|柑橘|みかん|オレンジ|レモン/i],
+    ['potato', /potato|pomme de terre|patate|بطاطا|بطاطس|ジャガイモ|じゃがいも/i], ['tomato', /tomato|tomate|طماطم|بندورة|トマト/i],
+    ['pepper', /pepper|poivron|piment|فلفل|ピーマン|唐辛子/i], ['grape', /grape|vine|vigne|raisin|عنب|كرم|ブドウ|葡萄/i],
+    ['peach', /peach|p[eê]che|pêcher|خوخ|دراق|モモ|桃/i], ['apple', /apple|pommier|\bpommes?\b(?! de terre)|تفاح|リンゴ|りんご/i],
+    ['almond', /almond|amande|لوز|アーモンド/i], ['fig', /\bfigs?\b|figue|figuier|تين|イチジク/i], ['pomegranate', /pomegranate|grenad|رمان|ザクロ/i],
+    ['cereal', /cereal|wheat|barley|c[eé]r[eé]ale|bl[eé]\b|orge|حبوب|قمح|شعير|小麦|大麦|穀物/i], ['veg', /vegetable|l[eé]gume|maraîch|خضر|野菜/i]
+  ];
+  // the crop named last wins: "not olives but peach" → peach
+  function cropIn(q) {
+    var best = null, at = -1;
+    CROP_WORDS.forEach(function (c) { var m = q.search(c[1]); if (m > at) { at = m; best = c[0]; } });
+    return best;
+  }
+  var CROP_NAME = {
+    fr: { olive: 'olivier', palm: 'palmier dattier', citrus: 'agrumes', potato: 'pomme de terre', tomato: 'tomate', pepper: 'poivron', grape: 'vigne', peach: 'pêcher', apple: 'pommier', almond: 'amandier', fig: 'figuier', pomegranate: 'grenadier', cereal: 'céréales', veg: 'maraîchage', other: 'autre culture' },
+    ar: { olive: 'الزيتون', palm: 'النخيل', citrus: 'القوارص', potato: 'البطاطا', tomato: 'الطماطم', pepper: 'الفلفل', grape: 'العنب', peach: 'الخوخ', apple: 'التفاح', almond: 'اللوز', fig: 'التين', pomegranate: 'الرمان', cereal: 'الحبوب', veg: 'الخضر', other: 'زراعة أخرى' },
+    en: { olive: 'olive', palm: 'date palm', citrus: 'citrus', potato: 'potato', tomato: 'tomato', pepper: 'pepper', grape: 'grape', peach: 'peach', apple: 'apple', almond: 'almond', fig: 'fig', pomegranate: 'pomegranate', cereal: 'cereals', veg: 'vegetables', other: 'other crop' },
+    ja: { olive: 'オリーブ', palm: 'ナツメヤシ', citrus: '柑橘', potato: 'ジャガイモ', tomato: 'トマト', pepper: 'ピーマン', grape: 'ブドウ', peach: 'モモ', apple: 'リンゴ', almond: 'アーモンド', fig: 'イチジク', pomegranate: 'ザクロ', cereal: '穀物', veg: '野菜', other: 'その他の作物' }
+  };
+  // the plant-health model's plants and diseases, read from its manifest (no fixed list)
+  var VISION = null;
+  try { fetch(G.CONFIG.visionManifest, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { VISION = m; }).catch(function () {}); } catch (e) { /* no model */ }
+
   // broad goal questions: earn more, produce more, improve the farm, what to do
   var GOAL = new RegExp(['gain', 'income', 'revenue', 'profit', 'earn', 'money', 'yield', 'productiv', 'improve', 'increase', 'boost', 'make more', 'more from',
     'what (should|can|could) i do', 'advice', 'help me', 'grow more', 'better harvest',
@@ -156,10 +192,11 @@
   }
 
   // annual rain, ET0 and the crop's net irrigation need (FAO-56 Kc, USDA-SCS effective rain), from the plot's monthly climate
-  function waterBalance(dna) {
+  var NEXUS_CROP = { tomato: 'veg', potato: 'veg', pepper: 'veg' };
+  function waterBalance(dna, cropOver) {
     var rain = D.value(dna, 'climate.rain_mm'), et0 = D.value(dna, 'climate.et0_mm');
     if (rain === null || et0 === null) return null;
-    var out = { rain: rain, et0: et0, irn: null }, N = window.GAIA_NEXUS, CM = dna.climateMonthly, crop = D.value(dna, 'crop');
+    var out = { rain: rain, et0: et0, irn: null }, N = window.GAIA_NEXUS, CM = dna.climateMonthly, crop = cropOver ? (NEXUS_CROP[cropOver] || cropOver) : D.value(dna, 'crop');
     if (N && CM && CM.et0 && CM.rain && crop && N.CROPS[crop] && N.CROPS[crop].kc) {
       var r = N.compute({ et0: CM.et0, rain: CM.rain, kc: N.CROPS[crop].kc, months: N.CROPS[crop].months, ea: 1, pump_eff: 0.45, pr: 0.75 });
       if (r.totals && typeof r.totals.irn === 'number') out.irn = r.totals.irn;
@@ -354,20 +391,73 @@
       a.data = dataUsed(dna, top3[0].checks.map(function (x) { return x.cond.field; }));
     }
 
+    else if (intent.kind === 'health') {
+      var hc = intent.crop || D.value(dna, 'crop'), cn = (CROP_NAME[L] || CROP_NAME.fr)[hc] || hc, dt = L === 'ja' ? '。' : '.';
+      var known = VISION && VISION.stage2 && hc && VISION.stage2[hc] ? VISION.stage2[hc].classes.filter(function (c) { return c !== 'healthy'; }) : null;
+      a.title = W(L, { fr: 'Garder les arbres et les cultures en bonne santé', ar: 'الحفاظ على صحة الأشجار والزراعات', en: 'Keeping trees and crops healthy', ja: '木と作物を健康に保つには' }) + (hc ? ' — ' + cn : '');
+      a.reco = W(L, {
+        fr: 'Prévenir plutôt que traiter : observer souvent, garder un feuillage aéré et sec, éviter le stress hydrique, et faire confirmer tout symptôme par un technicien avant un traitement.',
+        ar: 'الوقاية خير من العلاج: راقب باستمرار، حافظ على أوراق مهوّاة وجافة، تجنّب العطش، واطلب من تقني تأكيد أي عرض قبل أي معالجة.',
+        en: 'Prevent rather than treat: inspect often, keep the foliage airy and dry, avoid water stress, and have any symptom confirmed by a technician before any treatment.',
+        ja: '治療より予防：こまめに観察し、葉の風通しを良く乾いた状態に保ち、水ストレスを避け、症状は処置の前に技術者に確認してもらいましょう。'
+      });
+      a.expl = W(L, {
+        fr: ['Observer chaque semaine au printemps et après les pluies : dessus et dessous des feuilles, rameaux, fruits. Photographier une feuille douteuse dans Santé des plantes.',
+          'Tailler pour aérer le centre de l’arbre ; enlever et détruire bois mort, feuilles et fruits malades (hygiène du verger).',
+          'Arroser au pied (goutte-à-goutte), sans mouiller le feuillage ; ni manque ni excès d’eau : un arbre stressé tombe plus vite malade.',
+          'Nourrir le sol : paillage et matière organique, fumure équilibrée, sans excès d’azote qui attire pucerons et maladies.',
+          'Favoriser les auxiliaires : haies et bandes fleuries (inspiration satoyama), pièges de surveillance plutôt que traitements systématiques (lutte intégrée).'],
+        ar: ['راقب كل أسبوع في الربيع وبعد الأمطار: وجه الأوراق وظهرها، الأغصان، الثمار. صوّر أي ورقة مشكوك فيها في صفحة صحة النباتات.',
+          'قلّم لتهوية وسط الشجرة؛ أزل وأتلف الخشب الميت والأوراق والثمار المصابة (نظافة البستان).',
+          'اسقِ عند الجذع (بالتقطير) دون ترطيب الأوراق؛ لا عطش ولا إفراط: الشجرة المجهدة تمرض أسرع.',
+          'غذِّ التربة: تغطية ومادة عضوية وتسميد متوازن دون إفراط في الآزوت الذي يجذب المنّ والأمراض.',
+          'شجّع الحشرات النافعة: سياجات وأشرطة مزهرة، ومصائد للمراقبة بدل المعالجة المنهجية (المكافحة المتكاملة).'],
+        en: ['Inspect every week in spring and after rain: both sides of the leaves, shoots, fruit. Photograph a doubtful leaf in Plant health.',
+          'Prune to open the centre of the tree; remove and destroy dead wood, diseased leaves and fruit (orchard hygiene).',
+          'Water at the foot (drip), without wetting the foliage; neither too little nor too much: a stressed tree gets sick faster.',
+          'Feed the soil: mulch and organic matter, balanced fertiliser, no excess nitrogen (it attracts aphids and disease).',
+          'Encourage natural enemies: hedges and flower strips (satoyama-inspired), monitoring traps rather than routine spraying (integrated pest management).'],
+        ja: ['春と雨の後は毎週観察する：葉の表と裏、新梢、果実。気になる葉は「植物の健康」で撮影する。',
+          '剪定して樹冠の中心に風を通す。枯れ枝や病気の葉・果実は取り除いて処分する（園地の衛生）。',
+          '株元に点滴で水やりし、葉をぬらさない。水不足も過剰も避ける：ストレスを受けた木は病気になりやすい。',
+          '土を養う：マルチングと有機物、バランスのよい施肥。窒素のやりすぎはアブラムシや病気を招く。',
+          '天敵を増やす：生け垣や花の帯（里山の考え方）、定期散布ではなく監視用トラップ（総合的病害虫管理）。']
+      }).slice();
+      var tmx = D.value(dna, 'climate.tmax_hot'), soc = D.value(dna, 'soil.soc');
+      if (tmx !== null && tmx >= 35) a.expl.push(W(L, { fr: 'Sur cette parcelle, l’été est chaud (' + fmt(tmx, 1) + ' °C de max. moyen) : le stress thermique et hydrique affaiblit les arbres en juillet–août.', ar: 'في هذه القطعة الصيف حار (' + fmt(tmx, 1) + ' °م كمعدل أقصى): الإجهاد الحراري والمائي يضعف الأشجار في جويلية وأوت.', en: 'On this plot summers are hot (' + fmt(tmx, 1) + ' °C mean max.): heat and water stress weaken trees in July–August.', ja: 'この区画の夏は暑く（平均最高' + fmt(tmx, 1) + ' °C）、7〜8月の高温と水ストレスが木を弱らせます。' }));
+      if (soc !== null && soc < 15) a.expl.push(W(L, { fr: 'Carbone organique du sol faible (' + fmt(soc) + ' g/kg, valeur régionale) : le paillage et le compost aident le sol et les racines.', ar: 'الكربون العضوي في التربة ضعيف (' + fmt(soc) + ' غ/كغ، قيمة جهوية): التغطية والسماد العضوي يساعدان التربة والجذور.', en: 'Low soil organic carbon (' + fmt(soc) + ' g/kg, regional value): mulch and compost help the soil and roots.', ja: '土壌有機炭素が少ない（' + fmt(soc) + ' g/kg、地域の値）：マルチングと堆肥が土と根を助けます。' }));
+      if (hc) {
+        if (known && known.length) a.expl.push(W(L, { fr: 'Pour ' + cn + ', le modèle de Santé des plantes reconnaît : ', ar: 'بالنسبة لـ' + cn + '، يتعرف نموذج صحة النباتات على: ', en: 'For ' + cn + ', the Plant health model recognises: ', ja: cn + 'について「植物の健康」のモデルが認識できるのは：' }) + known.map(function (c) { return c.replace(/_/g, ' '); }).join(', ') + dt);
+        else a.expl.push(W(L, { fr: 'Culture « ' + cn + ' » : pas encore dans le modèle de Santé des plantes ; la page propose alors l’identification Pl@ntNet, et un technicien doit confirmer.', ar: cn + ' ليس بعد في نموذج صحة النباتات: تقترح الصفحة حينها التعرف عبر Pl@ntNet، ويجب أن يؤكد تقني النتيجة.', en: 'Crop “' + cn + '”: not in the Plant health model yet; the page then offers Pl@ntNet identification, and a technician must confirm.', ja: cn + 'はまだ「植物の健康」のモデルに含まれていません。ページではPl@ntNetによる同定を提案します。結果は技術者に確認してもらってください。' }));
+      }
+      if (intent.followUp) a.expl.unshift(W(L, { fr: 'Réponse reprise pour : ', ar: 'الإجابة معدّلة لـ: ', en: 'Answer adjusted for: ', ja: '次の作物について回答：' }) + cn + dt);
+      a.expl.push(W(L, { fr: 'GAIA ne prescrit aucun produit chimique : pour un traitement, voir le CRDA ou un technicien en protection des végétaux.', ar: 'لا تصف غايا أي مبيد كيميائي: للمعالجة، اتصل بالمندوبية الجهوية للفلاحة أو بتقني في وقاية النباتات.', en: 'GAIA prescribes no chemical product: for a treatment, ask the CRDA or a plant-protection technician.', ja: 'GAIAは化学薬剤を処方しません。処置は地域の農業局（CRDA）や植物防疫の技術者に相談してください。' }));
+      a.actions = W(L, {
+        fr: ['Photographier une feuille suspecte dans Santé des plantes.', 'Tailler et nettoyer le verger avant la saison des pluies.', 'Pailler au pied des arbres (voir la fiche Paillage).'],
+        ar: ['صوّر ورقة مشكوكاً فيها في صفحة صحة النباتات.', 'قلّم ونظّف البستان قبل موسم الأمطار.', 'غطِّ التربة عند جذوع الأشجار (انظر بطاقة التغطية).'],
+        en: ['Photograph a suspicious leaf in Plant health.', 'Prune and clean the orchard before the rainy season.', 'Mulch at the foot of the trees (see the Mulching record).'],
+        ja: ['気になる葉を「植物の健康」で撮影する。', '雨季の前に剪定し、園地をきれいにする。', '木の株元をマルチングする（マルチングの記録を参照）。']
+      });
+      var mrec = get('x-mulch'), srec = get('jp-satoyama-layers');
+      a.records = [mrec, srec].filter(Boolean).map(function (r) { return r.record; });
+      a.results = [mrec, srec].filter(Boolean);
+      a.data = dataUsed(dna, ['climate.tmax_hot', 'soil.soc', 'crop']);
+    }
+
     else if (intent.kind === 'goal' || intent.kind === 'overview') {
       var mm = W(L, { fr: ' mm/an', ar: ' mm/سنة', en: ' mm/yr', ja: ' mm/年' }), dot = L === 'ja' ? '。' : '.';
       var ok = all.filter(function (r) { return r.verdict === 'feasible' || r.verdict === 'adapt'; });
       var byFam = function (f) { return ok.filter(function (r) { return r.record.families.indexOf(f) !== -1; })[0] || null; };
       var lbl = function (r) { return nameOf(r.record, L) + ' (' + verdictText(r.verdict, L) + (r.score !== null ? ', ' + fmt(r.score * 100) + ' %' : '') + ')'; };
-      var wb = waterBalance(dna);
-      var crop = D.value(dna, 'crop'), src2 = D.value(dna, 'water.source'), pump = D.value(dna, 'energy.pump'), ghi2 = D.value(dna, 'solar.ghi_kwh'), area = D.value(dna, 'area_ha');
+      var wb = waterBalance(dna, intent.crop);
+      var crop = intent.crop || D.value(dna, 'crop'), src2 = D.value(dna, 'water.source'), pump = D.value(dna, 'energy.pump'), ghi2 = D.value(dna, 'solar.ghi_kwh'), area = D.value(dna, 'area_ha');
       var waterRec = ok.filter(function (r) { return r.record.families.indexOf('water') !== -1 && r.verdict === 'feasible'; })[0] || byFam('water');
       var mulch = ok.filter(function (r) { return r.record.id === 'x-mulch'; })[0] || null;
       var layers = ok.filter(function (r) { return r.record.id === 'jp-satoyama-layers'; })[0] || null;
       var solarR = all.filter(function (r) { return r.record.id === 'jp-solar-sharing'; })[0];
 
       if (intent.kind === 'goal') {
-        a.title = W(L, { fr: 'Comment tirer plus de cette parcelle', ar: 'كيف تحصل على مردود أكبر من هذه القطعة', en: 'How to get more from this plot', ja: 'この区画からもっと収益を上げるには' });
+        a.title = W(L, { fr: 'Comment tirer plus de cette parcelle', ar: 'كيف تحصل على مردود أكبر من هذه القطعة', en: 'How to get more from this plot', ja: 'この区画からもっと収益を上げるには' }) + (intent.crop ? ' — ' + ((CROP_NAME[L] || CROP_NAME.fr)[intent.crop] || intent.crop) : '');
         var levers = [];
         if (waterRec) levers.push(W(L, { fr: 'capter plus d’eau de pluie avec ', ar: 'جمع مزيد من مياه الأمطار بـ', en: 'capture more rainwater with ', ja: '雨水をより多く集める（' }) + nameOf(waterRec.record, L) + (L === 'ja' ? '）' : ''));
         if (mulch) levers.push(W(L, { fr: 'réduire l’évaporation par le paillage', ar: 'تقليل التبخر بالتغطية', en: 'cut evaporation with mulch', ja: 'マルチングで蒸発を減らす' }));
@@ -380,7 +470,7 @@
         if (wb) {
           a.expl.push(W(L, { fr: 'Eau, premier facteur limitant : ', ar: 'الماء، العامل المحدِّد الأول: ', en: 'Water is the first limit: ', ja: '最大の制約は水：' }) +
             W(L, { fr: 'pluie ', ar: 'الأمطار ', en: 'rainfall ', ja: '降水量 ' }) + fmt(wb.rain) + mm + ', ET0 ' + fmt(wb.et0) + mm +
-            (wb.irn !== null ? W(L, { fr: ' ; besoin net non couvert par la pluie pour ', ar: '؛ الحاجة الصافية غير المغطاة بالمطر لـ', en: '; net need not covered by rain for ', ja: '。雨で賄えない正味の必要水量（' }) + E.valueLabel(crop) + (L === 'ja' ? '）：' : S) + fmt(wb.irn) + ' mm ' + W(L, { fr: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ar: '(≈ ' + fmt(wb.irn * 10) + ' م³/هكتار، FAO-56)', en: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ja: '（約' + fmt(wb.irn * 10) + ' m³/ha、FAO-56）' }) : '') + dot);
+            (wb.irn !== null ? W(L, { fr: ' ; besoin net non couvert par la pluie pour ', ar: '؛ الحاجة الصافية غير المغطاة بالمطر لـ', en: '; net need not covered by rain for ', ja: '。雨で賄えない正味の必要水量（' }) + ((CROP_NAME[L] || CROP_NAME.fr)[crop] || E.valueLabel(crop)) + (L === 'ja' ? '）：' : S) + fmt(wb.irn) + ' mm ' + W(L, { fr: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ar: '(≈ ' + fmt(wb.irn * 10) + ' م³/هكتار، FAO-56)', en: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ja: '（約' + fmt(wb.irn * 10) + ' m³/ha、FAO-56）' }) : '') + dot);
           a.expl.push(W(L, { fr: 'Chaque millimètre capté compte : 1 mm sur 1 ha = 10 m³. La pluie qui tombe sur 1 ha ici représente ' + fmt(wb.rain * 10) + ' m³/an.', ar: 'كل مليمتر يُجمع مهم: 1 مم على هكتار واحد = 10 م³. الأمطار على هكتار واحد هنا تعادل ' + fmt(wb.rain * 10) + ' م³ في السنة.', en: 'Every millimetre captured counts: 1 mm on 1 ha = 10 m³. The rain falling on 1 ha here is ' + fmt(wb.rain * 10) + ' m³/yr.', ja: '集めた1 mmが大切です。1 haで1 mm = 10 m³。ここで1 haに降る雨は年' + fmt(wb.rain * 10) + ' m³です。' }));
         }
         if (waterRec) a.expl.push(W(L, { fr: 'Collecte de l’eau : ', ar: 'جمع الماء: ', en: 'Water harvesting: ', ja: '集水：' }) + ok.filter(function (r) { return r.record.families.indexOf('water') !== -1; }).slice(0, 3).map(lbl).join(L === 'ja' ? '、' : ', ') + dot);

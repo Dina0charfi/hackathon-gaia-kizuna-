@@ -55,7 +55,7 @@
     cost: 'cout couts prix cher chere budget tnd dinar dinars investissement rentable rentabilite financer cost price expensive cheap afford تكلفه كلفه سعر ثمن تمويل ميزانيه',
     risk: 'risque risques danger inconvenient inconvenients probleme problemes limite limites echec risk risks drawback downside problem مخاطر خطر عيوب مشاكل سلبيات',
     materials: 'materiau materiaux materiel pierre pierres outil outils beton terre material materials tools stone مواد حجاره ادوات',
-    actors: 'acteur acteurs aider aident aidez crda gda partenaire partenaires aide aides subvention subventions cooperative groupement voisin voisins who actor partner subsidy support cooperative دعم شريك منحه تعاونيه مجمع',
+    actors: 'acteur acteurs aider aident aidez crda gda partenaire partenaires aide aides subvention subventions cooperative groupement voisin voisins actor partner subsidy support cooperative دعم شريك منحه تعاونيه مجمع',
     regulation: 'loi lois reglement reglementation autorisation autorisations permis legal legalement droit droits regulation permit law legal قانون ترخيص رخصه تنظيم',
     actions: 'comment etape etapes faire commencer installer construire mettre planter entretenir entretien how steps build start install maintain كيف خطوات ابدا بناء تركيب صيانه',
     soil: 'sol sols argile argileux sable sableux limon limoneux texture carbone matiere organique fertilite soil clay sand loam carbon organic تربه طين رمل كربون خصوبه',

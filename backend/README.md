@@ -6,7 +6,7 @@ The website works on its own in the browser. This backend exposes the same logic
 cd backend
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn gaia.main:app --reload --port 8765       # http://127.0.0.1:8765/docs (the port the website looks for first; 8000 also works)
+uvicorn gaia.main:app --reload                   # http://127.0.0.1:8000/docs (the Plant health page finds it on 8000 or 8765)
 pytest -q                                        # needs node for the JS parity tests
 ```
 
