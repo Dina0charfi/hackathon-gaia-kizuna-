@@ -35,7 +35,8 @@
   .pay-next .v { font-family: var(--g-display); font-size: 30px; font-weight: 800; color: var(--g-forest); }
   .pay-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 8px; }
   .pay-m { display: grid; gap: 2px; text-align: start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--g-line-2); background: #fff; cursor: pointer; font: inherit; color: var(--g-ink-2); }
-  .pay-m b { font-size: 15px; color: var(--g-ink); }
+  .pay-m b { font-size: 15px; color: var(--g-ink); display: inline-flex; align-items: center; gap: 6px; min-height: 22px; }
+  .pay-m b svg { color: var(--g-gold-ink); }
   .pay-m span { font-size: 12.5px; }
   .pay-m[aria-checked="true"] { border-color: var(--g-gold); box-shadow: 0 0 0 3px rgba(217, 184, 106, .25); background: #FFFBEF; }
   .pay-next > .gp-btn { justify-self: start; }

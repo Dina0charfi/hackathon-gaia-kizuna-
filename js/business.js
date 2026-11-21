@@ -604,7 +604,7 @@
   }
 
   /* ---------------------------------------------------------- pay an instalment (simulation, no real money) */
-  var PAY_METHODS = [['d17', 'D17', 'pm_d17'], ['flouci', 'Flouci', 'pm_flouci'], ['card', '💳', 'pm_card'], ['cash', '🤝', 'pm_cash']];
+  var PAY_METHODS = [['d17', 'D17', 'pm_d17', 'phone'], ['flouci', 'Flouci', 'pm_flouci', 'phone'], ['card', null, 'pm_card', 'card'], ['cash', null, 'pm_cash', 'cash']];
   function payCard(r) {
     var sig = [Math.round(r.total), r.term, r.seasonal ? 's' : 'f', +S.start].join('|');
     var L = G.load('gaia.business.payments', null);
@@ -647,7 +647,7 @@
             el('span', { class: 'small muted' }, ['#' + next.i + ' · ' + months[next.month] + ' · ' + t('pay_saving') + ' ' + fmt(next.saving) + ' TND'])]),
           el('div', { class: 'pay-methods', role: 'radiogroup', 'aria-label': t('pay_method') }, PAY_METHODS.map(function (m) {
             return el('button', { type: 'button', role: 'radio', 'aria-checked': String(L.method === m[0]), class: 'pay-m', onclick: function () { L.method = m[0]; save(); render(); } },
-              [el('b', null, [m[1]]), el('span', null, [t(m[2])])]);
+              [el('b', null, [G.icon(m[3], 18), m[1] ? el('span', null, [m[1]]) : null]), el('span', null, [t(m[2])])]);
           })),
           el('button', { type: 'button', class: 'gp-btn gold', onclick: function () { stage = 'confirm'; render(); } }, [t('pay_btn').replace('{a}', fmt(next.installment) + ' TND')])
         ]));
@@ -655,7 +655,7 @@
       if (stage === 'receipt' && L.paid.length) {
         var p = L.paid[L.paid.length - 1];
         box.appendChild(el('div', { class: 'pay-receipt', role: 'status' }, [
-          el('b', null, ['✓ ' + t('pay_ok')]),
+          el('b', { style: 'display:inline-flex;align-items:center;gap:6px' }, [G.icon('ok', 16), t('pay_ok')]),
           el('span', null, [t('pay_ref') + ' ' + p.ref + ' · ' + fmt(p.amount) + ' TND · ' + methodName(p.method) + ' · ' + new Date(p.at).toLocaleString(G.lang())])
         ]));
       }

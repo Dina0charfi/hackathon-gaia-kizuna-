@@ -503,7 +503,7 @@
     var arch = N.layers.map(function (L) { return L.in; }).concat([N.layers[N.layers.length - 1].out]).join(' → ');
     var nparam = N.layers.reduce(function (s, L) { return s + L.W.length + L.b.length; }, 0);
     return el('details', { class: 'gp-more ai-net', open: true }, [
-      el('summary', null, ['🧠 ' + t('nn_t')]),
+      el('summary', null, [G.icon('network', 18), el('span', { style: 'margin-inline-start:8px' }, [t('nn_t')])]),
       el('p', { class: 'small', style: 'margin-top:6px;max-width:80ch;color:var(--g-ink-2)' }, [t('nn_p')]),
       el('div', { class: 'ai-net-facts' }, [
         el('div', null, [el('b', null, [t('nn_in')]), el('span', null, [t('nn_in_v')])]),

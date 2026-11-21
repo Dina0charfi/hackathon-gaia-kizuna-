@@ -18,6 +18,7 @@
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
     plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
+    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/auth' : null, // accounts (backend /auth/*). null = guest only
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
 
@@ -38,7 +39,7 @@
       nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab',
       nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
-      skip: 'Aller au contenu',
+      skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte',
       foot_line: "GAIA n'impose pas la technologie à la terre. GAIA adapte la technologie à la terre.",
       foot_honest: "Données ouvertes citées à chaque valeur. Les modules non connectés le disent.",
       verdict_ok: 'Faisable', verdict_adapt: 'Faisable avec adaptation', verdict_no: 'Non recommandé', verdict_unk: 'Preuves insuffisantes',
@@ -58,7 +59,7 @@
       nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء',
       nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
-      skip: 'انتقل إلى المحتوى',
+      skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي',
       foot_line: 'غايا لا تفرض التكنولوجيا على الأرض، بل تكيّف التكنولوجيا مع الأرض.',
       foot_honest: 'كل قيمة مصحوبة بمصدرها. والوحدات غير المتصلة تصرّح بذلك.',
       verdict_ok: 'ممكن', verdict_adapt: 'ممكن مع التكييف', verdict_no: 'غير موصى به', verdict_unk: 'أدلة غير كافية',
@@ -78,7 +79,7 @@
       nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab',
       nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
-      skip: 'Skip to content',
+      skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account',
       foot_line: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
       foot_honest: 'Open data, cited for every value. Modules that are not connected say so.',
       verdict_ok: 'Feasible', verdict_adapt: 'Feasible with adaptation', verdict_no: 'Not recommended', verdict_unk: 'Not enough evidence',
@@ -98,7 +99,7 @@
       nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ',
       nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
-      skip: '本文へ移動',
+      skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント',
       foot_line: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
       foot_honest: 'すべての値にオープンデータの出典を表示。未接続のモジュールはそう明示します。',
       verdict_ok: '実施可能', verdict_adapt: '調整すれば実施可能', verdict_no: '推奨しない', verdict_unk: '根拠不足',
@@ -173,6 +174,7 @@
     document.querySelectorAll('.gp-lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-l') === l)); });
     applyI18n();
     renderParcelBadge();
+    renderAccount();
     langListeners.forEach(function (fn) { try { fn(l); } catch (e) { console.error(e); } });
   }
 
@@ -190,6 +192,71 @@
     return p;
   }
   function setParcel(p) { save('gaia.parcel', p); renderParcelBadge(); }
+
+  /* ---------------------------------------------------------- accounts */
+  // The backend keeps the account (hashed password, sessions). The browser keeps only the
+  // session token and the public profile, under 'gaia.session'.
+  var authListeners = [];
+  function session() { return load('gaia.session', null); }
+  function currentUser() { var s = session(); return s && s.user ? s.user : null; }
+  function setSession(s) {
+    if (s) save('gaia.session', s); else { try { global.localStorage.removeItem('gaia.session'); } catch (e) {} }
+    renderAccount();
+    authListeners.forEach(function (fn) { try { fn(currentUser()); } catch (e) { console.error(e); } });
+  }
+  function authCall(path, opts) {   // path relative to /auth; '../share/x' style paths go to the API root
+    if (!CONFIG.authEndpoint) return Promise.reject({ code: 'no_server' });
+    var s = session(), h = { 'Content-Type': 'application/json' };
+    if (s && s.token) h.Authorization = 'Bearer ' + s.token;
+    var url = path.indexOf('/share/') === 0 ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
+    return fetch(url, Object.assign({ headers: h }, opts || {})).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        if (!r.ok) throw Object.assign({ status: r.status }, (b && b.detail) || {});
+        return b;
+      });
+    }, function () { throw { code: 'no_server' }; });
+  }
+  var auth = {
+    enabled: function () { return !!CONFIG.authEndpoint; },
+    user: currentUser,
+    onChange: function (fn) { authListeners.push(fn); },
+    signup: function (body) { return authCall('/signup', { method: 'POST', body: JSON.stringify(body) }).then(function (r) { setSession(r); return r.user; }); },
+    login: function (identifier, password) {
+      return authCall('/login', { method: 'POST', body: JSON.stringify({ identifier: identifier, password: password }) }).then(function (r) { setSession(r); return r.user; });
+    },
+    logout: function () {
+      var done = function () { setSession(null); };
+      return authCall('/logout', { method: 'POST' }).then(done, done);   // always forget the session on this device
+    },
+    setFarm: function (farm) {
+      return authCall('/farm', { method: 'PUT', body: farm ? JSON.stringify(farm) : null }).then(function (r) { var s = session(); s.user = r.user; setSession(s); return r.user; });
+    },
+    neighbours: function (radiusKm) { return authCall('/share/neighbours?radius_km=' + encodeURIComponent(radiusKm || 5)); },
+    requestShare: function (id) { return authCall('/share/request', { method: 'POST', body: JSON.stringify({ to: id }) }); },
+    respondShare: function (id, accept) { return authCall('/share/respond', { method: 'POST', body: JSON.stringify({ from_id: id, accept: !!accept }) }); },
+    refresh: function () {   // drop a session the server no longer knows (expired, signed out elsewhere)
+      if (!session()) return Promise.resolve(null);
+      return authCall('/me').then(function (r) { var s = session(); s.user = r.user; save('gaia.session', s); renderAccount(); return r.user; },
+        function (e) { if (e && e.status === 401) setSession(null); return currentUser(); });
+    }
+  };
+  function initials(name) { return String(name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }
+  function renderAccount() {
+    var box = document.getElementById('gp-account');
+    if (!box) return;
+    clear(box);
+    var u = currentUser();
+    if (u) {
+      box.appendChild(el('a', { class: 'gp-acc', href: 'account.html', title: t('acc_menu') }, [
+        el('span', { class: 'gp-acc-av', 'aria-hidden': 'true' }, [initials(u.name)]),
+        el('span', { class: 'gp-acc-name' }, [u.name.split(/\s+/)[0]])
+      ]));
+      box.appendChild(el('button', { type: 'button', class: 'gp-acc-out', title: t('acc_signout'), 'aria-label': t('acc_signout'),
+        onclick: function () { auth.logout().then(function () { if (/account\.html$/.test(global.location.pathname)) global.location.reload(); }); } }, [icon('logout', 16)]));
+    } else {
+      box.appendChild(el('a', { class: 'gp-acc in', href: 'account.html' }, [icon('user', 16), el('span', null, [t('acc_signin')])]));
+    }
+  }
 
   /* ---------------------------------------------------------- dom utils */
   function el(tag, attrs, children) {
@@ -220,7 +287,13 @@
     info: '<circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/>',
     warn: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
     leaf: '<path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19l7-7"/>',
-    pin: '<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'
+    pin: '<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4"/><path d="M6 12h10"/>',
+    card: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>',
+    cash: '<rect x="3" y="7" width="18" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
+    phone: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    network: '<circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M7 7.8l3.2 3M7 16.2l3.2-3M13.8 11l3.4-3.2M13.8 13l3.4 3.2"/>'
   };
   function icon(name, size) {
     var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -276,6 +349,7 @@
           return el('a', { href: n[1], 'data-i18n': n[2], 'aria-current': n[0] === current ? 'page' : null });
         })),
         el('div', { class: 'gp-tools' }, [
+          el('div', { id: 'gp-account', class: 'gp-account' }),
           el('a', { id: 'gp-parcel', class: 'gp-parcel', href: 'land.html' }),
           el('div', { class: 'gp-lang', role: 'group', 'aria-label': 'Langue / اللغة / Language / 言語' }, [
             el('button', { type: 'button', 'data-l': 'fr', lang: 'fr', onclick: function () { setLang('fr'); } }, ['FR']),
@@ -300,6 +374,7 @@
     ]);
     document.body.appendChild(foot);
     setLang(lang);
+    auth.refresh();
   }
 
   /* ---------------------------------------------------------- tooltips */
@@ -435,7 +510,7 @@
   global.GAIA = {
     CONFIG: CONFIG, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
     lang: function () { return lang; }, onLang: function (fn) { langListeners.push(fn); },
-    getParcel: getParcel, setParcel: setParcel, load: load, save: save,
+    getParcel: getParcel, setParcel: setParcel, load: load, save: save, auth: auth,
     el: el, clear: clear, fmt: fmt, icon: icon, pill: pill, note: note, confBadge: confBadge,
     mountShell: mountShell, barChart: barChart, bindTip: bindTip, needParcel: needParcel,
     kaizenButton: kaizenButton, recordFeedback: recordFeedback
