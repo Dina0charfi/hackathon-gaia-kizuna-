@@ -1,0 +1,14 @@
+{
+  "name": "Gaia — Two cultures. One land.",
+  "short_name": "Gaia",
+  "description": "Gaia connects Tunisian and Japanese agricultural knowledge through AI.",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFF8E9",
+  "theme_color": "#344A38",
+  "icons": [
+    { "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

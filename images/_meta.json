@@ -1,0 +1,47 @@
+{
+ "olive-grove": {
+  "alt": "Illustration: a Tunisian olive grove at golden hour, rows of olive trees on dry terraced soil, low sun behind them",
+  "w": "400",
+  "h": "560"
+ },
+ "jessour": {
+  "alt": "Illustration: a traditional jessour, a low stone dike across a dry valley with silt built up behind it and a fig tree growing in the catchment",
+  "w": "400",
+  "h": "300"
+ },
+ "tanada": {
+  "alt": "Illustration: Japanese terraced rice fields on a green hillside, flooded steps reflecting the sky, stone retaining walls",
+  "w": "400",
+  "h": "300"
+ },
+ "oasis": {
+  "alt": "Illustration: a Tunisian oasis in three growing layers, date palms above, fruit trees in the middle, vegetables at ground level",
+  "w": "400",
+  "h": "300"
+ },
+ "bridge-split": {
+  "alt": "Illustration: split composition, a dry Tunisian hillside with runoff gullies on the left, green Japanese terraces on the right, joined by one horizon line",
+  "w": "400",
+  "h": "560"
+ },
+ "kaizen-phone": {
+  "alt": "Illustration: two hands holding a phone that shows a short checklist of three tasks, soil below",
+  "w": "400",
+  "h": "300"
+ },
+ "mottainai-mill": {
+  "alt": "Illustration: olive pressing residue piled in sacks and a heap beside a small mill building, steam rising in warm late light",
+  "w": "400",
+  "h": "560"
+ },
+ "satoyama": {
+  "alt": "Illustration: a mixed landscape where woodland, cultivated plots and a small village meet with soft boundaries",
+  "w": "400",
+  "h": "300"
+ },
+ "farm-to-farm": {
+  "alt": "Illustration: two screens side by side, one showing a Tunisian olive field, the other Japanese terraces, joined by a connecting thread",
+  "w": "400",
+  "h": "300"
+ }
+}

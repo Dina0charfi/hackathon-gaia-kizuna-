@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The pillars at a glance &mdash; Gaia</title>
+<meta name="description" content="Water, energy and agriculture: the three pillars of Gaia on one page.">
+<meta name="theme-color" content="#344A38">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;700&family=Caveat:wght@500;600&family=Cairo:wght@400;600&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper-noise">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<svg class="grain" aria-hidden="true" focusable="false">
+  <filter id="grainFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="4" stitchTiles="stitch"></feTurbulence>
+    <feColorMatrix type="saturate" values="0"></feColorMatrix>
+    <feComponentTransfer><feFuncA type="linear" slope="0.38"></feFuncA></feComponentTransfer>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grainFilter)"></rect>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="Gaia, home">
+      <span class="hanko" aria-hidden="true">&#32070;</span>
+      <span class="brand-word">GAIA</span>
+      <span class="jp">&#22823;&#22320;</span>
+    </a>
+    <!--nav--><nav class="mainnav" aria-label="Main">
+      <a class="navlink" href="story.html">Story</a>
+      <a class="navlink" href="water.html">Water</a>
+      <a class="navlink" href="energy.html">Energy</a>
+      <a class="navlink" href="agriculture.html">Agriculture</a>
+      <a class="navlink" href="bridge.html">Bridge</a>
+      <a class="navlink" href="ai.html">Engine</a>
+      <a class="navlink" href="community.html">Community</a>
+    </nav>
+    <details class="navmenu">
+      <summary>Chapters</summary>
+      <nav class="menu" aria-label="Chapters">
+        <a href="index.html"><span class="k">&#24207;</span>Prologue</a>
+        <a href="story.html"><span class="k">一</span>Story</a>
+        <a href="water.html"><span class="k">二</span>Water</a>
+        <a href="energy.html"><span class="k">三</span>Energy</a>
+        <a href="agriculture.html"><span class="k">四</span>Agriculture</a>
+        <a href="bridge.html"><span class="k">五</span>Bridge</a>
+        <a href="ai.html"><span class="k">六</span>Engine</a>
+        <a href="community.html"><span class="k">七</span>Community</a>
+        <a href="home.html"><span class="k">&#32080;</span>GAIA platform</a>
+      </nav>
+    </details><!--/nav-->
+    <a class="btn btn-ghost" href="home.html" style="min-height:44px;padding:0 20px;font-size:14px">Open the platform</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="chapter">
+  <span class="chapter-wash" aria-hidden="true"></span>
+  <div class="wrap chapter-grid">
+    <div class="chapter-mark" aria-hidden="true">
+      <p class="ch-num" lang="ja">&#38291;</p>
+      <p class="ch-kanji" lang="ja">&#19977;</p>
+    </div>
+    <div>
+      <p class="crumbs"><a href="index.html">Gaia</a> &nbsp;/&nbsp; At a glance</p>
+      <p class="eyebrow">Interlude &nbsp;&middot;&nbsp; <span lang="ja">&#38291;</span> ma, the pause between</p>
+      <h1>Water. Energy. Agriculture.</h1>
+      <p class="kicker">The three pillars, on one page.</p>
+      <p class="lede">Three challenges both countries face, approached from both sides. Each pillar pairs a Japanese practice with its Tunisian counterpart, then asks what survives the transfer.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="challenges" style="margin-top:0">
+      <a class="challenge reveal" href="water.html">
+        <span class="big" lang="ja" aria-hidden="true">&#27700;</span>
+        <h3>01 &mdash; Water</h3>
+        <dl><div><dt class="jpn">Modules</dt><dd>Smart irrigation, rainwater intelligence, water sharing, technique matching.</dd></div></dl>
+        <span class="more">Chapter &#20108; &rarr;</span>
+      </a>
+      <a class="challenge reveal" href="energy.html">
+        <span class="big" lang="ja" aria-hidden="true">&#38525;</span>
+        <h3>02 &mdash; Energy</h3>
+        <dl><div><dt class="jpn">Modules</dt><dd>Solar farming, smart pumping, energy prediction, solar-sharing advisor.</dd></div></dl>
+        <span class="more">Chapter &#19977; &rarr;</span>
+      </a>
+      <a class="challenge reveal" href="agriculture.html">
+        <span class="big" lang="ja" aria-hidden="true">&#22303;</span>
+        <h3>03 &mdash; Agriculture</h3>
+        <dl><div><dt class="jpn">Modules</dt><dd>Disease detection, crop and soil intelligence, kaizen, mottainai, satoyama, knowledge bridge.</dd></div></dl>
+        <span class="more">Chapter &#22235; &rarr;</span>
+      </a>
+    </div>
+    <div class="legend">
+  <span class="badge b-live">Working</span>
+  <span class="badge b-demo">Demo</span>
+  <span class="badge b-soon">Planned</span>
+  <p>Every feature carries one of these. Working runs for real; Demo works on sample values; Planned is designed but not built.</p>
+</div>
+  </div>
+</section>
+<section class="next">
+  <div class="wrap">
+    <a class="next-card reveal" href="water.html">
+      <span class="next-k" lang="ja" aria-hidden="true">水</span>
+      <span>
+        <span class="lbl">Next &middot; chapter 二</span>
+        <h2>Water</h2>
+        <p>One country organised abundance. The other organised scarcity.</p>
+      </span>
+      <span class="next-arrow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+    </a>
+    <a class="prev-link" href="index.html">&larr; Back to the prologue</a>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span class="hanko lg" aria-hidden="true">&#32070;</span>
+      <p class="eyebrow" style="color:var(--sage)">Kizuna 2026 &mdash; Japan &times; Tunisia</p>
+    </div>
+    <h2 style="margin-top:20px">Two cultures, one connection,<br>a sustainable future.</h2>
+    <p style="margin-top:18px;max-width:56ch;color:#CFC9B7">Japan and Tunisia have different landscapes, cultures and farming traditions. They share the same challenge: building a sustainable future.</p>
+    <nav aria-label="Footer" style="margin-top:26px;display:flex;flex-wrap:wrap;gap:12px 26px;font-size:14.5px">
+      <a href="index.html">&#24207; Prologue</a>
+      <a href="story.html">一 Story</a>
+      <a href="water.html">二 Water</a>
+      <a href="energy.html">三 Energy</a>
+      <a href="agriculture.html">四 Agriculture</a>
+      <a href="bridge.html">五 Bridge</a>
+      <a href="ai.html">六 Engine</a>
+      <a href="community.html">七 Community</a>
+      <a href="pillars.html">The pillars at a glance</a>
+      <a href="login.html">Sign in</a>
+      <a href="home.html">GAIA platform</a>
+    </nav>
+    <div class="footer-row">
+      <p style="flex-grow:1">Team Gaia <span class="jp">&#22823;&#22320;</span> &mdash; [TEAM MEMBERS]</p>
+      <p>[CONTACT EMAIL]</p>
+      <p lang="ja">&#20108;&#12388;&#12398;&#25991;&#21270;&#12289;&#19968;&#12388;&#12398;&#22823;&#22320;</p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

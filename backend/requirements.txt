@@ -1,0 +1,11 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+httpx>=0.27
+python-multipart>=0.0.9
+numpy>=1.26
+pandas>=2.1
+pvlib>=0.11
+pytest>=8
+# optional, for a local SoilGrids raster:
+# rasterio>=1.3

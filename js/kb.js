@@ -1,0 +1,251 @@
+/* ==========================================================================
+   GAIA KNOWLEDGE CORE — structured technique records.
+   Powers the compatibility engine, the AI Lab and the library.
+
+   Rules of this file:
+   - every record lists its sources, and says when a source is still missing;
+   - a threshold not stated by a source is marked provisional: true;
+   - review.status stays "draft" until an agronomist or a CRDA validates it.
+   Detailed text is in French; Arabic names are given for the interface.
+   ========================================================================== */
+
+(function (global) {
+  'use strict';
+
+  var WOCAT = function (id, title) {
+    return { label: 'WOCAT — ' + title, url: 'https://qcat.wocat.net/en/wocat/technologies/view/permalink/' + id, verified: true };
+  };
+  var OKUIZUMO = { label: 'FAO GIAHS — Okuizumo System (Japon)', url: 'https://www.fao.org/giahs/giahs-around-the-world/japan-okuizumo-system/en', verified: true };
+
+  var RECORDS = [
+    {
+      id: 'tn-jessour', version: 2, origin: 'tn', families: ['water', 'soil', 'agriculture'],
+      name: 'Jessour', name_ar: 'الجسور', jp: null,
+      summary: "Digues de terre (tabia) barrant un oued de montagne : elles retiennent le ruissellement et les sédiments, qui forment une terrasse cultivable (oliviers, figuiers, céréales).",
+      description: "Chaque unité (jessr) comprend un impluvium qui collecte le ruissellement, une terrasse qui se forme par dépôt de sédiments (jusqu'à 5 m d'épaisseur près de la digue) et une digue de 15 à 50 m de long, 2 à 5 m de haut, avec un déversoir vers l'unité en aval. Système traditionnel du Sud-Est (Médenine, Matmata).",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'max', value: 250, hard: false, weight: 2, why: 'Zone aride, pluie annuelle inférieure à 250 mm dans la fiche WOCAT.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'min', value: 5, hard: true, provisional: true, why: "Pentes moyennes à fortes de montagne (fiche WOCAT) ; seuil chiffré de 5 % à valider." },
+        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed'], hard: false, weight: 1, why: "Conçu pour l'agriculture pluviale : l'eau vient du ruissellement." }
+      ],
+      materials: 'Terre, pierre sèche pour stabiliser les digues anciennes.',
+      cost: "Installation : 3 000 TND/ha ; entretien : 900 TND/ha/an (fiche WOCAT ; taux de change de la fiche 1 USD = 1,3 TND, donc chiffres anciens).",
+      actors: "Agriculteurs et familles ; CRDA lorsque un programme public cofinance (part de l'agriculteur 10 à 50 % selon la fiche).",
+      regulation: 'À valider : aménagement d’un oued et droits sur le ruissellement en aval.',
+      risks: "Moins d'eau disponible pour les usagers en aval ; savoir-faire menacé par l'exode rural ; supporte mal les grandes crues.",
+      adaptations: [],
+      actions: ["Inspecter la digue et le déversoir avant la saison des pluies.", "Recharger la terrasse en sédiments et réparer les brèches.", "Planter ou regarnir les oliviers sur la partie la plus profonde de la terrasse."],
+      sources: [WOCAT(5462, 'Jessour [Tunisia]')],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'tn-tabia', version: 1, origin: 'tn', families: ['water', 'soil', 'agriculture'],
+      name: 'Tabia', name_ar: 'الطابية', jp: null,
+      summary: 'Variante des jessour pour terrains doux : une digue de terre avec deux bourrelets latéraux et un déversoir, alimentée par un impluvium.',
+      description: "Digues de 50 à 150 m de long et 1 à 2 m de haut ; rapport surface cultivée / impluvium de 1:4 dans la fiche (1:6 à 1:20 en général). Installée où la pente ne dépasse pas environ 3 % (classe 3–5 % dans la fiche). Documentée à Médenine Nord.",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'max', value: 250, hard: false, weight: 2, why: 'Zone aride, pluie annuelle inférieure à 250 mm (fiche WOCAT).' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'max', value: 5, hard: true, why: 'Pente douce : ne dépasse pas environ 3 %, classe 3–5 % dans la fiche WOCAT.' },
+        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed'], hard: false, weight: 1, why: 'Collecte du ruissellement pour une culture pluviale.' }
+      ],
+      materials: 'Terre (digue), pierre et béton (déversoir), gabions (digue de dérivation).',
+      cost: 'Installation : 670 TND/ha ; entretien : 200 TND/ha/an (fiche WOCAT, 1 USD = 1,3 TND).',
+      actors: 'Agriculteurs ; programmes publics avec part de 10 à 50 % pour l’agriculteur.',
+      regulation: 'À valider.',
+      risks: "Peut s'étendre au détriment des parcours ; supporte mal la sécheresse prolongée et les crues ; dépend de l'entretien.",
+      adaptations: [
+        { when: ['terrain.slope_pct'], verdict: 'adapt', text: "Pente plus forte que 5 % : préférer des jessour (digues en travers de l'oued) plutôt qu'une tabia." }
+      ],
+      actions: ["Vérifier que la pente de la parcelle reste douce sur toute la longueur prévue.", "Dimensionner l'impluvium (environ 4 fois la surface cultivée selon la fiche).", "Construire le déversoir en pierre avant la première saison des pluies."],
+      sources: [WOCAT(3586, 'Tabia [Tunisia]')],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'tn-meskat', version: 1, origin: 'tn', families: ['water', 'soil', 'agriculture'],
+      name: 'Meskat', name_ar: 'المسقاة', jp: null,
+      summary: "Système du Sahel : un impluvium aménagé en amont conduit le ruissellement vers une parcelle plantée (souvent d'oliviers) en aval.",
+      description: "Système traditionnel de plus de 50 ans en zone semi-aride. La fiche WOCAT le classe comme collecte d'eau combinée à des mesures de couverture végétale, appliqué en situation concave.",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'between', value: [200, 450], hard: false, weight: 2, provisional: true, why: "Zone semi-aride (fiche WOCAT) ; la fiche ne précise pas de pluviométrie : bornes à valider." },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'min', value: 1, hard: true, provisional: true, why: "Il faut une pente pour que l'impluvium ruisselle vers la parcelle ; seuil à valider." },
+        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed'], hard: false, weight: 1, why: 'Approvisionnement pluvial ou mixte selon la fiche.' }
+      ],
+      materials: "Terre pour les bourrelets ; l'impluvium est gardé nu et compacté.",
+      cost: "Installation : 1 400 unités monétaires locales (≈ 560 USD au taux de la fiche, 1 USD = 2,5) ; unités de surface non précisées dans la fiche.",
+      actors: 'Agriculteurs ; adoption majoritairement sans incitation matérielle selon la fiche.',
+      regulation: 'À valider.',
+      risks: "La fiche n'indique pas d'inconvénient ; à compléter avec un agronome.",
+      adaptations: [],
+      actions: ["Délimiter l'impluvium en amont et retirer la végétation qui freine le ruissellement.", 'Relever les bourrelets autour de la parcelle plantée.', "Orienter l'entrée d'eau vers les arbres les plus jeunes."],
+      sources: [WOCAT(4143, 'The Meskats [Tunisia]')],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'tn-dry-stone-basins', version: 1, origin: 'tn', families: ['water', 'soil', 'agriculture'],
+      name: 'Cuvettes en pierre sèche autour des oliviers', name_ar: 'أحواض الحجارة الجافة حول الزياتين', jp: null,
+      summary: "Muret semi-circulaire en pierre sèche construit à l'amont de chaque olivier pour retenir le ruissellement et le faire infiltrer lentement.",
+      description: "Documenté à Oueslatia (Kairouan). Grosses pierres en base dans une tranchée peu profonde, pierres concassées de 1–2 cm pour filtrer. Pluie moyenne de 350 mm (200–400 mm) dans la fiche ; pente maximale de 35°.",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'between', value: [200, 400], hard: false, weight: 2, why: 'Pluie de 200 à 400 mm dans la fiche WOCAT.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'max', value: 70, hard: true, why: 'Pente maximale de 35° (≈ 70 %) dans la fiche WOCAT.' },
+        { dim: 'water', field: 'crop', op: 'in', value: ['olive'], hard: false, weight: 2, why: 'Utilisé surtout pour les oliviers.' }
+      ],
+      materials: 'Pierres locales, pierres concassées ; masse, pioche, pelle.',
+      cost: "Installation : 171 TND par cuvette, outils inclus (fiche WOCAT, 3,1 TND/USD).",
+      actors: "Petits exploitants ; appui possible de la Direction générale de l'aménagement et de la conservation des terres agricoles.",
+      regulation: 'Aucune connue pour sa propre parcelle — à valider.',
+      risks: 'Construction exigeante en main-d’œuvre et coûteuse (principal frein selon la fiche).',
+      adaptations: [],
+      actions: ["Commencer par les arbres situés sur les zones de ruissellement les plus marquées.", 'Construire le muret côté amont de chaque tronc.', 'Remettre en forme après chaque labour et désherber la cuvette.'],
+      sources: [WOCAT(6987, 'Individual Dry-Stone Basins [Tunisia]')],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'tn-oasis', version: 1, origin: 'tn', families: ['agriculture', 'water'],
+      name: 'Oasis à trois étages', name_ar: 'الواحة ذات الطوابق الثلاثة', jp: null,
+      summary: "Palmiers dattiers en étage haut, arbres fruitiers au milieu, cultures basses au sol : l'ombre du haut protège les étages du bas.",
+      description: "Système des oasis du Djérid et de Gabès. Il dépend d'une irrigation régulière.",
+      conditions: [
+        { dim: 'water', field: 'water.source', op: 'in', value: ['well', 'network', 'shared'], hard: true, why: "L'oasis est un système irrigué." },
+        { dim: 'climate', field: 'climate.tmax_hot', op: 'min', value: 30, hard: false, weight: 1, provisional: true, why: "Intérêt de l'ombrage surtout en climat chaud ; seuil à valider." },
+        { dim: 'water', field: 'crop', op: 'in', value: ['palm', 'citrus', 'veg'], hard: false, weight: 1, why: 'Cultures typiques des étages.' }
+      ],
+      materials: 'Plants, réseau d’irrigation existant.',
+      cost: 'Source chiffrée à ajouter.',
+      actors: 'Exploitants, GDA de l’oasis.',
+      regulation: 'Accès à l’eau et forages : à valider auprès du CRDA.',
+      risks: 'Pression sur les nappes ; salinité.',
+      adaptations: [],
+      actions: ['Cartographier ce qui pousse à chaque étage.', "Compléter l'étage manquant (souvent l'étage intermédiaire).", "Éclaircir l'étage haut si la lumière manque en bas."],
+      sources: [{ label: 'Source primaire à ajouter (fiche en cours)', url: null, verified: false }],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'tn-cistern', version: 1, origin: 'tn', families: ['water'],
+      name: "Citernes de collecte d'eau de pluie", name_ar: 'خزانات تجميع مياه الأمطار', jp: null,
+      summary: "Citerne enterrée alimentée par une aire de collecte : stocke l'eau d'hiver pour l'abreuvement, l'appoint d'irrigation ou l'usage domestique.",
+      description: "Pratique répandue en zone aride. Les noms locaux (par exemple majel, fesguia) et leurs dimensions sont à confirmer avec une source.",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 100, hard: true, provisional: true, why: 'Il faut assez de pluie pour remplir la citerne ; seuil à valider.' },
+        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed', 'well'], hard: false, weight: 1, why: 'Surtout utile sans réseau.' }
+      ],
+      materials: 'Maçonnerie ou béton, aire de collecte.',
+      cost: 'Source chiffrée à ajouter.',
+      actors: 'Ménages, CRDA (programmes de mobilisation des eaux).',
+      regulation: 'À valider.',
+      risks: 'Qualité de l’eau ; entretien de l’aire de collecte.',
+      adaptations: [],
+      actions: ["Estimer le volume collectable : surface de l'aire × pluie × coefficient de ruissellement.", "Nettoyer l'aire de collecte avant les pluies.", "Réserver l'eau stockée à l'appoint des jeunes plants en été."],
+      sources: [{ label: 'Source primaire à ajouter (fiche en cours)', url: null, verified: false }],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'x-mulch', version: 1, origin: 'tn', families: ['water', 'soil', 'agriculture'],
+      name: 'Paillage avec les résidus de taille', name_ar: 'التغطية ببقايا التقليم', jp: 'もったいない',
+      summary: "Broyer les résidus de taille et les étaler au pied des arbres pour réduire l'évaporation du sol nu (principe mottainai : ne rien gaspiller).",
+      description: "Le paillis limite l'évaporation à la surface du sol ; FAO-56 traite de l'effet des paillis sur l'évaporation. Inspiré aussi de la couverture permanente du sol des vergers japonais.",
+      conditions: [
+        { dim: 'water', field: 'crop', op: 'in', value: ['olive', 'citrus', 'palm'], hard: false, weight: 1, why: 'Arbres produisant des résidus de taille.' }
+      ],
+      materials: 'Résidus de taille broyés.',
+      cost: 'Main-d’œuvre ; broyeur à louer ou à partager.',
+      actors: 'Agriculteur ; GDA pour le partage d’un broyeur.',
+      regulation: 'Aucune connue.',
+      risks: 'Ne pas plaquer le paillis contre le tronc ; risque d’incendie en été à surveiller.',
+      adaptations: [],
+      actions: ['Broyer les résidus de la taille d’hiver.', 'Étaler un anneau de paillis à la limite de la couronne, pas contre le tronc.', 'Renouveler une fois par an après les premières pluies.'],
+      sources: [{ label: 'FAO-56 (Allen et al., 1998), chapitre sur les paillis — référence à vérifier', url: null, verified: false }],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'jp-tanada', version: 2, origin: 'jp', families: ['water', 'soil', 'agriculture'],
+      name: 'Terrasses japonaises (tanada)', name_ar: 'المدرجات اليابانية (تانادا)', jp: '棚田',
+      summary: 'Gradins plats reliés par des points de débordement : l’eau descend la pente un niveau à la fois au lieu de la dévaler.',
+      description: "À Okuizumo, des terres dégradées par l'extraction de sable ferrugineux ont été transformées en rizières en terrasses retenues par des murs de pierre et alimentées par des canaux gravitaires. La version d'origine suppose une eau abondante pour l'inondation.",
+      conditions: [
+        { dim: 'water', field: 'water.source', op: 'in', value: ['network', 'shared'], hard: true, why: "La rizière en terrasse inondée suppose une alimentation en eau continue." },
+        { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 1000, hard: true, provisional: true, why: 'Riziculture en terrasse sous climat humide ; seuil à valider.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'min', value: 3, hard: true, provisional: true, why: 'Les gradins n’ont de sens que sur une pente ; seuil à valider.' }
+      ],
+      materials: 'Pierre, terre ; canaux.',
+      cost: 'Non chiffré pour la Tunisie.',
+      actors: 'Organisations villageoises au Japon ; en Tunisie, CRDA et agriculteurs.',
+      regulation: 'À valider.',
+      risks: 'Transposition directe impossible en zone sèche.',
+      adaptations: [
+        { when: ['water.source', 'climate.rain_mm'], requires: { field: 'terrain.slope_pct', op: 'min', value: 3 }, verdict: 'adapt',
+          text: "Garder la géométrie (gradins plats et point de débordement contrôlé) mais sans inondation : terrasse sèche combinée aux jessour ou aux tabias existantes." }
+      ],
+      actions: ['Niveler une bande de 4 m le long de la courbe de niveau.', 'Ouvrir un seuil de débordement au point bas de chaque digue.', 'Pailler les pieds d’arbres avant les pluies.'],
+      sources: [OKUIZUMO],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'jp-canal-turn', version: 1, origin: 'jp', families: ['water'],
+      name: 'Tour d’eau publié (canaux d’Okuizumo)', name_ar: 'دور الماء المعلن (قنوات أوكوئيزومو)', jp: '水番',
+      summary: "Un ordre d'irrigation connu de tous, fixé par une règle d'équité, pour les exploitations qui partagent une même source.",
+      description: "À Okuizumo, les organisations villageoises entretiennent les canaux et l'ordre d'attribution de l'eau suit une coutume ancienne destinée au partage équitable et à éviter les conflits.",
+      conditions: [
+        { dim: 'water', field: 'water.source', op: 'in', value: ['shared', 'network'], hard: true, why: 'Il faut une source partagée entre plusieurs exploitations.' }
+      ],
+      materials: 'Aucun : un planning partagé.',
+      cost: 'Faible.',
+      actors: 'GDA (groupement de développement agricole) ou groupe de voisins.',
+      regulation: "Allocation officielle de l'eau à respecter.",
+      risks: 'Ne fonctionne que si tous les membres l’acceptent.',
+      adaptations: [],
+      actions: ['Lister les exploitations branchées sur la même source.', 'Publier le tour de la semaine.', 'Autoriser l’échange d’un tour avec un voisin en stress hydrique.'],
+      sources: [OKUIZUMO],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'jp-solar-sharing', version: 1, origin: 'jp', families: ['energy', 'agriculture', 'water'],
+      name: 'Solar sharing (agrivoltaïsme)', name_ar: 'تقاسم الطاقة الشمسية (الزراعة الضوئية)', jp: 'ソーラーシェアリング',
+      summary: "Panneaux étroits surélevés et espacés au-dessus d'une culture : la parcelle produit de l'électricité et l'ombre peut protéger certaines cultures de la chaleur.",
+      description: "Pratique actuelle au Japon. En Tunisie, l'intérêt dépend d'un usage pour l'électricité (pompage, réseau) et de la tolérance de la culture à l'ombre. Simuler avec la page Agrivoltaïsme.",
+      conditions: [
+        { dim: 'materials', field: 'energy.pump', op: 'in', value: ['diesel', 'grid', 'solar'], hard: true, why: "Sans pompe ni raccordement, l'électricité n'a pas d'usage sur l'exploitation." },
+        { dim: 'water', field: 'crop', op: 'in', value: ['veg', 'citrus'], hard: false, weight: 1, provisional: true, why: 'Cultures basses ou arbustives plus faciles à couvrir ; tolérance à l’ombre à documenter.' }
+      ],
+      materials: 'Structures hautes, panneaux, onduleur ou pompe solaire.',
+      cost: 'Prix à saisir et à dater (voir Eau & énergie).',
+      actors: 'Installateur agréé ; STEG si raccordement.',
+      regulation: 'Raccordement et autorisations : à valider.',
+      risks: 'Surpompage si le pompage devient gratuit : toujours avec un quota (voir Eau & énergie).',
+      adaptations: [],
+      actions: ['Simuler hauteur et espacement des panneaux.', 'Calculer le quota d’eau mensuel avant de dimensionner.', 'Vérifier les conditions de raccordement.'],
+      sources: [{ label: "Source primaire sur l'origine japonaise à vérifier", url: null, verified: false }],
+      review: { status: 'draft' }
+    },
+    {
+      id: 'jp-satoyama-layers', version: 1, origin: 'jp', families: ['agriculture', 'soil'],
+      name: 'Système en couches inspiré du satoyama', name_ar: 'نظام طبقات مستوحى من ساتوياما', jp: '里山',
+      summary: "Gérer la parcelle comme des couches qui s'entraident (arbres, cultures intercalaires, haies), plutôt que comme une monoculture.",
+      description: "Le satoyama désigne au Japon la bande où village, bois et champs sont gérés comme un seul système. En Tunisie, la logique rejoint celle de l'oasis ; en zone pluviale, elle se traduit par haies brise-vent et cultures intercalaires.",
+      conditions: [
+        { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 200, hard: false, weight: 1, provisional: true, why: 'Les couches intercalaires demandent un minimum d’eau ; seuil à valider.' }
+      ],
+      materials: 'Plants de haie, semences.',
+      cost: 'Non chiffré.',
+      actors: 'Agriculteurs, voisins (haies partagées).',
+      regulation: 'Aucune connue.',
+      risks: 'Concurrence pour l’eau entre couches si mal dimensionné.',
+      adaptations: [],
+      actions: ['Recenser les couches existantes.', 'Ajouter une haie brise-vent côté vents dominants.', 'Tester une culture intercalaire sur une petite surface.'],
+      sources: [{ label: 'Satoyama Initiative (IPSI) — référence à vérifier', url: null, verified: false }],
+      review: { status: 'draft' }
+    }
+  ];
+
+  var FAMILIES = {
+    water: { fr: 'Eau', ar: 'الماء' },
+    energy: { fr: 'Énergie', ar: 'الطاقة' },
+    agriculture: { fr: 'Agriculture', ar: 'الفلاحة' },
+    soil: { fr: 'Conservation des sols', ar: 'حماية التربة' }
+  };
+
+  global.GAIA_KB = {
+    records: RECORDS, families: FAMILIES,
+    get: function (id) { return RECORDS.filter(function (r) { return r.id === id; })[0] || null; }
+  };
+}(window));

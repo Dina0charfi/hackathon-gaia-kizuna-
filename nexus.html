@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eau &amp; énergie — GAIA</title>
+<meta name="description" content="Besoin en eau de la culture (FAO-56), pluie efficace, irrigation, énergie de pompage, taille d'un champ solaire, coûts comparés et quota mensuel de pompage pour votre parcelle.">
+<meta name="theme-color" content="#1F3A2B">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="platform.css">
+<style>
+  .nx { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .nx { grid-template-columns: 1fr; } }
+  .nx-in { position: sticky; top: 84px; }
+  @media (max-width: 1000px) { .nx-in { position: static; } }
+  .nx-in .gp-field { margin-top: 12px; }
+  .months { display: flex; flex-wrap: wrap; gap: 4px; }
+  .months button { border: 1px solid var(--g-line-2); background: #fff; border-radius: 7px; min-width: 40px; min-height: 34px; font: 600 12.5px var(--g-sans); cursor: pointer; color: var(--g-ink-2); }
+  .months button[aria-pressed="true"] { background: var(--g-forest); color: var(--g-ivory); border-color: var(--g-forest); }
+  .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+  @media (max-width: 860px) { .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .fbox { background: var(--g-paper); border: 1px solid var(--g-line); border-radius: 12px; padding: 12px 14px; position: relative; }
+  .fbox b { display: block; font-size: 12px; color: var(--g-ink-3); font-weight: 600; }
+  .fbox .v { font-family: var(--g-display); font-size: 23px; font-weight: 600; color: var(--g-forest); margin-top: 2px; }
+  body.gp[dir="rtl"] .fbox .v { font-family: var(--g-ar); }
+  .fbox .u { font-size: 12.5px; color: var(--g-ink-3); }
+  .fbox.water .v { color: #2F5A75; } .fbox.energy .v { color: var(--g-gold-ink); } .fbox.quota { border-color: var(--g-gold); background: var(--s-adapt-bg); }
+  .formula { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background: var(--g-ivory); border: 1px solid var(--g-line); border-radius: 8px; padding: 8px 10px; direction: ltr; text-align: left; overflow-x: auto; }
+  .assump { font-size: 12.5px; color: var(--g-ink-3); }
+  .cost-row td:first-child { font-weight: 600; }
+</style>
+</head>
+<body class="gp">
+<main id="main" class="wrap">
+  <header class="gp-head">
+    <p class="eyebrow">GAIA WATER–ENERGY NEXUS · M4</p>
+    <h1><span data-i18n="n_title">Eau &amp; énergie</span><span class="jp-mark">水 · 陽</span></h1>
+    <p class="lead" data-i18n="n_lead">Combien d'eau la culture demande, combien d'énergie il faut pour la pomper, quel champ solaire la fournirait, et surtout combien ne pas dépasser.</p>
+  </header>
+  <div id="app"></div>
+</main>
+<script src="js/gaia-core.js"></script>
+<script src="js/landdna.js"></script>
+<script src="js/nexus-core.js"></script>
+<script src="js/nexus.js"></script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter five: Knowledge bridge &mdash; Gaia</title>
+<meta name="description" content="Six documented connections between Japanese and Tunisian practice, and a working technique matcher.">
+<meta name="theme-color" content="#344A38">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;700&family=Caveat:wght@500;600&family=Cairo:wght@400;600&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper-noise">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<svg class="grain" aria-hidden="true" focusable="false">
+  <filter id="grainFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="4" stitchTiles="stitch"></feTurbulence>
+    <feColorMatrix type="saturate" values="0"></feColorMatrix>
+    <feComponentTransfer><feFuncA type="linear" slope="0.38"></feFuncA></feComponentTransfer>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grainFilter)"></rect>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="Gaia, home">
+      <span class="hanko" aria-hidden="true">&#32070;</span>
+      <span class="brand-word">GAIA</span>
+      <span class="jp">&#22823;&#22320;</span>
+    </a>
+    <!--nav--><nav class="mainnav" aria-label="Main">
+      <a class="navlink" href="story.html">Story</a>
+      <a class="navlink" href="water.html">Water</a>
+      <a class="navlink" href="energy.html">Energy</a>
+      <a class="navlink" href="agriculture.html">Agriculture</a>
+      <a class="navlink" href="bridge.html" aria-current="page">Bridge</a>
+      <a class="navlink" href="ai.html">Engine</a>
+      <a class="navlink" href="community.html">Community</a>
+    </nav>
+    <details class="navmenu">
+      <summary>Chapters</summary>
+      <nav class="menu" aria-label="Chapters">
+        <a href="index.html"><span class="k">&#24207;</span>Prologue</a>
+        <a href="story.html"><span class="k">一</span>Story</a>
+        <a href="water.html"><span class="k">二</span>Water</a>
+        <a href="energy.html"><span class="k">三</span>Energy</a>
+        <a href="agriculture.html"><span class="k">四</span>Agriculture</a>
+        <a href="bridge.html" aria-current="page"><span class="k">五</span>Bridge</a>
+        <a href="ai.html"><span class="k">六</span>Engine</a>
+        <a href="community.html"><span class="k">七</span>Community</a>
+        <a href="home.html"><span class="k">&#32080;</span>GAIA platform</a>
+      </nav>
+    </details><!--/nav-->
+    <a class="btn btn-ghost" href="home.html" style="min-height:44px;padding:0 20px;font-size:14px">Open the platform</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="chapter t-sakura">
+  <span class="chapter-wash" aria-hidden="true"></span>
+  <div class="wrap chapter-grid">
+    <div class="chapter-mark" aria-hidden="true">
+      <p class="ch-num" lang="ja">&#31532;五&#31456;</p>
+      <p class="ch-kanji" lang="ja">橋</p>
+    </div>
+    <div>
+      <p class="crumbs"><a href="index.html">Gaia</a> &nbsp;/&nbsp; Bridge</p>
+      <p class="eyebrow">Chapter 五 &nbsp;&middot;&nbsp; Bridge</p>
+      <h1>Describe your parcel. Meet its twin.</h1>
+      <p class="kicker">The knowledge bridge, Japan &times; Tunisia</p>
+      <p class="lede">Tell Gaia about your land the way you would tell a neighbour. It answers with a technique that already works &mdash; somewhere &mdash; and shows you where the two traditions meet.</p>
+      <div class="dots" aria-label="Chapters"><a class="past" href="story.html" aria-label="Chapter 1: Story"></a><a class="past" href="water.html" aria-label="Chapter 2: Water"></a><a class="past" href="energy.html" aria-label="Chapter 3: Energy"></a><a class="past" href="agriculture.html" aria-label="Chapter 4: Agriculture"></a><a class="now" href="bridge.html" aria-label="Chapter 5: Bridge" aria-current="step"></a><a class="" href="ai.html" aria-label="Chapter 6: Engine"></a><a class="" href="community.html" aria-label="Chapter 7: Community"></a><span class="count">Chapter 5 of 7</span></div>
+    </div>
+  </div>
+</section>
+<section id="bridge" class="tint-forest">
+  <div class="wrap">
+    <div class="bridge-ui">
+      <form class="bridge-form panel reveal" id="parcelForm">
+        <div class="field">
+          <label for="region">Location</label>
+          <select id="region" name="region">
+            <option value="Matmata, Gabès">Matmata, Gabès</option>
+            <option value="Sidi Bouzid">Sidi Bouzid</option>
+            <option value="Kairouan">Kairouan</option>
+            <option value="Cap Bon, Nabeul">Cap Bon, Nabeul</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="soil">Soil</label>
+          <select id="soil" name="soil">
+            <option value="clay">Clay</option>
+            <option value="sandy">Sandy</option>
+            <option value="silty">Silty loam</option>
+            <option value="rocky">Rocky / thin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="slope">Terrain slope</label>
+          <select id="slope" name="slope">
+            <option value="steep">Steep — above 8%</option>
+            <option value="moderate" selected>Moderate — 3 to 8%</option>
+            <option value="flat">Flat — under 3%</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rain">Annual rainfall (mm)</label>
+          <input id="rain" name="rain" type="number" min="40" max="900" step="10" value="210">
+        </div>
+        <div class="field">
+          <label for="water">Available water</label>
+          <select id="water" name="water">
+            <option value="rainfed">Rain only</option>
+            <option value="well">Shallow well</option>
+            <option value="network">Irrigation network</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="crop">Crop</label>
+          <select id="crop" name="crop">
+            <option value="olives">Olives</option>
+            <option value="almonds">Almonds</option>
+            <option value="dates">Dates</option>
+            <option value="vegetables">Vegetables</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;background:var(--butter);color:#3A2E10">Find the connection</button>
+      </form>
+
+      <div class="bridge-out reveal" id="bridgeOut" aria-live="polite">
+        <article class="bridge-card">
+          <p class="tag tag-tn">Tunisian challenge</p>
+          <h4 id="outChallenge">Water runs off the slope before it soaks in</h4>
+          <p id="outChallengeBody">On a moderate clay slope with 210 mm of rain, most of the yearly water arrives in a handful of storms and leaves within the hour, taking topsoil with it.</p>
+        </article>
+
+        <p class="bridge-link" aria-hidden="true"><span>meets</span></p>
+
+        <article class="bridge-card">
+          <p class="tag tag-jp">Japanese inspiration <span class="jp">日本</span></p>
+          <h4 id="outJp">Tanada — stepped terraces with overflow sills</h4>
+          <p id="outJpBody">Mountain villages flattened the slope into steps joined by low spill points, so water walks down the hill one level at a time instead of running down it.</p>
+        </article>
+
+        <p class="bridge-link" aria-hidden="true"><span>becomes</span></p>
+
+        <article class="bridge-card" style="border-color:rgba(244,216,117,0.45)">
+          <p class="tag tag-ai">Gaia recommendation</p>
+          <h4 id="outRec">Jessour crossed with tanada</h4>
+          <p id="outRecBody">Keep your existing dikes. Level a four-metre band behind each one along the contour, and open a 30 cm spill sill at the low point. The catchment fills, the surplus steps down instead of breaking out sideways.</p>
+          <div class="metrics" id="outMetrics">
+            <span class="metric">Water retained +38%</span>
+            <span class="metric">Topsoil loss −60%</span>
+            <span class="metric">3 actions this month</span>
+          </div>
+          <p style="margin-top:16px;font-size:13px;color:#B9B3A1">Demonstration values — replace with your own model output before the pitch.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section><section class="tint-ivory">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="seam left" lang="ja">&#27211;</p>
+      <p class="eyebrow">Six documented connections</p>
+      <h2>Where the two traditions actually touch.</h2>
+      <p>Each is a real practice in its own country. What Gaia adds is the pairing &mdash; and an honest note about what is built and what is not.</p>
+    </div>
+
+    <div class="conns">
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>Okuizumo &nbsp;<span class="jp" lang="ja">&#22885;&#20986;&#38642;</span></h3>
+      <span class="badge b-soon">Reference</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>In Okuizumo, land left degraded by centuries of iron-sand mining was turned into terraced rice fields held by stone walls and fed by gravity canals from mountain streams. Village organisations keep the canals, and the timing of water allocation follows long-established custom meant to share it fairly and head off conflict.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>Jessour and meskat answer a drier version of the same problem: how to make a slope keep what falls on it. Tunisia has the earthworks; what is rarer is a written turn-taking rule for who waters when.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>Japan shows that the social rule matters as much as the stonework. Tunisia shows the same engineering when water arrives in three storms instead of all season.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>Treat the canal custom as data: a schedule with a fairness rule, publishable to a group of neighbouring farms. That is the Water Sharing module &mdash; designed, not built.</p></div>
+    </div>
+    <p class="src">Source: FAO, Globally Important Agricultural Heritage Systems &mdash; Okuizumo.</p>
+  </article>
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>Solar sharing</h3>
+      <span class="badge b-soon">Reference</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>Panels raised high above a field, spaced so part of the light still reaches the crop, so one plot produces both food and electricity. The approach developed in Japan, where spare land is scarce.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>The oasis grows in three layers for the same reason: the top layer cuts the sun for the ones below. Tunisia has the sunshine Japan does not.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>Japan brings the geometry &mdash; height, spacing, orientation. Tunisia brings the question of how much shade is a gift rather than a cost under a harsher sun.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>A Solar Sharing Advisor that computes spacing for a given crop and latitude. It needs light-response data per crop we do not have, so it stays planned.</p></div>
+    </div>
+    
+  </article>
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>Satoyama &nbsp;<span class="jp" lang="ja">&#37324;&#23665;</span></h3>
+      <span class="badge b-soon">Reference</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>The managed band between village and mountain, where woodland, fields and settlement are kept as one system: the forest supplies leaf litter and firewood, the lower slopes food and livestock.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>The Tunisian oasis is layered by the same logic, with palms, fruit trees and ground crops supporting each other instead of competing.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>Both argue against the single-crop plot, and each gives the other a worked example in a completely different climate.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>Model a parcel as layers rather than one crop, and tune the balance. Designed, not built.</p></div>
+    </div>
+    
+  </article>
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>Society 5.0</h3>
+      <span class="badge b-soon">Reference</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>Japan&rsquo;s national framing of technology as something that should serve a human society &mdash; including an ageing, rural one &mdash; rather than the other way round.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>Tunisian farms are not short of advice; they are short of advice in the right language, on the right device, at the right moment of the season.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>The framing is what transfers: judge a tool by whether the person on the slope can actually use it.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>Why Gaia plans spoken answers in Tunisian Arabic and offline use. Those are design commitments here, not shipped features.</p></div>
+    </div>
+    
+  </article>
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>NARO</h3>
+      <span class="badge b-soon">Reference</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>Japan&rsquo;s national agriculture and food research organisation, which publishes agricultural research and field results.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>Tunisia has its own agricultural research institutions, and a body of field knowledge that is largely unwritten.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>A shared technique library only works if both sides contribute: one has publications, the other has practice nobody has written down.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>The technique table behind the matcher stands in for that library. We wrote it by hand; it holds no institutional data.</p></div>
+    </div>
+    
+  </article>
+  <article class="conn reveal">
+    <div class="conn-head">
+      <h3>Jessour &amp; meskat</h3>
+      <span class="badge b-demo">In the demo</span>
+    </div>
+    <div class="conn-grid">
+      <div class="c-jp"><h4>The Japanese approach</h4><p>The Japanese counterpart is the terrace with its overflow sill: level the ground, then control where the surplus leaves.</p></div>
+      <div class="c-tn"><h4>The Tunisian counterpart</h4><p>Low dikes across a dry valley catch runoff and silt; a crop grows in what builds up behind them. Meskat gathers water from a prepared catchment upslope.</p></div>
+      <div class="c-both"><h4>What both can learn</h4><p>Together they give a hillside both storage and a controlled exit &mdash; the catchment holds, the sill decides where the overflow goes.</p></div>
+      <div class="c-gaia"><h4>What Gaia would do with it</h4><p>The one pairing the demo actually computes: enter a slope, a soil and a rainfall above, and the matcher returns it with three field actions.</p></div>
+    </div>
+    
+  </article>
+    </div>
+
+    <p class="hint reveal" style="margin-top:26px;max-width:66ch">None of these pairings has been measured in the field, and nothing here is presented as a result. The Okuizumo description follows the FAO heritage listing; the rest are described qualitatively on purpose.</p>
+  </div>
+</section>
+<section class="next">
+  <div class="wrap">
+    <a class="next-card reveal" href="ai.html">
+      <span class="next-k" lang="ja" aria-hidden="true">知</span>
+      <span>
+        <span class="lbl">Next &middot; chapter 六</span>
+        <h2>Engine</h2>
+        <p>It does not copy. It checks.</p>
+      </span>
+      <span class="next-arrow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+    </a>
+    <a class="prev-link" href="agriculture.html">&larr; Previous: Agriculture</a>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span class="hanko lg" aria-hidden="true">&#32070;</span>
+      <p class="eyebrow" style="color:var(--sage)">Kizuna 2026 &mdash; Japan &times; Tunisia</p>
+    </div>
+    <h2 style="margin-top:20px">Two cultures, one connection,<br>a sustainable future.</h2>
+    <p style="margin-top:18px;max-width:56ch;color:#CFC9B7">Japan and Tunisia have different landscapes, cultures and farming traditions. They share the same challenge: building a sustainable future.</p>
+    <nav aria-label="Footer" style="margin-top:26px;display:flex;flex-wrap:wrap;gap:12px 26px;font-size:14.5px">
+      <a href="index.html">&#24207; Prologue</a>
+      <a href="story.html">一 Story</a>
+      <a href="water.html">二 Water</a>
+      <a href="energy.html">三 Energy</a>
+      <a href="agriculture.html">四 Agriculture</a>
+      <a href="bridge.html">五 Bridge</a>
+      <a href="ai.html">六 Engine</a>
+      <a href="community.html">七 Community</a>
+      <a href="pillars.html">The pillars at a glance</a>
+      <a href="login.html">Sign in</a>
+      <a href="home.html">GAIA platform</a>
+    </nav>
+    <div class="footer-row">
+      <p style="flex-grow:1">Team Gaia <span class="jp">&#22823;&#22320;</span> &mdash; [TEAM MEMBERS]</p>
+      <p>[CONTACT EMAIL]</p>
+      <p lang="ja">&#20108;&#12388;&#12398;&#25991;&#21270;&#12289;&#19968;&#12388;&#12398;&#22823;&#22320;</p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

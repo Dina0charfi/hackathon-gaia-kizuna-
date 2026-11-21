@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bibliothèque — GAIA</title>
+<meta name="description" content="Les fiches techniques sourcées qui alimentent le moteur de compatibilité et l'AI Lab de GAIA.">
+<meta name="theme-color" content="#1F3A2B">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="platform.css">
+<style>
+  .lib-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .chip { border: 1px solid var(--g-line-2); background: #fff; border-radius: 999px; min-height: 36px; padding: 0 14px; font: 600 13.5px var(--g-sans); cursor: pointer; color: var(--g-ink-2); }
+  .chip[aria-pressed="true"] { background: var(--g-forest); color: var(--g-ivory); border-color: var(--g-forest); }
+  .rec { display: flex; flex-direction: column; gap: 10px; text-align: start; cursor: pointer; border: 1px solid var(--g-line); background: var(--g-paper); border-radius: var(--g-r); padding: 18px; font: inherit; color: inherit; transition: transform .2s, box-shadow .2s; }
+  .rec:hover { transform: translateY(-3px); box-shadow: var(--g-shadow); }
+  .rec h3 { font-size: 19px; }
+  .rec .fam { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rec .fam span { font-size: 12px; background: var(--g-sage-soft); color: var(--g-forest); border-radius: 999px; padding: 2px 9px; }
+  .kv { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px 16px; font-size: 14.5px; margin-top: 16px; }
+  .kv dt { font-weight: 600; color: var(--g-ink-3); }
+  .kv dd { margin: 0; color: var(--g-ink-2); }
+  @media (max-width: 620px) { .kv { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="gp">
+<main id="main" class="wrap">
+  <header class="gp-head">
+    <p class="eyebrow">GAIA KNOWLEDGE CORE</p>
+    <h1><span data-i18n="lb_title">Bibliothèque des techniques</span><span class="jp-mark">知</span></h1>
+    <p class="lead" data-i18n="lb_lead">Chaque fiche décrit une technique, ses conditions, ses coûts et ses sources. Ce sont ces fiches que lisent le moteur de compatibilité et l'AI Lab ; rien n'est affirmé en dehors d'elles.</p>
+  </header>
+  <div class="lib-tools">
+    <div class="gp-field" style="flex:1;min-width:220px"><label for="s" class="sr">Rechercher</label><input id="s" type="search" data-i18n-ph="lb_search" placeholder="Rechercher une technique"></div>
+    <div id="chips" role="group" aria-label="Filtres" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+  <p id="count" class="small muted" aria-live="polite" style="margin-bottom:10px"></p>
+  <div id="grid" class="gp-grid gp-cols-3"></div>
+</main>
+<dialog class="gp-dialog" id="dlg" aria-labelledby="dlg-title"><div class="in" id="dlg-in"></div></dialog>
+<script src="js/gaia-core.js"></script>
+<script src="js/kb.js"></script>
+<script>
+(function () {
+  var G = GAIA, el = G.el, t = G.t, KB = GAIA_KB;
+  G.addStrings({
+    fr: { lb_title: 'Bibliothèque des techniques', lb_lead: "Chaque fiche décrit une technique, ses conditions, ses coûts et ses sources. Ce sont ces fiches que lisent le moteur de compatibilité et l'AI Lab ; rien n'est affirmé en dehors d'elles.",
+      lb_search: 'Rechercher une technique', lb_count: 'fiches', lb_close: 'Fermer', k_origin: 'Origine', k_desc: 'Description', k_cond: 'Conditions',
+      k_adapt: 'Adaptations', k_mat: 'Matériaux', k_cost: 'Coûts', k_actors: 'Acteurs locaux', k_reg: 'Réglementation', k_risk: 'Risques', k_src: 'Sources', k_status: 'Validation', k_actions: 'Actions',
+      hard: 'obligatoire', soft: 'secondaire', prov: 'seuil provisoire', no_src: 'source à ajouter', none: 'Aucune' },
+    ar: { lb_title: 'مكتبة التقنيات', lb_lead: 'تصف كل بطاقة تقنية وشروطها وتكاليفها ومصادرها. هذه البطاقات هي ما يقرؤه محرك التوافق ومختبر الذكاء.',
+      lb_search: 'ابحث عن تقنية', lb_count: 'بطاقات', lb_close: 'إغلاق', k_origin: 'الأصل', k_desc: 'الوصف', k_cond: 'الشروط',
+      k_adapt: 'التكييفات', k_mat: 'المواد', k_cost: 'التكاليف', k_actors: 'الفاعلون المحليون', k_reg: 'التنظيمات', k_risk: 'المخاطر', k_src: 'المصادر', k_status: 'المصادقة', k_actions: 'الخطوات',
+      hard: 'إلزامي', soft: 'ثانوي', prov: 'عتبة مؤقتة', no_src: 'المصدر يُضاف لاحقاً', none: 'لا يوجد' }
+  });
+  G.mountShell('lib');
+
+  var active = {}, q = '';
+  var CH = [['jp', function () { return t('origin_jp'); }], ['tn', function () { return t('origin_tn'); }]]
+    .concat(Object.keys(KB.families).map(function (f) { return [f, function () { return KB.families[f][G.lang()] || KB.families[f].fr; }]; }));
+
+  function chips() {
+    var box = G.clear(document.getElementById('chips'));
+    CH.forEach(function (c) {
+      box.appendChild(el('button', { type: 'button', class: 'chip', 'aria-pressed': String(!!active[c[0]]), onclick: function () { active[c[0]] = !active[c[0]]; render(); } }, [c[1]()]));
+    });
+  }
+  function match(r) {
+    var origins = ['jp', 'tn'].filter(function (k) { return active[k]; });
+    var fams = Object.keys(KB.families).filter(function (k) { return active[k]; });
+    if (origins.length && origins.indexOf(r.origin) === -1) return false;
+    if (fams.length && !fams.every(function (f) { return r.families.indexOf(f) !== -1; })) return false;
+    if (q) { var hay = (r.name + ' ' + r.name_ar + ' ' + r.summary + ' ' + r.description).toLowerCase(); if (hay.indexOf(q) === -1) return false; }
+    return true;
+  }
+  function name(r) { return G.lang() === 'ar' && r.name_ar ? r.name_ar : r.name; }
+  function render() {
+    chips();
+    var grid = G.clear(document.getElementById('grid'));
+    var list = KB.records.filter(match);
+    document.getElementById('count').textContent = list.length + ' ' + t('lb_count');
+    list.forEach(function (r) {
+      grid.appendChild(el('button', { type: 'button', class: 'rec', onclick: function () { open(r); } }, [
+        el('span', { class: 'origin ' + r.origin }, [el('i', { class: 'dot' }), t(r.origin === 'jp' ? 'origin_jp' : 'origin_tn')]),
+        el('h3', null, [name(r), r.jp ? el('span', { class: 'jp', lang: 'ja', style: 'color:var(--g-gold);font-size:14px;margin-inline-start:8px' }, [r.jp]) : null]),
+        el('p', { class: 'small', style: 'color:var(--g-ink-2)' }, [r.summary]),
+        el('div', { class: 'fam' }, r.families.map(function (f) { return el('span', null, [KB.families[f][G.lang()] || KB.families[f].fr]); })),
+        el('div', null, [G.pill('demo', t('draft'))])
+      ]));
+    });
+  }
+  function condText(c) {
+    var v = c.op === 'in' ? c.value.join(', ') : c.op === 'between' ? c.value[0] + '–' + c.value[1] : (c.op === 'max' ? '≤ ' : '≥ ') + c.value;
+    return c.field + ' ' + v + ' (' + t(c.hard ? 'hard' : 'soft') + (c.provisional ? ', ' + t('prov') : '') + ') — ' + c.why;
+  }
+  function open(r) {
+    var box = G.clear(document.getElementById('dlg-in'));
+    var dd = function (k, v) { return [el('dt', null, [t(k)]), el('dd', null, Array.isArray(v) ? v : [v])]; };
+    box.appendChild(el('button', { class: 'gp-btn ghost sm x', type: 'button', onclick: function () { document.getElementById('dlg').close(); } }, [t('lb_close')]));
+    box.appendChild(el('p', { class: 'eyebrow' }, [r.id + ' · v' + r.version]));
+    box.appendChild(el('h2', { id: 'dlg-title', style: 'font-size:28px;margin-top:6px' }, [name(r), r.jp ? el('span', { class: 'jp', lang: 'ja', style: 'color:var(--g-gold);font-size:18px;margin-inline-start:10px' }, [r.jp]) : null]));
+    var kv = el('dl', { class: 'kv' });
+    [].concat(
+      dd('k_origin', t(r.origin === 'jp' ? 'origin_jp' : 'origin_tn')),
+      dd('k_desc', r.description),
+      dd('k_cond', [el('ul', { style: 'margin:0;padding-inline-start:18px' }, r.conditions.map(function (c) { return el('li', null, [condText(c)]); }))]),
+      dd('k_adapt', r.adaptations.length ? r.adaptations.map(function (a) { return a.text; }).join(' ') : t('none')),
+      dd('k_mat', r.materials), dd('k_cost', r.cost), dd('k_actors', r.actors), dd('k_reg', r.regulation), dd('k_risk', r.risks),
+      dd('k_actions', [el('ol', { style: 'margin:0;padding-inline-start:18px' }, r.actions.map(function (a) { return el('li', null, [a]); }))]),
+      dd('k_src', r.sources.map(function (s) { return el('div', null, [s.url ? el('a', { href: s.url, target: '_blank', rel: 'noopener' }, [s.label]) : el('span', { class: 'muted' }, [s.label + ' (' + t('no_src') + ')'])]); })),
+      dd('k_status', [G.pill('demo', t('draft'))])
+    ).forEach(function (n) { kv.appendChild(n); });
+    box.appendChild(kv);
+    var d = document.getElementById('dlg');
+    if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+    try { history.replaceState(null, '', '#' + r.id); } catch (e) {}
+  }
+  document.getElementById('dlg').addEventListener('close', function () { try { history.replaceState(null, '', location.pathname); } catch (e) {} });
+  document.getElementById('s').addEventListener('input', function (e) { q = e.target.value.trim().toLowerCase(); render(); });
+  G.addStrings({ fr: { draft: 'Brouillon, non validée par un expert' }, ar: { draft: 'مسودة غير مصادق عليها' } });
+  render();
+  G.onLang(render);
+  if (location.hash) { var r = KB.get(location.hash.slice(1)); if (r) open(r); }
+}());
+</script>
+</body>
+</html>

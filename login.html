@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Gaia</title>
+<meta name="description" content="Sign in to Gaia, or create an account as a farmer, cooperative or partner.">
+<meta name="theme-color" content="#344A38">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;700&family=Caveat:wght@500;600&family=Cairo:wght@400;600&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper-noise">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<svg class="grain" aria-hidden="true" focusable="false">
+  <filter id="grainFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="4" stitchTiles="stitch"></feTurbulence>
+    <feColorMatrix type="saturate" values="0"></feColorMatrix>
+    <feComponentTransfer><feFuncA type="linear" slope="0.38"></feFuncA></feComponentTransfer>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grainFilter)"></rect>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <span class="hanko" aria-hidden="true">&#32070;</span>
+      <span class="brand-word">GAIA</span>
+      <span class="jp">大地</span>
+    </a>
+    <!--nav--><nav class="mainnav" aria-label="Main">
+      <a class="navlink" href="story.html">Story</a>
+      <a class="navlink" href="water.html">Water</a>
+      <a class="navlink" href="energy.html">Energy</a>
+      <a class="navlink" href="agriculture.html">Agriculture</a>
+      <a class="navlink" href="bridge.html">Bridge</a>
+      <a class="navlink" href="ai.html">Engine</a>
+      <a class="navlink" href="community.html">Community</a>
+    </nav>
+    <details class="navmenu">
+      <summary>Chapters</summary>
+      <nav class="menu" aria-label="Chapters">
+        <a href="index.html"><span class="k">&#24207;</span>Prologue</a>
+        <a href="story.html"><span class="k">一</span>Story</a>
+        <a href="water.html"><span class="k">二</span>Water</a>
+        <a href="energy.html"><span class="k">三</span>Energy</a>
+        <a href="agriculture.html"><span class="k">四</span>Agriculture</a>
+        <a href="bridge.html"><span class="k">五</span>Bridge</a>
+        <a href="ai.html"><span class="k">六</span>Engine</a>
+        <a href="community.html"><span class="k">七</span>Community</a>
+        <a href="home.html"><span class="k">&#32080;</span>GAIA platform</a>
+      </nav>
+    </details><!--/nav-->
+    <a class="btn btn-ghost" href="home.html" style="min-height:44px;padding:0 20px;font-size:14px">Open the platform</a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="auth">
+
+      <div class="auth-art reveal">
+        <img src="images/olive-grove.svg" alt="" width="400" height="560" loading="lazy" style="max-height:62vh;object-fit:cover;width:100%">
+        <p class="hand" style="margin-top:18px">Your field remembers.<br>Gaia just writes it down.</p>
+      </div>
+
+      <div class="auth-card reveal">
+        <p class="eyebrow">Gaia account</p>
+        <h1 id="authTitle">Welcome back</h1>
+        <p class="lede" id="authLede">Sign in to see your parcels, your technique cards and what your neighbours have learned this week.</p>
+
+        <div class="tabs" role="tablist" aria-label="Sign in or create an account">
+          <button type="button" role="tab" id="tabSignin" aria-selected="true" aria-controls="authForm">Sign in</button>
+          <button type="button" role="tab" id="tabSignup" aria-selected="false" aria-controls="authForm">Create account</button>
+        </div>
+
+        <form id="authForm" novalidate>
+
+          <div class="form-field signup-only" hidden>
+            <label for="fullname">Your name</label>
+            <input id="fullname" name="fullname" type="text" autocomplete="name" placeholder="Amel Ben Salah">
+          </div>
+
+          <div class="form-field signup-only" hidden>
+            <label for="role">I am a</label>
+            <select id="role" name="role">
+              <option value="farmer">Farmer</option>
+              <option value="cooperative">Cooperative</option>
+              <option value="agronomist">Agronomist</option>
+              <option value="partner">Partner or researcher</option>
+            </select>
+          </div>
+
+          <div class="form-field signup-only" hidden>
+            <label for="country">Country</label>
+            <select id="country" name="country">
+              <option value="tn">Tunisia &nbsp;<span>تونس</span></option>
+              <option value="jp">Japan &nbsp;日本</option>
+              <option value="other">Elsewhere</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="email">Email or phone</label>
+            <input id="email" name="email" type="text" autocomplete="username" placeholder="you@example.com">
+          </div>
+
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••">
+            <p class="hint signin-only">Forgot it? <a href="#reset">Send me a reset link</a></p>
+            <p class="hint signup-only" hidden>At least 8 characters.</p>
+          </div>
+
+          <div class="form-field">
+            <label for="lang">Interface language</label>
+            <select id="lang" name="lang">
+              <option value="fr">Français</option>
+              <option value="ar">العربية — الدارجة التونسية</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="authSubmit" style="width:100%;justify-content:center;margin-top:22px">Sign in</button>
+
+          <p class="divider">or</p>
+
+          <a class="btn btn-ghost" href="home.html" style="width:100%;justify-content:center">Continue as a guest</a>
+
+          <p class="notice">
+            <strong>Front-end only.</strong> This form is a mockup: nothing is sent, stored or verified, and no account is created. Wire it to your auth provider before the demo.
+          </p>
+
+          <p class="hint" style="margin-top:16px">By continuing you accept the [TERMS] and the [PRIVACY POLICY].</p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="eyebrow" style="color:var(--sage)">Kizuna 2026</p>
+    <h2 style="margin-top:14px">Rooted in nature,<br>built with code.</h2>
+    <div class="footer-row">
+      <p style="flex-grow:1">Team Gaia <span class="jp">大地</span> — [TEAM MEMBERS]</p>
+      <p><a href="index.html">Back to the site</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  var signin = document.getElementById('tabSignin');
+  var signup = document.getElementById('tabSignup');
+  var title = document.getElementById('authTitle');
+  var lede = document.getElementById('authLede');
+  var submit = document.getElementById('authSubmit');
+  var form = document.getElementById('authForm');
+
+  function mode(isSignup) {
+    signin.setAttribute('aria-selected', String(!isSignup));
+    signup.setAttribute('aria-selected', String(isSignup));
+    title.textContent = isSignup ? 'Join Gaia' : 'Welcome back';
+    lede.textContent = isSignup
+      ? 'Tell us who you are and where you farm. Your first parcel takes about three minutes to describe.'
+      : 'Sign in to see your parcels, your technique cards and what your neighbours have learned this week.';
+    submit.textContent = isSignup ? 'Create my account' : 'Sign in';
+    document.getElementById('password').setAttribute(
+      'autocomplete', isSignup ? 'new-password' : 'current-password');
+
+    form.querySelectorAll('.signup-only').forEach(function (el) { el.hidden = !isSignup; });
+    form.querySelectorAll('.signin-only').forEach(function (el) { el.hidden = isSignup; });
+  }
+
+  signin.addEventListener('click', function () { mode(false); });
+  signup.addEventListener('click', function () { mode(true); });
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    window.location.href = 'home.html';
+  });
+}());
+</script>
+</body>
+</html>
