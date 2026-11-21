@@ -12,11 +12,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import agent, assistant, business, engine, guard, nexus, plantnet, solar, vision
+from . import agent, assistant, auth, business, engine, guard, nexus, plantnet, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -33,6 +33,96 @@ def health() -> dict:
     llms = assistant.available()
     return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(),
             "assistant_llm": bool(llms), "assistant_providers": llms, "plantnet": bool(plantnet.api_key())}
+
+
+class FarmIn(BaseModel):
+    lat: float
+    lon: float
+    crop: Optional[str] = None
+    water: Optional[str] = None
+    share: bool = False
+
+
+class SignupIn(BaseModel):
+    name: str = Field(..., max_length=80)
+    identifier: str = Field(..., max_length=120, description="email or phone number")
+    password: str = Field(..., max_length=200)
+    role: str = "farmer"
+    region: Optional[str] = Field(None, max_length=80)
+    farm: Optional[FarmIn] = None
+
+
+class LoginIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+    password: str = Field(..., max_length=200)
+
+
+def _bearer(authorization: Optional[str]) -> Optional[str]:
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization[7:].strip() or None
+    return None
+
+
+def _auth_call(fn, *a, **k):
+    try:
+        return fn(*a, **k)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, detail={"code": e.code, "message": e.message}) from e
+
+
+@app.post("/auth/signup", status_code=201)
+def auth_signup(body: SignupIn) -> dict:
+    return _auth_call(auth.signup, **body.model_dump())
+
+
+@app.post("/auth/login")
+def auth_login(body: LoginIn) -> dict:
+    return _auth_call(auth.login, body.identifier, body.password)
+
+
+@app.get("/auth/me")
+def auth_me(authorization: Optional[str] = Header(None)) -> dict:
+    user = auth.user_for(_bearer(authorization))
+    if not user:
+        raise HTTPException(401, detail={"code": "no_session", "message": "Not signed in."})
+    return {"user": user}
+
+
+@app.post("/auth/logout")
+def auth_logout(authorization: Optional[str] = Header(None)) -> dict:
+    auth.logout(_bearer(authorization))
+    return {"signed_out": True}
+
+
+@app.put("/auth/farm")
+def auth_farm(body: Optional[FarmIn] = None, authorization: Optional[str] = Header(None)) -> dict:
+    """Link, update or (empty body) unlink the plot of the signed-in account."""
+    return {"user": _auth_call(auth.set_farm, _bearer(authorization), body.model_dump() if body else None)}
+
+
+@app.get("/share/neighbours")
+def share_neighbours(radius_km: float = 5.0, authorization: Optional[str] = Header(None)) -> dict:
+    """Neighbours who agreed to be visible: first name, crop, water source, distance rounded to 0.5 km."""
+    return _auth_call(auth.neighbours, _bearer(authorization), radius_km)
+
+
+class ShareRequestIn(BaseModel):
+    to: int
+
+
+class ShareRespondIn(BaseModel):
+    from_id: int
+    accept: bool
+
+
+@app.post("/share/request")
+def share_request(body: ShareRequestIn, authorization: Optional[str] = Header(None)) -> dict:
+    return _auth_call(auth.request_share, _bearer(authorization), body.to)
+
+
+@app.post("/share/respond")
+def share_respond(body: ShareRespondIn, authorization: Optional[str] = Header(None)) -> dict:
+    return _auth_call(auth.respond_share, _bearer(authorization), body.from_id, body.accept)
 
 
 @app.get("/knowledge/techniques")

@@ -494,6 +494,19 @@ body.gp {
   .gp-lang button { padding: 0 8px; min-width: 0; }
 }
 
+/* ---- account in the header */
+.gp-account { display: inline-flex; align-items: center; gap: 4px; }
+.gp .gp-acc { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 4px; border-radius: 999px; text-decoration: none;
+  color: #F3DFA8; background: rgba(217, 184, 106, 0.12); border: 1px solid rgba(217, 184, 106, 0.4); font-size: 13px; font-weight: 600; max-width: 180px; }
+.gp .gp-acc.in { padding: 0 14px; color: #DCE3D2; background: rgba(255, 255, 255, 0.06); border-color: rgba(220, 227, 210, 0.3); }
+.gp .gp-acc:hover { background: rgba(217, 184, 106, 0.22); }
+.gp-acc-av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  background: linear-gradient(145deg, #EBD08E, #B8954F); color: #0F1C15; flex-shrink: 0; }
+.gp-acc-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gp-acc-out { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(220, 227, 210, 0.3); background: transparent; color: #DCE3D2; cursor: pointer; display: inline-grid; place-items: center; padding: 0; }
+.gp .gp-acc.in svg { color: var(--g-gold-2); }
+.gp-acc-out:hover { color: #FFFDF8; background: rgba(255, 255, 255, 0.08); }
+
 /* ---- page head: big editorial title, kanji as a gold stamp */
 .gp-head { padding: 44px 0 22px; }
 .gp-head h1 {

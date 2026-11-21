@@ -6,3 +6,4 @@ backend/data/feedback.jsonl
 .env
 *.env
 !.env.example
+backend/data/users.db
