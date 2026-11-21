@@ -56,11 +56,12 @@ the story, bridge and community sections are read back from their own pages, so 
 | `home.html` | Platform home |
 | `land.html` | Land Intelligence: pick a plot on the map and build its "Land DNA" (Open-Meteo ERA5 climate, elevation, NASA POWER sun, soil). Farm inputs can be pre-filled with labelled demo values |
 | `engine.html` | Compatibility engine: feasible / adapt / insufficient / rejected for each practice, with reasons |
-| `nexus.html` | Water & energy: FAO-56 water need, pumping energy, solar sizing, monthly quota |
+| `nexus.html` | Water & energy: FAO-56 water need, pumping energy, solar sizing, monthly quota, and a satellite check: water actually used on the plot (FAO WaPOR v3, 100 m, last 12 months, `js/wapor.js`), measured crop coefficient and soil moisture |
 | `agrivoltaic.html` | Agrivoltaics: panel rows above the crop, light and shading simulation |
 | `health.html` | Plant health: photo quality check, then a two-stage tree / disease model (see below) |
 | `lab.html` | AI Lab: free questions in French, Arabic or English, answered by a language model (`js/lab-llm.js`: free in-browser model, Ollama, Groq, Hugging Face or Claude) from the knowledge records and the parcel profile (`js/lab-retrieval.js`), with the rule-based answer and sources underneath |
 | `library.html` | The 11 knowledge records with their sources |
+| `farm.html` | Dashboard: water pumped (from the farmer's meter readings, typed in My season or imported as a CSV from a meter / logger) against the daily quota, solar energy, savings, leak alerts from night readings, 7-day irrigation advice. A labelled simulation is shown only while there are no readings |
 | `season.html` | My season (a tab of the Dashboard): this month's actions for the declared crop, drought / rain / heat / frost alerts from the live Open-Meteo forecast, and water used (farmer's meter readings) against the FAO-56 monthly quota. No simulated value |
 | `calendar.html` | Crop calendar (a tab of the Dashboard) for olive, date palm, citrus and cereals, crossed with the plot's ERA5 rain and net irrigation need, plus the 24 Japanese solar terms (sekki) |
 
@@ -71,10 +72,10 @@ The knowledge base lives in `js/kb.js`. After changing it, run `node tools/expor
 
 ## Soil data
 
-The SoilGrids REST API is paused by ISRIC, so the Land DNA reads soil in this order:
+The Land DNA reads soil in this order (the SoilGrids REST API was paused by ISRIC in 2024–25 and answers again since November 2026):
 
 1. `soilEndpoint` in `js/gaia-core.js`, if you serve downloaded SoilGrids rasters for Tunisia;
-2. the SoilGrids REST API (short timeout, in case it is back online);
+2. the SoilGrids REST API (250 m, one retry; if it fails it is skipped for 30 minutes);
 3. `js/soil-tn.js`: typical topsoil values (texture, clay, organic carbon, 0–30 cm) for 21 Tunisian agro-ecological
    zones, compiled as orders of magnitude from HWSD v2 (FAO/IIASA) and SoilGrids 2.0. These are shown with
    confidence "low" and the zone name, never as a measurement of the parcel. A soil analysis replaces them.
