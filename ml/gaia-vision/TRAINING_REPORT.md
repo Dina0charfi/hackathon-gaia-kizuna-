@@ -1,3 +1,41 @@
+# GAIA Vision v3 (current model, 2026-11): olive added, tomato trained on real farm photos
+
+Same method as v2 below (frozen EfficientNet-B0, one linear head per task, near-duplicate-grouped split,
+temperature calibration, refusal threshold set on field validation photos). Two public field datasets added:
+
+- **Olive** (new plant): Uguz & Uysal (2021), 3,400 leaf photos from olive groves in Denizli, Turkey
+  (healthy / *Aculus olearius* / peacock spot), github.com/sinanuguz/CNN_olive_dataset. 3,311 readable
+  (89 files are truncated in the archives). Olive is GAIA's first Tunisian priority crop.
+- **Tomato-Village** (Gehlot et al. 2023, *Multimedia Systems*): 4,453 photos of tomato leaves taken on farms in
+  Rajasthan, github.com/mamta-joshi-gehlot/Tomato-Village. Adds early and late blight on real farm photos and four
+  field problems PlantVillage does not have: leaf miner, tomato spotted wilt virus, magnesium and nitrogen deficiency.
+
+Neither repository states a licence: the photos are used only to train the weights and are not redistributed here.
+Cite both papers in any publication.
+
+| model | classes | field test acc | answers / accuracy when answering | before (v2) |
+|---|---|---|---|---|
+| stage 1 (which plant) | 8 (olive added) | 95 % (n=3049) | 100 % / 95 % | 94 %, 7 classes |
+| **olive** | 3 | **96 %** (n=495) | 100 % / 96 % | not available |
+| tomato, all field photos | 14 | 71 % (n=712) | **28 % / 93 %** | 48 % (n=112), 7 % / 88 % |
+| tomato, Tomato-Village farm photos | | 77 % (n=592) | | – |
+| tomato, PlantDoc web photos | | 40 % (n=120) | | 48 % with 10 classes |
+| potato (PlantDoc) | 3 | 85 % (n=33) | 100 % / 85 % | 54 % (n=24) |
+| pepper (PlantDoc) | 2 | 59 % (n=22) | 100 % / 59 % | 65 % (n=20) |
+| citrus / grape / palm | | 96 % / 93 % / 82 % | | 97 % / 92 % / 81 % |
+
+What it means: olive works on grove photos. Tomato now answers on 28 % of field photos (4× more than v2) and is right
+93 % of the time when it answers; the rest are refused instead of guessed. Tomato on PlantDoc web photos (mixed
+backgrounds, several leaves) is still weak, and pepper and potato field test sets are tiny (±15 points).
+The next gain is Tunisian photos: GAIA Kaizen corrections reviewed by an agronomist, re-run with the same scripts.
+All numbers: `reports/results.md`, `reports/report.json`, confusion matrices in `reports/`.
+
+Reproduce: extract the olive archives and clone Tomato-Village, then
+`python scripts/10_fetch_hf.py --hf hf --out raw_hf --index data/index.csv --olive <olive folder> --tomato-village "<Tomato-Village>/Variant-a(Multiclass Classification)"`
+and steps 11–14 as below (about 1 h 15 on 4 CPU cores).
+
+---
+
 # GAIA Vision v2: why v1 "overfit" and what changed
 
 ## Diagnosis of the v1 notebook (`GAIA_Vision_Kaggle.ipynb`)

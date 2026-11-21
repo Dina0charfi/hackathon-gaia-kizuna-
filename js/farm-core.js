@@ -13,9 +13,13 @@
      groundwater spared   = Vmax − pumped                         (what an uncapped pump would take)
      diesel avoided       = E_solar / kWh_per_L ; CO₂ = L × 2.68 kg
 
-   The meter readings are SIMULATED for the demo (seeded, reproducible),
-   with two injected events so the alerts can be shown: a stretch of
-   over-pumping and a night-time flow (likely leak).
+   Water pumped comes from the farmer's METER READINGS (index in m³, typed in
+   My season or imported as a CSV from a meter / data logger):
+     daily volume = meter index interpolated linearly between readings;
+     night flow   = index rise between two readings both taken 22:00–05:00.
+   Only when there are no readings, a labelled DEMO series is simulated
+   (seeded, reproducible), with two injected events so the alerts can be
+   shown: a stretch of over-pumping and a night-time flow (likely leak).
    ========================================================================== */
 
 (function (root) {
@@ -106,6 +110,58 @@
     });
   }
 
+  /* Real readings. readings: [{date: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM', index: m³}] (meter index, cumulative).
+     Days outside the first..last reading get pumped = null (not measured). */
+  function ts(d) { return Date.parse(d.length <= 10 ? d + 'T12:00:00Z' : d.replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(d) ? '' : 'Z')); }
+  function isNight(d) { if (d.length <= 10) return false; var h = +d.slice(11, 13); return h >= 22 || h < 5; }
+  function parseReadings(text) {
+    var out = [];
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      var c = line.split(/[;,\t]/).map(function (x) { return x.trim().replace(/^"|"$/g, ''); });
+      if (c.length < 2) return;
+      var d = c[0].replace(/^(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'), v = parseFloat(c[1].replace(',', '.'));
+      if (!/^\d{4}-\d{2}-\d{2}/.test(d) || !isFinite(v) || isNaN(ts(d))) return;   // header or bad line
+      out.push({ date: d.slice(0, 16).replace(' ', 'T'), index: v });
+    });
+    return out.sort(function (a, b) { return ts(a.date) - ts(b.date); });
+  }
+  function indexAt(R, t) {   // linear interpolation of the meter index; null outside the readings
+    if (!R.length || t < R[0].t || t > R[R.length - 1].t) return null;
+    for (var i = 1; i < R.length; i++) if (t <= R[i].t) {
+      var a = R[i - 1], b = R[i];
+      return b.t === a.t ? b.v : a.v + (b.v - a.v) * (t - a.t) / (b.t - a.t);
+    }
+    return R[R.length - 1].v;
+  }
+  function fromReadings(past, s, readings) {
+    var R = (readings || []).map(function (r) { return { t: ts(r.date), v: +r.index, d: r.date }; })
+      .filter(function (r) { return !isNaN(r.t) && isFinite(r.v); }).sort(function (a, b) { return a.t - b.t; });
+    var night = {};
+    for (var i = 1; i < R.length; i++) {
+      var a = R[i - 1], b = R[i];
+      if (isNight(a.d) && isNight(b.d) && b.t - a.t <= 8 * 3600000 && b.v - a.v > 0.2) {
+        var day = new Date(b.t - 6 * 3600000).toISOString().slice(0, 10);   // a night belongs to the day it starts
+        night[day] = (night[day] || 0) + (b.v - a.v);
+      }
+    }
+    var n = past.length;
+    return past.map(function (d, k) {
+      var q = quotaDay(d, s), t0 = Date.parse(d.date + 'T00:00:00Z'), t1 = t0 + 86400000;
+      var i0 = indexAt(R, t0), i1 = indexAt(R, t1), back = n - 1 - k;
+      if (i1 === null && back === 0 && R.length && R[R.length - 1].t >= t0) i1 = R[R.length - 1].v;   // today so far
+      if (i0 === null && R.length && R[0].t < t1 && R[0].t >= t0) i0 = R[0].v;
+      var pumped = i0 !== null && i1 !== null ? Math.max(0, i1 - i0) : null;
+      var solar = solarKwh(d.ghi, s), cap = solarPumpCapacity(d.ghi, s);
+      var kwh = pumped === null ? null : pumpKwh(pumped, s);
+      return {
+        date: d.date, et0: d.et0, rain: d.rain, ghi: d.ghi, tmax: d.tmax,
+        quota: q.vol, pumped: pumped, nightFlow: night[d.date] || 0, kwhPump: kwh,
+        solar: solar, solarUsed: kwh === null ? null : Math.min(solar, kwh), capacity: cap,
+        spared: pumped === null ? null : Math.max(0, cap - pumped), partial: back === 0, measured: pumped !== null
+      };
+    });
+  }
+
   function forecast(next, s) {
     return next.map(function (d) {
       var q = quotaDay(d, s);
@@ -124,7 +180,9 @@
 
   function summary(hist, s, today) {
     var month = today.slice(0, 7);
-    var mtd = hist.filter(function (h) { return h.date.slice(0, 7) === month; });
+    // only days with a measured (or demo) volume count, so the quota is compared over the same days
+    var mtd = hist.filter(function (h) { return h.date.slice(0, 7) === month && h.pumped !== null; });
+    var all = hist.filter(function (h) { return h.pumped !== null; });
     var sum = function (arr, k) { return arr.reduce(function (a, h) { return a + (h[k] || 0); }, 0); };
     var solarUsed = sum(mtd, 'solarUsed');
     var litres = s.diesel_kwh_l > 0 ? solarUsed / s.diesel_kwh_l : 0;
@@ -134,7 +192,7 @@
       solar: sum(mtd, 'solar'), solarUsed: solarUsed, kwhPump: sum(mtd, 'kwhPump'),
       litres: litres, tnd: litres * (s.diesel_tnd_l || 0), co2: litres * DIESEL_CO2_KG_L,
       spared: sum(mtd, 'spared'),
-      pumped30: sum(hist, 'pumped'), quota30: sum(hist, 'quota')
+      pumped30: sum(all, 'pumped'), quota30: sum(all, 'quota'), measuredDays: all.length
     };
   }
 
@@ -144,7 +202,7 @@
    */
   function alerts(hist, fc, sum) {
     var out = [];
-    var done = hist.filter(function (h) { return !h.partial; });
+    var done = hist.filter(function (h) { return !h.partial && h.pumped !== null; });
     // 1. month to date: pumped more than the crop needed so far
     if (sum.quota > 0 && sum.pumped > sum.quota * 1.05) {
       out.push({ level: sum.pumped > sum.quota * 1.15 ? 'critical' : 'warning', code: 'mtd_over', data: { pct: 100 * (sum.pumped / sum.quota - 1), extra: sum.pumped - sum.quota } });
@@ -201,6 +259,7 @@
     DEFAULTS: DEFAULTS, DIESEL_CO2_KG_L: DIESEL_CO2_KG_L, NORMALS: NORMALS,
     effRainDay: effRainDay, quotaDay: quotaDay, pumpKwh: pumpKwh, solarKwh: solarKwh,
     solarPumpCapacity: solarPumpCapacity, sizeKwp: sizeKwp, simulateMeter: simulateMeter,
+    fromReadings: fromReadings, parseReadings: parseReadings,
     forecast: forecast, summary: summary, alerts: alerts, syntheticWeather: syntheticWeather
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

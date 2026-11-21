@@ -12,7 +12,7 @@ pytest -q                                        # needs node for the JS parity 
 
 | Endpoint | What it does | Status |
 |---|---|---|
-| `GET /health` | records loaded, whether a vision model is installed, whether the assistant LLM and Pl@ntNet keys are set | implemented |
+| `GET /health` | records loaded, whether a vision model is installed, which assistant LLM providers are available (`assistant_providers`) and whether a Pl@ntNet key is set | implemented |
 | `POST /plantnet` | optional Pl@ntNet species + anomaly check, only after the user consents in the Plant health page; key in `PLANTNET_API_KEY` (environment or `backend/.env`). The page checks `/health` first and says why the check is unavailable (server not running, no key) | implemented |
 | `GET /knowledge/techniques?origin=tn\|jp\|x` | the 11 knowledge records (exported from `js/kb.js` by `tools/export_kb.js`) | implemented |
 | `GET /parcel/profile?lat=&lon=` | GAIA LAND DNA from Open-Meteo (ERA5), Copernicus DEM, NASA POWER; soil from a local SoilGrids raster (`GAIA_SOIL_RASTER`), otherwise the regional reference `data/soil_tn.json` (confidence low) | implemented, needs internet; not tested from the build sandbox |
@@ -22,7 +22,7 @@ pytest -q                                        # needs node for the JS parity 
 | `POST /business/payg` · `/business/coop` · `/business/adoption` | pay-as-you-go pump kit paid from diesel savings, cooperative shared pump (allowance = Σ quotas), four adoption tests | implemented, parity-tested |
 | `POST /solar/simulate` | agrivoltaic simulation with pvlib (SPA, Erbs, isotropic) + 2-D row shading | implemented, labelled *simulation* |
 | `POST /diagnose` | two-stage plant health (tree, then disease) with ONNX models from `models/gaia-vision/manifest.json` (or `GAIA_MODEL_DIR`); abstains when unsure | implemented; returns **503 model_not_loaded** until a validated model is installed (none is shipped yet) |
-| `POST /assistant` | AI Lab wording by Claude (`claude-opus-5-5`, override with `GAIA_LLM_MODEL`), grounded only in the records and profile the page sends; says when the records do not cover the question | implemented; returns **503 no_api_key** until `ANTHROPIC_API_KEY` is set on the server |
+| `POST /assistant` | AI Lab answer by a language model, grounded in the records, profile and conversation the page sends; general knowledge only when labelled as such. Providers tried in order: Claude (`ANTHROPIC_API_KEY`), a free OpenAI-compatible service (`GAIA_LLM_PROVIDER=groq|huggingface|openrouter|ollama|custom` + `GAIA_LLM_API_KEY`), then Ollama on this machine (found automatically) | implemented; **503 no_api_key** when none is configured |
 | `POST /feedback` | Kaizen correction, appended to `data/feedback.jsonl` with `expert_status: pending` | implemented |
 
 To make the website send Kaizen feedback here, set `feedbackEndpoint: 'http://127.0.0.1:8000/feedback'` in `js/gaia-core.js` (`CONFIG`).

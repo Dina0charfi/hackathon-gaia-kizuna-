@@ -29,7 +29,7 @@ pytest -q
 ```
 
 Everything in the website works without this server, except two optional extras: the Pl@ntNet check in
-Plant health and Claude wording in the AI Lab. For Pl@ntNet, put `PLANTNET_API_KEY=...` in `backend/.env`
+Plant health and the server-side language models of the AI Lab (the Lab can also run a free model inside the browser). For Pl@ntNet, put `PLANTNET_API_KEY=...` in `backend/.env`
 (never commit it), start the server as above, and reload the page: it finds the server on port 8000 or 8765
 and says why the check is unavailable when it is not (server not running, no key, key refused, network).
 
@@ -56,11 +56,12 @@ the story, bridge and community sections are read back from their own pages, so 
 | `home.html` | Platform home |
 | `land.html` | Land Intelligence: pick a plot on the map and build its "Land DNA" (Open-Meteo ERA5 climate, elevation, NASA POWER sun, soil). Farm inputs can be pre-filled with labelled demo values |
 | `engine.html` | Compatibility engine: feasible / adapt / insufficient / rejected for each practice, with reasons |
-| `nexus.html` | Water & energy: FAO-56 water need, pumping energy, solar sizing, monthly quota |
+| `nexus.html` | Water & energy: FAO-56 water need, pumping energy, solar sizing, monthly quota, and a satellite check: water actually used on the plot (FAO WaPOR v3, 100 m, last 12 months, `js/wapor.js`), measured crop coefficient and soil moisture |
 | `agrivoltaic.html` | Agrivoltaics: panel rows above the crop, light and shading simulation |
 | `health.html` | Plant health: photo quality check, then a two-stage tree / disease model (see below) |
-| `lab.html` | AI Lab: free questions in French, Arabic or English, answered from the knowledge records and the parcel profile (`js/lab-retrieval.js`); optional Claude wording through the API |
+| `lab.html` | AI Lab: free questions in French, Arabic or English, answered by a language model (`js/lab-llm.js`: free in-browser model, Ollama, Groq, Hugging Face or Claude) from the knowledge records and the parcel profile (`js/lab-retrieval.js`), with the rule-based answer and sources underneath |
 | `library.html` | The 11 knowledge records with their sources |
+| `farm.html` | Dashboard: water pumped (from the farmer's meter readings, typed in My season or imported as a CSV from a meter / logger) against the daily quota, solar energy, savings, leak alerts from night readings, 7-day irrigation advice. A labelled simulation is shown only while there are no readings |
 | `season.html` | My season (a tab of the Dashboard): this month's actions for the declared crop, drought / rain / heat / frost alerts from the live Open-Meteo forecast, and water used (farmer's meter readings) against the FAO-56 monthly quota. No simulated value |
 | `calendar.html` | Crop calendar (a tab of the Dashboard) for olive, date palm, citrus and cereals, crossed with the plot's ERA5 rain and net irrigation need, plus the 24 Japanese solar terms (sekki) |
 
@@ -71,32 +72,31 @@ The knowledge base lives in `js/kb.js`. After changing it, run `node tools/expor
 
 ## Soil data
 
-The SoilGrids REST API is paused by ISRIC, so the Land DNA reads soil in this order:
+The Land DNA reads soil in this order (the SoilGrids REST API was paused by ISRIC in 2024–25 and answers again since November 2026):
 
 1. `soilEndpoint` in `js/gaia-core.js`, if you serve downloaded SoilGrids rasters for Tunisia;
-2. the SoilGrids REST API (short timeout, in case it is back online);
+2. the SoilGrids REST API (250 m, one retry; if it fails it is skipped for 30 minutes);
 3. `js/soil-tn.js`: typical topsoil values (texture, clay, organic carbon, 0–30 cm) for 21 Tunisian agro-ecological
    zones, compiled as orders of magnitude from HWSD v2 (FAO/IIASA) and SoilGrids 2.0. These are shown with
    confidence "low" and the zone name, never as a measurement of the parcel. A soil analysis replaces them.
 
-## AI Lab with Claude (optional)
+## AI Lab: a real language model (free options first)
 
-Without configuration the Lab answers from retrieval and templates. To add wording by Claude, grounded only in the
-records and values the page retrieved:
+Every question first gets GAIA's rule-based answer (records + Land DNA + verdicts). A language model then writes
+the answer from that evidence and the last turns of the conversation; the rule-based sections stay one click below,
+and any figure the model writes that is not in the evidence is highlighted. The Lab uses the first source that works:
 
-```
-cd backend
-export ANTHROPIC_API_KEY=...        # never commit it
-uvicorn gaia.main:app --reload
-```
+| Source | Cost | How |
+|---|---|---|
+| Free model **inside the browser** (Qwen2.5 1.5B via WebLLM) | free, no key, no server | click *Turn on the free model* in the AI Lab (needs WebGPU: recent Chrome/Edge; ~1 GB downloaded once, then cached) |
+| **Ollama** on the same computer | free, offline | install Ollama, `ollama pull qwen2.5:3b`, start the GAIA server: it finds Ollama by itself |
+| **Groq** | free key (rate-limited) | `backend/.env`: `GAIA_LLM_PROVIDER=groq` and `GAIA_LLM_API_KEY=gsk_...` (key from console.groq.com) |
+| **Hugging Face** / **OpenRouter** | free token / free models | `GAIA_LLM_PROVIDER=huggingface` (or `openrouter`) and `GAIA_LLM_API_KEY=...` |
+| **Claude** | paid key | `ANTHROPIC_API_KEY=...` |
 
-then, before `js/gaia-core.js` is loaded in `lab.html` (or in your own config script):
-
-```html
-<script>window.GAIA_CONFIG = { assistantEndpoint: 'http://127.0.0.1:8000/assistant' };</script>
-```
-
-The page still blocks any model sentence containing a number that is not in the evidence it sent.
+Start the server with `cd backend && uvicorn gaia.main:app --reload`. On localhost the Lab finds it on port 8000 or
+8765; elsewhere set `window.GAIA_CONFIG = { assistantEndpoint: 'https://your-server/assistant' }` before
+`js/gaia-core.js`. Never commit a key: `backend/.env` is git-ignored.
 
 ## Plant health
 

@@ -256,8 +256,8 @@
 
   /* ---------------------------------------------------------- soil */
   // Order: 1) configured soil service (local SoilGrids rasters), 2) the SoilGrids
-  // REST API (paused by ISRIC; tried with a short timeout, and not again for 6 h once it
-  // failed), 3) the bundled 5 km grid of SoilGrids 2.0 values (js/soil-grid-tn.js),
+  // REST API (paused by ISRIC in 2024-25, answering again in Nov 2026; one retry, and not
+  // tried again for 30 min once it failed), 3) the bundled 5 km grid of SoilGrids 2.0 values (js/soil-grid-tn.js),
   // 4) the regional reference table in js/soil-tn.js, shown with confidence "low".
   function textureOf(sand, clay) {
     if (clay === null || clay === undefined) return null;
@@ -268,7 +268,7 @@
   function soilGridsRest(lat, lon) {
     var url = 'https://rest.isric.org/soilgrids/v2.0/properties/query?lon=' + lon + '&lat=' + lat +
       '&property=clay&property=sand&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean';
-    return getJSON(url, 5000).then(function (d) {
+    return getJSONRetry(url, 12000, [1500]).then(function (d) {
       var out = {};
       ((d.properties && d.properties.layers) || []).forEach(function (L) {
         var w = { '0-5cm': 5, '5-15cm': 10, '15-30cm': 15 }, sum = 0, wt = 0;
@@ -322,7 +322,7 @@
     var viaRest = function () {
       if (flagGet('soilgrids-down')) return Promise.resolve(bundled('SoilGrids injoignable : API REST en pause.'));
       return soilGridsRest(lat, lon).then(function (d) { return fromGrid(d, meta); })
-        .catch(function (e) { flagSet('soilgrids-down', 360); return bundled('SoilGrids injoignable (' + why(e) + ') : API REST en pause.'); });
+        .catch(function (e) { flagSet('soilgrids-down', 30); return bundled('SoilGrids injoignable (' + why(e) + ') : API REST en pause.'); });
     };
     if (!C().soilEndpoint) return viaRest();
     var url = C().soilEndpoint.replace('{lat}', lat).replace('{lon}', lon);
