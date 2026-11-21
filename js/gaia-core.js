@@ -15,6 +15,7 @@
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
+    plantnetModel: 'models/plantnet-mnv4/',            // Pl@ntNet's open species model (Apache-2.0), runs in the browser: no key, no server
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
     plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
@@ -35,7 +36,7 @@
   var DICT = {
     fr: {
       tagline: "L'intelligence qui comprend la terre",
-      nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab',
+      nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
       skip: 'Aller au contenu',
@@ -55,7 +56,7 @@
     },
     ar: {
       tagline: 'ذكاء يفهم الأرض',
-      nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء',
+      nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء', nav_agent: 'الوكيل',
       nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
       skip: 'انتقل إلى المحتوى',
@@ -75,7 +76,7 @@
     },
     en: {
       tagline: 'Intelligence that understands the land',
-      nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab',
+      nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
       skip: 'Skip to content',
@@ -95,7 +96,7 @@
     },
     ja: {
       tagline: '土地を理解するインテリジェンス',
-      nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ',
+      nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ', nav_agent: 'エージェント',
       nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
       skip: '本文へ移動',
@@ -246,7 +247,7 @@
   /* ---------------------------------------------------------- shell */
   var NAV = [
     ['home', 'home.html', 'nav_home'], ['land', 'land.html', 'nav_land'], ['engine', 'engine.html', 'nav_engine'],
-    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
+    ['lab', 'lab.html', 'nav_lab'], ['agent', 'agent.html', 'nav_agent'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
     ['biz', 'business.html', 'nav_biz'], ['agv', 'agrivoltaic.html', 'nav_agv'], ['lib', 'library.html', 'nav_lib']
   ];
 

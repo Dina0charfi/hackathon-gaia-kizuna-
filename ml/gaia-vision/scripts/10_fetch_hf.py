@@ -45,6 +45,9 @@ PLANTDOC = {
     "grape leaf": ("grape", "healthy"), "grape leaf black rot": ("grape", "black_rot"),
 }
 
+def merge(m):
+    return ("potato", "fungal_leaf_spot") if m and m[0] == "potato" and m[1] == "early_blight" else m
+
 def pv_map(name):
     if "___" not in name:
         return ("other", "background") if "background" in name.lower() else None
@@ -67,14 +70,20 @@ ORANGE = {"citrus_canker": "canker", "citrus_greening": "greening", "yellow_drag
           "healthy_leaf": "healthy", "powdery_mildew": "powdery_mildew", "citrus_mealybugs": "mealybugs",
           "spiny_whitefly": "spiny_whitefly", "shot_hole": "shot_hole", "die_back": "die_back"}
 GRAPE = {"Bacterial Leaf Spot": "bacterial_leaf_spot", "Downy Mildew": "downy_mildew", "Healthy Leaves": "healthy", "Powdery Mildew": "powdery_mildew"}
+# Potato Leaf Disease Dataset in Uncontrolled Environment (Shabrina et al. 2024, Data in Brief 52:109900): 3,076 field
+# photos from Magelang farms, Indonesia, labelled by cause. "Fungi" covers early blight and other fungal leaf spots,
+# so PlantVillage / PlantDoc early blight is merged into the same class (fungal_leaf_spot).
+POTATO_FIELD = {"Bacteria": "bacterial", "Fungi": "fungal_leaf_spot", "Healthy": "healthy", "Nematode": "nematode",
+                "Pest": "pest_damage", "Phytopthora": "late_blight", "Virus": "virus"}
 PALM = lambda n: ("palm", {"healthy_sample": "healthy", "honey": "honeydew", "bug": "dubas_bug", "dubas": "dubas"}.get(slug(n), slug(n)))
 
 #        folder name                                   source tag   domain   mapper                                           cap/class
 SOURCES = [
-    ("plant_village_classification",                "plantvillage", "lab",   lambda n, r: pv_map(n),                            450),
-    ("plant_doc_classification",                    "plantdoc",     "field", lambda n, r: plantdoc_map(n),                      None),
+    ("plant_village_classification",                "plantvillage", "lab",   lambda n, r: merge(pv_map(n)),                          450),
+    ("plant_doc_classification",                    "plantdoc",     "field", lambda n, r: merge(plantdoc_map(n)),                    None),
     ("citrus_fruit_leaf_disease_classification",    "citrus_sl",    "field", citrus_map,                                        None),
     ("orange_leaf_disease_classification",          "orange_leaf",    "field", lambda n, r: ("citrus", ORANGE[n]) if n in ORANGE else None, 350),
+    ("potato_leaf_disease_classification",          "potato_field", "field", lambda n, r: ("potato", POTATO_FIELD[n]),          None),
     ("grape_leaf_disease_classification",           "grape_agml",   "field", lambda n, r: ("grape", GRAPE[n]),                  None),
     ("date_palm_leaf_disease_classification",       "palm_sa",      "field", lambda n, r: PALM(n),                              None),
     ("date_palm_leaf_disease_classification_iraq",  "palm_iq",      "field", lambda n, r: PALM(n),                              400),

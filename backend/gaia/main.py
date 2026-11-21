@@ -16,7 +16,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import assistant, business, engine, guard, nexus, plantnet, solar, vision
+from . import agent, assistant, business, engine, guard, nexus, plantnet, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -238,5 +238,19 @@ def assistant_answer(body: AssistantIn) -> dict:
         d["records"] = KB["records"]
     try:
         return assistant.answer(d)
+    except assistant.AssistantUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
+
+
+class AgentIn(BaseModel):
+    messages: list[dict[str, Any]] = Field(..., min_length=1, max_length=60)
+    tools: list[dict[str, Any]] = Field(..., min_length=1, max_length=30)
+
+
+@app.post("/agent/step")
+def agent_step(body: AgentIn) -> dict:
+    """One step of the GAIA Farm Agent: the model's next tool calls, or its final plan. The page runs the tools. 503 when no model is configured."""
+    try:
+        return agent.step(body.messages, body.tools)
     except assistant.AssistantUnavailable as e:
         raise HTTPException(503, detail=e.detail) from e

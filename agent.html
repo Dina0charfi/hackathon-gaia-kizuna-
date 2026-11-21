@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Farm Agent — GAIA</title>
+<meta name="description" content="L'agent agricole de GAIA planifie, appelle les outils de GAIA (Land DNA, eau, nappe, Solar Brain, météo, risques de maladie) et rend un plan d'action daté.">
+<meta name="theme-color" content="#1F3A2B">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="platform.css">
+<style>
+  .ag-top { display: grid; gap: 12px; }
+  .ag-lab { font-weight: 600; font-size: 14px; }
+  .ag-form textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--g-line-2); border-radius: 12px; padding: 12px 14px; font: 16px var(--g-sans); resize: vertical; margin-top: 6px; background: #fff; }
+  body.gp[dir="rtl"] .ag-form textarea { font-family: var(--g-ar); }
+  .ag-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .ag-ex { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .ag-ex button { border: 1px solid var(--g-line); background: #fff; border-radius: 999px; padding: 7px 12px; min-height: 36px; font: 13px var(--g-sans); cursor: pointer; color: var(--g-ink-2); text-align: start; }
+  body.gp[dir="rtl"] .ag-ex button { font-family: var(--g-ar); }
+  .ag-ex button:hover { background: var(--g-sand-soft); }
+  .ag-mode { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .ag-chip { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--g-sand-soft); color: var(--g-ink-2); font-weight: 600; }
+  .ag-chip.server { background: #E3EEDD; color: #234A2E; }
+  .ag-chip.browser { background: #E6ECF5; color: #23395B; }
+  .ag-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; margin-top: 18px; align-items: start; }
+  @media (max-width: 900px) { .ag-grid { grid-template-columns: 1fr; } }
+  .ag-h { font-size: 18px; margin: 0 0 10px; }
+  .ag-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ag-step { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; padding: 10px; border: 1px solid var(--g-line); border-radius: 12px; background: #fff; animation: agIn .25s ease-out; }
+  @keyframes agIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .ag-step { animation: none; } }
+  .ag-step.running { border-color: #C9B77A; background: #FFFBEF; }
+  .ag-step.error { border-color: #D9A08A; background: #FFF4F0; }
+  .ag-step.thought, .ag-step.thinking { background: var(--g-paper); font-size: 14px; color: var(--g-ink-2); }
+  .ag-ico { font-size: 18px; line-height: 1.4; text-align: center; }
+  .ag-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .ag-head code { font-size: 12.5px; color: var(--g-forest); word-break: break-word; }
+  .ag-st { font-size: 11.5px; color: var(--g-ink-3); white-space: nowrap; }
+  .ag-why { font-size: 12.5px; color: var(--g-ink-3); }
+  .ag-sum { font-size: 14px; margin-top: 3px; color: var(--g-ink); }
+  .ag-sum.err { color: #8A3B22; }
+  .ag-step details summary { font-size: 12px; color: var(--g-ink-3); cursor: pointer; margin-top: 4px; }
+  .ag-step pre { max-height: 220px; overflow: auto; font-size: 11.5px; background: var(--g-paper); padding: 8px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+  .ag-dots::after { content: ''; animation: agDots 1.2s infinite steps(4); }
+  @keyframes agDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+  .ag-sit { font-family: var(--g-display); font-size: 17px; color: var(--g-forest); margin: 0 0 10px; }
+  body.gp[dir="rtl"] .ag-sit { font-family: var(--g-ar); }
+  .ag-acts { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: a; }
+  .ag-acts li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 12px; padding: 10px 12px; border-inline-start: 4px solid var(--g-olive, #7C9455); background: #fff; border-radius: 8px; }
+  @media (max-width: 560px) { .ag-acts li { grid-template-columns: 1fr; } }
+  .ag-when { font-weight: 700; font-size: 13px; color: var(--g-ink-2); }
+  .ag-txt { font-size: 14.5px; }
+  .ag-src { grid-column: 2; font-size: 11.5px; color: var(--g-ink-3); }
+  @media (max-width: 560px) { .ag-src { grid-column: 1; } }
+  .ag-watch h4 { margin: 14px 0 4px; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--g-ink-3); }
+  .ag-watch ul { margin: 0; padding-inline-start: 18px; font-size: 14px; color: var(--g-ink-2); }
+  .ag-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .ag-plan .llm-text p, .ag-plan .llm-text li { font-size: 15px; line-height: 1.55; }
+  .ag-plan mark.unv { background: #fde7b0; border-radius: 3px; padding: 0 2px; }
+</style>
+</head>
+<body class="gp">
+<main id="main" class="wrap">
+  <header class="gp-head">
+    <p class="eyebrow">GAIA FARM AGENT</p>
+    <h1><span data-i18n="ag_title">Agent agricole</span><span class="jp-mark">策</span></h1>
+    <p class="lead" data-i18n="ag_lead">Donnez un objectif. L'agent planifie, appelle les outils de GAIA et vous rend un plan d'action daté.</p>
+  </header>
+  <div id="app"></div>
+</main>
+<script src="js/gaia-core.js"></script>
+<script src="js/i18n-data.js"></script>
+<script src="js/kb.js"></script>
+<script src="js/kb-i18n.js"></script>
+<script src="js/soil-tn.js"></script>
+<script src="js/soil-grid-tn.js"></script>
+<script src="js/climate-core.js"></script>
+<script src="js/climate-tn.js"></script>
+<script src="js/landdna.js"></script>
+<script src="js/engine-core.js"></script>
+<script src="js/nexus-core.js"></script>
+<script src="js/guard-core.js"></script>
+<script src="js/solar-core.js"></script>
+<script src="js/agv-net.js"></script>
+<script src="js/agv-ai-core.js"></script>
+<script src="js/lab-retrieval.js"></script>
+<script src="js/lab-llm.js"></script>
+<script src="js/agent-tools.js"></script>
+<script src="js/agent.js"></script>
+</body>
+</html>

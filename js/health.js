@@ -241,6 +241,88 @@
           pn_off_key: 'Pl@ntNetによる同定は利用できません。GAIAサーバーは起動していますが、Pl@ntNetのキーがありません（backend/.env の PLANTNET_API_KEY）。', pn_err_quota: '本日のPl@ntNetの上限に達しました。明日もう一度お試しください。', pn_err: 'Pl@ntNetが応答できませんでした。', pn_retry: '再試行', pn_left: '本日の残り回数' }
   });
 
+  G.addStrings({
+    fr: { pl_t: 'Identification de l\'espèce (modèle Pl@ntNet, sur l\'appareil)', pl_p: 'Le modèle ouvert de Pl@ntNet (7 806 espèces de la flore méditerranéenne, licence Apache-2.0) tourne dans votre navigateur : la photo ne quitte pas l\'appareil, aucune clé n\'est nécessaire.',
+          pl_run: 'Identifier l\'espèce', pl_loading: 'Identification en cours (premier usage : 20 Mo à télécharger)…', pl_agree: 'Concorde avec GAIA', pl_disagree: 'Ne concorde pas avec GAIA : reprenez la photo ou montrez la plante à un technicien', pl_err: 'Le modèle Pl@ntNet n\'a pas pu être chargé : ',
+          pl_note: 'Le modèle reconnaît des espèces, pas les maladies. La tomate et le poivron cultivés ne sont pas dans sa liste (flore sauvage) : GAIA utilise alors son propre modèle.', pl_family: 'famille',
+          pn_key_how: 'Clé gratuite : créez un compte sur my.plantnet.org, menu « Your API key » (500 identifications par jour gratuites), puis écrivez PLANTNET_API_KEY=votre_clé dans backend/.env et relancez le serveur.' },
+    ar: { pl_t: 'التعرف على النوع (نموذج Pl@ntNet على الجهاز)', pl_p: 'يعمل نموذج Pl@ntNet المفتوح (7806 نوعاً من النباتات المتوسطية، رخصة Apache-2.0) داخل متصفحك: لا تغادر الصورة الجهاز ولا حاجة لمفتاح.',
+          pl_run: 'تعرّف على النوع', pl_loading: 'جارٍ التعرف (أول استعمال: تنزيل 20 م.ب)…', pl_agree: 'يتفق مع غايا', pl_disagree: 'لا يتفق مع غايا: أعد التصوير أو اعرض النبتة على تقني', pl_err: 'تعذّر تحميل نموذج Pl@ntNet: ',
+          pl_note: 'يتعرف النموذج على الأنواع لا على الأمراض. الطماطم والفلفل المزروعان ليسا في قائمته (نباتات برية)، فتستعمل غايا نموذجها الخاص.', pl_family: 'الفصيلة',
+          pn_key_how: 'مفتاح مجاني: أنشئ حساباً في my.plantnet.org، ثم «Your API key» (500 تعرف يومياً مجاناً)، واكتب PLANTNET_API_KEY=مفتاحك في backend/.env وأعد تشغيل الخادم.' },
+    en: { pl_t: 'Species identification (Pl@ntNet model, on this device)', pl_p: 'Pl@ntNet\'s open model (7,806 species of the Mediterranean flora, Apache-2.0 licence) runs in your browser: the photo never leaves the device and no key is needed.',
+          pl_run: 'Identify the species', pl_loading: 'Identifying (first use: 20 MB download)…', pl_agree: 'Agrees with GAIA', pl_disagree: 'Does not agree with GAIA: retake the photo or show the plant to a technician', pl_err: 'The Pl@ntNet model could not be loaded: ',
+          pl_note: 'The model recognises species, not diseases. Cultivated tomato and pepper are not in its list (wild flora): GAIA uses its own model for them.', pl_family: 'family',
+          pn_key_how: 'Free key: create an account at my.plantnet.org, open “Your API key” (500 identifications a day for free), then write PLANTNET_API_KEY=your_key in backend/.env and restart the server.' },
+    ja: { pl_t: '種の同定（Pl@ntNetモデル、端末内）', pl_p: 'Pl@ntNetの公開モデル（地中海植物7,806種、Apache-2.0ライセンス）がブラウザ内で動きます。写真は端末の外に出ず、キーも不要です。',
+          pl_run: '種を同定', pl_loading: '同定中（初回は20 MBをダウンロード）…', pl_agree: 'GAIAと一致', pl_disagree: 'GAIAと一致しません。撮り直すか技術者に見てもらってください', pl_err: 'Pl@ntNetモデルを読み込めませんでした：',
+          pl_note: 'このモデルが認識するのは種であり、病気ではありません。栽培トマトとピーマンはリストにないため（野生植物）、GAIA独自のモデルを使います。', pl_family: '科',
+          pn_key_how: '無料キー：my.plantnet.org でアカウントを作成し「Your API key」を開く（1日500回まで無料）。backend/.env に PLANTNET_API_KEY=キー と書き、サーバーを再起動。' }
+  });
+
+  /* ---------------------------------------------------------- Pl@ntNet open model, in the browser */
+  // GAIA plants by genus / species of the Pl@ntCLEF list, to cross-check GAIA's own stage 1.
+  var PL_GAIA = [[/^Olea /, 'olive'], [/^Phoenix /, 'palm'], [/^Citrus /, 'citrus'], [/^Vitis /, 'grape'], [/^Solanum tuberosum/, 'potato'], [/^Capsicum /, 'pepper'], [/^Solanum lycopersicum|^Lycopersicon/, 'tomato']];
+  var PL_COMMON = { 'Olea europaea L.': { fr: 'olivier', en: 'olive tree', ar: 'زيتون', ja: 'オリーブ' }, 'Phoenix dactylifera L.': { fr: 'palmier dattier', en: 'date palm', ar: 'نخلة التمر', ja: 'ナツメヤシ' },
+    'Citrus × aurantium L.': { fr: 'oranger / bigaradier', en: 'orange', ar: 'برتقال / نارنج', ja: 'オレンジ' }, 'Citrus × limon (L.) Osbeck': { fr: 'citronnier', en: 'lemon', ar: 'ليمون', ja: 'レモン' },
+    'Vitis vinifera L.': { fr: 'vigne', en: 'grapevine', ar: 'عنب', ja: 'ブドウ' }, 'Solanum tuberosum L.': { fr: 'pomme de terre', en: 'potato', ar: 'بطاطا', ja: 'ジャガイモ' },
+    'Ficus carica L.': { fr: 'figuier', en: 'fig tree', ar: 'تين', ja: 'イチジク' }, 'Punica granatum L.': { fr: 'grenadier', en: 'pomegranate', ar: 'رمان', ja: 'ザクロ' },
+    'Opuntia ficus-indica (L.) Mill.': { fr: 'figuier de Barbarie (hindi)', en: 'prickly pear', ar: 'هندي', ja: 'ウチワサボテン' }, 'Prunus amygdalus Batsch': { fr: 'amandier', en: 'almond', ar: 'لوز', ja: 'アーモンド' },
+    'Triticum turgidum L.': { fr: 'blé dur', en: 'durum wheat', ar: 'قمح صلب', ja: 'デュラム小麦' }, 'Hordeum vulgare L.': { fr: 'orge', en: 'barley', ar: 'شعير', ja: '大麦' },
+    'Prunus armeniaca L.': { fr: 'abricotier', en: 'apricot', ar: 'مشمش', ja: 'アンズ' }, 'Pistacia vera L.': { fr: 'pistachier', en: 'pistachio', ar: 'فستق', ja: 'ピスタチオ' } };
+  var PL = { status: 'idle', labels: null, sess: null };
+  function plUrl() { return G.CONFIG.plantnetModel || 'models/plantnet-mnv4/'; }
+  function plLoad() {
+    if (PL.sess) return Promise.resolve(PL);
+    return loadOrt().then(function () {
+      return Promise.all([fetch(plUrl() + 'labels.json').then(function (r) { if (!r.ok) throw new Error('labels ' + r.status); return r.json(); }),
+        window.ort.InferenceSession.create(plUrl() + 'plantnet-mnv4-int8.onnx')]);
+    }).then(function (x) { PL.labels = x[0]; PL.sess = x[1]; return PL; });
+  }
+  function plRun() {
+    if (!state.img || PL.status === 'loading') return;
+    PL.status = 'loading'; PL.top = null; render();
+    var img = state.img;
+    plLoad().then(function () {
+      var x = tensorFrom(img, PL.labels.input), feeds = {}; feeds[PL.sess.inputNames[0]] = x;
+      return PL.sess.run(feeds);
+    }).then(function (o) {
+      if (img !== state.img) return;
+      var z = o[PL.sess.outputNames[0]].data, probs = softmax(z, 1), idx = [];
+      for (var i = 0; i < probs.length; i++) idx.push(i);
+      idx.sort(function (a, b) { return probs[b] - probs[a]; });
+      PL.top = idx.slice(0, 5).map(function (i) { var sp = PL.labels.species[i]; return { species: sp, family: PL.labels.families[PL.labels.family[i]], p: probs[i], gaia: plGaia(sp) }; });
+      // family-level score: the sum over the family's species (more robust than one species on a leaf photo)
+      var fam = {}; for (var k = 0; k < probs.length; k++) { var f = PL.labels.families[PL.labels.family[k]]; fam[f] = (fam[f] || 0) + probs[k]; }
+      PL.families = Object.keys(fam).sort(function (a, b) { return fam[b] - fam[a]; }).slice(0, 3).map(function (f) { return { family: f, p: fam[f] }; });
+      PL.status = 'done';
+      try { var last = G.load('gaia.health.last', null); if (last) { last.species = PL.top[0].species; last.species_p = PL.top[0].p; G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
+    }).catch(function (e) { PL.status = 'error'; PL.error = e.message || String(e); }).then(render);
+  }
+  function plGaia(sp) { for (var i = 0; i < PL_GAIA.length; i++) if (PL_GAIA[i][0].test(sp)) return PL_GAIA[i][1]; return null; }
+  function plBlock() {
+    if (!state.img) return null;
+    var kids = [el('h3', null, [t('pl_t')]), el('p', { class: 'small', style: 'margin-top:4px;color:var(--g-ink-2)' }, [t('pl_p')])];
+    if (PL.status === 'idle') kids.push(el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: plRun }, [t('pl_run')])]));
+    if (PL.status === 'loading') kids.push(el('p', { role: 'status', style: 'margin-top:8px' }, [el('span', { class: 'gp-spin' }), ' ' + t('pl_loading')]));
+    if (PL.status === 'error') kids.push(G.note('err', t('pl_err') + PL.error));
+    if (PL.status === 'done' && PL.top) {
+      var L = G.lang();
+      PL.top.slice(0, 3).forEach(function (s, i) {
+        var cn = PL_COMMON[s.species] ? PL_COMMON[s.species][L] || PL_COMMON[s.species].en : null;
+        kids.push(el('p', { style: i ? 'margin-top:4px' : 'margin-top:8px' }, [
+          el('i', { style: i ? '' : 'font-family:var(--g-display);font-size:20px;font-weight:600' }, [s.species]), cn ? ' (' + cn + ')' : '',
+          el('span', { class: 'small muted' }, [' · ' + t('pl_family') + ' ' + s.family + ' · ' + fmt(s.p * 100) + ' %'])]));
+      });
+      kids.push(el('p', { class: 'small muted', style: 'margin-top:6px' }, [PL.families.map(function (f) { return f.family + ' ' + fmt(f.p * 100) + ' %'; }).join(' · ')]));
+      var r = state.result, gaiaTree = r && !r.error && !r.stage1.abstain ? r.tree : null, plTree = PL.top[0].gaia;
+      if (gaiaTree && gaiaTree !== 'other' && plTree) kids.push(el('div', { style: 'margin-top:8px' }, [plTree === gaiaTree ? G.pill('ok', t('pl_agree')) : G.note('warn', t('pl_disagree'))]));
+      kids.push(el('p', { class: 'assump', style: 'margin-top:8px' }, [t('pl_note')]));
+      kids.push(el('p', { class: 'small muted', style: 'margin-top:4px' }, ['Model: PlantNet/mobilenetv4-conv-s-plantclef2024 (Pl@ntNet / Inria, Apache-2.0) · Pl@ntCLEF 2026 top-1 62.5 %, top-5 84.1 %']));
+    }
+    return el('div', { class: 'gp-card' }, kids);
+  }
+
   /* ---------------------------------------------------------- manifest */
   var EXAMPLE_MANIFEST = {
     version: '2026.11-olive-v1',
@@ -379,9 +461,18 @@
         if (s1.abstain || s1.top.label === 'other' || !m.stage2 || !m.stage2[s1.top.label]) return res;
         return runModel(m.stage2[s1.top.label], x).then(function (s2) { res.stage2 = s2; return res; });
       });
-    }).then(function (res) { state.result = res; }).catch(function (e) {
+    }).then(function (res) {
+      state.result = res;
+      // the Farm Agent reads the last check (plant_health_last tool); kept on this device only
+      try {
+        var s2 = res.stage2;
+        G.save('gaia.health.last', { at: new Date().toISOString(), plant: res.stage1.abstain ? null : res.tree,
+          plant_confidence: res.stage1.top.p, disease: s2 && !s2.abstain ? s2.top.label : null, confidence: s2 ? s2.top.p : null,
+          unsure: !!(res.stage1.abstain || (s2 && s2.abstain)), model: m.version || null });
+      } catch (e) { /* storage full or private mode */ }
+    }).catch(function (e) {
       state.result = { error: e.message };
-    }).then(function () { state.running = false; render(); });
+    }).then(function () { state.running = false; render(); if (PL.status !== 'loading') plRun(); });
   }
 
   /* ---------------------------------------------------------- feedback (Kaizen) */
@@ -472,7 +563,7 @@
     var reader = new FileReader();
     reader.onload = function () {
       var img = new Image();
-      img.onload = function () { state.img = img; state.quality = analyse(img); state.result = null; render(); };
+      img.onload = function () { state.img = img; state.quality = analyse(img); state.result = null; PL.status = 'idle'; PL.top = null; render(); };
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
@@ -596,9 +687,9 @@
     if (pn.status === 'declined') return el('p', { class: 'muted small' }, [t('pn_declined') + ' ', el('button', { class: 'gp-btn ghost sm', type: 'button', onclick: function () { state.pn = { status: 'idle' }; render(); } }, [t('pn_again')])]);
     if (state.pnAvail === 'no_server' && pn.status !== 'error') return el('div', null, [G.note('info', t('pn_off_server')),
       el('button', { class: 'gp-btn ghost sm', type: 'button', style: 'margin-top:8px', onclick: function () { state.pnAvail = 'checking'; G.CONFIG.plantnetEndpoint = PN_DEFAULT; render(); checkPlantnet(); } }, [t('pn_recheck')])]);
-    if (state.pnAvail === 'no_key') return G.note('info', t('pn_off_key'));
+    if (state.pnAvail === 'no_key') return el('div', null, [G.note('info', t('pn_off_key')), el('p', { class: 'small', style: 'margin-top:6px' }, [t('pn_key_how')])]);
     if (state.pnAvail === 'checking') return null;
-    if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error).replace('{m}', pn.msg || '').replace('{u}', pn.msg || '')), el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);
+    if (pn.status === 'error') return el('div', { class: 'gp-card' }, [G.note('err', t(pn.error).replace('{m}', pn.msg || '').replace('{u}', pn.msg || '')), pn.error === 'pn_err_key' ? el('p', { class: 'small', style: 'margin-top:6px' }, [t('pn_key_how')]) : null, el('div', { style: 'margin-top:10px' }, [el('button', { class: 'gp-btn ghost', type: 'button', onclick: pnSend }, [t('pn_retry')])])]);
     if (pn.status === 'done') {
       var d = pn.data || {}, sp = d.species || [], kids = [el('h3', null, [t('pn_res_t')])];
       if (d.not_a_plant) kids.push(el('p', { style: 'margin-top:6px' }, [t('pn_not_plant')]));
@@ -653,10 +744,11 @@
 
     var right = [pipe];
     if (state.model.status === 'checking') right.unshift(el('p', { class: 'muted small' }, [el('span', { class: 'gp-spin' }), ' …']));
-    else if (!ready) { if (hasImg) { var pb0 = pnBlock(); if (pb0) right.push(pb0); } right.push(boundaryBlock()); }
+    else if (!ready) { if (hasImg) { right.push(plBlock()); var pb0 = pnBlock(); if (pb0) right.push(pb0); } right.push(boundaryBlock()); }
     else if (hasImg) {
       right.push(el('button', { class: 'gp-btn primary', type: 'button', disabled: state.running || state.quality.overall === 'fail', onclick: diagnose }, [state.running ? t('running') : t('run')]));
       var rb = resultBlocks(); if (rb) right = right.concat(rb);
+      right.push(plBlock());
       if (ran && (state.result.stage1.abstain || state.result.stage1.top.label === 'other')) { var pb1 = pnBlock(); if (pb1) right.push(pb1); }
     }
     right.push(el('div', { class: 'gp-card' }, [
