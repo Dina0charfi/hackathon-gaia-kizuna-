@@ -20,22 +20,99 @@
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs || 20000) : null;
     return fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (r) {
       if (timer) clearTimeout(timer);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if (!r.ok) { var err = new Error('HTTP ' + r.status); err.status = r.status; err.retryAfter = +r.headers.get('Retry-After') || 0; throw err; }
       return r.json();
     }, function (e) { if (timer) clearTimeout(timer); throw e; });
   }
+  function why(e) { return e.name === 'AbortError' ? 'délai dépassé' : e.message; }
+
+  // Retry on rate limit (429), server errors and network errors, with growing waits
+  // (Retry-After is honoured when the server sends a short one). Other errors fail at once.
+  function getJSONRetry(url, timeoutMs, waits) {
+    waits = waits || [1500, 4000];
+    var attempt = function (i) {
+      return getJSON(url, timeoutMs).catch(function (e) {
+        var retriable = !e.status || e.status === 429 || e.status >= 500;
+        if (!retriable || i >= waits.length || e.name === 'AbortError') throw e;
+        var ms = e.retryAfter > 0 && e.retryAfter <= 10 ? e.retryAfter * 1000 : waits[i] * (0.8 + Math.random() * 0.4);
+        return new Promise(function (res) { setTimeout(res, ms); }).then(function () { return attempt(i + 1); });
+      });
+    };
+    return attempt(0);
+  }
+
+  // Small cache in the browser: a plot looked at again (or a neighbour within ≈ 1 km)
+  // does not call the APIs again. Reads and writes never throw (private mode, quota).
+  var CACHE_DAYS = 60;
+  function cacheGet(key) {
+    try {
+      var x = JSON.parse(global.localStorage.getItem('gaia.cache.' + key));
+      if (x && Date.now() - x.t < CACHE_DAYS * 864e5) return x.v;
+    } catch (e) { /* no storage */ }
+    return null;
+  }
+  function cacheSet(key, v) {
+    try { global.localStorage.setItem('gaia.cache.' + key, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { /* full or blocked */ }
+  }
+  function flagGet(key, minutes) {
+    try { var t = +global.localStorage.getItem('gaia.flag.' + key); return t && Date.now() - t < minutes * 6e4; } catch (e) { return false; }
+  }
+  function flagSet(key) { try { global.localStorage.setItem('gaia.flag.' + key, String(Date.now())); } catch (e) { /* ignore */ } }
+  function cell(lat, lon, d) { return lat.toFixed(d) + ',' + lon.toFixed(d); }
+
+  /* ---------------------------------------------------------- NASA POWER (one request per plot) */
+  // One climatology request serves both the sun (GHI) and the climate fallback, so a
+  // plot never costs more than one POWER call; it is cached per ≈ 5 km.
+  var powerMemo = {};
+  function power(lat, lon) {
+    var key = 'power:' + cell(lat, lon, 2);
+    if (powerMemo[key]) return powerMemo[key];
+    var hit = cacheGet(key);
+    if (hit) return (powerMemo[key] = Promise.resolve(hit));
+    var url = 'https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=' + global.GAIA_CLIMATE.PARAMS.join(',') +
+      '&community=RE&longitude=' + lon.toFixed(4) + '&latitude=' + lat.toFixed(4) + '&format=JSON';
+    powerMemo[key] = getJSONRetry(url, 30000).then(function (d) {
+      var p = d && d.properties && d.properties.parameter;
+      if (!p || !p.ALLSKY_SFC_SW_DWN) throw new Error('paramètre absent');
+      var out = { p: p, fill: d.header && d.header.fill_value, z: d.geometry && d.geometry.coordinates && d.geometry.coordinates[2],
+        unit: (d.parameters && d.parameters.ALLSKY_SFC_SW_DWN && d.parameters.ALLSKY_SFC_SW_DWN.units) || 'kWh/m²/jour' };
+      cacheSet(key, out);
+      return out;
+    });
+    powerMemo[key].catch(function () { delete powerMemo[key]; });
+    return powerMemo[key];
+  }
 
   /* ---------------------------------------------------------- climate */
-  function climate(lat, lon) {
+  // Order: 1) browser cache, 2) Open-Meteo archive (ERA5, 10 years, one request, retried),
+  // 3) NASA POWER climatology (same request as the sun) with FAO-56 ET0 computed here,
+  // 4) the bundled NASA POWER normals table (js/climate-tn.js), confidence "low".
+  // After a 429, Open-Meteo is skipped for 15 min so a busy network does not keep hitting it.
+  var OM_META = function (p) { return { source: 'Open-Meteo Historical API (réanalyse ERA5 / ERA5-Land)', resolution: '≈ 11–25 km', period: p.start.slice(0, 4) + '–' + p.end.slice(0, 4), url: 'https://open-meteo.com/en/docs/historical-weather-api' }; };
+  var POWER_META = { source: 'NASA POWER — climatologie 2001–2025 (MERRA-2)', resolution: '≈ 50 km (0,5° × 0,625°)', period: '2001–2025', url: 'https://power.larc.nasa.gov/' };
+
+  function climateFields(v, meta, conf, notes) {
+    notes = notes || {};
+    var n = function (k, base) { return [base, notes.all].filter(Boolean).join(' · ') || undefined; };
+    return {
+      rain_mm: field(v.rain_mm, Object.assign({ unit: 'mm/an', confidence: conf.rain, note: n('rain', notes.rain), extra: v.extra }, meta)),
+      et0_mm: field(v.et0_mm, Object.assign({ unit: 'mm/an', confidence: conf.et0, note: n('et0', notes.et0) }, meta)),
+      tmax_hot: field(v.tmax_hot, Object.assign({ unit: '°C', confidence: conf.t, note: n('t', 'Moyenne des maximales du mois le plus chaud') }, meta)),
+      tmin_cold: field(v.tmin_cold, Object.assign({ unit: '°C', confidence: conf.t, note: n('t', 'Moyenne des minimales du mois le plus froid') }, meta)),
+      monthly: Object.assign({ source: meta.source, period: meta.period }, v.monthly)
+    };
+  }
+
+  function openMeteo(lat, lon) {
     var p = C().climatePeriod;
-    var url = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + lat + '&longitude=' + lon +
+    var url = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + lat.toFixed(3) + '&longitude=' + lon.toFixed(3) +
       '&start_date=' + p.start + '&end_date=' + p.end +
-      '&daily=precipitation_sum,et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min,shortwave_radiation_sum&timezone=auto';
-    var meta = { source: 'Open-Meteo Historical API (réanalyse ERA5 / ERA5-Land)', resolution: '≈ 11–25 km', period: p.start.slice(0, 4) + '–' + p.end.slice(0, 4), url: 'https://open-meteo.com/en/docs/historical-weather-api' };
-    return getJSON(url, 30000).then(function (d) {
+      '&daily=precipitation_sum,et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min&timezone=auto';
+    var meta = OM_META(p);
+    return getJSONRetry(url, 30000).then(function (d) {
       var D = d.daily;
       if (!D || !D.time || !D.time.length) throw new Error('réponse vide');
-      var years = {}, monthsP = {}, monthsE = {}, monthTmax = {}, monthTmin = {}, monthSw = {};
+      var years = {}, monthsP = {}, monthsE = {}, monthTmax = {}, monthTmin = {};
       D.time.forEach(function (day, i) {
         var y = day.slice(0, 4), m = +day.slice(5, 7) - 1, key = y + '-' + m;
         var pr = D.precipitation_sum[i], et = D.et0_fao_evapotranspiration[i];
@@ -43,10 +120,8 @@
         if (et !== null) monthsE[key] = (monthsE[key] || 0) + et;
         if (D.temperature_2m_max[i] !== null) (monthTmax[m] = monthTmax[m] || []).push(D.temperature_2m_max[i]);
         if (D.temperature_2m_min[i] !== null) (monthTmin[m] = monthTmin[m] || []).push(D.temperature_2m_min[i]);
-        if (D.shortwave_radiation_sum && D.shortwave_radiation_sum[i] !== null) (monthSw[m] = monthSw[m] || []).push(D.shortwave_radiation_sum[i] / 3.6); // MJ/m² → kWh/m²
       });
       var yearTotals = Object.keys(years).map(function (y) { return years[y]; });
-      var nY = yearTotals.length;
       var mean = function (a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; };
       var monthlyMean = function (store) {
         var out = [];
@@ -56,19 +131,46 @@
         }
         return out;
       };
-      var rainM = monthlyMean(monthsP), et0M = monthlyMean(monthsE);
-      var tmaxM = []; var tminM = [];
+      var rainM = monthlyMean(monthsP), et0M = monthlyMean(monthsE), tmaxM = [], tminM = [];
       for (var m = 0; m < 12; m++) { tmaxM.push(monthTmax[m] ? mean(monthTmax[m]) : null); tminM.push(monthTmin[m] ? mean(monthTmin[m]) : null); }
-      return {
-        rain_mm: field(mean(yearTotals), Object.assign({ unit: 'mm/an', confidence: 'medium', extra: { min: Math.min.apply(null, yearTotals), max: Math.max.apply(null, yearTotals), years: nY } }, meta)),
-        et0_mm: field(et0M.reduce(function (s, v) { return s + (v || 0); }, 0), Object.assign({ unit: 'mm/an', confidence: 'medium', note: 'ET0 FAO Penman–Monteith calculée par Open-Meteo' }, meta)),
-        tmax_hot: field(Math.max.apply(null, tmaxM.filter(function (v) { return v !== null; })), Object.assign({ unit: '°C', confidence: 'medium', note: 'Moyenne des maximales du mois le plus chaud' }, meta)),
-        tmin_cold: field(Math.min.apply(null, tminM.filter(function (v) { return v !== null; })), Object.assign({ unit: '°C', confidence: 'medium', note: 'Moyenne des minimales du mois le plus froid' }, meta)),
-        monthly: { rain: rainM, et0: et0M, tmax: tmaxM, tmin: tminM, ghi: (function () { var g = []; for (var k = 0; k < 12; k++) g.push(monthSw[k] ? mean(monthSw[k]) : null); return g.some(function (v) { return v !== null; }) ? g : null; }()), source: meta.source, period: meta.period }
-      };
-    }).catch(function (e) {
-      var why = 'Open-Meteo indisponible (' + (e.name === 'AbortError' ? 'délai dépassé' : e.message) + ')';
-      return { rain_mm: failed(why, meta), et0_mm: failed(why, meta), tmax_hot: failed(why, meta), tmin_cold: failed(why, meta), monthly: null };
+      var nn = function (a) { return a.filter(function (v) { return v !== null; }); };
+      return climateFields({
+        rain_mm: mean(yearTotals), et0_mm: et0M.reduce(function (s, v) { return s + (v || 0); }, 0),
+        tmax_hot: Math.max.apply(null, nn(tmaxM)), tmin_cold: Math.min.apply(null, nn(tminM)),
+        extra: { min: Math.min.apply(null, yearTotals), max: Math.max.apply(null, yearTotals), years: yearTotals.length },
+        monthly: { rain: rainM, et0: et0M, tmax: tmaxM, tmin: tminM }
+      }, meta, { rain: 'medium', et0: 'medium', t: 'medium' }, { et0: 'ET0 FAO Penman–Monteith calculée par Open-Meteo' });
+    });
+  }
+
+  function climate(lat, lon) {
+    var key = 'climate:' + cell(lat, lon, 2);
+    var hit = cacheGet(key);
+    if (hit && hit.rain_mm && hit.rain_mm.status === 'ok') return Promise.resolve(hit);
+    var omSkipped = flagGet('om429', 15);
+    var primary = omSkipped ? Promise.reject(new Error('HTTP 429')) : openMeteo(lat, lon);
+    return primary.then(function (r) { cacheSet(key, r); return r; }, function (e) {
+      if (e.status === 429) flagSet('om429');
+      var reason = 'Open-Meteo indisponible (' + why(e) + ')';
+      return power(lat, lon).then(function (pw) {
+        var v = global.GAIA_CLIMATE.fromPower(pw.p, pw.z, pw.fill);
+        if (!v || v.rain_mm === null) throw new Error('paramètre absent');
+        var r = climateFields(v, POWER_META, { rain: 'low', et0: 'medium', t: 'medium' }, {
+          all: reason + ' : repli sur NASA POWER.',
+          rain: 'Grille d’environ 50 km : la pluie locale peut s’en écarter nettement.',
+          et0: 'ET0 FAO-56 Penman–Monteith calculée par GAIA à partir des moyennes mensuelles NASA POWER'
+        });
+        cacheSet(key, r);
+        return r;
+      }).catch(function (e2) {
+        var T = global.GAIA_CLIMATE_TN, v = T ? T.lookup(lat, lon) : null;
+        var tm = { source: T ? T.source : 'Table GAIA intégrée', resolution: 'grille 0,5° interpolée', period: '2001–2025', url: T ? T.url : null };
+        var all = reason + ' ; NASA POWER indisponible (' + why(e2) + ').';
+        if (!v) return { rain_mm: failed(all, tm), et0_mm: failed(all, tm), tmax_hot: failed(all, tm), tmin_cold: failed(all, tm), monthly: null };
+        return climateFields(v, tm, { rain: 'low', et0: 'low', t: 'low' }, {
+          all: all + ' Valeurs interpolées de la table intégrée (point le plus proche ≈ ' + v.km + ' km).'
+        });
+      });
     });
   }
 
@@ -100,28 +202,26 @@
   /* ---------------------------------------------------------- solar */
   var MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   function solar(lat, lon) {
-    var url = 'https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=AG&longitude=' + lon + '&latitude=' + lat + '&format=JSON';
     var meta = { source: 'NASA POWER — climatologie, ALLSKY_SFC_SW_DWN', resolution: 'grille globale (≈ 0,5°)', url: 'https://power.larc.nasa.gov/' };
-    return getJSON(url, 30000).then(function (d) {
-      var p = d && d.properties && d.properties.parameter && d.properties.parameter.ALLSKY_SFC_SW_DWN;
-      if (!p) throw new Error('paramètre absent');
-      var fill = d.header && d.header.fill_value;
+    return power(lat, lon).then(function (pw) {
+      var p = pw.p.ALLSKY_SFC_SW_DWN, fill = pw.fill;
       var monthly = MONTHS.map(function (k) { var v = p[k]; return (v === undefined || v === fill) ? null : v; });
-      var unit = (d.parameters && d.parameters.ALLSKY_SFC_SW_DWN && d.parameters.ALLSKY_SFC_SW_DWN.units) || 'kWh/m²/jour';
       var ann = p.ANN !== undefined && p.ANN !== fill ? p.ANN : null;
+      var unit = /kW-?hr?\/m\^?2\/day/i.test(pw.unit) ? 'kWh/m²/jour' : pw.unit;
       return {
         ghi_kwh: field(ann, Object.assign({ unit: unit, confidence: 'medium', note: 'Rayonnement global horizontal, moyenne annuelle' }, meta)),
         monthly: { ghi: monthly, unit: unit, source: meta.source }
       };
     }).catch(function (e) {
-      return { ghi_kwh: failed('NASA POWER indisponible (' + (e.name === 'AbortError' ? 'délai dépassé' : e.message) + ')', meta), monthly: null };
+      return { ghi_kwh: failed('NASA POWER indisponible (' + why(e) + ')', meta), monthly: null };
     });
   }
 
   /* ---------------------------------------------------------- soil */
   // Order: 1) configured soil service (local SoilGrids rasters), 2) the SoilGrids
-  // REST API (paused by ISRIC, tried with a short timeout in case it is back),
-  // 3) the regional reference table in js/soil-tn.js, shown with confidence "low".
+  // REST API (paused by ISRIC; tried with a short timeout, and not again for 6 h once it
+  // failed), 3) the bundled 5 km grid of SoilGrids 2.0 values (js/soil-grid-tn.js),
+  // 4) the regional reference table in js/soil-tn.js, shown with confidence "low".
   function textureOf(sand, clay) {
     if (clay === null || clay === undefined) return null;
     if (clay >= 35) return 'clayey';
@@ -131,7 +231,7 @@
   function soilGridsRest(lat, lon) {
     var url = 'https://rest.isric.org/soilgrids/v2.0/properties/query?lon=' + lon + '&lat=' + lat +
       '&property=clay&property=sand&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean';
-    return getJSON(url, 8000).then(function (d) {
+    return getJSON(url, 5000).then(function (d) {
       var out = {};
       ((d.properties && d.properties.layers) || []).forEach(function (L) {
         var w = { '0-5cm': 5, '5-15cm': 10, '15-30cm': 15 }, sum = 0, wt = 0;
@@ -150,13 +250,14 @@
     var meta = { source: 'SoilGrids 2.0 (ISRIC)', resolution: '250 m', url: 'https://www.isric.org/explore/soilgrids' };
     var fromFarmer = declared && declared !== 'unknown'
       ? field(declared, { confidence: 'declared', source: "Déclaré par l'agriculteur", status: 'ok' }) : null;
-    var fromGrid = function (d, m, why) {
+    var fromGrid = function (d, m, why, conf) {
       var tx = d.texture || textureOf(d.sand, d.clay_pct !== undefined ? d.clay_pct : d.clay);
       var clay = d.clay_pct !== undefined ? d.clay_pct : d.clay;
+      conf = conf || {};
       return {
-        texture: fromFarmer || field(tx || null, Object.assign({ confidence: 'medium', note: why || 'Classe déduite de la teneur en argile et en sable (0–30 cm)' }, m)),
-        clay_pct: field(clay === undefined ? null : clay, Object.assign({ unit: '%', confidence: 'medium', note: '0–30 cm' }, m)),
-        soc: field(d.soc === undefined ? null : d.soc, Object.assign({ unit: 'g/kg', confidence: 'medium', note: 'Carbone organique, 0–30 cm' }, m))
+        texture: fromFarmer || field(tx || null, Object.assign({ confidence: conf.clay || 'medium', note: why || 'Classe déduite de la teneur en argile et en sable (0–30 cm)' }, m)),
+        clay_pct: field(clay === undefined ? null : clay, Object.assign({ unit: '%', confidence: conf.clay || 'medium', note: '0–30 cm' + (why ? '. ' + why : '') }, m)),
+        soc: field(d.soc === undefined ? null : d.soc, Object.assign({ unit: 'g/kg', confidence: conf.soc || 'medium', note: 'Carbone organique, 0–30 cm' + (why ? '. ' + why : '') }, m))
       };
     };
     var regional = function (reason) {
@@ -173,9 +274,18 @@
         soc: field(hit.soc, Object.assign({ unit: 'g/kg', confidence: 'low', note: '0–30 cm. ' + note }, rm))
       };
     };
+    var bundled = function (reason) {
+      var Gd = global.GAIA_SOIL_GRID, hit = Gd ? Gd.lookup(lat, lon) : null;
+      if (!hit) return regional(reason);
+      var gm = { source: Gd.source, resolution: 'maille ≈ 5 km (16 points à 250 m)', url: Gd.url };
+      var note = hit.km ? 'Moyenne SoilGrids de la maille voisine (≈ ' + hit.km + ' km, côte ou zone non cartographiée), pas une mesure de la parcelle.'
+        : 'Moyenne SoilGrids de la maille de 5 km qui contient la parcelle, pas une mesure de la parcelle.';
+      return fromGrid({ clay: hit.clay_pct, sand: hit.sand_pct, soc: hit.soc }, gm, note, { clay: hit.km ? 'low' : 'medium', soc: 'low' });
+    };
     var viaRest = function () {
+      if (flagGet('soilgrids-down', 360)) return Promise.resolve(bundled('SoilGrids injoignable : API REST en pause.'));
       return soilGridsRest(lat, lon).then(function (d) { return fromGrid(d, meta); })
-        .catch(function (e) { return regional('SoilGrids injoignable (' + (e.name === 'AbortError' ? 'délai dépassé' : e.message) + ') : API REST en pause.'); });
+        .catch(function (e) { flagSet('soilgrids-down'); return bundled('SoilGrids injoignable (' + why(e) + ') : API REST en pause.'); });
     };
     if (!C().soilEndpoint) return viaRest();
     var url = C().soilEndpoint.replace('{lat}', lat).replace('{lon}', lon);
@@ -196,10 +306,10 @@
     var step = function (k, s) { if (onStep) onStep(k, s); };
     var demo = input.demo || {};
     step('climate', 'loading'); step('terrain', 'loading'); step('solar', 'loading'); step('soil', 'loading');
-    var pc = climate(lat, lon).then(function (r) { step('climate', r.rain_mm.status === 'ok' ? 'ok' : 'error'); return r; });
+    var pc = climate(lat, lon).then(function (r) { step('climate', r.rain_mm.status !== 'ok' ? 'error' : /^Open-Meteo/.test(r.rain_mm.source) ? 'ok' : 'approx'); return r; });
     var pt = terrain(lat, lon).then(function (r) { step('terrain', r.slope_pct.status === 'ok' ? 'ok' : 'error'); return r; });
     var ps = solar(lat, lon).then(function (r) { step('solar', r.ghi_kwh.status === 'ok' ? 'ok' : 'error'); return r; });
-    var pso = soil(lat, lon, input.soilTexture).then(function (r) { step('soil', r.clay_pct.status !== 'ok' ? 'error' : r.clay_pct.confidence === 'low' ? 'approx' : 'ok'); return r; });
+    var pso = soil(lat, lon, input.soilTexture).then(function (r) { step('soil', r.clay_pct.status !== 'ok' ? 'error' : r.clay_pct.resolution === '250 m' ? 'ok' : 'approx'); return r; });
 
     return Promise.all([pc, pt, ps, pso]).then(function (res) {
       var cl = res[0], te = res[1], so = res[2], soi = res[3];
@@ -208,7 +318,7 @@
         builtAt: new Date().toISOString(),
         location: { lat: lat, lon: lon, name: input.name || null },
         climate: { rain_mm: cl.rain_mm, et0_mm: cl.et0_mm, tmax_hot: cl.tmax_hot, tmin_cold: cl.tmin_cold },
-        climateMonthly: cl.monthly,
+        climateMonthly: cl.monthly && !cl.monthly.ghi && so.monthly ? Object.assign({}, cl.monthly, { ghi: so.monthly.ghi }) : cl.monthly,
         terrain: te,
         solar: { ghi_kwh: so.ghi_kwh },
         solarMonthly: so.monthly,
