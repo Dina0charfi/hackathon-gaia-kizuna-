@@ -36,6 +36,12 @@ and steps 11–14 as below (about 1 h 15 on 4 CPU cores).
 
 ---
 
+# GAIA Vision: training report
+
+## v4 (November 2026): Pl@ntNet backbone, field potato data, model fusion
+
+See the section at the end. v2/v3 details follow.
+
 # GAIA Vision v2: why v1 "overfit" and what changed
 
 ## Diagnosis of the v1 notebook (`GAIA_Vision_Kaggle.ipynb`)
@@ -108,3 +114,44 @@ Confusion matrices: `reports/cm_<model>_field.png` and `reports/cm_<model>_all.p
     python scripts/13_export.py --weights efficientnet_b0_ra-3dd342df.pth --heads models_out \
         --dest ../../models/gaia-vision --dest ../../backend/models/gaia-vision
     python scripts/14_report.py --heads models_out --out reports
+
+
+## v4: a plant-trained backbone, real potato field photos, and fusion with Pl@ntNet
+
+**Why.** v3 used an ImageNet backbone (EfficientNet-B0). It knows dogs and cars better than leaves, and its potato
+head had seen almost no field photos (24 in test).
+
+**What changed** (`scripts/20_split_onnx.py` → `23_export_v4.py`, no PyTorch model needed, CPU only):
+1. **Backbone comparison on one leakage-free split** (same near-duplicate grouping and linear heads as v3; 15,180
+   images of tomato, potato, pepper and grape; test = held-out groups). Backbones: v3 EfficientNet-B0 (ImageNet),
+   **Pl@ntNet MobileNetV4-Conv-S** (distilled by the Pl@ntNet team from their DINOv2 ViT-B on Pl@ntCLEF 2024,
+   7,806 Mediterranean species, Apache-2.0) and DINOv2-small.
+2. **New field data for potato**: Potato Leaf Disease Dataset in Uncontrolled Environment (Shabrina et al. 2024,
+   Data in Brief; 3,076 farm photos, CC BY 4.0, via Hugging Face Project-AgML). Its classes are by cause, so the
+   potato head now answers *healthy, late blight, fungal leaf spot (incl. early blight), bacterial, virus, pest damage,
+   nematode*.
+3. **Fusion**: Pl@ntNet's own species output (Olea, Phoenix, Citrus, Vitis, Solanum tuberosum summed per GAIA plant)
+   overrides GAIA's stage 1 when it finds a different plant with ≥ 15 % (≥ 50 % against a tomato / pepper answer,
+   which are not in its species list). Same rule in `js/health.js` and `backend/gaia/vision.py`.
+
+**Results, held-out field photos** (`reports/compare_v4.json`, `reports/report_v4_plantnet.json`):
+
+| head | v3 backbone (EffB0) | v4 backbone (Pl@ntNet) | n field test |
+|---|---|---|---|
+| grape | 92.8 % | **94.3 %** | 442 |
+| potato (7 field classes) | 68.0 % (answers 44 %, 92 % right) | **73.2 %** (answers 60 %, 89 % right) | 485 |
+| tomato (PlantVillage classes) | 47.2 % | 52.8 % | 106 |
+| pepper | 73.7 % | 73.7 % | 19 |
+| **plant identification** (stage 1, field) | 59.1 % alone | **79.6 % with fusion** (potato 28 → 70 %, grape 96 → 99 %) | 1,052 val+test |
+
+Lab photos are unchanged (95 %). Concatenating both backbones adds ≤ 2 points: not worth a second download.
+
+**Shipped.** `models/gaia-vision/gaia-vision-v4-pn.onnx` (20 MB: Pl@ntNet backbone, its species classifier in int8,
+and GAIA's potato and grape heads in fp32; exported heads match numpy to 7e-6). Potato and grape now use it (512 px
+input, declared per head in the manifest); olive, palm, citrus, tomato and pepper keep their v3 heads. The tomato v3
+head stays because it was trained on Tomato-Village farm photos (14 classes) that this environment could not
+download; on PlantDoc-only data the Pl@ntNet backbone would gain 5 points, so retrain it with Tomato-Village added.
+
+**Limits.** No Tunisian test set yet. The potato field photos come from Indonesia; the fusion threshold was chosen on
+val + test of these four crops, so its olive / palm / citrus effect is not measured (Pl@ntNet recognises *Olea
+europaea* and *Phoenix dactylifera* well, but check on Tunisian photos).

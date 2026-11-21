@@ -84,7 +84,7 @@
     o.place = T.placeIn(g);
     o.crop = T.cropKey(g);
     var m = f.match(/(\d+(?:[.,]\d+)?)\s*(?:ha\b|hect|هكتار|ヘクタール)/); if (m) o.area = +m[1].replace(',', '.');
-    m = f.match(/(?:puits|forage|well|بئر|井戸)[^\d]{0,15}(\d{1,3})\s*m|(\d{1,3})\s*m(?:\s*(?:de\s*)?(?:puits|well|deep|profond)|\s*بئر)/); if (m) o.well = +(m[1] || m[2]);
+    m = f.match(/(?:puits|forage|well|بئر|井戸)[^\d]{0,15}(\d{1,3})\s*(?:m|م)|(\d{1,3})\s*(?:m|م)(?:\s*(?:de\s*)?(?:puits|well|deep|profond)|\s*بئر)/); if (m) o.well = +(m[1] || m[2]);
     o.solar = /solai|solar|panneau|panel|شمس|ألواح|ソーラー|太陽|agrivolt|photovolt/.test(f);
     o.nappe = /nappe|aquif|groundwater|over.?pump|épuis|المائدة|استنزاف|地下水/.test(f);
     if (o.solar && !o.crop && /tomat|طماطم|トマト/.test(f)) o.crop = 'tomato';

@@ -244,19 +244,19 @@
   G.addStrings({
     fr: { pl_t: 'Identification de l\'espèce (modèle Pl@ntNet, sur l\'appareil)', pl_p: 'Le modèle ouvert de Pl@ntNet (7 806 espèces de la flore méditerranéenne, licence Apache-2.0) tourne dans votre navigateur : la photo ne quitte pas l\'appareil, aucune clé n\'est nécessaire.',
           pl_run: 'Identifier l\'espèce', pl_loading: 'Identification en cours (premier usage : 20 Mo à télécharger)…', pl_agree: 'Concorde avec GAIA', pl_disagree: 'Ne concorde pas avec GAIA : reprenez la photo ou montrez la plante à un technicien', pl_err: 'Le modèle Pl@ntNet n\'a pas pu être chargé : ',
-          pl_note: 'Le modèle reconnaît des espèces, pas les maladies. La tomate et le poivron cultivés ne sont pas dans sa liste (flore sauvage) : GAIA utilise alors son propre modèle.', pl_family: 'famille',
+          pl_note: 'Le modèle reconnaît des espèces, pas les maladies. La tomate et le poivron cultivés ne sont pas dans sa liste (flore sauvage) : GAIA utilise alors son propre modèle.', pl_family: 'famille', pl_routed: 'Plante reconnue par le modèle Pl@ntNet ({p} %) ; le premier modèle de GAIA proposait : {s}. Les deux modèles ensemble passent de 59 % à 80 % de plantes bien reconnues sur des photos de terrain.',
           pn_key_how: 'Clé gratuite : créez un compte sur my.plantnet.org, menu « Your API key » (500 identifications par jour gratuites), puis écrivez PLANTNET_API_KEY=votre_clé dans backend/.env et relancez le serveur.' },
     ar: { pl_t: 'التعرف على النوع (نموذج Pl@ntNet على الجهاز)', pl_p: 'يعمل نموذج Pl@ntNet المفتوح (7806 نوعاً من النباتات المتوسطية، رخصة Apache-2.0) داخل متصفحك: لا تغادر الصورة الجهاز ولا حاجة لمفتاح.',
           pl_run: 'تعرّف على النوع', pl_loading: 'جارٍ التعرف (أول استعمال: تنزيل 20 م.ب)…', pl_agree: 'يتفق مع غايا', pl_disagree: 'لا يتفق مع غايا: أعد التصوير أو اعرض النبتة على تقني', pl_err: 'تعذّر تحميل نموذج Pl@ntNet: ',
-          pl_note: 'يتعرف النموذج على الأنواع لا على الأمراض. الطماطم والفلفل المزروعان ليسا في قائمته (نباتات برية)، فتستعمل غايا نموذجها الخاص.', pl_family: 'الفصيلة',
+          pl_note: 'يتعرف النموذج على الأنواع لا على الأمراض. الطماطم والفلفل المزروعان ليسا في قائمته (نباتات برية)، فتستعمل غايا نموذجها الخاص.', pl_family: 'الفصيلة', pl_routed: 'تعرّف نموذج Pl@ntNet على النبتة ({p} %)؛ النموذج الأول لغايا اقترح: {s}. معاً يرتفع التعرف الصحيح على صور الحقل من 59 % إلى 80 %.',
           pn_key_how: 'مفتاح مجاني: أنشئ حساباً في my.plantnet.org، ثم «Your API key» (500 تعرف يومياً مجاناً)، واكتب PLANTNET_API_KEY=مفتاحك في backend/.env وأعد تشغيل الخادم.' },
     en: { pl_t: 'Species identification (Pl@ntNet model, on this device)', pl_p: 'Pl@ntNet\'s open model (7,806 species of the Mediterranean flora, Apache-2.0 licence) runs in your browser: the photo never leaves the device and no key is needed.',
           pl_run: 'Identify the species', pl_loading: 'Identifying (first use: 20 MB download)…', pl_agree: 'Agrees with GAIA', pl_disagree: 'Does not agree with GAIA: retake the photo or show the plant to a technician', pl_err: 'The Pl@ntNet model could not be loaded: ',
-          pl_note: 'The model recognises species, not diseases. Cultivated tomato and pepper are not in its list (wild flora): GAIA uses its own model for them.', pl_family: 'family',
+          pl_note: 'The model recognises species, not diseases. Cultivated tomato and pepper are not in its list (wild flora): GAIA uses its own model for them.', pl_family: 'family', pl_routed: 'Plant recognised by the Pl@ntNet model ({p} %); GAIA’s first model said: {s}. Together the two models raise correct plant recognition on field photos from 59 % to 80 %.',
           pn_key_how: 'Free key: create an account at my.plantnet.org, open “Your API key” (500 identifications a day for free), then write PLANTNET_API_KEY=your_key in backend/.env and restart the server.' },
     ja: { pl_t: '種の同定（Pl@ntNetモデル、端末内）', pl_p: 'Pl@ntNetの公開モデル（地中海植物7,806種、Apache-2.0ライセンス）がブラウザ内で動きます。写真は端末の外に出ず、キーも不要です。',
           pl_run: '種を同定', pl_loading: '同定中（初回は20 MBをダウンロード）…', pl_agree: 'GAIAと一致', pl_disagree: 'GAIAと一致しません。撮り直すか技術者に見てもらってください', pl_err: 'Pl@ntNetモデルを読み込めませんでした：',
-          pl_note: 'このモデルが認識するのは種であり、病気ではありません。栽培トマトとピーマンはリストにないため（野生植物）、GAIA独自のモデルを使います。', pl_family: '科',
+          pl_note: 'このモデルが認識するのは種であり、病気ではありません。栽培トマトとピーマンはリストにないため（野生植物）、GAIA独自のモデルを使います。', pl_family: '科', pl_routed: 'Pl@ntNetモデルが植物を認識（{p}%）。GAIAの第1モデルの答え：{s}。2つのモデルを組み合わせると、圃場写真での植物の正答率は59%から80%に上がります。',
           pn_key_how: '無料キー：my.plantnet.org でアカウントを作成し「Your API key」を開く（1日500回まで無料）。backend/.env に PLANTNET_API_KEY=キー と書き、サーバーを再起動。' }
   });
 
@@ -271,33 +271,47 @@
     'Triticum turgidum L.': { fr: 'blé dur', en: 'durum wheat', ar: 'قمح صلب', ja: 'デュラム小麦' }, 'Hordeum vulgare L.': { fr: 'orge', en: 'barley', ar: 'شعير', ja: '大麦' },
     'Prunus armeniaca L.': { fr: 'abricotier', en: 'apricot', ar: 'مشمش', ja: 'アンズ' }, 'Pistacia vera L.': { fr: 'pistachier', en: 'pistachio', ar: 'فستق', ja: 'ピスタチオ' } };
   var PL = { status: 'idle', labels: null, sess: null };
-  function plUrl() { return G.CONFIG.plantnetModel || 'models/plantnet-mnv4/'; }
+  // the species model is declared in the vision manifest (species_model): the same ONNX file carries Pl@ntNet's
+  // 7,806 species logits and GAIA's v4 disease heads, so it is downloaded once and its session is shared
+  function plSpec() { var m = state.model.manifest; return (m && m.species_model) || { file: 'gaia-vision-v4-pn.onnx', output: 'logits', labels: 'plantnet-labels.json', input: { size: 512, mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225] } }; }
   function plLoad() {
     if (PL.sess) return Promise.resolve(PL);
+    var sp = plSpec(), url = baseUrl() + sp.file;
     return loadOrt().then(function () {
-      return Promise.all([fetch(plUrl() + 'labels.json').then(function (r) { if (!r.ok) throw new Error('labels ' + r.status); return r.json(); }),
-        window.ort.InferenceSession.create(plUrl() + 'plantnet-mnv4-int8.onnx')]);
-    }).then(function (x) { PL.labels = x[0]; PL.sess = x[1]; return PL; });
+      sessions[url] = sessions[url] || window.ort.InferenceSession.create(url);
+      return Promise.all([fetch(baseUrl() + sp.labels).then(function (r) { if (!r.ok) throw new Error('labels ' + r.status); return r.json(); }), sessions[url]]);
+    }).then(function (x) { PL.labels = x[0]; PL.sess = x[1]; PL.spec = sp; return PL; });
   }
-  function plRun() {
-    if (!state.img || PL.status === 'loading') return;
-    PL.status = 'loading'; PL.top = null; render();
-    var img = state.img;
-    plLoad().then(function () {
-      var x = tensorFrom(img, PL.labels.input), feeds = {}; feeds[PL.sess.inputNames[0]] = x;
+  // species identification; resolves to PL (status 'done') or rejects. Also returns the probability of each GAIA plant
+  // (sum over its species: Olea → olive, Phoenix → palm, Citrus → citrus, Vitis → grape, Solanum tuberosum → potato).
+  function plPredict(img) {
+    PL.status = 'loading'; PL.top = null;
+    return plLoad().then(function () {
+      var x = tensorFrom(img, PL.spec.input || PL.labels.input), feeds = {}; feeds[PL.sess.inputNames[0]] = x;
       return PL.sess.run(feeds);
     }).then(function (o) {
-      if (img !== state.img) return;
-      var z = o[PL.sess.outputNames[0]].data, probs = softmax(z, 1), idx = [];
-      for (var i = 0; i < probs.length; i++) idx.push(i);
+      var z = o[PL.spec.output || 'logits'].data, probs = softmax(z, 1), idx = [], plants = {};
+      for (var i = 0; i < probs.length; i++) { idx.push(i); var gp = plGaia(PL.labels.species[i]); if (gp) plants[gp] = (plants[gp] || 0) + probs[i]; }
       idx.sort(function (a, b) { return probs[b] - probs[a]; });
       PL.top = idx.slice(0, 5).map(function (i) { var sp = PL.labels.species[i]; return { species: sp, family: PL.labels.families[PL.labels.family[i]], p: probs[i], gaia: plGaia(sp) }; });
       // family-level score: the sum over the family's species (more robust than one species on a leaf photo)
       var fam = {}; for (var k = 0; k < probs.length; k++) { var f = PL.labels.families[PL.labels.family[k]]; fam[f] = (fam[f] || 0) + probs[k]; }
       PL.families = Object.keys(fam).sort(function (a, b) { return fam[b] - fam[a]; }).slice(0, 3).map(function (f) { return { family: f, p: fam[f] }; });
-      PL.status = 'done';
-      try { var last = G.load('gaia.health.last', null); if (last) { last.species = PL.top[0].species; last.species_p = PL.top[0].p; G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
-    }).catch(function (e) { PL.status = 'error'; PL.error = e.message || String(e); }).then(render);
+      var best = Object.keys(plants).sort(function (a, b) { return plants[b] - plants[a]; })[0];
+      PL.plant = best ? { label: best, p: plants[best] } : null;
+      PL.status = 'done'; PL.img = img;
+      return PL;
+    }, function (e) { PL.status = 'error'; PL.error = e.message || String(e); throw e; });
+  }
+  function plRun() {
+    if (!state.img || PL.status === 'loading') return;
+    var img = state.img;
+    plPredict(img).catch(function () { /* shown by plBlock */ }).then(function () {
+      if (img !== state.img) return;
+      try { var last = G.load('gaia.health.last', null); if (last && PL.top) { last.species = PL.top[0].species; last.species_p = PL.top[0].p; G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
+      render();
+    });
+    render();
   }
   function plGaia(sp) { for (var i = 0; i < PL_GAIA.length; i++) if (PL_GAIA[i][0].test(sp)) return PL_GAIA[i][1]; return null; }
   function plBlock() {
@@ -458,21 +472,36 @@
       var x = tensorFrom(state.img, m.input || {});
       return runModel(m.stage1, x).then(function (s1) {
         var res = { stage1: s1, stage2: null, tree: s1.top.label };
-        if (s1.abstain || s1.top.label === 'other' || !m.stage2 || !m.stage2[s1.top.label]) return res;
-        return runModel(m.stage2[s1.top.label], x).then(function (s2) { res.stage2 = s2; return res; });
+        // Fusion with the Pl@ntNet species model (v4). On held-out field photos, plant identification goes from 59 % (stage 1
+        // alone) to 80 % when Pl@ntNet's plant (≥ 15 %) overrides a different stage-1 answer; never on a tomato / pepper
+        // answer unless Pl@ntNet is ≥ 50 % sure, because those crops are not in its species list. Lab photos: unchanged.
+        var fuse = m.species_model ? plPredict(state.img).catch(function () { return null; }) : Promise.resolve(null);
+        return fuse.then(function (pl) {
+          var pp = pl && pl.plant, s1lab = s1.abstain ? null : s1.top.label;
+          if (pp && pp.label !== s1lab && (pp.p >= 0.5 || (pp.p >= 0.15 && ['tomato', 'pepper'].indexOf(s1lab) === -1))) {
+            res.tree = pp.label; res.routed = { by: 'plantnet', p: pp.p, stage1: s1lab };
+          }
+          if ((s1.abstain && !res.routed) || res.tree === 'other' || !m.stage2 || !m.stage2[res.tree]) return res;
+          return stage2(res);
+        });
       });
+      function stage2(res) {
+        var spec2 = m.stage2[res.tree];
+        // a head can run on another backbone with its own input size (v4: Pl@ntNet MobileNetV4 at 512 px)
+        return runModel(spec2, spec2.input ? tensorFrom(state.img, spec2.input) : x).then(function (s2) { res.stage2 = s2; return res; });
+      }
     }).then(function (res) {
       state.result = res;
       // the Farm Agent reads the last check (plant_health_last tool); kept on this device only
       try {
         var s2 = res.stage2;
-        G.save('gaia.health.last', { at: new Date().toISOString(), plant: res.stage1.abstain ? null : res.tree,
+        G.save('gaia.health.last', { at: new Date().toISOString(), plant: res.stage1.abstain && !res.routed ? null : res.tree, routed_by_plantnet: !!res.routed, species: PL.top ? PL.top[0].species : null,
           plant_confidence: res.stage1.top.p, disease: s2 && !s2.abstain ? s2.top.label : null, confidence: s2 ? s2.top.p : null,
           unsure: !!(res.stage1.abstain || (s2 && s2.abstain)), model: m.version || null });
       } catch (e) { /* storage full or private mode */ }
     }).catch(function (e) {
       state.result = { error: e.message };
-    }).then(function () { state.running = false; render(); if (PL.status !== 'loading') plRun(); });
+    }).then(function () { state.running = false; render(); if (PL.status !== 'done' && PL.status !== 'loading') plRun(); });
   }
 
   /* ---------------------------------------------------------- feedback (Kaizen) */
@@ -517,7 +546,7 @@
   }
   var TREE_KEYS = ['olive', 'palm', 'citrus', 'kaki', 'tomato', 'potato', 'pepper', 'grape', 'apple', 'peach', 'cherry', 'strawberry', 'corn', 'soybean', 'squash', 'blueberry', 'raspberry', 'other'];
   // Disease names shown to the farmer (model class -> fr / ar / en / ja); unknown classes fall back to the class name.
-  var DISEASE = {"healthy":{"fr":"Sain","ar":"سليم","en":"Healthy","ja":"健全"},"aculus_olearius":{"fr":"Acariose de l'olivier (Aculus olearius)","ar":"أكاروس الزيتون (Aculus olearius)","en":"Olive bud mite (Aculus olearius)","ja":"オリーブサビダニ（Aculus olearius）"},"peacock_spot":{"fr":"Œil de paon","ar":"عين الطاووس","en":"Peacock spot","ja":"クジャク斑点病"},"bacterial_leaf_spot":{"fr":"Tache bactérienne des feuilles","ar":"التبقع البكتيري للأوراق","en":"Bacterial leaf spot","ja":"細菌性斑点病"},"bacterial_spot":{"fr":"Tache bactérienne","ar":"التبقع البكتيري","en":"Bacterial spot","ja":"細菌性斑点病"},"black_rot":{"fr":"Pourriture noire","ar":"العفن الأسود","en":"Black rot","ja":"黒腐病"},"black_scorch":{"fr":"Brûlure noire","ar":"اللفحة السوداء","en":"Black scorch","ja":"黒焦病"},"black_spot":{"fr":"Tache noire","ar":"البقعة السوداء","en":"Black spot","ja":"黒点病"},"canker":{"fr":"Chancre","ar":"التقرح","en":"Canker","ja":"かいよう病"},"die_back":{"fr":"Dépérissement","ar":"موت الأطراف","en":"Dieback","ja":"枝枯れ"},"downy_mildew":{"fr":"Mildiou","ar":"البياض الزغبي","en":"Downy mildew","ja":"べと病"},"dubas":{"fr":"Dubas (dégâts)","ar":"الدوباس (أضرار)","en":"Dubas damage","ja":"ドゥバス被害"},"dubas_bug":{"fr":"Punaise du dubas","ar":"حشرة الدوباس","en":"Dubas bug","ja":"ドゥバスムシ"},"early_blight":{"fr":"Alternariose","ar":"اللفحة المبكرة","en":"Early blight","ja":"夏疫病"},"esca":{"fr":"Esca","ar":"الإسكا","en":"Esca","ja":"エスカ病"},"fusarium_wilt":{"fr":"Fusariose (bayoud)","ar":"الذبول الفيوزاريومي (البيوض)","en":"Fusarium wilt (bayoud)","ja":"フザリウム萎凋病（バユード）"},"greening":{"fr":"Greening (HLB)","ar":"الاخضرار (HLB)","en":"Greening (HLB)","ja":"グリーニング病（HLB）"},"honeydew":{"fr":"Miellat","ar":"الندوة العسلية","en":"Honeydew","ja":"甘露"},"isariopsis_leaf_spot":{"fr":"Tache foliaire (Isariopsis)","ar":"تبقع الأوراق (Isariopsis)","en":"Isariopsis leaf spot","ja":"褐斑病（Isariopsis）"},"late_blight":{"fr":"Mildiou","ar":"اللفحة المتأخرة","en":"Late blight","ja":"疫病"},"leaf_mold":{"fr":"Cladosporiose","ar":"عفن الأوراق","en":"Leaf mould","ja":"葉かび病"},"leaf_spots":{"fr":"Taches foliaires","ar":"تبقعات الأوراق","en":"Leaf spots","ja":"葉の斑点"},"leaf_miner":{"fr":"Mineuse (galeries dans la feuille)","ar":"حافرة الأوراق","en":"Leaf miner","ja":"ハモグリバエ類（潜葉虫）"},"magnesium_deficiency":{"fr":"Carence en magnésium","ar":"نقص المغنيسيوم","en":"Magnesium deficiency","ja":"マグネシウム欠乏"},"manganese_deficiency":{"fr":"Carence en manganèse","ar":"نقص المنغنيز","en":"Manganese deficiency","ja":"マンガン欠乏"},"nitrogen_deficiency":{"fr":"Carence en azote","ar":"نقص الآزوت","en":"Nitrogen deficiency","ja":"窒素欠乏"},"mealybugs":{"fr":"Cochenilles farineuses","ar":"البق الدقيقي","en":"Mealybugs","ja":"コナカイガラムシ"},"mosaic_virus":{"fr":"Virus de la mosaïque","ar":"فيروس الموزاييك","en":"Mosaic virus","ja":"モザイクウイルス"},"parlatoria_blanchardi":{"fr":"Cochenille blanche du palmier (Parlatoria)","ar":"القشرية البيضاء للنخيل (Parlatoria)","en":"White scale (Parlatoria blanchardi)","ja":"ナツメヤシのカイガラムシ（Parlatoria）"},"potassium_deficiency":{"fr":"Carence en potassium","ar":"نقص البوتاسيوم","en":"Potassium deficiency","ja":"カリウム欠乏"},"powdery_mildew":{"fr":"Oïdium","ar":"البياض الدقيقي","en":"Powdery mildew","ja":"うどんこ病"},"rachis_blight":{"fr":"Brûlure du rachis","ar":"لفحة العرجون","en":"Rachis blight","ja":"葉軸枯れ"},"septoria_leaf_spot":{"fr":"Septoriose","ar":"التبقع السبتوري","en":"Septoria leaf spot","ja":"斑点病（セプトリア）"},"shot_hole":{"fr":"Criblure","ar":"ثقوب الأوراق","en":"Shot hole","ja":"せん孔病"},"spider_mites":{"fr":"Acariens tisserands","ar":"العنكبوت الأحمر","en":"Spider mites","ja":"ハダニ"},"spiny_whitefly":{"fr":"Aleurode épineux","ar":"الذبابة البيضاء الشوكية","en":"Spiny whitefly","ja":"トゲコナジラミ"},"spotted_wilt_virus":{"fr":"Maladie bronzée (TSWV)","ar":"فيروس الذبول المتبقع","en":"Spotted wilt virus (TSWV)","ja":"黄化えそ病（TSWV）"},"target_spot":{"fr":"Tache cible","ar":"البقعة الهدفية","en":"Target spot","ja":"褐色輪紋病"},"yellow_leaf_curl_virus":{"fr":"Virus des feuilles jaunes en cuillère (TYLCV)","ar":"فيروس تجعد واصفرار الأوراق","en":"Yellow leaf curl virus (TYLCV)","ja":"黄化葉巻病（TYLCV）"}};
+  var DISEASE = {"bacterial":{"fr":"Maladie bactérienne","ar":"مرض بكتيري","en":"Bacterial disease","ja":"細菌病"},"fungal_leaf_spot":{"fr":"Taches fongiques (dont alternariose)","ar":"تبقعات فطرية (منها اللفحة المبكرة)","en":"Fungal leaf spots (incl. early blight)","ja":"糸状菌による斑点（夏疫病を含む）"},"nematode":{"fr":"Nématodes","ar":"الديدان الخيطية","en":"Nematodes","ja":"線虫"},"pest_damage":{"fr":"Dégâts de ravageurs","ar":"أضرار الآفات","en":"Pest damage","ja":"害虫の被害"},"virus":{"fr":"Virose","ar":"مرض فيروسي","en":"Virus disease","ja":"ウイルス病"},"healthy":{"fr":"Sain","ar":"سليم","en":"Healthy","ja":"健全"},"aculus_olearius":{"fr":"Acariose de l'olivier (Aculus olearius)","ar":"أكاروس الزيتون (Aculus olearius)","en":"Olive bud mite (Aculus olearius)","ja":"オリーブサビダニ（Aculus olearius）"},"peacock_spot":{"fr":"Œil de paon","ar":"عين الطاووس","en":"Peacock spot","ja":"クジャク斑点病"},"bacterial_leaf_spot":{"fr":"Tache bactérienne des feuilles","ar":"التبقع البكتيري للأوراق","en":"Bacterial leaf spot","ja":"細菌性斑点病"},"bacterial_spot":{"fr":"Tache bactérienne","ar":"التبقع البكتيري","en":"Bacterial spot","ja":"細菌性斑点病"},"black_rot":{"fr":"Pourriture noire","ar":"العفن الأسود","en":"Black rot","ja":"黒腐病"},"black_scorch":{"fr":"Brûlure noire","ar":"اللفحة السوداء","en":"Black scorch","ja":"黒焦病"},"black_spot":{"fr":"Tache noire","ar":"البقعة السوداء","en":"Black spot","ja":"黒点病"},"canker":{"fr":"Chancre","ar":"التقرح","en":"Canker","ja":"かいよう病"},"die_back":{"fr":"Dépérissement","ar":"موت الأطراف","en":"Dieback","ja":"枝枯れ"},"downy_mildew":{"fr":"Mildiou","ar":"البياض الزغبي","en":"Downy mildew","ja":"べと病"},"dubas":{"fr":"Dubas (dégâts)","ar":"الدوباس (أضرار)","en":"Dubas damage","ja":"ドゥバス被害"},"dubas_bug":{"fr":"Punaise du dubas","ar":"حشرة الدوباس","en":"Dubas bug","ja":"ドゥバスムシ"},"early_blight":{"fr":"Alternariose","ar":"اللفحة المبكرة","en":"Early blight","ja":"夏疫病"},"esca":{"fr":"Esca","ar":"الإسكا","en":"Esca","ja":"エスカ病"},"fusarium_wilt":{"fr":"Fusariose (bayoud)","ar":"الذبول الفيوزاريومي (البيوض)","en":"Fusarium wilt (bayoud)","ja":"フザリウム萎凋病（バユード）"},"greening":{"fr":"Greening (HLB)","ar":"الاخضرار (HLB)","en":"Greening (HLB)","ja":"グリーニング病（HLB）"},"honeydew":{"fr":"Miellat","ar":"الندوة العسلية","en":"Honeydew","ja":"甘露"},"isariopsis_leaf_spot":{"fr":"Tache foliaire (Isariopsis)","ar":"تبقع الأوراق (Isariopsis)","en":"Isariopsis leaf spot","ja":"褐斑病（Isariopsis）"},"late_blight":{"fr":"Mildiou","ar":"اللفحة المتأخرة","en":"Late blight","ja":"疫病"},"leaf_mold":{"fr":"Cladosporiose","ar":"عفن الأوراق","en":"Leaf mould","ja":"葉かび病"},"leaf_spots":{"fr":"Taches foliaires","ar":"تبقعات الأوراق","en":"Leaf spots","ja":"葉の斑点"},"leaf_miner":{"fr":"Mineuse (galeries dans la feuille)","ar":"حافرة الأوراق","en":"Leaf miner","ja":"ハモグリバエ類（潜葉虫）"},"magnesium_deficiency":{"fr":"Carence en magnésium","ar":"نقص المغنيسيوم","en":"Magnesium deficiency","ja":"マグネシウム欠乏"},"manganese_deficiency":{"fr":"Carence en manganèse","ar":"نقص المنغنيز","en":"Manganese deficiency","ja":"マンガン欠乏"},"nitrogen_deficiency":{"fr":"Carence en azote","ar":"نقص الآزوت","en":"Nitrogen deficiency","ja":"窒素欠乏"},"mealybugs":{"fr":"Cochenilles farineuses","ar":"البق الدقيقي","en":"Mealybugs","ja":"コナカイガラムシ"},"mosaic_virus":{"fr":"Virus de la mosaïque","ar":"فيروس الموزاييك","en":"Mosaic virus","ja":"モザイクウイルス"},"parlatoria_blanchardi":{"fr":"Cochenille blanche du palmier (Parlatoria)","ar":"القشرية البيضاء للنخيل (Parlatoria)","en":"White scale (Parlatoria blanchardi)","ja":"ナツメヤシのカイガラムシ（Parlatoria）"},"potassium_deficiency":{"fr":"Carence en potassium","ar":"نقص البوتاسيوم","en":"Potassium deficiency","ja":"カリウム欠乏"},"powdery_mildew":{"fr":"Oïdium","ar":"البياض الدقيقي","en":"Powdery mildew","ja":"うどんこ病"},"rachis_blight":{"fr":"Brûlure du rachis","ar":"لفحة العرجون","en":"Rachis blight","ja":"葉軸枯れ"},"septoria_leaf_spot":{"fr":"Septoriose","ar":"التبقع السبتوري","en":"Septoria leaf spot","ja":"斑点病（セプトリア）"},"shot_hole":{"fr":"Criblure","ar":"ثقوب الأوراق","en":"Shot hole","ja":"せん孔病"},"spider_mites":{"fr":"Acariens tisserands","ar":"العنكبوت الأحمر","en":"Spider mites","ja":"ハダニ"},"spiny_whitefly":{"fr":"Aleurode épineux","ar":"الذبابة البيضاء الشوكية","en":"Spiny whitefly","ja":"トゲコナジラミ"},"spotted_wilt_virus":{"fr":"Maladie bronzée (TSWV)","ar":"فيروس الذبول المتبقع","en":"Spotted wilt virus (TSWV)","ja":"黄化えそ病（TSWV）"},"target_spot":{"fr":"Tache cible","ar":"البقعة الهدفية","en":"Target spot","ja":"褐色輪紋病"},"yellow_leaf_curl_virus":{"fr":"Virus des feuilles jaunes en cuillère (TYLCV)","ar":"فيروس تجعد واصفرار الأوراق","en":"Yellow leaf curl virus (TYLCV)","ja":"黄化葉巻病（TYLCV）"}};
   function label(x, inResult) {
     if (x === 'other' && inResult) return t('tr_other_res');
     if (TREE_KEYS.indexOf(x) >= 0) return t('tr_' + x);
@@ -605,7 +634,15 @@
     if (!r) return null;
     if (r.error) return G.note('err', r.error);
     var s1 = r.stage1, out = [];
-    out.push(el('div', { class: 'gp-card' }, [
+    if (r.routed) {   // Pl@ntNet's species model overrode stage 1: show the plant it found, and what stage 1 said
+      s1 = { top: { label: r.tree, p: r.routed.p }, ranked: s1.ranked, abstain: false };
+      out.push(el('div', { class: 'gp-card' }, [
+        el('p', { class: 'eyebrow' }, [t('tree')]),
+        el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(r.tree, true)]),
+        el('p', { class: 'small', style: 'margin-top:4px;color:var(--g-ink-2)' }, [t('pl_routed').replace('{p}', fmt(r.routed.p * 100)).replace('{s}', r.routed.stage1 ? label(r.routed.stage1) : t('unsure_t'))]),
+        probs(r.stage1.ranked)
+      ]));
+    } else out.push(el('div', { class: 'gp-card' }, [
       el('p', { class: 'eyebrow' }, [t('tree')]),
       el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(s1.top.label, true)]),
       probs(s1.ranked)

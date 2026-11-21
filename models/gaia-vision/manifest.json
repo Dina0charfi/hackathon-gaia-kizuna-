@@ -1,5 +1,5 @@
 {
-  "version": "2026.11-effb0-v3",
+  "version": "2026.11-effb0-v3+v4pn",
   "backbone": "efficientnet_b0 (timm, ImageNet ra weights), frozen; one linear head per stage",
   "input": {
     "size": 224,
@@ -49,8 +49,22 @@
       "threshold": 0.3
     },
     "grape": {
-      "file": "gaia-vision-effb0.onnx",
+      "file": "gaia-vision-v4-pn.onnx",
       "output": "grape",
+      "input": {
+        "size": 512,
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
+      },
+      "backbone": "PlantNet/mobilenetv4-conv-s-plantclef2024 (frozen) + linear head",
       "classes": [
         "bacterial_leaf_spot",
         "black_rot",
@@ -60,7 +74,7 @@
         "isariopsis_leaf_spot",
         "powdery_mildew"
       ],
-      "temperature": 0.3816,
+      "temperature": 0.4442,
       "threshold": 0.3
     },
     "olive": {
@@ -105,15 +119,33 @@
       "threshold": 0.3
     },
     "potato": {
-      "file": "gaia-vision-effb0.onnx",
+      "file": "gaia-vision-v4-pn.onnx",
       "output": "potato",
+      "input": {
+        "size": 512,
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
+      },
+      "backbone": "PlantNet/mobilenetv4-conv-s-plantclef2024 (frozen) + linear head",
       "classes": [
-        "early_blight",
+        "bacterial",
+        "fungal_leaf_spot",
         "healthy",
-        "late_blight"
+        "late_blight",
+        "nematode",
+        "pest_damage",
+        "virus"
       ],
-      "temperature": 0.7826,
-      "threshold": 0.3
+      "temperature": 0.8046,
+      "threshold": 0.7
     },
     "tomato": {
       "file": "gaia-vision-effb0.onnx",
@@ -353,5 +385,25 @@
       "leaky_random_split_test_accuracy": 0.8216,
       "dropped_classes_too_few_images": []
     }
+  },
+  "species_model": {
+    "file": "gaia-vision-v4-pn.onnx",
+    "output": "logits",
+    "input": {
+      "size": 512,
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ]
+    },
+    "labels": "plantnet-labels.json",
+    "source": "https://huggingface.co/PlantNet/mobilenetv4-conv-s-plantclef2024",
+    "license": "Apache-2.0"
   }
 }

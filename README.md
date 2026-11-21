@@ -28,9 +28,10 @@ uvicorn gaia.main:app --reload      # http://127.0.0.1:8000/docs
 pytest -q
 ```
 
-Everything in the website works without this server, except two optional extras: the Pl@ntNet check in
-Plant health and the server-side language models of the AI Lab (the Lab can also run a free model inside the browser). For Pl@ntNet, put `PLANTNET_API_KEY=...` in `backend/.env`
-(never commit it), start the server as above, and reload the page: it finds the server on port 8000 or 8765
+Everything in the website works without this server, except two optional extras: the online Pl@ntNet check in
+Plant health (an offline Pl@ntNet model now runs in the browser without it) and the server-side language models of the AI Lab and the Farm Agent (the Lab can also run a free model inside the browser). For Pl@ntNet, put `PLANTNET_API_KEY=...` in `backend/.env`
+(never commit it), start the server as above, and reload the page. **Free key:** create an account at
+[my.plantnet.org](https://my.plantnet.org), open *Your API key* (500 identifications a day for free) and paste it after `PLANTNET_API_KEY=`. The page finds the server on port 8000 or 8765
 and says why the check is unavailable when it is not (server not running, no key, key refused, network).
 
 ## What is in the repo
@@ -59,6 +60,7 @@ the story, bridge and community sections are read back from their own pages, so 
 | `nexus.html` | Water & energy: FAO-56 water need, pumping energy, solar sizing, monthly quota, and a satellite check: water actually used on the plot (FAO WaPOR v3, 100 m, last 12 months, `js/wapor.js`), measured crop coefficient and soil moisture |
 | `agrivoltaic.html` | Agrivoltaics: panel rows above the crop, light and shading simulation |
 | `health.html` | Plant health: photo quality check, then a two-stage tree / disease model (see below) |
+| `agent.html` | **Farm Agent**: give a goal ("get my 3 ha of olives near Kairouan ready for summer"). The agent plans, calls GAIA's own tools live on screen (place search, Land DNA, plot profile, 16-day weather, FAO-56 water need and 14-day irrigation schedule, groundwater guard, compatibility engine, Solar Brain, weather-driven disease risk, Sentinel-2 NDVI, last plant-health photo, knowledge search) and returns a dated action plan, each line linked to the tool that justifies it, exportable to a calendar (.ics). `js/agent-tools.js`, `js/agent.js`, `backend/gaia/agent.py` |
 | `lab.html` | AI Lab: free questions in French, Arabic or English, answered by a language model (`js/lab-llm.js`: free in-browser model, Ollama, Groq, Hugging Face or Claude) from the knowledge records and the parcel profile (`js/lab-retrieval.js`), with the rule-based answer and sources underneath |
 | `library.html` | The 11 knowledge records with their sources |
 | `farm.html` | Dashboard: water pumped (from the farmer's meter readings, typed in My season or imported as a CSV from a meter / logger) against the daily quota, solar energy, savings, leak alerts from night readings, 7-day irrigation advice. A labelled simulation is shown only while there are no readings |
@@ -79,6 +81,33 @@ The Land DNA reads soil in this order (the SoilGrids REST API was paused by ISRI
 3. `js/soil-tn.js`: typical topsoil values (texture, clay, organic carbon, 0–30 cm) for 21 Tunisian agro-ecological
    zones, compiled as orders of magnitude from HWSD v2 (FAO/IIASA) and SoilGrids 2.0. These are shown with
    confidence "low" and the zone name, never as a measurement of the parcel. A soil analysis replaces them.
+
+## Farm Agent: an AI that acts, not only answers
+
+The agent has three brains, best first, and always shows which one is working:
+
+1. **A language model with native tool calling**, through the GAIA server (`POST /agent/step`): Claude, Groq (free key),
+   OpenRouter, Hugging Face or Ollama, configured exactly like the AI Lab below. The model decides which tools to call,
+   reads the results, investigates risks with more calls, and stops when it can write the plan. The loop runs in the
+   browser because the tools are GAIA's JavaScript modules working on the farmer's saved plot; the server only relays
+   one reasoning step at a time, so no key ever reaches the browser.
+2. **GAIA's planner + the free in-browser model** (Qwen2.5 1.5B, WebGPU): the planner runs the tools, the small model
+   rewrites the plan without adding numbers.
+3. **GAIA's planner alone**: offline, no key, deterministic. It parses the goal (place, crop, area, well depth, solar,
+   aquifer), runs the tools and writes the plan from rules on their results.
+
+Numbers the model writes that appear in no tool result are highlighted. Disease-risk rules (olive peacock spot, olive
+fly, grape downy and powdery mildew, tomato/potato late blight with the Hutton criteria, citrus Alternaria, date-palm
+heat) run on the hourly Open-Meteo forecast and cite their source; they flag weather that favours an infection, they do
+not diagnose it.
+
+## Crop vigour from space (Sentinel-2 NDVI)
+
+`js/ndvi.js` finds the Sentinel-2 L2A scenes over the plot for the last 12 months (Element 84 Earth Search STAC, cloud
+cover < 30 %), reads a small window of the red, near-infrared and scene-classification bands straight from the
+cloud-optimised GeoTIFFs on AWS Open Data (HTTP range requests, geotiff.js), drops cloud, shadow and water pixels, and
+returns the NDVI series, the 12-month median, the 90-day trend and any sudden drop. Free, no key, about 10 s, cached
+4 days. Shown in Land Intelligence and used by the Farm Agent.
 
 ## AI Lab: a real language model (free options first)
 
@@ -110,7 +139,16 @@ The plant check never shows a diagnosis it did not compute.
 3. Without a model, the page says the model is not connected, and `POST /diagnose` answers `503 model_not_loaded`.
    With a model, `POST /diagnose` returns `ok`, `unsure`, `unsupported_tree` or `no_disease_model`.
 
-No model is shipped yet: it still has to be trained on olive, date palm and citrus leaves and checked on Tunisian photos.
+Shipped models (details and honest test numbers in `ml/gaia-vision/TRAINING_REPORT.md`):
+
+- **v3** (EfficientNet-B0): stage 1 finds the plant, stage 2 the disease for olive, date palm, citrus, tomato and pepper.
+- **v4** (`gaia-vision-v4-pn.onnx`, 20 MB): Pl@ntNet's open MobileNetV4 (PlantCLEF 2024, 7,806 species, Apache-2.0)
+  with GAIA disease heads for potato and grape. Same file also gives the species, **offline and without any key**.
+- **Fusion**: when Pl@ntNet is confident about another plant than stage 1, it routes the photo to that plant's
+  disease model. On field photos, plant identification rises from 59% to 80% (potato 28% → 70%).
+
+The online Pl@ntNet API is optional (better on rare species): create a free account on my.plantnet.org, copy
+"Your API key" (500 identifications a day) and put `PLANTNET_API_KEY=...` in `backend/.env`.
 
 ## Honest by design
 

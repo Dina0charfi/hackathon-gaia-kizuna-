@@ -15,7 +15,6 @@
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
-    plantnetModel: 'models/plantnet-mnv4/',            // Pl@ntNet's open species model (Apache-2.0), runs in the browser: no key, no server
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
     plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
