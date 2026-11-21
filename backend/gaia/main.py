@@ -16,7 +16,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import engine, nexus, solar
+from . import business, engine, guard, nexus, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -82,6 +82,75 @@ def nexus_calculate(body: NexusIn) -> dict:
     return nexus.compute(**body.model_dump())
 
 
+class GuardIn(NexusIn):
+    pv_kwp: Optional[float] = Field(None, description="installed solar driving the pump; default: the size the nexus computes")
+    safe_yield_m3_year: Optional[float] = Field(None, description="permit, or the farm's share of aquifer recharge")
+    flow_m3_h: Optional[float] = Field(None, description="pump flow at the working head, for daily run-time limits")
+
+
+@app.post("/nexus/guard")
+def nexus_guard(body: GuardIn) -> dict:
+    """Groundwater guard: cap solar pumping at the crop need (and the safe yield when given)."""
+    return guard.guard(**body.model_dump())
+
+
+class PaygIn(BaseModel):
+    kit_tnd: Optional[float] = Field(None, description="installed price of the solar pump kit (TND)")
+    diesel_tnd_year: Optional[float] = Field(None, description="what the farm spends on pumping diesel per year (TND)")
+    deposit_pct: float = 0.10
+    term_months: int = 36
+    fee_rate: float = 0.08
+    share_cap: float = 0.70
+    maint_tnd_year: float = 0
+    monthly_kwh: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12)
+    seasonal: bool = False
+    start_month: int = Field(0, ge=0, le=11)
+    life_y: float = 20
+
+
+@app.post("/business/payg")
+def business_payg(body: PaygIn) -> dict:
+    return business.payg(**body.model_dump())
+
+
+class CoopMember(BaseModel):
+    name: Optional[str] = None
+    quota_m3: float
+    diesel_tnd_year: Optional[float] = None
+
+
+class CoopIn(BaseModel):
+    kit_tnd: Optional[float] = None
+    individual_kit_tnd: Optional[float] = None
+    members: list[CoopMember] = []
+    deposit_pct: float = 0.10
+    term_months: int = 36
+    fee_rate: float = 0.08
+    reserve_pct: float = 0.05
+
+
+@app.post("/business/coop")
+def business_coop(body: CoopIn) -> dict:
+    d = body.model_dump()
+    return business.coop(**d)
+
+
+class AdoptionIn(BaseModel):
+    ghi_mean: Optional[float] = None
+    water_source: Optional[str] = None
+    has_quota: bool = False
+    payg: Optional[PaygIn] = None
+    ease: dict[str, bool] = {}
+    partners: dict[str, bool] = {}
+
+
+@app.post("/business/adoption")
+def business_adoption(body: AdoptionIn) -> dict:
+    d = body.model_dump()
+    d["payg"] = business.payg(**d["payg"]) if d["payg"] else None
+    return business.adoption(**d)
+
+
 class SolarIn(BaseModel):
     lat: float
     lon: float
@@ -106,14 +175,13 @@ def solar_simulate(body: SolarIn) -> dict:
 
 @app.post("/diagnose")
 async def diagnose(image: UploadFile = File(...)) -> dict:
-    manifest = MODEL_DIR / "manifest.json"
-    if not manifest.exists():
-        raise HTTPException(503, detail={
-            "status": "model_not_loaded",
-            "message": "No validated plant-health model is installed. GAIA does not return a diagnosis without one.",
-            "expected": str(manifest)})
-    # A real model is wired here once trained and validated (see report, M2).
-    raise HTTPException(501, detail={"status": "not_implemented", "message": "Server-side inference not wired yet; use the in-browser ONNX path."})
+    """Two-stage plant-health check. 503 with a clear status when no usable model is installed."""
+    try:
+        return vision.diagnose(MODEL_DIR, await image.read())
+    except vision.VisionUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
+    except vision.BadImage as e:
+        raise HTTPException(422, detail={"status": "bad_image", "message": str(e)}) from e
 
 
 class FeedbackIn(BaseModel):
