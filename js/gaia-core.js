@@ -177,7 +177,18 @@
   }
 
   /* ---------------------------------------------------------- parcel */
-  function getParcel() { return load('gaia.parcel', null); }
+  function getParcel() {
+    var p = load('gaia.parcel', null);
+    // plots saved before the unit fix kept NASA POWER radiation in MJ/m²/day: convert to kWh/m²/day
+    var SM = p && p.dna && p.dna.solarMonthly, S = p && p.dna && p.dna.solar && p.dna.solar.ghi_kwh;
+    if (SM && /MJ/i.test(SM.unit || '')) {
+      SM.ghi = (SM.ghi || []).map(function (v) { return typeof v === 'number' ? v / 3.6 : v; });
+      SM.unit = 'kWh/m²/jour';
+      if (S && typeof S.value === 'number' && /MJ/i.test(S.unit || '')) { S.value = S.value / 3.6; S.unit = 'kWh/m²/jour'; }
+      save('gaia.parcel', p);
+    }
+    return p;
+  }
   function setParcel(p) { save('gaia.parcel', p); renderParcelBadge(); }
 
   /* ---------------------------------------------------------- dom utils */

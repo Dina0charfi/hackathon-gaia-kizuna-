@@ -16,9 +16,13 @@
    4. Optimiser: seeded genetic algorithm over row spacing, panel width, tilt
       and orientation, with the Japanese solar-sharing rule as a constraint:
       the crop must keep at least 80 % of its normal yield (MAFF guideline, 2013).
+   4b. Search: NSGA-II multi-objective selection (Deb et al. 2002) over crop yield,
+      electricity and the goal score, Japanese rule as a hard constraint.
    5. Weather pilot: hour-by-hour angle of a single-axis tracker (north–south
       axis) that trades light between crop and modules from an hourly weather
-      forecast: sun tracking, light for the crop, or heat shield.
+      forecast: sun tracking, light for the crop, or heat shield. Default is
+      model-predictive control: each forecast day is planned as a whole
+      (maximise kWh subject to a daily crop-light target), not hour by hour.
    ========================================================================== */
 
 (function (root) {
@@ -31,14 +35,17 @@
   // Ls: share of full Tunisian sun above which more light adds no yield; γ: curvature;
   // tcrit: daily maximum (°C) above which heat costs yield; s: yield loss per °C above it.
   // kc: FAO-56 Table 12 mid-season value (to check). months: typical Tunisian season.
+  // src 'wofost': Ls and g fitted on WOFOST 7.2 (PCSE) runs under shade, NASA POWER weather 2001–2023,
+  // Jendouba, Tunis, Kairouan, Sidi Bouzid, 92 seasons (ml/agv-calibration, models/agv-calibration/calibration.json).
+  // Literature values they replace: wheat Ls 0.9, g 1.0; potato Ls 0.75, g 0.8. Other crops: literature (Laub et al. 2022).
   var CROPS = {
     lettuce_s: { cls: 'tol', Ls: 0.5, g: 0.5, tcrit: 27, s: 0.05, kc: 1.00, months: [0,0,0,0,1,1,1,1,0,0,0,0] },
     pepper:    { cls: 'mod', Ls: 0.7, g: 0.7, tcrit: 32, s: 0.04, kc: 1.05, months: [0,0,0,1,1,1,1,1,1,0,0,0] },
     tomato:    { cls: 'mod', Ls: 0.8, g: 0.8, tcrit: 32, s: 0.04, kc: 1.15, months: [0,0,1,1,1,1,1,1,0,0,0,0] },
     strawb:    { cls: 'tol', Ls: 0.6, g: 0.6, tcrit: 28, s: 0.04, kc: 0.85, months: [1,1,1,1,1,0,0,0,0,0,1,1] },
-    potato:    { cls: 'mod', Ls: 0.75, g: 0.8, tcrit: 28, s: 0.04, kc: 1.15, months: [1,1,1,1,1,0,0,0,0,0,0,0] },
+    potato:    { cls: 'mod', Ls: 0.74, g: 0.56, tcrit: 28, s: 0.04, kc: 1.15, months: [1,1,1,1,1,0,0,0,0,0,0,0], src: 'wofost' },
     alfalfa:   { cls: 'tol', Ls: 0.65, g: 0.6, tcrit: 35, s: 0.03, kc: 0.95, months: [1,1,1,1,1,1,1,1,1,1,1,1] },
-    wheat:     { cls: 'sens', Ls: 0.9, g: 1.0, tcrit: 31, s: 0.05, kc: 1.15, months: [1,1,1,1,1,0,0,0,0,0,1,1] }
+    wheat:     { cls: 'sens', Ls: 0.65, g: 1.7, tcrit: 31, s: 0.05, kc: 1.15, months: [1,1,1,1,1,0,0,0,0,0,1,1], src: 'wofost' }
   };
   var JAPAN_RULE = 0.8;
 
@@ -52,7 +59,7 @@
    * sim: result of GAIA_SOLAR.simulate; clim: { tmax[12], et0[12] mm/month, rain[12] mm/month }
    * → { yrel, months[12] (ratio or null), waterOpen, waterUnder (m³/ha/yr), heatGain }
    */
-  function cropResponse(sim, cropKey, clim) {
+  function cropResponse(sim, cropKey, clim, lat) {
     var c = CROPS[cropKey], ratios = [], n = 0, sum = 0, wO = 0, wU = 0, heatGain = 0;
     for (var m = 0; m < 12; m++) {
       var mo = sim.months[m];
@@ -68,7 +75,51 @@
         wO += Math.max(0, etc - pe); wU += Math.max(0, etc * (1 - BETA * (1 - L)) - pe);
       }
     }
-    return { yrel: n ? sum / n : null, months: ratios, waterOpen: wO * 10, waterUnder: wU * 10, heatGain: n ? heatGain / n : 0 };
+    var out = { yrel: n ? sum / n : null, months: ratios, waterOpen: wO * 10, waterUnder: wU * 10, heatGain: n ? heatGain / n : 0, model: 'formula' };
+    // GAIA AgriNet (trained neural network) replaces the season yield for the crops it was trained on
+    var nn = n ? agriNet(cropKey, sim, clim, lat) : null;
+    if (nn) {
+      out.formulaYrel = sum / n; out.yrel = nn.yrel; out.model = 'agrinet';
+      if (nn.yfull !== undefined) { out.yieldFull = nn.yfull; out.yieldUnder = nn.yrel * nn.yfull; }
+    }
+    return out;
+  }
+
+  /* ---------------------------------------------------------- GAIA AgriNet (neural network) */
+  // Weights come from js/agv-net.js (ml/agv-net/02_train.py). Inputs are built from the parcel's
+  // monthly climate over the crop's months, the same quantities the network was trained on.
+  function NET() { return root.GAIA_AGV_NET || (typeof global !== 'undefined' && global.GAIA_AGV_NET) || null; }
+  function mlp(N, x) {
+    var h = x.map(function (v, i) { return (v - N.x_mean[i]) / N.x_std[i]; });
+    N.layers.forEach(function (L, k) {
+      var o = [];
+      for (var j = 0; j < L.out; j++) { var s = L.b[j]; for (var i = 0; i < L.in; i++) s += h[i] * L.W[i * L.out + j]; o.push(k < N.layers.length - 1 ? Math.tanh(s) : s); }
+      h = o;
+    });
+    return h.map(function (v, i) { return v * N.y_std[i] + N.y_mean[i]; });
+  }
+  function agriNet(cropKey, sim, clim, lat) {
+    var N = NET(), c = CROPS[cropKey];
+    if (!N || (cropKey !== 'wheat' && cropKey !== 'potato') || lat === undefined || lat === null || !clim || !clim.ghi || !clim.tmax || !clim.tmin) return null;
+    var Ls = 0, k = 0, rad = 0, tx = 0, tn = 0;
+    for (var m = 0; m < 12; m++) {
+      if (!c.months[m]) continue;
+      var mo = sim.months[m];
+      if (!mo || mo.lightShare === null || clim.ghi[m] === null || clim.tmax[m] === null || clim.tmin[m] === null) return null;
+      Ls += mo.lightShare; rad += clim.ghi[m] * 3.6 * DAYS[m]; tx += clim.tmax[m]; tn += clim.tmin[m]; k++;
+    }
+    if (!k) return null;
+    var L = Ls / k;
+    if (L < 0.3) return null;                       // below the shade levels the network was trained on: keep the formula
+    var x = function (l) { return N.features.map(function (f) {
+      return { is_wheat: cropKey === 'wheat' ? 1 : 0, is_potato: cropKey === 'potato' ? 1 : 0, L: l, lat: lat, rad_gj: rad / 1000, tmax: tx / k, tmin: tn / k, shift: 0 }[f];
+    }); };
+    var full = mlp(N, x(1)), under = mlp(N, x(Math.min(1, L)));
+    if (!(full[0] > 0.2)) return null;
+    // relative to the network's own full-sun answer, so full sun is exactly 100 %
+    var out = { yrel: Math.max(0, Math.min(1.1, under[0] / full[0])) };
+    if (N.outputs.indexOf('yield_full_t_ha') !== -1) out.yfull = Math.max(0, full[N.outputs.indexOf('yield_full_t_ha')]);
+    return out;
   }
 
   // electricity of a conventional ground-mounted plant on the same land (PV-only reference for LER)
@@ -79,12 +130,13 @@
 
   function evaluate(base, genes, cropKey, clim, refKwhHa) {
     var g = Object.assign({}, base, genes);
-    var sim = S.simulate(g), cr = cropResponse(sim, cropKey, clim);
+    var sim = S.simulate(g), cr = cropResponse(sim, cropKey, clim, g.lat);
     var eRel = refKwhHa > 0 ? sim.annual_kwh / (refKwhHa * (g.area_ha || 1)) : 0;
     return {
       genes: genes, kwh: sim.annual_kwh, kwp: sim.kwp, light: sim.lightShareYear, yrel: cr.yrel, eRel: eRel,
       ler: (cr.yrel || 0) + eRel, waterSaved: (cr.waterOpen - cr.waterUnder) * (g.area_ha || 1),
-      waterOpen: cr.waterOpen * (g.area_ha || 1), cropMonths: cr.months, sim: sim
+      waterOpen: cr.waterOpen * (g.area_ha || 1), cropMonths: cr.months, sim: sim,
+      model: cr.model, yieldFull: cr.yieldFull, yieldUnder: cr.yieldUnder, formulaYrel: cr.formulaYrel
     };
   }
 
@@ -127,17 +179,65 @@
     if (opts.start) P.push(make(Object.assign({}, opts.start)));
     while (P.length < pop) P.push(make(randomGenes()));
     function best() { return P.reduce(function (b, e) { return !b || e.fit > b.fit ? e : b; }, null); }
+
+    /* NSGA-II (Deb et al. 2002). Objectives, all maximised: crop yield, electricity, and the
+       goal score (so the best layout for the chosen goal is always kept). The Japanese rule is
+       a constraint: a layout that respects it always beats one that does not (constrained domination). */
+    function objs(e) { return [e.yrel || 0, e.eRel || 0, e.fit]; }
+    function viol(e) { return Math.max(0, minY - (e.yrel || 0)); }
+    function dominates(a, b) {
+      var va = viol(a), vb = viol(b);
+      if (va > 0 || vb > 0) return va < vb;
+      var oa = objs(a), ob = objs(b), better = false;
+      for (var i = 0; i < oa.length; i++) { if (oa[i] < ob[i] - 1e-12) return false; if (oa[i] > ob[i] + 1e-12) better = true; }
+      return better;
+    }
+    function fronts(R) {
+      var S = R.map(function () { return []; }), n = R.map(function () { return 0; }), F = [[]];
+      for (var p = 0; p < R.length; p++) {
+        for (var q = 0; q < R.length; q++) {
+          if (p === q) continue;
+          if (dominates(R[p], R[q])) S[p].push(q); else if (dominates(R[q], R[p])) n[p]++;
+        }
+        if (n[p] === 0) { R[p].rank = 0; F[0].push(p); }
+      }
+      for (var i = 0; F[i].length; i++) {
+        var Q = [];
+        F[i].forEach(function (p) { S[p].forEach(function (q) { if (--n[q] === 0) { R[q].rank = i + 1; Q.push(q); } }); });
+        F.push(Q);
+      }
+      return F.slice(0, -1).map(function (f) { return f.map(function (k) { return R[k]; }); });
+    }
+    function crowding(f) {
+      f.forEach(function (e) { e.crowd = 0; });
+      for (var m = 0; m < 3; m++) {
+        f.sort(function (a, b) { return objs(a)[m] - objs(b)[m]; });
+        var lo = objs(f[0])[m], hi = objs(f[f.length - 1])[m], span = hi - lo || 1;
+        f[0].crowd = f[f.length - 1].crowd = Infinity;
+        for (var i = 1; i < f.length - 1; i++) f[i].crowd += (objs(f[i + 1])[m] - objs(f[i - 1])[m]) / span;
+      }
+    }
+    function better(a, b) { return a.rank !== b.rank ? a.rank < b.rank : a.crowd > b.crowd; }
+    function tour() { var a = P[Math.floor(R() * P.length)], b = P[Math.floor(R() * P.length)]; return better(a, b) ? a : b; }
+    fronts(P).forEach(crowding);
+
     return {
-      ref: ref, all: all, gens: gens,
+      ref: ref, all: all, gens: gens, method: 'nsga2',
       done: function () { return gen >= gens; },
       best: best,
       next: function () {
         if (gen >= gens) return best();
         gen++;
-        var sigma = 0.25 * (1 - gen / gens) + 0.03;
-        P.sort(function (a, b) { return b.fit - a.fit; });
-        var nextP = P.slice(0, 4);
-        while (nextP.length < pop) nextP.push(make(child(pick(), pick(), sigma)));
+        var sigma = 0.25 * (1 - gen / gens) + 0.03, Q = [];
+        while (Q.length < pop) Q.push(make(child(tour(), tour(), sigma)));
+        var nextP = [];
+        fronts(P.concat(Q)).some(function (f) {
+          crowding(f);
+          if (nextP.length + f.length <= pop) { nextP = nextP.concat(f); return nextP.length === pop; }
+          f.sort(function (a, b) { return b.crowd - a.crowd; });
+          nextP = nextP.concat(f.slice(0, pop - nextP.length));
+          return true;
+        });
         P = nextP;
         return best();
       },
@@ -182,7 +282,9 @@
     var c = CROPS[cfg.crop], Isat = c.Ls * 1000;
     var trk = { azimuth: 90, width: cfg.width, pitch: cfg.pitch, height: cfg.height };
     var fixed = { azimuth: cfg.fixedAz, tilt: cfg.fixedTilt, width: cfg.width, pitch: cfg.pitch, height: cfg.height };
-    var strat = { fixed: [], sun: [], gaia: [] };
+    var strat = { fixed: [], sun: [], gaia: [] }, plan = [];
+    // what drove the decision: heat (panels kept across the sun to shade the crop), light for the crop, or energy
+    function modeOf(heat, best, bestE) { return heat > 0 && best.g <= bestE.g * 1.02 ? 'shield' : Math.abs(best.ang - bestE.ang) <= 5 ? 'energy' : 'light'; }
     weather.forEach(function (w) {
       var mid = new Date(w.time.getTime() - 30 * 60000), doy = doyOf(mid);
       var solarH = mid.getUTCHours() + mid.getUTCMinutes() / 60 + lon / 15 + eotMinutes(doy) / 60;
@@ -215,15 +317,61 @@
       var eR = Math.max(eMax - eMin, 0.05 * eMax, 1e-6), uR = Math.max(uMax - uMin, 0.05 * Math.abs(uMax), 1e-6);
       var bestE = opts.reduce(function (b, r) { return r.e > b.e ? r : b; }, opts[0]);
       strat.sun.push(rec('energy', bestE.ang, bestE));
-      var best = null, bestS = -1e9;
-      opts.forEach(function (r) {
-        var score = cfg.alpha * (r.e - eMin) / eR + (1 - cfg.alpha) * (r.u - uMin) / uR;
-        if (score > bestS + 1e-9) { bestS = score; best = r; }
-      });
-      // what drove the decision: heat (panels kept across the sun to shade the crop), light for the crop, or energy
-      var mode = heat > 0 && best.g <= bestE.g * 1.02 ? 'shield' : Math.abs(best.ang - bestE.ang) <= 5 ? 'energy' : 'light';
-      strat.gaia.push(rec(mode, best.ang, best));
+      if (cfg.mpc === false) {
+        var best = null, bestS = -1e9;
+        opts.forEach(function (r) {
+          var score = cfg.alpha * (r.e - eMin) / eR + (1 - cfg.alpha) * (r.u - uMin) / uR;
+          if (score > bestS + 1e-9) { bestS = score; best = r; }
+        });
+        strat.gaia.push(rec(modeOf(heat, best, bestE), best.ang, best));
+        return;
+      }
+      // horizon planning: keep the options, decide the whole day at once below
+      var day = Math.floor((w.time.getTime() / 3600e3 + lon / 15) / 24);
+      plan.push({ idx: strat.gaia.length, day: day, opts: opts, uMin: uMin, uMax: uMax, bestE: bestE, heat: heat, rec: rec });
+      strat.gaia.push(null);
     });
+
+    /* Model-predictive control over each forecast day.
+       Maximise the day's electricity subject to: light the crop can use (heat counted against it)
+       ≥ τ × the best the crop could get that day, with τ = 1 − priority (0 = crop first, 1 = energy first).
+       Solved exactly for the discrete angles by Lagrangian relaxation: for a multiplier λ each hour
+       picks argmax e + λ·u; λ is found by bisection as the smallest value that meets the target. */
+    if (cfg.mpc !== false) {
+      var tau = Math.max(0, Math.min(1, 1 - cfg.alpha)), days = {};
+      plan.forEach(function (p) { (days[p.day] = days[p.day] || []).push(p); });
+      Object.keys(days).forEach(function (k) {
+        var H = days[k], need = 0, eS = 0, uS = 0;
+        H.forEach(function (p) { need += tau * (p.uMax - p.uMin); eS = Math.max(eS, p.bestE.e); uS = Math.max(uS, p.uMax - p.uMin); });
+        eS = eS || 1; uS = uS || 1;
+        function choose(lam) {
+          var got = 0, pick = H.map(function (p) {
+            var b = null, bs = -Infinity;
+            p.opts.forEach(function (r) { var s = r.e / eS + lam * (r.u - p.uMin) / uS; if (s > bs + 1e-12) { bs = s; b = r; } });
+            got += b.u - p.uMin; return b;
+          });
+          return { pick: pick, ok: got >= need - 1e-9 };
+        }
+        var sol = choose(0);
+        if (!sol.ok) {
+          var lo = 0, hi = 1;
+          while (!choose(hi).ok && hi < 1e6) hi *= 4;
+          for (var it = 0; it < 40; it++) { var mid = (lo + hi) / 2; if (choose(mid).ok) hi = mid; else lo = mid; }
+          sol = choose(hi);
+          // the angles are discrete, so the feasible multiplier usually gives the crop more than the target:
+          // hand the surplus back to the panels hour by hour, best kWh per unit of light first
+          var loPick = choose(lo).pick, got = 0, sw = [];
+          H.forEach(function (p, i) {
+            got += sol.pick[i].u - p.uMin;
+            var de = loPick[i].e - sol.pick[i].e, du = loPick[i].u - sol.pick[i].u;
+            if (de > 0 && du < 0) sw.push({ i: i, de: de, du: du, r: de / -du });
+          });
+          sw.sort(function (a, b) { return b.r - a.r; });
+          sw.forEach(function (s) { if (got + s.du >= need - 1e-9) { got += s.du; sol.pick[s.i] = loPick[s.i]; } });
+        }
+        H.forEach(function (p, i) { var b = sol.pick[i]; strat.gaia[p.idx] = p.rec(modeOf(p.heat, b, p.bestE), b.ang, b); });
+      });
+    }
     function tot(list) {
       var o = { kwh: 0, useful: 0, open: 0, hot: 0, heatLoad: 0, heatOpen: 0, et: 0, etOpen: 0, modes: { energy: 0, light: 0, shield: 0 } };
       list.forEach(function (h) { o.kwh += h.e; o.useful += h.useful; o.open += h.open; o.hot += h.hot && h.ghi > 0 ? 1 : 0; o.heatLoad += h.heatLoad; o.heatOpen += h.heatOpen; o.et += h.et; o.etOpen += h.etOpen; if (o.modes[h.mode] !== undefined) o.modes[h.mode]++; });
@@ -232,7 +380,7 @@
       o.waterCut = o.etOpen > 0 ? 1 - o.et / o.etOpen : null;
       return o;
     }
-    return { hours: strat, totals: { fixed: tot(strat.fixed), sun: tot(strat.sun), gaia: tot(strat.gaia) }, crop: cfg.crop };
+    return { hours: strat, totals: { fixed: tot(strat.fixed), sun: tot(strat.sun), gaia: tot(strat.gaia) }, crop: cfg.crop, method: cfg.mpc === false ? 'greedy' : 'mpc' };
   }
 
   /**
@@ -279,7 +427,7 @@
       '&hourly=temperature_2m,shortwave_radiation,direct_normal_irradiance,diffuse_radiation,et0_fao_evapotranspiration&forecast_days=7&timezone=auto';
   }
 
-  var api = { CROPS: CROPS, JAPAN_RULE: JAPAN_RULE, cropResponse: cropResponse, evaluate: evaluate, pvOnlyKwhPerHa: pvOnlyKwhPerHa,
+  var api = { CROPS: CROPS, JAPAN_RULE: JAPAN_RULE, cropResponse: cropResponse, agriNet: agriNet, hasNet: function () { return !!NET(); }, evaluate: evaluate, pvOnlyKwhPerHa: pvOnlyKwhPerHa,
     optimizer: optimizer, pilot: pilot, typicalWeek: typicalWeek, parseOpenMeteo: parseOpenMeteo, forecastUrl: forecastUrl, hour: hour, SPACE: SPACE };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.GAIA_AGV_AI = api;

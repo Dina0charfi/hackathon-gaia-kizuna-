@@ -472,7 +472,7 @@
         var y = e.yrel || 0, bar = el('span', { class: 'ai-bar' }, [el('i', { style: 'width:' + Math.min(100, y / 1.2 * 100) + '%;background:' + (y >= A.JAPAN_RULE ? '#7C9455' : '#C98A5B') })]);
         return el('tr', { class: e.key === ST.crop ? 'ai-win' : '', tabindex: 0, style: 'cursor:pointer', onclick: function () { ST.crop = e.key; persist(); resetOpt(); mount(root, ctx); },
           onkeydown: function (ev) { if (ev.key === 'Enter') { ST.crop = e.key; persist(); resetOpt(); mount(root, ctx); } } }, [
-          el('th', { scope: 'row' }, [t('c_' + e.key)]), el('td', null, [t('cls_' + A.CROPS[e.key].cls)]),
+          el('th', { scope: 'row' }, [t('c_' + e.key), e.model === 'agrinet' ? el('span', { class: 'ai-net-tag', title: t('nn_tag_t') }, ['AgriNet' + (e.yieldUnder !== undefined ? ' · ' + fmt(e.yieldUnder, 1) + ' t/ha' : '')]) : null]), el('td', null, [t('cls_' + A.CROPS[e.key].cls)]),
           el('td', { class: 'num' }, [pct(y)]), el('td', { style: 'min-width:120px' }, [bar]),
           el('td', { class: 'num' }, [fmt(e.waterSaved) + ' m³']),
           el('td', null, [G.pill(y >= A.JAPAN_RULE ? 'ok' : 'no', y >= A.JAPAN_RULE ? t('r_ok') : t('r_no'))])
@@ -481,7 +481,79 @@
     ])]));
     var lt = list.filter(function (e) { return e.key === 'lettuce_s'; })[0];
     if (lt && lt.yrel > 1) b.appendChild(el('p', { class: 'insight', style: 'margin-top:12px' }, ['✦ ' + t('r_star')]));
+    b.appendChild(netCard(list));
   }
+
+  /* ---------------------------------------------------------- GAIA AgriNet card */
+  function netCard(list) {
+    var N = window.GAIA_AGV_NET;
+    if (!N) return el('span');
+    var V = N.validation || {}, C = V.crops || {};
+    var rows = ['wheat', 'potato'].filter(function (k) { return C[k]; }).map(function (k) {
+      var c = C[k], e = list.filter(function (x) { return x.key === k; })[0];
+      return el('tr', null, [
+        el('th', { scope: 'row' }, [t('c_' + k)]),
+        el('td', { class: 'num' }, [e && e.model === 'agrinet' ? pct(e.yrel) : '—']),
+        el('td', { class: 'num' }, [e && e.formulaYrel !== undefined ? pct(e.formulaYrel) : '—']),
+        el('td', { class: 'num' }, [e && e.yieldUnder !== undefined ? fmt(e.yieldUnder, 1) + ' t/ha' : '—']),
+        el('td', { class: 'num' }, [fmt(c.yrel_network.mae * 100, 1) + ' pts']),
+        el('td', { class: 'num' }, [fmt(c.yrel_formula.mae * 100, 1) + ' pts'])
+      ]);
+    });
+    var arch = N.layers.map(function (L) { return L.in; }).concat([N.layers[N.layers.length - 1].out]).join(' → ');
+    var nparam = N.layers.reduce(function (s, L) { return s + L.W.length + L.b.length; }, 0);
+    return el('details', { class: 'gp-more ai-net', open: true }, [
+      el('summary', null, ['🧠 ' + t('nn_t')]),
+      el('p', { class: 'small', style: 'margin-top:6px;max-width:80ch;color:var(--g-ink-2)' }, [t('nn_p')]),
+      el('div', { class: 'ai-net-facts' }, [
+        el('div', null, [el('b', null, [t('nn_in')]), el('span', null, [t('nn_in_v')])]),
+        el('div', null, [el('b', null, [t('nn_arch')]), el('span', null, [arch + ' · tanh · ' + fmt(nparam) + ' ' + t('nn_params')])]),
+        el('div', null, [el('b', null, [t('nn_out')]), el('span', null, [t('nn_out_v')])]),
+        el('div', null, [el('b', null, [t('nn_data')]), el('span', null, [fill(t('nn_data_v'), { n: fmt(V.rows || 0), s: (V.sites || []).length })])])
+      ]),
+      el('div', { class: 'gp-table-wrap', style: 'margin-top:10px' }, [el('table', { class: 'gp-table' }, [
+        el('thead', null, [el('tr', null, [t('r_c'), t('nn_h_net'), t('nn_h_formula'), t('nn_h_yield'), t('nn_h_mae_net'), t('nn_h_mae_f')].map(function (h, i) { return el('th', { class: i ? 'num' : null }, [h]); }))]),
+        el('tbody', null, rows)
+      ])]),
+      el('p', { class: 'small muted', style: 'margin-top:8px' }, [fill(t('nn_val'), { s: (V.test_sites || []).join(', ') })]),
+      el('p', { class: 'small muted', style: 'margin-top:4px' }, [t('nn_lim')])
+    ]);
+  }
+
+  G.addStrings({
+    fr: { nn_t: 'GAIA AgriNet : le réseau de neurones entraîné', nn_tag_t: 'Rendement prédit par le réseau de neurones GAIA AgriNet',
+      nn_p: 'Pour le blé et la pomme de terre, le rendement sous les panneaux vient d’un réseau de neurones entraîné sur des milliers de saisons simulées par WOFOST (modèle de culture de l’université de Wageningen) avec la vraie météo NASA POWER de la Tunisie. Il tourne ici, dans votre navigateur.',
+      nn_in: 'Entrées', nn_in_v: 'culture, part de lumière sous les panneaux, rayonnement de la saison, Tmax et Tmin moyennes',
+      nn_arch: 'Architecture', nn_params: 'paramètres', nn_out: 'Sorties', nn_out_v: 'rendement relatif sous les panneaux et rendement potentiel en plein soleil (t/ha)',
+      nn_data: 'Données', nn_data_v: '{n} saisons × niveaux d’ombre simulés sur {s} sites tunisiens, 2001–2022',
+      nn_h_net: 'Réseau', nn_h_formula: 'Formule', nn_h_yield: 'Récolte prédite', nn_h_mae_net: 'Erreur réseau', nn_h_mae_f: 'Erreur formule',
+      nn_val: 'Erreur moyenne mesurée site par site : le réseau est entraîné sur 12 sites et testé sur le 13e, qu’il n’a jamais vu, pour chacun des sites : {s}.',
+      nn_lim: 'Limites : appris sur un modèle de culture, pas encore sur des récoltes réelles ; variétés de blé européennes ; eau non limitante. Les autres cultures utilisent la formule.' },
+    ar: { nn_t: 'GAIA AgriNet: الشبكة العصبية المدرَّبة', nn_tag_t: 'مردود تتوقعه الشبكة العصبية GAIA AgriNet',
+      nn_p: 'بالنسبة للقمح والبطاطا، يأتي المردود تحت الألواح من شبكة عصبية دُرِّبت على آلاف المواسم التي حاكاها نموذج WOFOST (جامعة فاغينينغن) بطقس NASA POWER الحقيقي في تونس. تعمل هنا داخل متصفحك.',
+      nn_in: 'المدخلات', nn_in_v: 'المحصول، نسبة الضوء تحت الألواح، إشعاع الموسم، معدل الحرارة القصوى والدنيا',
+      nn_arch: 'البنية', nn_params: 'معامل', nn_out: 'المخرجات', nn_out_v: 'المردود النسبي تحت الألواح والمردود الممكن في الشمس الكاملة (طن/هك)',
+      nn_data: 'البيانات', nn_data_v: '{n} موسم × مستوى ظل في {s} موقعاً تونسياً، 2001–2022',
+      nn_h_net: 'الشبكة', nn_h_formula: 'المعادلة', nn_h_yield: 'المحصول المتوقع', nn_h_mae_net: 'خطأ الشبكة', nn_h_mae_f: 'خطأ المعادلة',
+      nn_val: 'متوسط الخطأ مقاس موقعاً بموقع: تُدرَّب الشبكة على 12 موقعاً وتُختبر على الموقع الثالث عشر الذي لم تره، لكل من المواقع: {s}.',
+      nn_lim: 'حدود: تعلّمت من نموذج زراعي وليس بعد من محاصيل حقيقية؛ أصناف قمح أوروبية؛ الماء غير محدود. المحاصيل الأخرى تستعمل المعادلة.' },
+    en: { nn_t: 'GAIA AgriNet: the trained neural network', nn_tag_t: 'Yield predicted by the GAIA AgriNet neural network',
+      nn_p: 'For wheat and potato, the yield under the panels comes from a neural network trained on thousands of seasons simulated by WOFOST (the Wageningen University crop model) with real NASA POWER weather for Tunisia. It runs here, in your browser.',
+      nn_in: 'Inputs', nn_in_v: 'crop, light share under the panels, season radiation, mean Tmax and Tmin',
+      nn_arch: 'Architecture', nn_params: 'parameters', nn_out: 'Outputs', nn_out_v: 'relative yield under the panels and full-sun potential yield (t/ha)',
+      nn_data: 'Data', nn_data_v: '{n} simulated seasons × shade levels at {s} Tunisian sites, 2001–2022',
+      nn_h_net: 'Network', nn_h_formula: 'Formula', nn_h_yield: 'Predicted harvest', nn_h_mae_net: 'Network error', nn_h_mae_f: 'Formula error',
+      nn_val: 'Mean error measured site by site: the network is trained on 12 sites and tested on the 13th, which it never saw, for each of: {s}.',
+      nn_lim: 'Limits: learned from a crop model, not yet from real harvests; European wheat varieties; water not limiting. Other crops use the formula.' },
+    ja: { nn_t: 'GAIA AgriNet：学習済みニューラルネットワーク', nn_tag_t: 'GAIA AgriNetニューラルネットワークによる予測収量',
+      nn_p: '小麦とジャガイモでは、パネル下の収量を、WOFOST（ワーゲニンゲン大学の作物モデル）がチュニジアの実際のNASA POWER気象で模擬した数千の作期で学習したニューラルネットワークが予測します。ここ、ブラウザの中で動きます。',
+      nn_in: '入力', nn_in_v: '作物、パネル下の光の割合、作期の日射量、平均最高・最低気温',
+      nn_arch: '構造', nn_params: 'パラメータ', nn_out: '出力', nn_out_v: 'パネル下の相対収量と全日照での潜在収量（t/ha）',
+      nn_data: 'データ', nn_data_v: 'チュニジア{s}地点、2001–2022年の作期×遮光レベル {n} 件の模擬データ',
+      nn_h_net: 'ネットワーク', nn_h_formula: '式', nn_h_yield: '予測収量', nn_h_mae_net: 'ネットワーク誤差', nn_h_mae_f: '式の誤差',
+      nn_val: '地点ごとに測った平均誤差：12地点で学習し、一度も見ていない13番目の地点で検証することを、次の各地点で繰り返しました：{s}。',
+      nn_lim: '限界：作物モデルから学習したもので、まだ実際の収穫ではありません。小麦は欧州品種、水は無制限。ほかの作物は式を使います。' }
+  });
 
   window.GAIA_AGV_UI = {
     mount: mount,

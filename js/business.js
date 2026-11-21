@@ -416,6 +416,7 @@
       el('div', null, [G.pill(vk, t('v_' + r.verdict)), ' ', t('v_' + r.verdict + '_p'),
         r.verdict !== 'ok' ? el('div', { style: 'margin-top:4px' }, [r.suggested_term ? t('suggest') + ' ' + r.suggested_term + ' ' + t('months_u') : t('suggest_none')]) : null])
     ]));
+    out.appendChild(payCard(r));
     out.appendChild(el('div', { class: 'kpis', style: 'margin-top:8px' }, [
       kpi(t('k_total'), fmt(r.total) + ' TND', r.term + ' ' + t('months_u')),
       kpi(t('k_payback'), r.simple_payback_y === null ? '—' : fmt(r.simple_payback_y, 1) + ' ' + t('years'), ''),
@@ -601,6 +602,109 @@
         el('p', { class: 'assump' }, [t('pl_ind_p')]),
         el('div', { class: 'gp-grid gp-cols-3', style: 'margin-top:8px' }, inds)])]);
   }
+
+  /* ---------------------------------------------------------- pay an instalment (simulation, no real money) */
+  var PAY_METHODS = [['d17', 'D17', 'pm_d17'], ['flouci', 'Flouci', 'pm_flouci'], ['card', '💳', 'pm_card'], ['cash', '🤝', 'pm_cash']];
+  function payCard(r) {
+    var sig = [Math.round(r.total), r.term, r.seasonal ? 's' : 'f', +S.start].join('|');
+    var L = G.load('gaia.business.payments', null);
+    if (!L || L.sig !== sig) L = { sig: sig, paid: [], method: (L && L.method) || 'd17' };
+    var box = el('div', { class: 'gp-card pay', style: 'margin-top:16px' });
+    var stage = 'idle';
+    function save() { G.save('gaia.business.payments', L); }
+    function ref(n) { var d = new Date(); return 'GAIA-' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(n).padStart(3, '0'); }
+    function methodName(k) { var m = PAY_METHODS.filter(function (x) { return x[0] === k; })[0]; return m ? t(m[2]) : k; }
+    function render() {
+      G.clear(box);
+      var months = G.t('months'), paidSum = L.paid.reduce(function (s, p) { return s + p.amount; }, 0);
+      var next = r.schedule[L.paid.length] || null, share = r.total > 0 ? Math.min(1, paidSum / r.total) : 0;
+      box.appendChild(el('div', { class: 'pay-head' }, [el('h2', null, [t('pay_t')]), el('span', { class: 'pay-sim' }, [t('pay_sim')])]));
+      box.appendChild(el('p', { class: 'small', style: 'margin-top:4px;color:var(--g-ink-2);max-width:80ch' }, [t('pay_p')]));
+      box.appendChild(el('div', { class: 'pay-prog' }, [
+        el('div', { class: 'pay-bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(share * 100) }, [el('i', { style: 'width:' + (share * 100).toFixed(1) + '%' })]),
+        el('div', { class: 'pay-nums' }, [
+          el('span', null, [t('pay_paid') + ' ', el('b', null, [fmt(paidSum) + ' / ' + fmt(r.total) + ' TND'])]),
+          el('span', null, [t('pay_count') + ' ', el('b', null, [L.paid.length + ' / ' + r.term])]),
+          el('span', null, [t('pay_own') + ' ', el('b', null, [fmt(share * 100) + ' %'])])
+        ])
+      ]));
+      if (!next) {
+        box.appendChild(G.note('ok', t('pay_done')));
+      } else if (stage === 'confirm') {
+        box.appendChild(el('div', { class: 'pay-confirm' }, [
+          el('p', null, [t('pay_confirm').replace('{a}', fmt(next.installment) + ' TND').replace('{m}', methodName(L.method)).replace('{n}', next.i)]),
+          el('div', { class: 'pay-actions' }, [
+            el('button', { type: 'button', class: 'gp-btn primary', onclick: function () {
+              L.paid.push({ i: next.i, month: next.month, amount: next.installment, method: L.method, ref: ref(next.i), at: new Date().toISOString() });
+              save(); stage = 'receipt'; render();
+            } }, [t('pay_yes')]),
+            el('button', { type: 'button', class: 'gp-btn ghost', onclick: function () { stage = 'idle'; render(); } }, [t('pay_no')])
+          ])
+        ]));
+      } else {
+        box.appendChild(el('div', { class: 'pay-next' }, [
+          el('div', null, [el('span', { class: 'lab' }, [t('pay_next')]), el('div', { class: 'v' }, [fmt(next.installment) + ' TND']),
+            el('span', { class: 'small muted' }, ['#' + next.i + ' · ' + months[next.month] + ' · ' + t('pay_saving') + ' ' + fmt(next.saving) + ' TND'])]),
+          el('div', { class: 'pay-methods', role: 'radiogroup', 'aria-label': t('pay_method') }, PAY_METHODS.map(function (m) {
+            return el('button', { type: 'button', role: 'radio', 'aria-checked': String(L.method === m[0]), class: 'pay-m', onclick: function () { L.method = m[0]; save(); render(); } },
+              [el('b', null, [m[1]]), el('span', null, [t(m[2])])]);
+          })),
+          el('button', { type: 'button', class: 'gp-btn gold', onclick: function () { stage = 'confirm'; render(); } }, [t('pay_btn').replace('{a}', fmt(next.installment) + ' TND')])
+        ]));
+      }
+      if (stage === 'receipt' && L.paid.length) {
+        var p = L.paid[L.paid.length - 1];
+        box.appendChild(el('div', { class: 'pay-receipt', role: 'status' }, [
+          el('b', null, ['✓ ' + t('pay_ok')]),
+          el('span', null, [t('pay_ref') + ' ' + p.ref + ' · ' + fmt(p.amount) + ' TND · ' + methodName(p.method) + ' · ' + new Date(p.at).toLocaleString(G.lang())])
+        ]));
+      }
+      if (L.paid.length) {
+        box.appendChild(el('details', { class: 'gp-more' }, [el('summary', null, [t('pay_hist') + ' (' + L.paid.length + ')']),
+          el('div', { class: 'gp-table-wrap' }, [el('table', { class: 'gp-table' }, [
+            el('thead', null, [el('tr', null, [t('th_i'), t('th_m'), t('pay_method'), t('pay_ref'), t('th_inst')].map(function (h, i) { return el('th', { class: i === 4 ? 'num' : null }, [h]); }))]),
+            el('tbody', null, L.paid.slice().reverse().map(function (p) {
+              return el('tr', null, [el('td', null, [String(p.i)]), el('td', null, [months[p.month]]), el('td', null, [methodName(p.method)]), el('td', null, [p.ref]), el('td', { class: 'num' }, [fmt(p.amount)])]);
+            }))
+          ])]),
+          el('button', { type: 'button', class: 'gp-btn ghost sm', style: 'margin-top:8px', onclick: function () { L.paid = []; save(); stage = 'idle'; render(); } }, [t('pay_reset')])
+        ]));
+      }
+    }
+    render();
+    return box;
+  }
+
+  G.addStrings({
+    fr: { pay_t: 'Payer ma mensualité', pay_sim: 'Simulation · aucun argent réel',
+      pay_p: 'Démonstration du parcours de paiement mobile. En production, le paiement passerait par le service choisi (D17 de La Poste, Flouci, carte bancaire) et la coopérative confirmerait la réception.',
+      pay_paid: 'Payé', pay_count: 'Mensualités', pay_own: 'Kit à vous à', pay_next: 'Prochaine mensualité', pay_saving: 'gazole économisé ce mois', pay_method: 'Moyen de paiement',
+      pm_d17: 'D17 · La Poste', pm_flouci: 'Portefeuille mobile', pm_card: 'Carte bancaire', pm_cash: 'Espèces à la coopérative',
+      pay_btn: 'Payer {a}', pay_confirm: 'Confirmer le paiement simulé de la mensualité n° {n} : {a} par {m} ?', pay_yes: 'Confirmer', pay_no: 'Annuler',
+      pay_ok: 'Paiement simulé enregistré', pay_ref: 'Réf.', pay_hist: 'Historique des paiements', pay_reset: 'Effacer l’historique de la démo',
+      pay_done: 'Toutes les mensualités sont payées : le kit est à vous. Désormais, chaque litre de gazole évité reste dans votre poche.' },
+    ar: { pay_t: 'دفع القسط الشهري', pay_sim: 'محاكاة · لا أموال حقيقية',
+      pay_p: 'عرض توضيحي لمسار الدفع بالهاتف. في الواقع يتم الدفع عبر الخدمة المختارة (D17 للبريد التونسي، Flouci، بطاقة بنكية) وتؤكد التعاضدية الاستلام.',
+      pay_paid: 'المدفوع', pay_count: 'الأقساط', pay_own: 'ملكيتك للمنظومة', pay_next: 'القسط القادم', pay_saving: 'الغازوال الموفَّر هذا الشهر', pay_method: 'وسيلة الدفع',
+      pm_d17: 'D17 · البريد التونسي', pm_flouci: 'محفظة إلكترونية', pm_card: 'بطاقة بنكية', pm_cash: 'نقداً لدى التعاضدية',
+      pay_btn: 'ادفع {a}', pay_confirm: 'تأكيد الدفع التجريبي للقسط رقم {n}: {a} عبر {m}؟', pay_yes: 'تأكيد', pay_no: 'إلغاء',
+      pay_ok: 'تم تسجيل الدفع التجريبي', pay_ref: 'المرجع', pay_hist: 'سجل الدفعات', pay_reset: 'مسح سجل العرض',
+      pay_done: 'تم دفع كل الأقساط: المنظومة ملكك. من الآن كل لتر غازوال موفَّر يبقى في جيبك.' },
+    en: { pay_t: 'Pay my instalment', pay_sim: 'Simulation · no real money',
+      pay_p: 'A demonstration of the mobile payment flow. In production, payment would go through the chosen service (La Poste D17, Flouci, bank card) and the cooperative would confirm receipt.',
+      pay_paid: 'Paid', pay_count: 'Instalments', pay_own: 'Kit owned', pay_next: 'Next instalment', pay_saving: 'diesel saved this month', pay_method: 'Payment method',
+      pm_d17: 'D17 · La Poste', pm_flouci: 'Mobile wallet', pm_card: 'Bank card', pm_cash: 'Cash at the cooperative',
+      pay_btn: 'Pay {a}', pay_confirm: 'Confirm the simulated payment of instalment no. {n}: {a} by {m}?', pay_yes: 'Confirm', pay_no: 'Cancel',
+      pay_ok: 'Simulated payment recorded', pay_ref: 'Ref.', pay_hist: 'Payment history', pay_reset: 'Clear the demo history',
+      pay_done: 'Every instalment is paid: the kit is yours. From now on, every litre of diesel avoided stays in your pocket.' },
+    ja: { pay_t: '月々の支払い', pay_sim: 'シミュレーション・実際のお金は動きません',
+      pay_p: 'モバイル決済の流れのデモです。実運用では、選んだサービス（チュニジア郵便のD17、Flouci、銀行カード）で支払い、協同組合が受領を確認します。',
+      pay_paid: '支払済み', pay_count: '支払回数', pay_own: 'キットの所有率', pay_next: '次回の支払い', pay_saving: '今月節約した軽油代', pay_method: '支払い方法',
+      pm_d17: 'D17・郵便', pm_flouci: 'モバイルウォレット', pm_card: '銀行カード', pm_cash: '協同組合で現金',
+      pay_btn: '{a}を支払う', pay_confirm: '第{n}回の支払い（{a}、{m}）をシミュレーションで確定しますか？', pay_yes: '確定', pay_no: 'キャンセル',
+      pay_ok: 'シミュレーションの支払いを記録しました', pay_ref: '参照番号', pay_hist: '支払い履歴', pay_reset: 'デモの履歴を消去',
+      pay_done: 'すべての支払いが完了し、キットはあなたのものです。これからは節約した軽油代がそのまま手元に残ります。' }
+  });
 
   function draw() { if (!out) return; drawPayg(); drawCoop(); drawAdoption(); drawRes(); }
 

@@ -1,0 +1,96 @@
+{
+  "rows": 4576,
+  "sites": [
+    "Béja",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Le Kef",
+    "Mahdia",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tunis",
+    "Zaghouan"
+  ],
+  "validation": "leave-one-site-out",
+  "test_sites": [
+    "Béja",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Le Kef",
+    "Mahdia",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tunis",
+    "Zaghouan"
+  ],
+  "network": {
+    "features": [
+      "is_wheat",
+      "is_potato",
+      "L",
+      "rad_gj",
+      "tmax",
+      "tmin",
+      "shift"
+    ],
+    "hidden": [
+      16
+    ],
+    "epochs": 2000,
+    "l2": 0.001
+  },
+  "crops": {
+    "wheat": {
+      "yrel_network": {
+        "mae": 0.0274,
+        "rmse": 0.0388,
+        "r2": 0.9797
+      },
+      "yrel_formula": {
+        "mae": 0.0555,
+        "rmse": 0.0722,
+        "r2": 0.9296
+      },
+      "yield_full_t_ha": {
+        "mae": 0.5824,
+        "rmse": 0.7547,
+        "r2": 0.4583
+      },
+      "yield_full_mean_baseline": {
+        "mae": 0.8113,
+        "rmse": 1.0494,
+        "r2": -0.0473
+      }
+    },
+    "potato": {
+      "yrel_network": {
+        "mae": 0.0148,
+        "rmse": 0.0202,
+        "r2": 0.9821
+      },
+      "yrel_formula": {
+        "mae": 0.0245,
+        "rmse": 0.034,
+        "r2": 0.9495
+      },
+      "yield_full_t_ha": {
+        "mae": 0.8325,
+        "rmse": 1.0528,
+        "r2": 0.5348
+      },
+      "yield_full_mean_baseline": {
+        "mae": 1.3134,
+        "rmse": 1.6129,
+        "r2": -0.0919
+      }
+    }
+  }
+}
