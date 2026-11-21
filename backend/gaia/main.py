@@ -16,7 +16,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import business, engine, guard, nexus, solar, vision
+from . import assistant, business, engine, guard, nexus, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -30,7 +30,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists()}
+    llm = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_PROFILE"))
+    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(), "assistant_llm": llm}
 
 
 @app.get("/knowledge/techniques")
@@ -198,3 +199,24 @@ def feedback(body: FeedbackIn) -> dict:
     with FEEDBACK.open("a", encoding="utf-8") as f:
         f.write(json.dumps(item, ensure_ascii=False) + "\n")
     return {"stored": True, "expert_status": "pending"}
+
+
+class AssistantIn(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2000)
+    lang: Literal["fr", "ar", "en"] = "fr"
+    answer: dict[str, Any] = {}
+    profile: dict[str, Any] = {}
+    verdicts: list[dict[str, Any]] = []
+    records: list[dict[str, Any]] = Field([], description="records the page retrieved; empty = the whole knowledge base")
+
+
+@app.post("/assistant")
+def assistant_answer(body: AssistantIn) -> dict:
+    """AI Lab wording by Claude, grounded only in the evidence sent. 503 when no API key is configured."""
+    d = body.model_dump()
+    if not d["records"]:
+        d["records"] = KB["records"]
+    try:
+        return assistant.answer(d)
+    except assistant.AssistantUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e

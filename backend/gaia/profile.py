@@ -4,11 +4,15 @@ Fetches the same public sources as js/landdna.js. Every field carries
 {value, unit, source, resolution, period, confidence, status}. When a source
 fails, the field is returned with status "error" — never a substituted value.
 Soil: the SoilGrids REST API is paused by ISRIC; set GAIA_SOIL_RASTER to a local
-SoilGrids GeoTIFF (e.g. clay 0–30 cm) to read it with rasterio, otherwise soil is "missing".
+SoilGrids GeoTIFF (e.g. clay 0–30 cm) to read it with rasterio, otherwise soil comes from the
+regional reference table (data/soil_tn.json, exported from js/soil-tn.js) with confidence "low".
 """
 from __future__ import annotations
 
+import json
+import math
 import os
+from pathlib import Path
 from statistics import mean
 
 import httpx
@@ -21,6 +25,26 @@ POWER = "https://power.larc.nasa.gov/api/temporal/climatology/point"
 def field(value=None, unit=None, source=None, resolution=None, period=None, confidence="missing", status="missing", note=None):
     return {"value": value, "unit": unit, "source": source, "resolution": resolution, "period": period,
             "confidence": confidence, "status": status, "note": note}
+
+
+SOIL_TN = Path(__file__).resolve().parent.parent / "data" / "soil_tn.json"
+
+
+def regional_soil(lat: float, lon: float, max_km: float = 120) -> dict | None:
+    """Nearest zone of the regional topsoil reference (same table as js/soil-tn.js)."""
+    if not SOIL_TN.exists():
+        return None
+    best = None
+    for zone, plat, plon, texture, clay, soc in json.loads(SOIL_TN.read_text(encoding="utf-8"))["points"]:
+        r = math.pi / 180
+        h = math.sin((plat - lat) * r / 2) ** 2 + math.cos(lat * r) * math.cos(plat * r) * math.sin((plon - lon) * r / 2) ** 2
+        km = 12742 * math.asin(math.sqrt(h))
+        if best is None or km < best["km"]:
+            best = {"zone": zone, "texture": texture, "clay_pct": clay, "soc": soc, "km": km}
+    if best is None or best["km"] > max_km:
+        return None
+    best["km"] = round(best["km"])
+    return best
 
 
 async def build(lat: float, lon: float, timeout: float = 20.0) -> dict:
@@ -88,5 +112,13 @@ async def build(lat: float, lon: float, timeout: float = 20.0) -> dict:
         except Exception as e:  # noqa: BLE001
             dna["soil"]["clay"] = field(source="SoilGrids local raster", status="error", confidence="error", note=str(e)[:200])
     else:
-        dna["soil"]["clay"] = field(source="SoilGrids 2.0", note="REST API paused by ISRIC; no local raster configured (GAIA_SOIL_RASTER).")
+        hit = regional_soil(lat, lon)
+        if hit:
+            note = f"Typical value for the zone '{hit['zone']}' (~{hit['km']} km), not a measurement of the parcel. SoilGrids REST API paused; no local raster (GAIA_SOIL_RASTER)."
+            src = "GAIA regional reference (orders of magnitude from HWSD v2 FAO/IIASA and SoilGrids 2.0)"
+            dna["soil"]["texture"] = field(hit["texture"], None, src, "agro-ecological zone", None, "low", "ok") | {"note": note}
+            dna["soil"]["clay_pct"] = field(hit["clay_pct"], "%", src, "agro-ecological zone", None, "low", "ok") | {"note": "0-30 cm. " + note}
+            dna["soil"]["soc"] = field(hit["soc"], "g/kg", src, "agro-ecological zone", None, "low", "ok") | {"note": "0-30 cm. " + note}
+        else:
+            dna["soil"]["clay"] = field(source="SoilGrids 2.0", note="REST API paused by ISRIC; no local raster configured (GAIA_SOIL_RASTER) and no regional reference within 120 km.")
     return dna

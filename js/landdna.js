@@ -119,41 +119,87 @@
   }
 
   /* ---------------------------------------------------------- soil */
+  // Order: 1) configured soil service (local SoilGrids rasters), 2) the SoilGrids
+  // REST API (paused by ISRIC, tried with a short timeout in case it is back),
+  // 3) the regional reference table in js/soil-tn.js, shown with confidence "low".
+  function textureOf(sand, clay) {
+    if (clay === null || clay === undefined) return null;
+    if (clay >= 35) return 'clayey';
+    if (sand !== null && sand !== undefined && sand >= 65 && clay < 15) return 'sandy';
+    return 'loamy';
+  }
+  function soilGridsRest(lat, lon) {
+    var url = 'https://rest.isric.org/soilgrids/v2.0/properties/query?lon=' + lon + '&lat=' + lat +
+      '&property=clay&property=sand&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean';
+    return getJSON(url, 8000).then(function (d) {
+      var out = {};
+      ((d.properties && d.properties.layers) || []).forEach(function (L) {
+        var w = { '0-5cm': 5, '5-15cm': 10, '15-30cm': 15 }, sum = 0, wt = 0;
+        (L.depths || []).forEach(function (dp) {
+          var v = dp.values && dp.values.mean;
+          if (v !== null && v !== undefined && w[dp.label]) { sum += v * w[dp.label]; wt += w[dp.label]; }
+        });
+        var factor = (L.unit_measure && L.unit_measure.d_factor) || 10;
+        if (wt) out[L.name] = sum / wt / factor; // clay, sand: % ; soc: g/kg
+      });
+      if (out.clay === undefined) throw new Error('aucune valeur (zone non cartographiée)');
+      return out;
+    });
+  }
   function soil(lat, lon, declared) {
-    var meta = { source: 'SoilGrids (ISRIC), rasters locaux', resolution: '250 m', url: 'https://www.isric.org/explore/soilgrids' };
+    var meta = { source: 'SoilGrids 2.0 (ISRIC)', resolution: '250 m', url: 'https://www.isric.org/explore/soilgrids' };
     var fromFarmer = declared && declared !== 'unknown'
       ? field(declared, { confidence: 'declared', source: "Déclaré par l'agriculteur", status: 'ok' }) : null;
-    if (!C().soilEndpoint) {
-      var boundary = failed("Service de sol local non configuré. L'API REST de SoilGrids est en pause : il faut servir les rasters téléchargés pour la Tunisie (voir README).", meta);
-      return Promise.resolve({ texture: fromFarmer || boundary, clay_pct: boundary, soc: boundary });
-    }
+    var fromGrid = function (d, m, why) {
+      var tx = d.texture || textureOf(d.sand, d.clay_pct !== undefined ? d.clay_pct : d.clay);
+      var clay = d.clay_pct !== undefined ? d.clay_pct : d.clay;
+      return {
+        texture: fromFarmer || field(tx || null, Object.assign({ confidence: 'medium', note: why || 'Classe déduite de la teneur en argile et en sable (0–30 cm)' }, m)),
+        clay_pct: field(clay === undefined ? null : clay, Object.assign({ unit: '%', confidence: 'medium', note: '0–30 cm' }, m)),
+        soc: field(d.soc === undefined ? null : d.soc, Object.assign({ unit: 'g/kg', confidence: 'medium', note: 'Carbone organique, 0–30 cm' }, m))
+      };
+    };
+    var regional = function (reason) {
+      var R = global.GAIA_SOIL_TN, hit = R ? R.lookup(lat, lon) : null;
+      var rm = { source: R ? R.source : 'Référence régionale', resolution: 'zone agro-écologique', url: R ? R.url : null };
+      if (!hit) {
+        var why = reason + ' Aucune zone de référence à moins de 120 km : faites analyser le sol.';
+        return { texture: fromFarmer || failed(why, rm), clay_pct: failed(why, rm), soc: failed(why, rm) };
+      }
+      var note = 'Valeur typique de la zone « ' + hit.zone + ' » (≈ ' + hit.km + ' km), pas une mesure de la parcelle. ' + reason;
+      return {
+        texture: fromFarmer || field(hit.texture, Object.assign({ confidence: 'low', note: note }, rm)),
+        clay_pct: field(hit.clay_pct, Object.assign({ unit: '%', confidence: 'low', note: '0–30 cm. ' + note }, rm)),
+        soc: field(hit.soc, Object.assign({ unit: 'g/kg', confidence: 'low', note: '0–30 cm. ' + note }, rm))
+      };
+    };
+    var viaRest = function () {
+      return soilGridsRest(lat, lon).then(function (d) { return fromGrid(d, meta); })
+        .catch(function (e) { return regional('SoilGrids injoignable (' + (e.name === 'AbortError' ? 'délai dépassé' : e.message) + ') : API REST en pause.'); });
+    };
+    if (!C().soilEndpoint) return viaRest();
     var url = C().soilEndpoint.replace('{lat}', lat).replace('{lon}', lon);
     return getJSON(url, 15000).then(function (d) {
-      return {
-        texture: fromFarmer || field(d.texture || null, Object.assign({ confidence: 'medium' }, meta)),
-        clay_pct: field(d.clay_pct === undefined ? null : d.clay_pct, Object.assign({ unit: '%', confidence: 'medium', note: '0–30 cm' }, meta)),
-        soc: field(d.soc === undefined ? null : d.soc, Object.assign({ unit: 'g/kg', confidence: 'medium', note: 'Carbone organique, 0–30 cm' }, meta))
-      };
-    }).catch(function (e) {
-      var why = 'Service de sol indisponible (' + e.message + ')';
-      return { texture: fromFarmer || failed(why, meta), clay_pct: failed(why, meta), soc: failed(why, meta) };
-    });
+      return fromGrid(d, Object.assign({}, meta, { source: 'SoilGrids 2.0 (ISRIC), rasters locaux' }), 'Rasters SoilGrids servis localement');
+    }).catch(function () { return viaRest(); });
   }
 
   /* ---------------------------------------------------------- build */
-  function declared(v, note) {
-    if (v === undefined || v === null || v === '' || v === 'unknown') return { value: null, status: 'missing', confidence: 'missing', source: "Saisie de l'agriculteur", note: note || 'Non renseigné' };
+  function declared(v, note, demo) {
+    if (v === undefined || v === null || v === '' || v === 'unknown') return { value: null, status: 'missing', confidence: 'missing', source: "Saisie de l'agriculteur", note: (note || 'Non renseigné') + ' — à saisir dans « Votre exploitation »' };
+    if (demo) return { value: v, status: 'ok', confidence: 'low', source: 'Valeur de démonstration', note: 'Valeur type pré-remplie pour la démo : remplacez-la par la vôtre.' };
     return { value: v, status: 'ok', confidence: 'declared', source: "Saisie de l'agriculteur" };
   }
 
   function build(input, onStep) {
     var lat = +input.lat, lon = +input.lon;
     var step = function (k, s) { if (onStep) onStep(k, s); };
+    var demo = input.demo || {};
     step('climate', 'loading'); step('terrain', 'loading'); step('solar', 'loading'); step('soil', 'loading');
     var pc = climate(lat, lon).then(function (r) { step('climate', r.rain_mm.status === 'ok' ? 'ok' : 'error'); return r; });
     var pt = terrain(lat, lon).then(function (r) { step('terrain', r.slope_pct.status === 'ok' ? 'ok' : 'error'); return r; });
     var ps = solar(lat, lon).then(function (r) { step('solar', r.ghi_kwh.status === 'ok' ? 'ok' : 'error'); return r; });
-    var pso = soil(lat, lon, input.soilTexture).then(function (r) { step('soil', r.texture.status === 'ok' ? 'ok' : 'error'); return r; });
+    var pso = soil(lat, lon, input.soilTexture).then(function (r) { step('soil', r.clay_pct.status !== 'ok' ? 'error' : r.clay_pct.confidence === 'low' ? 'approx' : 'ok'); return r; });
 
     return Promise.all([pc, pt, ps, pso]).then(function (res) {
       var cl = res[0], te = res[1], so = res[2], soi = res[3];
@@ -167,14 +213,16 @@
         solar: { ghi_kwh: so.ghi_kwh },
         solarMonthly: so.monthly,
         soil: soi,
-        crop: declared(input.crop),
+        crop: declared(input.crop, 'Culture non renseignée', demo.crop),
         water: {
-          source: declared(input.water),
-          well_depth_m: declared(input.wellDepth ? +input.wellDepth : null, 'Profondeur du puits non renseignée')
+          source: declared(input.water, "Source d'eau non renseignée", demo.water),
+          well_depth_m: input.water && input.water !== 'well' && !input.wellDepth
+            ? { value: null, status: 'na', confidence: 'declared', source: "Saisie de l'agriculteur", note: "Sans objet : pas de puits déclaré" }
+            : declared(input.wellDepth ? +input.wellDepth : null, 'Profondeur du puits non renseignée', demo.wellDepth)
         },
-        energy: { pump: declared(input.pump), grid: declared(input.grid) },
-        area_ha: declared(input.area ? +input.area : null, 'Surface non renseignée'),
-        structures: declared(input.structures && input.structures.length ? input.structures : null, 'Aucun ouvrage déclaré')
+        energy: { pump: declared(input.pump, 'Pompage non renseigné', demo.pump) },
+        area_ha: declared(input.area ? +input.area : null, 'Surface non renseignée', demo.area),
+        structures: declared(input.structures && input.structures.length ? input.structures : null, 'Ouvrages non renseignés (cochez « Aucun » s’il n’y en a pas)', demo.structures)
       };
       dna.quality = quality(dna);
       return dna;
