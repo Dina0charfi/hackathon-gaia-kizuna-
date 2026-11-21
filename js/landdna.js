@@ -69,11 +69,22 @@
   // One climatology request serves both the sun (GHI) and the climate fallback, so a
   // plot never costs more than one POWER call; it is cached per ≈ 5 km.
   var powerMemo = {};
+  // NASA POWER may answer radiation in MJ/m²/day instead of kWh/m²/day (the unit is in the reply).
+  // Every GAIA calculation expects kWh/m²/day, so convert once here (1 kWh = 3.6 MJ).
+  function kwhUnits(out) {
+    if (!out || !/MJ/i.test(out.unit || '')) return out;
+    ['ALLSKY_SFC_SW_DWN', 'TOA_SW_DWN'].forEach(function (k) {
+      var p = out.p[k]; if (!p) return;
+      Object.keys(p).forEach(function (m) { if (typeof p[m] === 'number' && p[m] !== out.fill) p[m] = p[m] / 3.6; });
+    });
+    out.unit = 'kWh/m²/jour';
+    return out;
+  }
   function power(lat, lon) {
     var key = 'power:' + cell(lat, lon, 2);
     if (powerMemo[key]) return powerMemo[key];
     var hit = cacheGet(key);
-    if (hit) return (powerMemo[key] = Promise.resolve(hit));
+    if (hit) return (powerMemo[key] = Promise.resolve(kwhUnits(hit)));
     var url = 'https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=' + global.GAIA_CLIMATE.PARAMS.join(',') +
       '&community=RE&longitude=' + lon.toFixed(4) + '&latitude=' + lat.toFixed(4) + '&format=JSON';
     powerMemo[key] = getJSONRetry(url, 30000).then(function (d) {
@@ -81,6 +92,7 @@
       if (!p || !p.ALLSKY_SFC_SW_DWN) throw new Error('paramètre absent');
       var out = { p: p, fill: d.header && d.header.fill_value, z: d.geometry && d.geometry.coordinates && d.geometry.coordinates[2],
         unit: (d.parameters && d.parameters.ALLSKY_SFC_SW_DWN && d.parameters.ALLSKY_SFC_SW_DWN.units) || 'kWh/m²/jour' };
+      kwhUnits(out);
       cacheSet(key, out);
       return out;
     });

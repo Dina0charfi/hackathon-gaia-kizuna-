@@ -40,6 +40,37 @@ assert(p.totals.gaia.modes.shield > 0, 'a heat wave should trigger the heat shie
 const allEnergy = A.pilot(week, 36.8, 10.2, { width: 2, pitch: 8, height: 4, kwp: 50, pr: 0.8, fixedTilt: 25, fixedAz: 180, crop: 'tomato', alpha: 1 });
 assert(Math.abs(allEnergy.totals.gaia.kwh - allEnergy.totals.sun.kwh) < 1e-6, 'alpha = 1 is pure sun tracking');
 
+// 5b. MPC pilot: the priority slider moves the trade-off smoothly (crop light never rises as the
+//     priority moves toward electricity, kWh never falls) and the hour-by-hour method stays available
+let prevL = Infinity, prevK = -Infinity;
+for (let a = 0; a <= 1.0001; a += 0.1) {
+  const r = A.pilot(week, 36.8, 10.2, { width: 2, pitch: 8, height: 4, kwp: 50, pr: 0.8, fixedTilt: 25, fixedAz: 180, crop: 'wheat', alpha: a });
+  assert.strictEqual(r.method, 'mpc');
+  assert(r.totals.gaia.useful <= prevL + 1e-6 && r.totals.gaia.kwh >= prevK - 1e-6, 'MPC trade-off must be monotone in the priority');
+  prevL = r.totals.gaia.useful; prevK = r.totals.gaia.kwh;
+}
+assert.strictEqual(A.pilot(week, 36.8, 10.2, { width: 2, pitch: 8, height: 4, kwp: 50, pr: 0.8, fixedTilt: 25, fixedAz: 180, crop: 'tomato', alpha: 0.5, mpc: false }).method, 'greedy');
+
+// 4b. NSGA-II: the trade-off front offers layouts that respect the Japanese rule
+assert.strictEqual(o.method, 'nsga2');
+assert(o.front().some(function (p) { return p.yrel >= A.JAPAN_RULE; }));
+
+// 7. GAIA AgriNet: the trained network loads, beats the formula in validation, gives 100 % in
+//    full sun, and less yield with less light
+global.GAIA_AGV_NET = require(path.join(root, 'js/agv-net.js'));
+assert(A.hasNet(), 'AgriNet weights should load');
+['wheat', 'potato'].forEach(function (k) {
+  const v = global.GAIA_AGV_NET.validation.crops[k];
+  assert(v.yrel_network.mae < v.yrel_formula.mae, k + ': network should beat the formula on held-out sites');
+  const open = A.evaluate(base, { pitch: 16, width: 1, tilt: 0 }, k, clim, ref), dense = A.evaluate(base, { pitch: 5, width: 2.5 }, k, clim, ref);
+  assert.strictEqual(open.model, 'agrinet');
+  assert(open.yrel <= 1.1 && open.yrel > 0.8, k + ': sparse panels keep most of the yield');
+  assert(dense.yrel < open.yrel, k + ': denser panels, less yield');
+  assert(open.yieldFull > 3 && open.yieldFull < 25, k + ': full-sun yield in a plausible range (t/ha)');
+});
+assert.strictEqual(A.evaluate(base, {}, 'tomato', clim, ref).model, 'formula', 'crops without WOFOST data keep the formula');
+delete global.GAIA_AGV_NET;
+
 // 6. Open-Meteo parsing: local times shifted back to UTC
 const rows = A.parseOpenMeteo({ utc_offset_seconds: 3600, hourly: { time: ['2026-07-01T13:00'], temperature_2m: [35], shortwave_radiation: [900],
   direct_normal_irradiance: [850], diffuse_radiation: [120], et0_fao_evapotranspiration: [0.8] } });

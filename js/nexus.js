@@ -444,8 +444,80 @@
     persist();
     out = el('div', { 'aria-live': 'polite' });
     app.appendChild(el('div', { class: 'nx' }, [inputs(), out]));
+    app.appendChild(neighbourCard());
     draw();
   }
+
+  /* ---------------------------------------------------------- two neighbours: compare and share one source (light) */
+  var NB = Object.assign({ crop: 'cereal', area: '' }, G.load('gaia.nexus.neighbour', null) || {});
+  function monthlyVol(crop, area, kc, months) {
+    var r = N.compute({ et0: CM ? CM.et0 : null, rain: CM ? CM.rain : null, ghi: null, kc: kc, months: months, area_ha: area, ea: num(S.ea), head_m: null, pump_eff: num(S.pump_eff), pr: num(S.pr), prices: {} });
+    return r.missing.indexOf('climate') !== -1 || r.missing.indexOf('area') !== -1 || r.missing.indexOf('kc') !== -1 ? null : r;
+  }
+  function neighbourCard() {
+    var res = el('div', { 'aria-live': 'polite' });
+    function drawNb() {
+      G.clear(res);
+      var mine = monthlyVol(S.crop, num(S.area), num(S.kc), S.months);
+      var C = N.CROPS[NB.crop], his = C ? monthlyVol(NB.crop, num(NB.area), C.kc, C.months) : null;
+      if (!mine || !his) { res.appendChild(G.note('info', t('nb_need'))); return; }
+      var a = mine.totals.vol, b = his.totals.vol, tot = a + b, months = G.t('months');
+      res.appendChild(el('div', { class: 'flow', style: 'margin-top:12px' }, [
+        el('div', { class: 'fbox quota' }, [el('b', null, [t('nb_me')]), el('div', { class: 'v' }, [fmt(a) + ' m³']), el('span', { class: 'u' }, [t('per_year')])]),
+        el('div', { class: 'fbox quota' }, [el('b', null, [t('nb_him')]), el('div', { class: 'v' }, [fmt(b) + ' m³']), el('span', { class: 'u' }, [t('per_year')])]),
+        el('div', { class: 'fbox water' }, [el('b', null, [t('nb_total')]), el('div', { class: 'v' }, [fmt(tot) + ' m³']), el('span', { class: 'u' }, [tot > 0 ? t('nb_split') + ' ' + fmt(a / tot * 100) + ' % / ' + fmt(b / tot * 100) + ' %' : ''])])
+      ]));
+      var both = 0;
+      var rows = mine.months.map(function (m, i) { var x = m.vol || 0, y = his.months[i].vol || 0; if (x > 0 && y > 0) both++; return [months[i], x, y]; });
+      var peakOf = function (k) { var best = -1, bi = -1; rows.forEach(function (r, i) { if (r[k] > best) { best = r[k]; bi = i; } }); return best > 0 ? months[bi] : '—'; };
+      res.appendChild(el('p', { style: 'margin-top:10px' }, [t('nb_peaks') + ' ' + peakOf(1) + ' · ' + peakOf(2) + '. ' + (both ? t('nb_overlap').replace('{n}', both) : t('nb_nooverlap'))]));
+      res.appendChild(el('div', { class: 'gp-table-wrap', style: 'margin-top:8px' }, [el('table', { class: 'gp-table' }, [
+        el('thead', null, [el('tr', null, [t('th_month'), t('nb_me'), t('nb_him'), t('nb_total')].map(function (h, i) { return el('th', { class: i ? 'num' : null }, [h]); }))]),
+        el('tbody', null, rows.map(function (r) { return el('tr', null, [el('td', null, [r[0]]), el('td', { class: 'num' }, [fmt(r[1])]), el('td', { class: 'num' }, [fmt(r[2])]), el('td', { class: 'num' }, [fmt(r[1] + r[2])])]); }))
+      ])]));
+      res.appendChild(G.note('ok', t('nb_one')));
+      res.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('nb_assump')]));
+    }
+    var sel = el('select', { id: 'nb-crop', onchange: function (e) { NB.crop = e.target.value; G.save('gaia.nexus.neighbour', NB); drawNb(); } },
+      ['olive', 'palm', 'citrus', 'cereal', 'veg'].map(function (k) { return el('option', { value: k, selected: NB.crop === k }, [t('c_' + k)]); }));
+    drawNb();
+    return el('details', { class: 'gp-card gp-more', style: 'margin-top:18px' }, [
+      el('summary', null, [t('nb_t')]),
+      el('p', { class: 'small', style: 'margin-top:8px;color:var(--g-ink-2);max-width:80ch' }, [t('nb_p')]),
+      el('div', { class: 'gp-grid gp-cols-3', style: 'margin-top:10px' }, [
+        el('div', { class: 'gp-field' }, [el('label', { for: 'nb-crop' }, [t('nb_crop')]), sel]),
+        el('div', { class: 'gp-field' }, [el('label', { for: 'nb-area' }, [t('nb_area')]),
+          el('input', { id: 'nb-area', type: 'number', step: 'any', min: 0, inputmode: 'decimal', value: NB.area, oninput: function (e) { NB.area = e.target.value; G.save('gaia.nexus.neighbour', NB); drawNb(); } })])
+      ]),
+      res]);
+  }
+
+  G.addStrings({
+    fr: { nb_t: 'Partager la source avec un voisin', nb_p: 'Deux parcelles, une seule source : comparez vos besoins en eau mois par mois et voyez ce qu’une source commune permet d’éviter de gaspiller.',
+      nb_crop: 'Culture du voisin', nb_area: 'Surface du voisin (ha)', nb_me: 'Moi', nb_him: 'Voisin', nb_total: 'Ensemble', nb_split: 'Part :',
+      nb_need: 'Renseignez ma culture et ma surface ci-dessus, puis la surface du voisin, pour comparer.', nb_peaks: 'Mois de plus grand besoin (moi · voisin) :',
+      nb_overlap: 'Vos besoins se chevauchent sur {n} mois : le tour d’eau compte.', nb_nooverlap: 'Vos besoins ne se chevauchent pas : le partage est facile.',
+      nb_one: 'Une seule source : on pompe une fois, la limite commune est la somme des deux quotas, jamais plus. Si l’un n’a pas besoin de son tour, il le cède à l’autre : l’eau n’est pas perdue.',
+      nb_assump: 'Hypothèse : le voisin a le même climat que votre parcelle ; sa culture et sa surface sont saisies par vous.' },
+    ar: { nb_t: 'تقاسم المصدر مع جار', nb_p: 'قطعتان ومصدر واحد: قارنوا حاجتكم من الماء شهراً بشهر وانظروا ما يمكن أن يوفّره مصدر مشترك من الهدر.',
+      nb_crop: 'محصول الجار', nb_area: 'مساحة الجار (هك)', nb_me: 'أنا', nb_him: 'الجار', nb_total: 'معاً', nb_split: 'الحصة:',
+      nb_need: 'أدخل محصولي ومساحتي أعلاه ثم مساحة الجار للمقارنة.', nb_peaks: 'أشهر الذروة (أنا · الجار):',
+      nb_overlap: 'تتقاطع حاجتكما في {n} أشهر: دور السقي مهم.', nb_nooverlap: 'لا تتقاطع حاجتكما: التقاسم سهل.',
+      nb_one: 'مصدر واحد: نضخّ مرة واحدة، والحد المشترك هو مجموع الحصتين لا أكثر. إن لم يحتج أحدكما إلى دوره يتنازل عنه للآخر فلا يضيع الماء.',
+      nb_assump: 'فرضية: للجار نفس مناخ قطعتك؛ محصوله ومساحته من إدخالك.' },
+    en: { nb_t: 'Share the source with a neighbour', nb_p: 'Two plots, one source: compare your water needs month by month and see what a shared source can stop from being wasted.',
+      nb_crop: 'Neighbour’s crop', nb_area: 'Neighbour’s area (ha)', nb_me: 'Me', nb_him: 'Neighbour', nb_total: 'Together', nb_split: 'Share:',
+      nb_need: 'Fill in my crop and area above, then the neighbour’s area, to compare.', nb_peaks: 'Peak need month (me · neighbour):',
+      nb_overlap: 'Your needs overlap over {n} months: the irrigation turn matters.', nb_nooverlap: 'Your needs do not overlap: sharing is easy.',
+      nb_one: 'One source: pump once, the shared limit is the sum of the two quotas, never more. If one of you does not need a turn, hand it to the other: the water is not lost.',
+      nb_assump: 'Assumption: the neighbour has the same climate as your plot; their crop and area are entered by you.' },
+    ja: { nb_t: '隣の農家と水源を共有する', nb_p: '2つの区画で1つの水源。月ごとの水の必要量を比べ、共同の水源でどれだけ無駄を防げるかを見ましょう。',
+      nb_crop: '隣の作物', nb_area: '隣の面積（ha）', nb_me: '自分', nb_him: '隣', nb_total: '合計', nb_split: '割合：',
+      nb_need: '比べるには、上で自分の作物と面積を入れ、続けて隣の面積を入れてください。', nb_peaks: '必要量が最大の月（自分・隣）：',
+      nb_overlap: '必要な時期が{n}か月重なります。水の順番が大切です。', nb_nooverlap: '必要な時期が重ならないので、共有しやすいです。',
+      nb_one: '水源は1つ。くみ上げるのは1回で、共同の上限は2人の割当の合計を超えません。順番が不要な方は相手に譲れば、水は無駄になりません。',
+      nb_assump: '前提：隣はあなたの区画と同じ気候です。隣の作物と面積はあなたが入力します。' }
+  });
 
   // crop labels live in land.js; provide them here too
   G.addStrings({
