@@ -6,6 +6,7 @@ python-multipart>=0.0.9
 numpy>=1.26
 pandas>=2.1
 pvlib>=0.11
+lightgbm>=4.0         # 7-day irrigation models trained in ml/
 pytest>=8
 # optional, for a local SoilGrids raster:
 # rasterio>=1.3

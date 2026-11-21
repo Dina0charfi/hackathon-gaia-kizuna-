@@ -158,6 +158,8 @@
         el('ul', { style: 'margin:4px 0 0;padding-inline-start:18px' }, r.missing.map(function (k) { return el('li', null, [t('miss_' + k)]); }))])]));
     }
 
+    out.appendChild(forecastCard());
+
     var c1 = el('div'), c2 = el('div');
     out.appendChild(el('div', { class: 'gp-card', style: 'margin-top:16px' }, [el('h2', null, [t('c_water_t')]), c1]));
     G.barChart(c1, { labels: months, unit: 'mm', title: t('c_water_t'), series: [
@@ -220,6 +222,119 @@
     out = el('div', { 'aria-live': 'polite' });
     app.appendChild(el('div', { class: 'nx' }, [inputs(), out]));
     draw();
+  }
+
+  /* ---------------------------------------------------- 7-day plan (trained model) */
+  G.addStrings({
+    fr: {
+      fc_t: 'Plan des 7 prochains jours', fc_badge: 'Modèle entraîné',
+      fc_lead: "Un modèle d'apprentissage automatique (LightGBM) prédit l'humidité du sol dans la zone des racines pour chacun des 7 prochains jours, à partir de l'état actuel du sol et de la météo prévue. Il a appris sur 9 ans de données ERA5-Land (2016–2024), 26 sites couvrant les 24 gouvernorats.",
+      fc_loading: 'Prévision en cours…',
+      fc_off: "Le service de prévision n'est pas démarré. Depuis le dossier du projet, lancez : python -m uvicorn gaia.main:app --app-dir backend --port 8000",
+      fc_err: 'Prévision indisponible :',
+      fc_today: "Réserve du sol au", fc_week: 'Besoin de la culture sur 7 jours (Kc × ET0)',
+      th_day: 'Jour', th_rain: 'Pluie prévue', th_et0: 'ET0', th_etc: 'Besoin culture', th_res: 'Réserve prévue', th_dec: 'Décision',
+      d_irrigate: 'Irriguer', d_soon: 'Bientôt', d_none: 'Pas besoin',
+      c_res_t: 'Réserve du sol prévue (%)',
+      fc_ref: 'Réserve relative : 0 % = aussi sec que les 5 % des jours les plus secs du site de référence, 100 % = aussi humide que les 5 % les plus humides. Site de référence :',
+      fc_thr: "Seuils de décision (hypothèse de démonstration, à remplacer par ceux de la culture FAO-56) : irriguer sous 30 %, bientôt sous 35 %.",
+      fc_err_note: "± = erreur moyenne du modèle sur des sites jamais vus à l'entraînement ; elle augmente avec l'horizon.",
+      fc_sim: 'Prédiction de modèle entraîné, pas une mesure.',
+      fc_state_note: "L'état du sol vient d'Open-Meteo ; les tout derniers jours peuvent venir d'un modèle de prévision plutôt que d'ERA5-Land.",
+      wd: ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam']
+    },
+    ar: {
+      fc_t: 'خطة الأيام السبعة القادمة', fc_badge: 'نموذج مُدرَّب',
+      fc_lead: 'يتنبأ نموذج تعلّم آلي (LightGBM) برطوبة التربة في منطقة الجذور لكل يوم من الأيام السبعة القادمة، انطلاقاً من حالة التربة الحالية والطقس المتوقع. تعلّم من 9 سنوات من بيانات ERA5-Land (2016–2024) في 26 موقعاً تغطي الولايات الـ24.',
+      fc_loading: 'جارٍ التنبؤ…',
+      fc_off: 'خدمة التنبؤ غير مشغّلة. من مجلد المشروع، شغّل: python -m uvicorn gaia.main:app --app-dir backend --port 8000',
+      fc_err: 'التنبؤ غير متاح:',
+      fc_today: 'مخزون التربة في', fc_week: 'حاجة الزراعة خلال 7 أيام (Kc × ET0)',
+      th_day: 'اليوم', th_rain: 'المطر المتوقع', th_et0: 'ET0', th_etc: 'حاجة الزراعة', th_res: 'المخزون المتوقع', th_dec: 'القرار',
+      d_irrigate: 'اسقِ', d_soon: 'قريباً', d_none: 'لا حاجة',
+      c_res_t: 'مخزون التربة المتوقع (%)',
+      fc_ref: 'مخزون نسبي: 0 % = جاف مثل أجفّ 5 % من أيام الموقع المرجعي، 100 % = رطب مثل أرطب 5 %. الموقع المرجعي:',
+      fc_thr: 'عتبات القرار (فرضية للعرض، تُعوَّض بعتبات الزراعة حسب FAO-56): اسقِ تحت 30 %، قريباً تحت 35 %.',
+      fc_err_note: '± = متوسط خطأ النموذج في مواقع لم يرها أثناء التدريب؛ يزداد مع بُعد الأفق.',
+      fc_sim: 'تنبؤ نموذج مُدرَّب وليس قياساً.',
+      fc_state_note: 'حالة التربة من Open-Meteo؛ قد تأتي الأيام الأخيرة من نموذج تنبؤ بدل ERA5-Land.',
+      wd: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
+    }
+  });
+
+  var FC = { status: 'off', data: null, error: null };
+  var loc = dna.location || {}, fLat = p.lat != null ? p.lat : loc.lat, fLon = p.lon != null ? p.lon : loc.lon;
+  if (G.CONFIG.irrigationEndpoint && fLat != null && fLon != null) {
+    FC.status = 'loading';
+    fetch(G.CONFIG.irrigationEndpoint.replace('{lat}', fLat).replace('{lon}', fLon))
+      .then(function (r) {
+        return r.json().then(function (j) {
+          if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status);
+          return j;
+        });
+      })
+      .then(function (j) { FC = { status: 'ok', data: j, error: null }; draw(); })
+      .catch(function (e) {
+        // a network failure means the local service is not running; anything else is reported as is
+        FC = e instanceof TypeError ? { status: 'off', data: null, error: null } : { status: 'error', data: null, error: String(e.message || e) };
+        draw();
+      });
+  }
+
+  function dayLabel(iso) {
+    var d = new Date(iso + 'T12:00:00');
+    return t('wd')[d.getDay()] + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  function forecastCard() {
+    var head = el('div', { style: 'display:flex;align-items:center;gap:10px;flex-wrap:wrap' }, [el('h2', null, [t('fc_t')]), G.pill('live', t('fc_badge'))]);
+    var card = el('div', { class: 'gp-card', style: 'margin-top:16px' }, [head,
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2);max-width:80ch' }, [t('fc_lead')])]);
+    if (FC.status === 'loading') { card.appendChild(el('p', { class: 'muted small', style: 'margin-top:10px' }, [el('span', { class: 'gp-spin' }), ' ' + t('fc_loading')])); return card; }
+    if (FC.status === 'off') { card.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('info', t('fc_off'))])); return card; }
+    if (FC.status === 'error') { card.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('err', t('fc_err') + ' ' + FC.error)])); return card; }
+
+    var d = FC.data, kc = num(S.kc), pct = function (x) { return fmt(x * 100) + ' %'; };
+    var etc = d.days.map(function (x) { return kc !== null && x.et0_mm !== null ? kc * x.et0_mm : null; });
+    var week = etc.every(function (v) { return v !== null; }) ? etc.reduce(function (a, b) { return a + b; }, 0) : null;
+    var decision = { irrigate: ['no', 'd_irrigate'], soon: ['adapt', 'd_soon'], none: ['ok', 'd_none'] };
+
+    card.appendChild(el('div', { class: 'flow', style: 'margin-top:12px' }, [
+      el('div', { class: 'fbox water' }, [el('b', null, [t('fc_today') + ' ' + dayLabel(d.state.date)]), el('div', { class: 'v' }, [pct(d.state.reserve)]), el('span', { class: 'u' }, [fmt(d.state.soil_moisture, 3) + ' m³/m³'])]),
+      el('div', { class: 'fbox water' }, [el('b', null, [t('fc_week')]), el('div', { class: 'v' }, [week === null ? '—' : fmt(week, 1) + ' mm']), el('span', { class: 'u' }, [week === null ? '' : fmt(week * 10) + ' m³ ' + t('per_ha')])])
+    ]));
+
+    var chart = el('div', { style: 'margin-top:12px' });
+    card.appendChild(chart);
+    G.barChart(chart, { labels: d.days.map(function (x) { return dayLabel(x.date); }), unit: '%', title: t('c_res_t'),
+      series: [{ name: t('c_res_t'), color: '#2F5A75', values: d.days.map(function (x) { return x.reserve * 100; }) }] });
+
+    card.appendChild(el('div', { class: 'gp-table-wrap', style: 'margin-top:10px' }, [el('table', { class: 'gp-table' }, [
+      el('thead', null, [el('tr', null, [el('th', null, [t('th_day')]), el('th', { class: 'num' }, [t('th_rain')]), el('th', { class: 'num' }, [t('th_et0')]),
+        el('th', { class: 'num' }, [t('th_etc')]), el('th', { class: 'num' }, [t('th_res')]), el('th', null, [t('th_dec')])])]),
+      el('tbody', null, d.days.map(function (x, i) {
+        var dec = decision[x.decision];
+        return el('tr', null, [
+          el('td', null, [dayLabel(x.date)]),
+          el('td', { class: 'num' }, [x.rain_mm === null ? '—' : fmt(x.rain_mm, 1) + ' mm']),
+          el('td', { class: 'num' }, [x.et0_mm === null ? '—' : fmt(x.et0_mm, 1) + ' mm']),
+          el('td', { class: 'num' }, [etc[i] === null ? '—' : fmt(etc[i], 1) + ' mm']),
+          el('td', { class: 'num' }, [pct(x.reserve) + ' ± ' + fmt(x.reserve_error * 100)]),
+          el('td', null, [G.pill(dec[0], t(dec[1]))])
+        ]);
+      }))
+    ])]));
+
+    var ref = d.reference_site;
+    card.appendChild(el('p', { class: 'assump', style: 'margin-top:8px' }, [t('fc_sim')]));
+    card.appendChild(el('details', { class: 'gp-more', style: 'margin-top:6px' }, [
+      el('summary', null, [t('method_t')]),
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_ref') + ' ' + ref.nom + ' (' + fmt(ref.distance_km) + ' km).']),
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_thr')]),
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_err_note')]),
+      el('p', { class: 'assump', style: 'margin-top:6px' }, [t('fc_state_note') + ' ' + d.model.source + ' · ' + d.model.period.join(' – ')])
+    ]));
+    return card;
   }
 
   // crop labels live in land.js; provide them here too

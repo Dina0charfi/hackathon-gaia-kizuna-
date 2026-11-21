@@ -18,6 +18,7 @@ pytest -q                                        # needs node for the JS parity 
 | `POST /analyze` | compatibility rules, verdicts feasible / adapt / insufficient / rejected | implemented, parity-tested against the browser engine |
 | `POST /nexus/calculate` | FAO-56 water need → pumping energy → solar size → monthly quota | implemented, parity-tested |
 | `POST /solar/simulate` | agrivoltaic simulation with pvlib (SPA, Erbs, isotropic) + 2-D row shading | implemented, labelled *simulation* |
+| `GET /irrigation/forecast?lat=&lon=` | 7-day root-zone soil moisture and irrigation plan from the LightGBM models trained in `ml/prevision_humidite_sol.ipynb`; recent soil state and weather forecast from Open-Meteo | implemented, needs internet; parity-tested against the notebook |
 | `POST /diagnose` | plant health | returns **503 model_not_loaded** until a validated model is installed |
 | `POST /feedback` | Kaizen correction, appended to `data/feedback.jsonl` with `expert_status: pending` | implemented |
 

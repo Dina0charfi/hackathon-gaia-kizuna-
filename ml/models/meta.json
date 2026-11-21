@@ -452,5 +452,202 @@
    "sec": 0.1426,
    "humide": 0.3256
   }
+ },
+ "sites": [
+  {
+   "id": "beja",
+   "nom": "Béja",
+   "lat": 36.73,
+   "lon": 9.18,
+   "zone": "Nord"
+  },
+  {
+   "id": "jendouba",
+   "nom": "Jendouba",
+   "lat": 36.5,
+   "lon": 8.78,
+   "zone": "Nord"
+  },
+  {
+   "id": "bousalem",
+   "nom": "Bou Salem",
+   "lat": 36.61,
+   "lon": 8.97,
+   "zone": "Nord"
+  },
+  {
+   "id": "kef",
+   "nom": "Le Kef",
+   "lat": 36.17,
+   "lon": 8.7,
+   "zone": "Nord-Ouest"
+  },
+  {
+   "id": "siliana",
+   "nom": "Siliana",
+   "lat": 36.08,
+   "lon": 9.37,
+   "zone": "Nord-Ouest"
+  },
+  {
+   "id": "zaghouan",
+   "nom": "Zaghouan",
+   "lat": 36.4,
+   "lon": 10.14,
+   "zone": "Nord-Est"
+  },
+  {
+   "id": "mateur",
+   "nom": "Mateur",
+   "lat": 37.04,
+   "lon": 9.66,
+   "zone": "Nord"
+  },
+  {
+   "id": "capbon",
+   "nom": "Menzel Bouzelfa (Cap Bon)",
+   "lat": 36.68,
+   "lon": 10.58,
+   "zone": "Nord-Est"
+  },
+  {
+   "id": "kairouan",
+   "nom": "Kairouan",
+   "lat": 35.68,
+   "lon": 10.1,
+   "zone": "Centre"
+  },
+  {
+   "id": "sbeitla",
+   "nom": "Sbeitla",
+   "lat": 35.23,
+   "lon": 9.13,
+   "zone": "Centre-Ouest"
+  },
+  {
+   "id": "sidibouzid",
+   "nom": "Sidi Bouzid",
+   "lat": 35.04,
+   "lon": 9.48,
+   "zone": "Centre"
+  },
+  {
+   "id": "kasserine",
+   "nom": "Kasserine",
+   "lat": 35.17,
+   "lon": 8.83,
+   "zone": "Centre-Ouest"
+  },
+  {
+   "id": "sfax",
+   "nom": "Agareb (Sfax)",
+   "lat": 34.74,
+   "lon": 10.52,
+   "zone": "Sahel"
+  },
+  {
+   "id": "msaken",
+   "nom": "Msaken (Sahel)",
+   "lat": 35.73,
+   "lon": 10.58,
+   "zone": "Sahel"
+  },
+  {
+   "id": "gafsa",
+   "nom": "Gafsa",
+   "lat": 34.42,
+   "lon": 8.78,
+   "zone": "Sud-Ouest"
+  },
+  {
+   "id": "medenine",
+   "nom": "Médenine",
+   "lat": 33.35,
+   "lon": 10.5,
+   "zone": "Sud-Est"
+  },
+  {
+   "id": "kebili",
+   "nom": "Kébili",
+   "lat": 33.7,
+   "lon": 8.97,
+   "zone": "Sud (oasis)"
+  },
+  {
+   "id": "tozeur",
+   "nom": "Tozeur",
+   "lat": 33.92,
+   "lon": 8.13,
+   "zone": "Sud (oasis)"
+  },
+  {
+   "id": "tunis",
+   "nom": "Tunis (Sijoumi)",
+   "lat": 36.78,
+   "lon": 10.08,
+   "zone": "Grand Tunis"
+  },
+  {
+   "id": "ariana",
+   "nom": "Kalâat el-Andalous (Ariana)",
+   "lat": 37.02,
+   "lon": 10.08,
+   "zone": "Grand Tunis"
+  },
+  {
+   "id": "benarous",
+   "nom": "Mornag (Ben Arous)",
+   "lat": 36.68,
+   "lon": 10.29,
+   "zone": "Grand Tunis"
+  },
+  {
+   "id": "manouba",
+   "nom": "Tebourba (Manouba)",
+   "lat": 36.83,
+   "lon": 9.84,
+   "zone": "Nord (Medjerda)"
+  },
+  {
+   "id": "monastir",
+   "nom": "Jemmal (Monastir)",
+   "lat": 35.62,
+   "lon": 10.76,
+   "zone": "Sahel"
+  },
+  {
+   "id": "mahdia",
+   "nom": "El Jem (Mahdia)",
+   "lat": 35.3,
+   "lon": 10.71,
+   "zone": "Sahel"
+  },
+  {
+   "id": "gabes",
+   "nom": "Chenini (oasis de Gabès)",
+   "lat": 33.87,
+   "lon": 10.06,
+   "zone": "Sud-Est (oasis littorale)"
+  },
+  {
+   "id": "tataouine",
+   "nom": "Tataouine (jessour)",
+   "lat": 32.93,
+   "lon": 10.45,
+   "zone": "Sud-Est"
+  }
+ ],
+ "exemple": {
+  "site": "msaken",
+  "date": "2023-06-18",
+  "predictions": {
+   "1": 0.17664923545565717,
+   "2": 0.17329213945727706,
+   "3": 0.17120379213855272,
+   "4": 0.16872621193556736,
+   "5": 0.1681188093281451,
+   "6": 0.16840816203810455,
+   "7": 0.16689933483291264
+  }
  }
 }

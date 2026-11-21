@@ -17,6 +17,7 @@
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
+    irrigationEndpoint: 'http://127.0.0.1:8000/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
 

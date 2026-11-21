@@ -16,7 +16,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import engine, nexus, solar
+from . import engine, irrigation, nexus, solar
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -30,7 +30,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists()}
+    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(),
+            "irrigation_model": irrigation.available()}
 
 
 @app.get("/knowledge/techniques")
@@ -102,6 +103,21 @@ def solar_simulate(body: SolarIn) -> dict:
     if body.pitch <= body.width:
         raise HTTPException(422, "pitch must be larger than panel width")
     return solar.simulate(**body.model_dump())
+
+
+@app.get("/irrigation/forecast")
+async def irrigation_forecast(lat: float, lon: float) -> dict:
+    """7-day soil moisture and irrigation plan from the trained LightGBM models (ml/)."""
+    if not (30 <= lat <= 38 and 7 <= lon <= 12):
+        raise HTTPException(422, "Point outside the Tunisia bounding box.")
+    try:
+        return await irrigation.forecast(lat, lon)
+    except irrigation.ModelMissing as e:
+        raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
+    except ValueError as e:
+        raise HTTPException(422, detail={"status": "no_data", "message": str(e)})
+    except Exception as e:  # Open-Meteo unreachable or refusing
+        raise HTTPException(502, detail={"status": "source_unavailable", "message": f"Open-Meteo: {e}"})
 
 
 @app.post("/diagnose")
