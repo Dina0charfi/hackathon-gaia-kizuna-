@@ -1,0 +1,424 @@
+{
+ "cible": "sm_7_28",
+ "horizons": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+ ],
+ "variables": {
+  "1": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_1",
+   "pluie_max_fut_1",
+   "et0_fut_1"
+  ],
+  "2": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_2",
+   "pluie_max_fut_2",
+   "et0_fut_2"
+  ],
+  "3": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_3",
+   "pluie_max_fut_3",
+   "et0_fut_3"
+  ],
+  "4": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_4",
+   "pluie_max_fut_4",
+   "et0_fut_4"
+  ],
+  "5": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_5",
+   "pluie_max_fut_5",
+   "et0_fut_5"
+  ],
+  "6": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_6",
+   "pluie_max_fut_6",
+   "et0_fut_6"
+  ],
+  "7": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_7",
+   "pluie_max_fut_7",
+   "et0_fut_7"
+  ]
+ },
+ "source": "Open-Meteo Historical API (ERA5 / ERA5-Land)",
+ "periode": [
+  "2016-01-01",
+  "2024-12-31"
+ ],
+ "resultats": [
+  {
+   "horizon": 1,
+   "test": "années jamais vues",
+   "rmse_modele": 0.00422,
+   "rmse_persistance": 0.00638,
+   "gain": 0.3389,
+   "arbres": 201
+  },
+  {
+   "horizon": 1,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.00428,
+   "rmse_persistance": 0.00678,
+   "gain": 0.36893,
+   "arbres": 201
+  },
+  {
+   "horizon": 2,
+   "test": "années jamais vues",
+   "rmse_modele": 0.00719,
+   "rmse_persistance": 0.01091,
+   "gain": 0.34088,
+   "arbres": 209
+  },
+  {
+   "horizon": 2,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.00751,
+   "rmse_persistance": 0.01178,
+   "gain": 0.36274,
+   "arbres": 209
+  },
+  {
+   "horizon": 3,
+   "test": "années jamais vues",
+   "rmse_modele": 0.0093,
+   "rmse_persistance": 0.01439,
+   "gain": 0.35386,
+   "arbres": 230
+  },
+  {
+   "horizon": 3,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.00997,
+   "rmse_persistance": 0.01553,
+   "gain": 0.35805,
+   "arbres": 230
+  },
+  {
+   "horizon": 4,
+   "test": "années jamais vues",
+   "rmse_modele": 0.0109,
+   "rmse_persistance": 0.01724,
+   "gain": 0.36758,
+   "arbres": 244
+  },
+  {
+   "horizon": 4,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.01169,
+   "rmse_persistance": 0.01855,
+   "gain": 0.36981,
+   "arbres": 244
+  },
+  {
+   "horizon": 5,
+   "test": "années jamais vues",
+   "rmse_modele": 0.01236,
+   "rmse_persistance": 0.01967,
+   "gain": 0.37164,
+   "arbres": 298
+  },
+  {
+   "horizon": 5,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.01289,
+   "rmse_persistance": 0.0211,
+   "gain": 0.38899,
+   "arbres": 298
+  },
+  {
+   "horizon": 6,
+   "test": "années jamais vues",
+   "rmse_modele": 0.01337,
+   "rmse_persistance": 0.02183,
+   "gain": 0.38747,
+   "arbres": 234
+  },
+  {
+   "horizon": 6,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.01392,
+   "rmse_persistance": 0.02332,
+   "gain": 0.40306,
+   "arbres": 234
+  },
+  {
+   "horizon": 7,
+   "test": "années jamais vues",
+   "rmse_modele": 0.01443,
+   "rmse_persistance": 0.02381,
+   "gain": 0.3941,
+   "arbres": 199
+  },
+  {
+   "horizon": 7,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.01479,
+   "rmse_persistance": 0.0253,
+   "gain": 0.41542,
+   "arbres": 199
+  }
+ ],
+ "seuils_sites": {
+  "beja": {
+   "sec": 0.222,
+   "humide": 0.4439
+  },
+  "bousalem": {
+   "sec": 0.0734,
+   "humide": 0.3124
+  },
+  "capbon": {
+   "sec": 0.234,
+   "humide": 0.4321
+  },
+  "gafsa": {
+   "sec": 0.0,
+   "humide": 0.115
+  },
+  "jendouba": {
+   "sec": 0.0862,
+   "humide": 0.3095
+  },
+  "kairouan": {
+   "sec": 0.085,
+   "humide": 0.2505
+  },
+  "kasserine": {
+   "sec": 0.0099,
+   "humide": 0.2247
+  },
+  "kebili": {
+   "sec": 0.0,
+   "humide": 0.096
+  },
+  "kef": {
+   "sec": 0.0699,
+   "humide": 0.2894
+  },
+  "mateur": {
+   "sec": 0.113,
+   "humide": 0.3292
+  },
+  "medenine": {
+   "sec": 0.0094,
+   "humide": 0.167
+  },
+  "msaken": {
+   "sec": 0.1152,
+   "humide": 0.2866
+  },
+  "sbeitla": {
+   "sec": 0.0113,
+   "humide": 0.2451
+  },
+  "sfax": {
+   "sec": 0.003,
+   "humide": 0.192
+  },
+  "sidibouzid": {
+   "sec": 0.002,
+   "humide": 0.2231
+  },
+  "siliana": {
+   "sec": 0.1097,
+   "humide": 0.3139
+  },
+  "tozeur": {
+   "sec": 0.0,
+   "humide": 0.125
+  },
+  "zaghouan": {
+   "sec": 0.1426,
+   "humide": 0.3256
+  }
+ }
+}
