@@ -6,6 +6,12 @@ Every row keeps its SOURCE dataset and its DOMAIN (lab = plain background, field
 orchard/garden photo). Those two columns are what let 11_split.py and 12_train_heads.py
 measure the lab -> field gap honestly instead of hiding it.
 
+Olive (not on Hugging Face): the public olive leaf set of Uguz & Uysal (2021), 3,400 field photos from Denizli,
+Turkey (healthy / Aculus olearius / peacock spot), from github.com/sinanuguz/CNN_olive_dataset. Extract its five .rar
+files (each is a separate archive: Train1 = healthy, Train2 = aculus, train3 + train4 = peacock spot, test = all three)
+into one folder and pass it with --olive; class = the folder name, mapped by OLIVE below:
+    python scripts/10_fetch_hf.py --hf hf --out raw_hf --index data/index.csv --olive olive_raw
+
 Download the parquet files first (needs huggingface.co):
     huggingface-cli download --repo-type dataset Project-AgML/plant_village_classification --local-dir hf/plant_village_classification
     (same for plant_doc_classification, citrus_fruit_leaf_disease_classification, orange_leaf_disease_classification,
@@ -72,12 +78,30 @@ SOURCES = [
     ("date_palm_leaf_disease_classification",       "palm_sa",      "field", lambda n, r: PALM(n),                              None),
     ("date_palm_leaf_disease_classification_iraq",  "palm_iq",      "field", lambda n, r: PALM(n),                              400),
 ]
+OLIVE = {"healthy": "healthy", "aculus_olearius": "aculus_olearius", "olive_peacock_spot": "peacock_spot",
+         "train3": "peacock_spot", "train4": "peacock_spot"}
+
+def olive_rows(root, out, short):
+    """Field photos of olive leaves -> raw_hf/olive/<class>/; rows tagged source=olive_tr, domain=field."""
+    rows = []
+    for p in sorted(root.rglob("*")):
+        if p.suffix.lower() not in (".jpg", ".jpeg", ".png"): continue
+        dis = OLIVE.get(p.parent.name.lower())
+        if not dis: continue
+        img = Image.open(p).convert("RGB"); s = short / min(img.size)
+        if s < 1: img = img.resize((max(1, round(img.width * s)), max(1, round(img.height * s))), Image.BICUBIC)
+        q = out / "olive" / dis / f"olive_tr_{slug(str(p.relative_to(root)))}.jpg"; q.parent.mkdir(parents=True, exist_ok=True)
+        img.save(q, quality=90); rows.append([str(q.resolve()), "olive", dis, "olive_tr", "field"])
+    print(f"olive_tr       field {len(rows):6d} images")
+    return rows
+
 OTHER_CAP = 120   # per "other" sub-class, so refusals do not swamp the real plants
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hf", type=Path, default=Path("hf")); ap.add_argument("--out", type=Path, default=Path("raw_hf"))
     ap.add_argument("--index", type=Path, default=Path("data/index.csv")); ap.add_argument("--short", type=int, default=288)
+    ap.add_argument("--olive", type=Path, default=None, help="folder with the extracted olive leaf archives")
     a = ap.parse_args(); rows = []; random.seed(0)
     for folder, src, domain, mapper, cap in SOURCES:
         files = sorted(glob.glob(str(a.hf / folder / "data" / "*.parquet")))
@@ -114,6 +138,7 @@ def main():
                     rows.append([str(p.resolve()), plant, dis, src, domain])
                 off += len(batch)
         print(f"{src:14s} {domain:5s} {n:6d} images  {len(by)} classes")
+    if a.olive: rows += olive_rows(a.olive, a.out, a.short)
     a.index.parent.mkdir(parents=True, exist_ok=True)
     with open(a.index, "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["path", "plant", "disease", "source", "domain"]); w.writerows(rows)
