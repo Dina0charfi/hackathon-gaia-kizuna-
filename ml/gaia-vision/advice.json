@@ -1,0 +1,6 @@
+{
+  "_note": "Key = <tree>/<disease>. An entry is shipped ONLY when validated_by is filled by an agronomist. Trees: olive, palm, citrus.",
+  "olive/peacock_spot": {"fr": "", "ar": "", "validated_by": "", "date": ""},
+  "olive/aculus_olearius": {"fr": "", "ar": "", "validated_by": "", "date": ""},
+  "olive/healthy": {"fr": "", "ar": "", "validated_by": "", "date": ""}
+}
