@@ -1,0 +1,222 @@
+{
+ "question": "la réserve passe-t-elle sous le seuil dans les 7 prochains jours ? (jours où elle est encore au-dessus)",
+ "seuil_reserve": 0.3,
+ "seuil_probabilite": 0.3999999999999999,
+ "variables": [
+  "sm_0_7",
+  "sm_7_28",
+  "sm_28_100",
+  "sm_lag1",
+  "sm_lag2",
+  "sm_lag3",
+  "sm_lag7",
+  "sm_diff1",
+  "pluie",
+  "et0",
+  "tmax",
+  "tmin",
+  "rayonnement",
+  "vent",
+  "pluie_1j",
+  "pluie_3j",
+  "pluie_7j",
+  "pluie_30j",
+  "et0_3j",
+  "et0_7j",
+  "et0_30j",
+  "lat",
+  "lon",
+  "altitude",
+  "saison_sin",
+  "saison_cos",
+  "reserve_auj",
+  "reserve_lag1",
+  "reserve_lag3",
+  "reserve_pente3",
+  "pluie_fut_3",
+  "et0_fut_3",
+  "pluie_fut_7",
+  "pluie_max_fut_7",
+  "et0_fut_7"
+ ],
+ "seuils_sites_entrainement": {
+  "ariana": {
+   "sec": 0.137,
+   "humide": 0.3218
+  },
+  "beja": {
+   "sec": 0.219,
+   "humide": 0.4383
+  },
+  "benarous": {
+   "sec": 0.137,
+   "humide": 0.3425
+  },
+  "bousalem": {
+   "sec": 0.0341,
+   "humide": 0.3123
+  },
+  "capbon": {
+   "sec": 0.233,
+   "humide": 0.4382
+  },
+  "gabes": {
+   "sec": 0.0033,
+   "humide": 0.1355
+  },
+  "gafsa": {
+   "sec": 0.002,
+   "humide": 0.126
+  },
+  "jendouba": {
+   "sec": 0.0663,
+   "humide": 0.3093
+  },
+  "kairouan": {
+   "sec": 0.089,
+   "humide": 0.2657
+  },
+  "kasserine": {
+   "sec": 0.1118,
+   "humide": 0.2329
+  },
+  "kebili": {
+   "sec": 0.0,
+   "humide": 0.0931
+  },
+  "kef": {
+   "sec": 0.0487,
+   "humide": 0.3013
+  },
+  "mahdia": {
+   "sec": 0.1327,
+   "humide": 0.2946
+  },
+  "manouba": {
+   "sec": 0.121,
+   "humide": 0.3025
+  },
+  "mateur": {
+   "sec": 0.1031,
+   "humide": 0.3303
+  },
+  "medenine": {
+   "sec": 0.066,
+   "humide": 0.1716
+  },
+  "monastir": {
+   "sec": 0.1261,
+   "humide": 0.3125
+  },
+  "msaken": {
+   "sec": 0.1002,
+   "humide": 0.2958
+  },
+  "sbeitla": {
+   "sec": 0.1113,
+   "humide": 0.2534
+  },
+  "sfax": {
+   "sec": 0.076,
+   "humide": 0.1938
+  },
+  "sidibouzid": {
+   "sec": 0.1097,
+   "humide": 0.2442
+  },
+  "siliana": {
+   "sec": 0.1056,
+   "humide": 0.3213
+  },
+  "tataouine": {
+   "sec": 0.017,
+   "humide": 0.1896
+  },
+  "tozeur": {
+   "sec": 0.0005,
+   "humide": 0.123
+  },
+  "tunis": {
+   "sec": 0.103,
+   "humide": 0.3073
+  },
+  "zaghouan": {
+   "sec": 0.145,
+   "humide": 0.34
+  }
+ },
+ "resultats": [
+  {
+   "test": "années jamais vues",
+   "méthode": "Persistance",
+   "bascules réelles": 888,
+   "bascules annoncées": 0,
+   "Précision": 0.0,
+   "Rappel": 0.0,
+   "F1": 0.0
+  },
+  {
+   "test": "années jamais vues",
+   "méthode": "Tendance (3 derniers jours)",
+   "bascules réelles": 888,
+   "bascules annoncées": 1158,
+   "Précision": 0.3921,
+   "Rappel": 0.5113,
+   "F1": 0.4438
+  },
+  {
+   "test": "années jamais vues",
+   "méthode": "Trajectoire des 7 modèles",
+   "bascules réelles": 888,
+   "bascules annoncées": 805,
+   "Précision": 0.6149,
+   "Rappel": 0.5574,
+   "F1": 0.5848
+  },
+  {
+   "test": "années jamais vues",
+   "méthode": "Modèle dédié aux bascules",
+   "bascules réelles": 888,
+   "bascules annoncées": 848,
+   "Précision": 0.6167,
+   "Rappel": 0.589,
+   "F1": 0.6025
+  },
+  {
+   "test": "lieux jamais vus",
+   "méthode": "Persistance",
+   "bascules réelles": 129,
+   "bascules annoncées": 0,
+   "Précision": 0.0,
+   "Rappel": 0.0,
+   "F1": 0.0
+  },
+  {
+   "test": "lieux jamais vus",
+   "méthode": "Tendance (3 derniers jours)",
+   "bascules réelles": 129,
+   "bascules annoncées": 195,
+   "Précision": 0.2923,
+   "Rappel": 0.4419,
+   "F1": 0.3519
+  },
+  {
+   "test": "lieux jamais vus",
+   "méthode": "Trajectoire des 7 modèles",
+   "bascules réelles": 129,
+   "bascules annoncées": 79,
+   "Précision": 0.7342,
+   "Rappel": 0.4496,
+   "F1": 0.5577
+  },
+  {
+   "test": "lieux jamais vus",
+   "méthode": "Modèle dédié aux bascules",
+   "bascules réelles": 129,
+   "bascules annoncées": 152,
+   "Précision": 0.5132,
+   "Rappel": 0.6047,
+   "F1": 0.5552
+  }
+ ]
+}

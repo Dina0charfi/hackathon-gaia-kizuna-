@@ -18,16 +18,33 @@ Le premier lancement télécharge les données dans `data/` (environ 1 minute) ;
 
 ## Résultats (test 2022–2024)
 
-| | Erreur J+1 | Erreur J+7 | Gain moyen vs persistance |
+Chaque chiffre est comparé à la persistance (« dans h jours, le sol sera comme aujourd'hui »).
+
+**Humidité du sol (section 9)**
+
+| | R² de la variation J+1 → J+7 | Erreur moyenne J+1 / J+7 | Gain vs persistance |
 |---|---|---|---|
-| Années jamais vues | 0,0043 m³/m³ | 0,0145 m³/m³ | 39 % |
-| Lieux jamais vus | 0,0043 m³/m³ | 0,0144 m³/m³ | 38 % |
+| Années jamais vues | 0,59 → 0,66 | 0,4 / 1,7 mm d'eau | 39 % |
+| Lieux jamais vus | 0,60 → 0,68 | 0,4 / 1,7 mm d'eau | 38 % |
+
+Le R² de l'humidité elle-même (≈ 0,97) est flatteur : la persistance atteint déjà ≈ 0,9. Le R² de la variation est le chiffre honnête.
+
+**Moments de bascule (section 10)** : la réserve passe-t-elle sous 30 % dans les 7 jours ?
+
+| F1 | Persistance | Tendance | Trajectoire des 7 modèles | Modèle dédié |
+|---|---|---|---|---|
+| Années jamais vues | 0 % | 44 % | 58 % | 60 % |
+| Lieux jamais vus | 0 % | 35 % | 56 % | 56 % |
+
+Environ 6 bascules détectées sur 10 au bon jour à ±1 jour, avec un léger retard moyen (0,5 à 1 jour).
 
 ## Fichiers produits
 
 - `data/*.csv` : les données téléchargées, un fichier par site
-- `models/humidite_sol_J1.txt` … `J7.txt` : les modèles LightGBM (chargeables avec `lightgbm.Booster(model_file=...)`)
+- `models/humidite_sol_J1.txt` … `J7.txt` : les modèles LightGBM (chargeables avec `lightgbm.Booster(model_file=...)`), utilisés par le backend
 - `models/meta.json` : variables attendues par chaque modèle, seuils sec/humide par site, résultats
+- `models/bascule_7j.txt` : le classifieur dédié aux moments de bascule
+- `models/bascule_meta.json` : ses variables, son seuil de probabilité, les seuils des sites (années d'entraînement), ses résultats
 
 ## Limites
 
