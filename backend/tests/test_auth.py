@@ -101,6 +101,67 @@ def test_farm_link_and_unlink(client):
     assert client.get("/auth/me", headers=H(tok)).json()["user"]["farm"]["lat"] == 35.0
 
 
+def test_forgot_password(client, capsys):
+    old = signup(client).json()["token"]
+    capsys.readouterr()
+    # unknown account: same answer, nothing printed
+    r0 = client.post("/auth/forgot", json={"identifier": "nobody@example.com"})
+    assert r0.status_code == 200 and r0.json()["sent"] is True and "code" not in r0.text
+    assert "reset code" not in capsys.readouterr().out
+    r = client.post("/auth/forgot", json={"identifier": "amel@example.com"})
+    assert r.json() == r0.json() and "code" not in r.text            # the code is never in the API answer
+    out = capsys.readouterr().out
+    code = out.split("amel@example.com: ")[1][:6]
+    assert code.isdigit()
+    assert client.post("/auth/reset", json={"identifier": "amel@example.com", "code": "000000" if code != "000000" else "111111",
+                                            "password": "new-olive-2026"}).status_code == 400
+    r2 = client.post("/auth/reset", json={"identifier": "amel@example.com", "code": code, "password": "new-olive-2026"})
+    assert r2.status_code == 200 and r2.json()["token"]
+    assert client.get("/auth/me", headers=H(old)).status_code == 401          # old sessions are closed
+    assert client.post("/auth/login", json={"identifier": "amel@example.com", "password": "olive-2026"}).status_code == 401
+    assert client.post("/auth/login", json={"identifier": "amel@example.com", "password": "new-olive-2026"}).status_code == 200
+    # a code works once
+    assert client.post("/auth/reset", json={"identifier": "amel@example.com", "code": code, "password": "again-2026x"}).status_code == 400
+
+
+def test_reset_demo_code_only_locally(client, monkeypatch):
+    from gaia import auth
+    signup(client)
+    assert "demo_code" not in client.post("/auth/forgot", json={"identifier": "amel@example.com"}).json()   # remote client
+    local = auth.request_reset("amel@example.com", local_demo=True)
+    assert local["channel"] == "demo" and local["demo_code"].isdigit()
+    assert "demo_code" not in auth.request_reset("nobody@example.com", local_demo=True)                  # unknown account
+    monkeypatch.setenv("GAIA_SMTP_HOST", "smtp.invalid")                                                  # email configured
+    monkeypatch.setattr(auth, "_deliver", lambda *a: "email")
+    assert "demo_code" not in auth.request_reset("amel@example.com", local_demo=True)
+
+
+def test_reset_code_by_whatsapp(client, monkeypatch):
+    import httpx
+    from gaia import auth
+    signup(client, identifier="98 123 456")
+    sent = {}
+
+    class R:
+        status_code, text = 200, "{}"
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        sent.update(url=url, auth=headers["Authorization"], body=json)
+        return R()
+
+    monkeypatch.setenv("GAIA_WA_TOKEN", "test-token")
+    monkeypatch.setenv("GAIA_WA_PHONE_ID", "1234567890")
+    monkeypatch.setattr(httpx, "post", fake_post)
+    r = auth.request_reset("98123456", local_demo=True)
+    assert r["channel"] == "whatsapp" and "demo_code" not in r            # a real channel: never shown on the page
+    assert sent["url"].endswith("/1234567890/messages") and sent["auth"] == "Bearer test-token"
+    assert sent["body"]["to"] == "21698123456"                              # Tunisian number gets 216
+    code = sent["body"]["template"]["components"][0]["parameters"][0]["text"]
+    assert len(code) == 6 and code.isdigit()
+    ok = client.post("/auth/reset", json={"identifier": "98123456", "code": code, "password": "via-whatsapp-1"})
+    assert ok.status_code == 200
+
+
 def test_lockout_after_repeated_failures(client):
     signup(client)
     for _ in range(5):

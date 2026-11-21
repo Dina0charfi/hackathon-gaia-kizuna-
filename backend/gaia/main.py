@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -92,6 +92,30 @@ def auth_me(authorization: Optional[str] = Header(None)) -> dict:
 def auth_logout(authorization: Optional[str] = Header(None)) -> dict:
     auth.logout(_bearer(authorization))
     return {"signed_out": True}
+
+
+class ForgotIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+
+
+class ResetIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+    code: str = Field(..., max_length=12)
+    password: str = Field(..., max_length=200)
+
+
+@app.post("/auth/forgot")
+def auth_forgot(body: ForgotIn, request: Request) -> dict:
+    """Send a 6-digit reset code (email via SMTP, or the server console). Same answer for unknown accounts.
+    Local demo only (request from this computer, no SMTP): the code is also returned for the page to show."""
+    host = request.client.host if request.client else ""
+    return _auth_call(auth.request_reset, body.identifier, host in ("127.0.0.1", "::1", "localhost"))
+
+
+@app.post("/auth/reset")
+def auth_reset(body: ResetIn) -> dict:
+    """Code + new password: sets the password, closes every other session, signs in."""
+    return _auth_call(auth.confirm_reset, body.identifier, body.code, body.password)
 
 
 @app.put("/auth/farm")
