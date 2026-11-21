@@ -144,7 +144,7 @@
     }
   });
 
-  G.mountShell('season');
+  G.mountShell('farm');
   var tabs = document.getElementById('tabs'), app = document.getElementById('app');
   var p = G.getParcel();
 
@@ -273,13 +273,6 @@
           el('p', { class: 'src' }, src ? [t('src') + S.colon(), src] : [t('ms_practice')])
         ])
       ]));
-      if (s.res && S.MOTT[s.res]) {
-        var r = S.loc(S.MOTT[s.res]);
-        list.appendChild(el('li', { class: 'ss-item res' }, [
-          el('span', { class: 'ic', 'aria-hidden': 'true' }, ['惜']),
-          el('div', null, [el('h3', null, [fill(t('ms_res_h'), { r: r.name })]), el('p', null, [t('ms_res_p')]), el('a', { href: 'mottainai.html', class: 'src' }, [t('ms_open_mott')])])
-        ]));
-      }
     });
     sec.appendChild(list);
     sec.appendChild(el('p', { class: 'small', style: 'margin-top:8px' }, [t('to_validate') + ' ', el('a', { href: 'calendar.html' }, [t('ms_open_cal')])]));

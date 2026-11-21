@@ -126,6 +126,8 @@ body.gp[dir="rtl"] .eyebrow { letter-spacing: 0; }
 .gp-head h1 { font-size: clamp(30px, 4.2vw, 46px); margin-top: 8px; }
 .gp-head p.lead { margin-top: 10px; max-width: 70ch; color: var(--g-ink-2); font-size: 16.5px; }
 .gp-head .jp-mark { font-family: var(--g-jp); color: var(--g-gold); font-size: 15px; margin-inline-start: 8px; }
+/* Japanese title already is the kanji: do not repeat it next to the heading */
+html[lang="ja"] .gp-head .jp-mark.dup { display: none; }
 
 /* ---------------------------------------------------------------- primitives */
 

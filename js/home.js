@@ -315,8 +315,6 @@
     ['lab.html', 'm_lab', 'm_lab_p', 'demo', 'st_rules', '知'], ['health.html', 'm_health', 'm_health_p', 'plan', 'st_off', '葉'],
     ['nexus.html', 'm_nexus', 'm_nexus_p', 'live', 'st_live', '水'], ['agrivoltaic.html', 'm_agv', 'm_agv_p', 'demo', 'st_sim', '陽'],
     ['farm.html', 'm_farm', 'm_farm_p', 'demo', 'st_sim', '測'],
-    ['season.html', 'm_season', 'm_season_p', 'live', 'st_data', '季'], ['calendar.html', 'm_cal', 'm_cal_p', 'live', 'st_rules2', '暦'],
-    ['soil.html', 'm_soil', 'm_soil_p', 'live', 'st_declared', '土'], ['mottainai.html', 'm_mott', 'm_mott_p', 'live', 'st_rules2', '惜'],
     ['business.html', 'm_biz', 'm_biz_p', 'live', 'st_live', '結'],
     ['library.html', 'm_lib', 'm_lib_p', 'live', 'st_live', '書']
   ];
@@ -349,7 +347,7 @@
   }
 
   function concepts() {
-    var C = [['改善', 'kaizen', 'health.html'], ['里山', 'satoyama', 'engine.html'], ['もったいない', 'mottainai', 'mottainai.html'], ['絆', 'kizuna', null], ['侘寂', 'wabisabi', 'health.html']];
+    var C = [['改善', 'kaizen', 'health.html'], ['里山', 'satoyama', 'engine.html'], ['もったいない', 'mottainai', null], ['絆', 'kizuna', null], ['侘寂', 'wabisabi', 'health.html']];
     return el('section', { class: 'sec', 'aria-labelledby': 'h-con' }, [
       el('h2', { id: 'h-con' }, [t('con_t')]),
       el('div', { class: 'concepts' }, C.map(function (c) {

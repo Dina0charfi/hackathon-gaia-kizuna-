@@ -7,6 +7,7 @@ numpy>=1.26
 pandas>=2.1
 pvlib>=0.11
 lightgbm>=4.0         # 7-day irrigation models trained in ml/
+scipy>=1.11     # required by pvlib
 pytest>=8
 anthropic>=2.12      # optional: POST /assistant (needs ANTHROPIC_API_KEY)
 # optional, for a local SoilGrids raster:

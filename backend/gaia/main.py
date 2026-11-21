@@ -12,11 +12,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import assistant, business, engine, guard, irrigation, nexus, solar, vision
+from . import assistant, business, engine, guard, irrigation, nexus, plantnet, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -32,7 +32,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 def health() -> dict:
     llm = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_PROFILE"))
     return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(),
-            "assistant_llm": llm, "irrigation_model": irrigation.available()}
+            "assistant_llm": llm, "plantnet": bool(plantnet.api_key()), "irrigation_model": irrigation.available()}
 
 
 @app.get("/knowledge/techniques")
@@ -199,6 +199,24 @@ async def diagnose(image: UploadFile = File(...)) -> dict:
         raise HTTPException(503, detail=e.detail) from e
     except vision.BadImage as e:
         raise HTTPException(422, detail={"status": "bad_image", "message": str(e)}) from e
+
+
+@app.post("/plantnet")
+async def plantnet_identify(image: UploadFile = File(...), organ: str = Form("leaf"), lang: str = Form("fr"),
+                            diseases: bool = Form(True)) -> dict:
+    """Optional external check (Pl@ntNet), called by the page only after the user agrees. Species name + possible disease."""
+    data = await image.read()
+    if not data or len(data) > 8_000_000:
+        raise HTTPException(422, detail={"status": "bad_image", "message": "Image missing or larger than 8 MB."})
+    if data[:3] != b"\xff\xd8\xff" and data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise HTTPException(422, detail={"status": "bad_image", "message": "Only JPEG or PNG images are accepted."})
+    if organ not in {"leaf", "flower", "fruit", "bark", "auto"}:
+        organ = "leaf"
+    lang = lang if lang.isalpha() and len(lang) == 2 else "en"
+    try:
+        return await plantnet.identify(data, organ=organ, lang=lang, diseases=diseases)
+    except plantnet.PlantnetError as e:
+        raise HTTPException(e.http_status, detail=e.detail) from e
 
 
 class FeedbackIn(BaseModel):

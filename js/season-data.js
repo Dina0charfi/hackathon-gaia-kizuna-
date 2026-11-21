@@ -18,7 +18,7 @@
   G.addStrings({
     fr: {
       ss_tab_season: 'Ma saison', ss_tab_cal: 'Calendrier', ss_tab_soil: 'Sol', ss_tab_mott: 'Mottainai',
-      ss_tabs: 'Saison',
+      ss_tabs: 'Saison', ss_tab_farm: 'Tableau de bord',
       crop_olive: 'Olivier', crop_palm: 'Palmier dattier', crop_citrus: 'Agrumes', crop_cereal: 'Céréales (blé, orge)',
       to_validate: 'Calendrier indicatif pour la Tunisie, à valider avec le CRDA ou un technicien de votre région.',
       src: 'Source',
@@ -26,7 +26,7 @@
     },
     ar: {
       ss_tab_season: 'موسمي', ss_tab_cal: 'الرزنامة', ss_tab_soil: 'التربة', ss_tab_mott: 'موتايناي',
-      ss_tabs: 'الموسم',
+      ss_tabs: 'الموسم', ss_tab_farm: 'لوحة القيادة',
       crop_olive: 'الزيتون', crop_palm: 'نخيل التمر', crop_citrus: 'القوارص', crop_cereal: 'الحبوب (قمح، شعير)',
       to_validate: 'رزنامة تقريبية لتونس، يجب التثبت منها مع المندوبية الجهوية للفلاحة أو تقني من جهتك.',
       src: 'المصدر',
@@ -34,7 +34,7 @@
     },
     en: {
       ss_tab_season: 'My season', ss_tab_cal: 'Calendar', ss_tab_soil: 'Soil', ss_tab_mott: 'Mottainai',
-      ss_tabs: 'Season',
+      ss_tabs: 'Season', ss_tab_farm: 'Dashboard',
       crop_olive: 'Olive', crop_palm: 'Date palm', crop_citrus: 'Citrus', crop_cereal: 'Cereals (wheat, barley)',
       to_validate: 'Indicative calendar for Tunisia, to check with the CRDA or an extension officer in your region.',
       src: 'Source',
@@ -42,7 +42,7 @@
     },
     ja: {
       ss_tab_season: 'わたしの季節', ss_tab_cal: '暦', ss_tab_soil: '土', ss_tab_mott: 'もったいない',
-      ss_tabs: '季節',
+      ss_tabs: '季節', ss_tab_farm: 'ダッシュボード',
       crop_olive: 'オリーブ', crop_palm: 'ナツメヤシ', crop_citrus: '柑橘', crop_cereal: '穀物（小麦・大麦）',
       to_validate: 'チュニジア向けの目安の暦です。地域のCRDA（農業開発局）または普及員に確認してください。',
       src: '出典',
@@ -315,7 +315,7 @@
     return G.el('a', { href: s.u, target: '_blank', rel: 'noopener' }, [(lang() === 'en' || lang() === 'ja') && s[lang()] || s.t]);
   }
   function subnav(current) {
-    var tabs = [['season', 'season.html', 'ss_tab_season', '季'], ['cal', 'calendar.html', 'ss_tab_cal', '暦'], ['soil', 'soil.html', 'ss_tab_soil', '土'], ['mott', 'mottainai.html', 'ss_tab_mott', '惜']];
+    var tabs = [['farm', 'farm.html', 'ss_tab_farm', '測'], ['season', 'season.html', 'ss_tab_season', '季'], ['cal', 'calendar.html', 'ss_tab_cal', '暦']];
     return G.el('nav', { class: 'ss-tabs', 'aria-label': G.t('ss_tabs') }, tabs.map(function (x) {
       return G.el('a', { href: x[1], 'aria-current': x[0] === current ? 'page' : null }, [G.el('span', { class: 'k', 'aria-hidden': 'true' }, [x[3]]), G.t(x[2])]);
     }));

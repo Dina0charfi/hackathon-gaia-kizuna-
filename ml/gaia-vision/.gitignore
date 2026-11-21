@@ -1,0 +1,9 @@
+raw/
+data/
+.venv/
+models_out/*.pt
+__pycache__/
+raw_hf/
+hf/
+data/*.npy
+*.pth

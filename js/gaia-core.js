@@ -16,6 +16,7 @@
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
+    plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
     irrigationEndpoint: 'http://127.0.0.1:8000/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
@@ -235,7 +236,7 @@
   /* ---------------------------------------------------------- shell */
   var NAV = [
     ['home', 'home.html', 'nav_home'], ['land', 'land.html', 'nav_land'], ['engine', 'engine.html', 'nav_engine'],
-    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'], ['season', 'season.html', 'nav_season'],
+    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
     ['biz', 'business.html', 'nav_biz'], ['agv', 'agrivoltaic.html', 'nav_agv'], ['lib', 'library.html', 'nav_lib']
   ];
 

@@ -191,7 +191,35 @@
     return { tests: tests, overall: overall };
   }
 
-  var api = { payg: payg, coop: coop, adoption: adoption, weights: weights, DEFAULTS: DEFAULTS, EASE_KEYS: EASE_KEYS, PARTNER_KEYS: PARTNER_KEYS };
+  // GAIA's own revenue: three streams, every figure entered by the user (no default price, no invented market size).
+  function revenue(i) {
+    i = i || {};
+    var sub = pos(i.coops) && pos(i.coop_fee_month) ? i.coops * i.coop_fee_month * 12 : null;
+    var com = pos(i.kits) && pos(i.kit_tnd) && pos(i.commission_pct) ? i.kits * i.kit_tnd * i.commission_pct / 100 : null;
+    var usr = pos(i.users) && pos(i.user_fee_month) ? i.users * i.user_fee_month * 12 : null;
+    var streams = [{ key: 'sub', value: sub }, { key: 'com', value: com }, { key: 'usr', value: usr }];
+    var active = streams.filter(function (x) { return x.value !== null; });
+    var total = active.reduce(function (a, x) { return a + x.value; }, 0);
+    if (!active.length) return { missing: true, streams: streams, total: null, margin: null };
+    active.forEach(function (x) { x.share = x.value / total; });
+    var margin = pos(i.cost_year) ? total - i.cost_year : null;
+    return { missing: false, streams: streams, total: total, margin: margin };
+  }
+
+  // One pilot: budget, funding gap, cost per farmer. Success targets are typed by the user in the page.
+  function pilot(i) {
+    i = i || {};
+    var missing = [];
+    if (!pos(i.kits) || !pos(i.kit_tnd)) missing.push('kits');
+    if (!pos(i.farmers)) missing.push('farmers');
+    if (missing.length) return { missing: missing };
+    var capex = i.kits * i.kit_tnd, other = num(i.training_tnd, 0) + num(i.staff_tnd, 0) + num(i.other_tnd, 0);
+    var total = capex + other, grant = pos(i.grant_tnd) ? i.grant_tnd : 0;
+    return { missing: [], capex: capex, other: other, total: total, per_farmer: total / i.farmers, grant: grant,
+      gap: Math.max(0, total - grant), cover: Math.min(1, grant / total), kits_per_farmer: i.kits / i.farmers };
+  }
+
+  var api = { payg: payg, coop: coop, adoption: adoption, revenue: revenue, pilot: pilot, weights: weights, DEFAULTS: DEFAULTS, EASE_KEYS: EASE_KEYS, PARTNER_KEYS: PARTNER_KEYS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.GAIA_BUSINESS = api;
 }(typeof window !== 'undefined' ? window : this));
