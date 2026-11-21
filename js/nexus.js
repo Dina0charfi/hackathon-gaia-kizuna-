@@ -34,6 +34,11 @@
       f_need: 'Besoin de la culture', f_rain: 'Pluie efficace', f_irr: "Irrigation nécessaire", f_energy: 'Énergie de pompage', f_quota: 'Quota annuel',
       per_ha: 'par ha', per_year: 'par an',
       c_water_t: "Eau : besoin, pluie utile et irrigation, par mois", c_energy_t: 'Énergie de pompage par mois',
+      sat_t: 'Vérification par satellite : l’eau réellement utilisée (FAO WaPOR)', sat_p: 'WaPOR mesure chaque mois, par satellite, l’eau que le sol et les plantes rendent à l’air (évapotranspiration réelle, pixel de 100 m autour de la parcelle). On la compare au besoin calculé (FAO-56).',
+      sat_load: 'Lecture des cartes WaPOR (12 mois)…', sat_err: 'Données WaPOR indisponibles ici ({e}). Le calcul FAO-56 reste valable.',
+      sat_etc: 'Besoin calculé (Kc × ET0)', sat_aeti: 'Eau réellement évaporée (satellite)', sat_kc: 'Coefficient cultural mesuré : {k} (calculé : {kc}).',
+      sat_year: 'Sur les 12 derniers mois : {a} mm évaporés (satellite), contre {b} mm de besoin calculé.', sat_rsm: 'Humidité relative du sol ({d}) : {v} % de la capacité.',
+      sat_use: 'Utiliser le coefficient mesuré', sat_note: 'Le pixel inclut le sol nu entre les arbres : sur un verger clairsemé, le coefficient mesuré est normalement plus bas que celui des tables. Un écart très supérieur au calcul signale une irrigation plus forte que le besoin.',
       s_etc: 'Besoin ETc', s_pe: 'Pluie efficace', s_irg: 'Irrigation brute',
       solar_t: 'Champ solaire nécessaire', solar_p: 'Dimensionné sur le mois le plus exigeant', solar_none: 'Pas de dimensionnement : il manque la surface, la hauteur de pompage ou le rayonnement.',
       cost_t: 'Coût annuel comparé', cost_none: 'Saisissez au moins un prix pour comparer.',
@@ -76,6 +81,11 @@
       f_need: 'حاجة الزراعة', f_rain: 'المطر الفعّال', f_irr: 'الري اللازم', f_energy: 'طاقة الضخ', f_quota: 'الحصة السنوية',
       per_ha: 'للهكتار', per_year: 'في السنة',
       c_water_t: 'الماء: الحاجة، المطر المفيد والري، حسب الشهر', c_energy_t: 'طاقة الضخ حسب الشهر',
+      sat_t: 'التحقق بالأقمار الصناعية: الماء المستعمل فعلاً (FAO WaPOR)', sat_p: 'يقيس WaPOR شهرياً بالأقمار الصناعية الماء الذي تعيده التربة والنباتات إلى الهواء (التبخر-النتح الفعلي، بكسل 100 م حول القطعة). نقارنه بالحاجة المحسوبة (FAO-56).',
+      sat_load: 'قراءة خرائط WaPOR (12 شهراً)…', sat_err: 'بيانات WaPOR غير متاحة هنا ({e}). حساب FAO-56 يبقى صالحاً.',
+      sat_etc: 'الحاجة المحسوبة (Kc × ET0)', sat_aeti: 'الماء المتبخر فعلاً (قمر صناعي)', sat_kc: 'المعامل الزراعي المقيس: {k} (المحسوب: {kc}).',
+      sat_year: 'خلال آخر 12 شهراً: {a} مم متبخرة (قمر صناعي) مقابل {b} مم حاجة محسوبة.', sat_rsm: 'الرطوبة النسبية للتربة ({d}): {v} % من السعة.',
+      sat_use: 'استعمال المعامل المقيس', sat_note: 'يشمل البكسل التربة العارية بين الأشجار: في بستان متباعد يكون المعامل المقيس عادة أقل من الجداول. فرق أعلى بكثير من الحساب يدل على ري أكثر من الحاجة.',
       s_etc: 'الحاجة ETc', s_pe: 'المطر الفعّال', s_irg: 'الري الإجمالي',
       solar_t: 'الحقل الشمسي اللازم', solar_p: 'محسوب على الشهر الأكثر طلباً', solar_none: 'لا يمكن الحساب: تنقص المساحة أو ارتفاع الضخ أو الإشعاع.',
       cost_t: 'مقارنة الكلفة السنوية', cost_none: 'أدخل سعراً واحداً على الأقل للمقارنة.',
@@ -118,6 +128,11 @@
       f_need: 'Crop need', f_rain: 'Effective rainfall', f_irr: 'Irrigation needed', f_energy: 'Pumping energy', f_quota: 'Annual quota',
       per_ha: 'per ha', per_year: 'per year',
       c_water_t: 'Water: need, useful rain and irrigation, by month', c_energy_t: 'Pumping energy by month',
+      sat_t: 'Satellite check: water actually used (FAO WaPOR)', sat_p: 'Every month WaPOR measures from satellites the water that soil and plants give back to the air (actual evapotranspiration, 100 m pixel around the plot). It is compared with the computed need (FAO-56).',
+      sat_load: 'Reading WaPOR maps (12 months)…', sat_err: 'WaPOR data unavailable here ({e}). The FAO-56 calculation still stands.',
+      sat_etc: 'Computed need (Kc × ET0)', sat_aeti: 'Water actually evaporated (satellite)', sat_kc: 'Measured crop coefficient: {k} (computed: {kc}).',
+      sat_year: 'Over the last 12 months: {a} mm evaporated (satellite), against {b} mm of computed need.', sat_rsm: 'Relative soil moisture ({d}): {v} % of capacity.',
+      sat_use: 'Use the measured coefficient', sat_note: 'The pixel includes bare soil between trees: in a sparse orchard the measured coefficient is normally lower than the tables. A value far above the computation points to more irrigation than the crop needs.',
       s_etc: 'Need ETc', s_pe: 'Effective rainfall', s_irg: 'Gross irrigation',
       solar_t: 'Solar array needed', solar_p: 'Sized for the most demanding month', solar_none: 'No sizing: the area, pumping head or radiation is missing.',
       cost_t: 'Annual cost compared', cost_none: 'Enter at least one price to compare.',
@@ -160,6 +175,11 @@
       f_need: '作物の必要量', f_rain: '有効雨量', f_irr: '必要な灌漑量', f_energy: '揚水エネルギー', f_quota: '年間割当量',
       per_ha: 'haあたり', per_year: '年あたり',
       c_water_t: '水：必要量・有効雨量・灌漑量（月別）', c_energy_t: '月別の揚水エネルギー',
+      sat_t: '衛星による確認：実際に使われた水（FAO WaPOR）', sat_p: 'WaPORは毎月、衛星で土壌と植物が大気に返す水（実蒸発散量、区画周辺100 mの画素）を測ります。計算した必要量（FAO-56）と比べます。',
+      sat_load: 'WaPORの地図を読み込み中（12か月）…', sat_err: 'この地点のWaPORデータは利用できません（{e}）。FAO-56の計算はそのまま有効です。',
+      sat_etc: '計算した必要量（Kc × ET0）', sat_aeti: '実際に蒸発した水（衛星）', sat_kc: '実測の作物係数：{k}（計算値：{kc}）。',
+      sat_year: '過去12か月：衛星で{a} mmの蒸発、計算上の必要量は{b} mm。', sat_rsm: '土壌の相対水分（{d}）：容量の{v} %。',
+      sat_use: '実測の係数を使う', sat_note: '画素には樹間の裸地も含まれるため、まばらな果樹園では実測係数は通常、表の値より低くなります。計算よりずっと高い場合は必要以上の灌漑を示します。',
       s_etc: '必要量ETc', s_pe: '有効雨量', s_irg: '総灌漑量',
       solar_t: '必要な太陽光アレイ', solar_p: '最も需要の大きい月に合わせて設計', solar_none: '設計できません：面積、揚程、または日射量が不足しています。',
       cost_t: '年間コストの比較', cost_none: '比較するには価格を1つ以上入力してください。',
@@ -301,6 +321,38 @@
     return card;
   }
 
+  /* satellite check (js/wapor.js): measured actual ET vs the FAO-56 estimate, same calendar months */
+  var SAT = null, satErr = null, satAsked = false;
+  function fillS(str, m) { return String(str).replace(/\{(\w+)\}/g, function (_, k) { return m[k] !== undefined ? m[k] : ''; }); }
+  function satCard(r, months) {
+    var W = window.GAIA_WAPOR, card = el('div', { class: 'gp-card', style: 'margin-top:16px' }, [el('h2', null, [t('sat_t')]), el('p', { class: 'small muted', style: 'margin-top:4px' }, [t('sat_p')])]);
+    if (!W) return card;
+    if (!SAT && !satErr) {
+      card.appendChild(el('p', { class: 'small muted', style: 'margin-top:8px' }, [el('span', { class: 'gp-spin' }), ' ', t('sat_load')]));
+      if (!satAsked) { satAsked = true; W.monthly(p.lat, p.lon).then(function (x) { SAT = x; draw(); }, function (e) { satErr = String(e && e.message || e); draw(); }); }
+      return card;
+    }
+    if (satErr) { card.appendChild(G.note('info', fillS(t('sat_err'), { e: satErr }))); return card; }
+    var byM = {}; SAT.months.forEach(function (m) { byM[m.month] = m; });
+    var etc = r.months.map(function (x) { return x.etc; }), aeti = months.map(function (_, i) { return byM[i] && byM[i].aeti !== null ? byM[i].aeti : null; });
+    var sumA = 0, sumE = 0; aeti.forEach(function (a, i) { if (a !== null && etc[i] !== null) { sumA += a; sumE += etc[i] || 0; } });
+    var chart = el('div');
+    card.appendChild(chart);
+    card.appendChild(el('p', { style: 'margin-top:8px' }, [fillS(t('sat_year'), { a: fmt(sumA), b: fmt(sumE) })]));
+    if (SAT.kcSat !== null) card.appendChild(el('p', null, [fillS(t('sat_kc'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) }), ' ',
+      el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { S.kc = Math.round(SAT.kcSat * 100) / 100; persist(); renderAll(); } }, [t('sat_use')])]));
+    if (SAT.rsm) card.appendChild(el('p', null, [fillS(t('sat_rsm'), { d: SAT.rsm.start || SAT.rsm.period, v: fmt(SAT.rsm.value * 100, 0) })]));
+    card.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('sat_note')]));
+    card.appendChild(el('p', { class: 'small muted', style: 'margin-top:6px' }, [el('a', { href: SAT.url, target: '_blank', rel: 'noopener' }, [SAT.source]), ' · ' + SAT.months[0].period + ' → ' + SAT.months[SAT.months.length - 1].period]));
+    setTimeout(function () {
+      G.barChart(chart, { labels: months, unit: 'mm', title: t('sat_t'), series: [
+        { name: t('sat_etc'), color: '#7C9455', values: etc },
+        { name: t('sat_aeti'), color: '#C0703A', values: aeti }
+      ] });
+    }, 0);
+    return card;
+  }
+
   function draw() {
     if (!out) return;
     G.clear(out);
@@ -336,6 +388,7 @@
       { name: t('s_pe'), color: '#9CB7C9', values: r.months.map(function (x) { return x.pe; }) },
       { name: t('s_irg'), color: '#2F5A75', values: r.months.map(function (x) { return x.irg; }) }
     ] });
+    out.appendChild(satCard(r, months));
     if (T.kwh > 0) {
       out.appendChild(el('div', { class: 'gp-card', style: 'margin-top:16px' }, [el('h2', null, [t('c_energy_t')]), c2]));
       G.barChart(c2, { labels: months, unit: 'kWh', title: t('c_energy_t'), series: [{ name: t('f_energy'), color: '#A88746', values: r.months.map(function (x) { return x.kwh || 0; }) }] });
