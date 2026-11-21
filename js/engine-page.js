@@ -38,8 +38,12 @@
     }
   });
   G.addStrings({
-    fr: { e_missing: 'Ce qui manque pour décider', e_complete: 'Compléter le profil de la parcelle' },
-    ar: { e_missing: 'ما ينقص لاتخاذ القرار', e_complete: 'أكمل ملف القطعة' }
+    fr: { e_missing: 'Ce qui manque pour décider', e_complete: 'Compléter le profil de la parcelle', no_cond: 'Sans contrainte',
+      no_cond_tip: 'La fiche ne fixe aucune condition sur cette dimension.', none_passed: 'Aucune condition confirmée pour l’instant : les données de la parcelle manquent pour les vérifier.',
+      missing_soft: 'Aucune condition obligatoire ne manque ; les conditions secondaires ci-dessous restent à vérifier.', unknown_tip: 'Donnée manquante : ' },
+    ar: { e_missing: 'ما ينقص لاتخاذ القرار', e_complete: 'أكمل ملف القطعة', no_cond: 'بلا قيد',
+      no_cond_tip: 'لا تحدد البطاقة أي شرط في هذا البعد.', none_passed: 'لا يوجد شرط مؤكد بعد: تنقص بيانات القطعة للتحقق منها.',
+      missing_soft: 'لا ينقص أي شرط إلزامي؛ الشروط الثانوية أدناه تبقى للتحقق.', unknown_tip: 'بيانات ناقصة: ' }
   });
   G.mountShell('engine');
 
@@ -49,16 +53,20 @@
   function vLabel(v) { return t(v === 'feasible' ? 'verdict_ok' : v === 'adapt' ? 'verdict_adapt' : v === 'insufficient' ? 'verdict_unk' : 'verdict_no'); }
   function dimLabel(d) { return t({ climate: 'dim_climate', terrain: 'dim_terrain', water: 'dim_water', materials: 'dim_materials', org: 'dim_org', reg: 'dim_reg' }[d]); }
 
-  function dimBox(d, info) {
+  function dimBox(d, info, rec) {
     var st = info.status, txt, ic;
+    var notes = (rec && rec.dimNotes) || {};
     if (st === 'pass') { txt = t('pass'); ic = 'ok'; }
     else if (st === 'fail') { txt = t('fail'); ic = 'no'; }
     else if (st === 'partial') { txt = t('pass') + ' / ' + t('fail'); ic = 'adapt'; }
     else if (st === 'unknown') { txt = t('unknown'); ic = 'unk'; }
     else if (st === 'info') { txt = t('to_check'); ic = 'info'; }
-    else { txt = t('none_dim'); ic = 'info'; }
+    else { txt = t('no_cond'); ic = 'info'; }
     var box = el('div', { class: 'dim ' + st }, [el('b', null, [dimLabel(d)]), el('span', null, [G.icon(ic), txt])]);
-    var tip = info.checks.map(E.describe).join(' · ');
+    var tip = info.checks.map(function (x) { return (x.result === 'unknown' ? t('unknown_tip') : '') + E.describe(x); }).join(' · ');
+    if (!tip && st === 'info' && rec) tip = { materials: rec.materials + ' — ' + rec.cost, org: rec.actors, reg: rec.regulation }[d] || '';
+    if (!tip) tip = notes[d] || t('no_cond_tip');
+    else if (notes[d]) tip += ' · ' + notes[d];
     if (tip) G.bindTip(box, tip);
     return box;
   }
@@ -80,7 +88,7 @@
       if (r.score !== null) G.bindTip(scoreBox, t('score_m'));
     }
 
-    var dims = el('div', { class: 'dims' }, E.DIMS.map(function (d) { return dimBox(d, r.dims[d]); }));
+    var dims = el('div', { class: 'dims' }, E.DIMS.map(function (d) { return dimBox(d, r.dims[d], rec); }));
 
     var passed = r.checks.filter(function (x) { return x.result === 'pass'; });
     var cols = [];
@@ -91,21 +99,25 @@
     } else {
       cols.push(el('div', null, [el('h4', null, [t('why_ok')]), passed.length ? el('ul', null, passed.map(function (x) {
         return el('li', null, [E.describe(x)]);
-      })) : el('p', { class: 'small muted' }, ['—'])]));
-      if (r.verdict === 'insufficient') cols.push(el('div', null, [el('h4', null, [t('e_missing')]), el('ul', null, r.unknown.filter(function (x) { return x.cond.hard; }).map(function (x) {
-        return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
-      })), el('a', { class: 'small', href: 'land.html' }, [t('e_complete') + ' →'])]));
+      })) : el('p', { class: 'small muted' }, [t('none_passed')])]));
+      if (r.verdict === 'insufficient') {
+        var need = r.unknown.filter(function (x) { return x.cond.hard; });
+        if (!need.length) need = r.unknown;
+        cols.push(el('div', null, [el('h4', null, [t('e_missing')]), el('ul', null, need.map(function (x) {
+          return el('li', null, [E.describe(x) + ' — ' + x.cond.why]);
+        })), el('a', { class: 'small', href: 'land.html' }, [t('e_complete') + ' →'])]));
+      }
       if (r.adaptation) cols.push(el('div', null, [el('h4', null, [t('what_adapt')]), el('p', { class: 'small', style: 'color:var(--g-ink-2)' }, [r.adaptation.text])]));
-      cols.push(el('div', null, [el('h4', null, [t('actions')]), el('ol', null, rec.actions.map(function (a) { return el('li', null, [a]); }))]));
+      if (rec.actions && rec.actions.length) cols.push(el('div', null, [el('h4', null, [t('actions')]), el('ol', null, rec.actions.map(function (a) { return el('li', null, [a]); }))]));
     }
     if (r.unknown.length) cols.push(el('div', null, [el('h4', null, [t('not_eval')]), el('ul', null, r.unknown.map(function (x) { return el('li', null, [E.describe(x)]); }))]));
 
     var more = el('details', { class: 'gp-more' }, [
       el('summary', null, [t('to_check') + ' : ' + t('dim_materials') + ', ' + t('dim_org') + ', ' + t('dim_reg')]),
       el('div', { class: 'tcols', style: 'margin-top:4px' }, [
-        el('div', null, [el('h4', null, [t('mat')]), el('p', { class: 'small' }, [rec.materials]), el('h4', { style: 'margin-top:10px' }, [t('mat_cost')]), el('p', { class: 'small' }, [rec.cost])]),
-        el('div', null, [el('h4', null, [t('actors')]), el('p', { class: 'small' }, [rec.actors])]),
-        el('div', null, [el('h4', null, [t('reg')]), el('p', { class: 'small' }, [rec.regulation])])
+        el('div', null, [el('h4', null, [t('mat')]), el('p', { class: 'small' }, [rec.materials || '—']), el('h4', { style: 'margin-top:10px' }, [t('mat_cost')]), el('p', { class: 'small' }, [rec.cost || '—'])]),
+        el('div', null, [el('h4', null, [t('actors')]), el('p', { class: 'small' }, [rec.actors || '—'])].concat(rec.dimNotes && rec.dimNotes.org ? [el('p', { class: 'small muted' }, [rec.dimNotes.org])] : [])),
+        el('div', null, [el('h4', null, [t('reg')]), el('p', { class: 'small' }, [rec.regulation || '—'])])
       ])
     ]);
 

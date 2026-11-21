@@ -101,12 +101,13 @@
     var c = x.cond, f = global.GAIA.fmt;
     var label = {
       'climate.rain_mm': 'pluie annuelle', 'terrain.slope_pct': 'pente', 'water.source': "source d'eau",
-      'crop': 'culture', 'energy.pump': 'pompage', 'climate.tmax_hot': 'température max. estivale'
+      'crop': 'culture', 'energy.pump': 'pompage', 'climate.tmax_hot': 'température max. estivale',
+      'climate.et0_mm': 'évapotranspiration de référence', 'solar.ghi_kwh': 'rayonnement solaire', 'climate.tmin_cold': 'température min. hivernale'
     }[c.field] || c.field;
-    var unit = { 'climate.rain_mm': ' mm', 'terrain.slope_pct': ' %', 'climate.tmax_hot': ' °C' }[c.field] || '';
+    var unit = { 'climate.rain_mm': ' mm', 'terrain.slope_pct': ' %', 'climate.tmax_hot': ' °C', 'climate.tmin_cold': ' °C', 'climate.et0_mm': ' mm', 'solar.ghi_kwh': ' kWh/m²/j' }[c.field] || '';
     var target = c.op === 'max' ? '≤ ' + f(c.value) + unit : c.op === 'min' ? '≥ ' + f(c.value) + unit
       : c.op === 'between' ? f(c.value[0]) + '–' + f(c.value[1]) + unit : c.value.map(valueLabel).join(', ');
-    var got = x.value === null ? 'inconnu' : (typeof x.value === 'number' ? f(x.value, c.field === 'terrain.slope_pct' ? 1 : 0) + unit : valueLabel(x.value));
+    var got = x.value === null ? 'inconnu' : (typeof x.value === 'number' ? f(x.value, c.field === 'terrain.slope_pct' || c.field === 'solar.ghi_kwh' ? 1 : 0) + unit : valueLabel(x.value));
     return label + ' : ' + got + ' (requis ' + target + ')';
   }
   function valueLabel(v) {

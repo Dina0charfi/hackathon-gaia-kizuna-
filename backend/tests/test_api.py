@@ -278,3 +278,62 @@ def test_business_endpoints_report_missing():
     assert client.post("/business/payg", json={"kit_tnd": 1000}).json()["missing"] == ["diesel"]
     res = client.post("/business/adoption", json={}).json()
     assert res["overall"] in ("unk", "no")
+
+
+# ---------------------------------------------------------------- soil fallback, assistant, AI Lab retrieval
+def test_regional_soil_reference():
+    from gaia.profile import regional_soil
+    med = regional_soil(33.45, 10.15)            # Matmata / Béni Khédache
+    assert med and med["texture"] == "loamy" and 0 < med["clay_pct"] < 40 and med["km"] < 10
+    assert regional_soil(45.0, 2.0) is None      # far from Tunisia: no guess
+
+
+def test_assistant_without_key_is_503(monkeypatch):
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+        monkeypatch.delenv(k, raising=False)
+    r = client.post("/assistant", json={"question": "Combien coûte une citerne ?"})
+    assert r.status_code == 503 and r.json()["detail"]["status"] == "no_api_key"
+
+
+def test_assistant_grounded_prompt():
+    from types import SimpleNamespace
+    from gaia import assistant
+    seen = {}
+
+    class Fake:
+        class beta:
+            class messages:
+                @staticmethod
+                def create(**kw):
+                    seen.update(kw)
+                    return SimpleNamespace(stop_reason="end_turn", model=kw["model"], content=[SimpleNamespace(type="text", text="Selon la fiche Tabia…")])
+
+    rec = next(r for r in KB["records"] if r["id"] == "tn-tabia")
+    out = assistant.answer({"question": "Quels risques pour la tabia ?", "lang": "fr", "records": [rec],
+                            "profile": {"climate.rain_mm": {"value": 180, "unit": "mm/an"}}}, client=Fake)
+    assert out == {"text": "Selon la fiche Tabia…", "status": "ok", "model": assistant.MODEL}
+    prompt = seen["messages"][0]["content"]
+    assert "tn-tabia" in prompt and "180" in prompt and "Quels risques" in prompt
+    assert "ONLY the evidence" in seen["system"]
+
+
+def test_lab_retrieval_free_questions():
+    if not shutil.which("node"):
+        pytest.skip("node not installed")
+    root = Path(__file__).resolve().parents[2]
+    script = """
+const vm=require('vm'),fs=require('fs'),path=require('path');const w={};const root=process.argv[1];
+for (const f of ['js/kb.js','js/lab-retrieval.js']) vm.runInNewContext(fs.readFileSync(path.join(root,f),'utf8'),{window:w});
+const R=w.GAIA_RETRIEVAL, recs=w.GAIA_KB.records;
+const qs=JSON.parse(process.argv[2]);
+console.log(JSON.stringify(qs.map(q=>{const a=R.analyse(q,recs);return {topics:a.topics,named:a.named,top:a.hits.length?a.hits[0].id:null,score:a.hits.length?a.hits[0].score:0};})));
+"""
+    qs = ["Combien coûte une citerne ?", "What are the risks of tabia?", "ما هي تكلفة الجسور؟", "quel est mon type de sol ?",
+          "comment construire des jesour", "Quel temps fera-t-il demain à Paris ?"]
+    out = json.loads(subprocess.run(["node", "-e", script, str(root), json.dumps(qs)], capture_output=True, text=True, check=True).stdout)
+    assert "cost" in out[0]["topics"] and out[0]["named"] == ["tn-cistern"]
+    assert "risk" in out[1]["topics"] and out[1]["named"][0] == "tn-tabia"
+    assert "cost" in out[2]["topics"] and out[2]["named"] == ["tn-jessour"]
+    assert out[3]["topics"] == ["soil"]
+    assert out[4]["top"] == "tn-jessour"                       # one-letter typo
+    assert out[5]["topics"] == [] and out[5]["score"] < 2      # off-topic: stays "not sure"

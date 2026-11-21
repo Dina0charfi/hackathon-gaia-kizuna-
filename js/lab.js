@@ -14,7 +14,7 @@
     fr: {
       lab_title: "Le centre d'intelligence", lab_lead: 'Posez une question sur votre parcelle. Chaque réponse montre la recommandation, la fiche qui la justifie, les données utilisées, la confiance et ce qui manque.',
       ctx: 'Contexte de la parcelle', ask: 'Questions possibles', ph: 'Posez votre question sur cette parcelle…', send: 'Envoyer',
-      mode_rules: 'Réponses composées à partir des règles et des fiches. Aucun modèle de langage n’est connecté.',
+      mode_rules: 'Réponses composées à partir des fiches et du profil de la parcelle (questions libres en français, arabe ou anglais). Aucun modèle de langage n’est connecté : voir backend/README.md pour activer Claude.',
       mode_llm: 'Formulation par modèle de langage, à partir des seules fiches récupérées ; chiffres vérifiés.',
       s_reco: 'Recommandation', s_expl: 'Explication', s_rec: 'Fiche technique', s_data: 'Données utilisées', s_conf: 'Confiance',
       s_miss: 'Informations manquantes', s_act: 'Actions', s_llm: 'Formulation (modèle de langage)',
@@ -29,7 +29,7 @@
     ar: {
       lab_title: 'مركز الذكاء', lab_lead: 'اطرح سؤالاً عن قطعتك. تعرض كل إجابة التوصية والبطاقة التي تبررها والبيانات المستعملة ودرجة الثقة وما ينقص.',
       ctx: 'سياق القطعة', ask: 'أسئلة مقترحة', ph: 'اطرح سؤالك عن هذه القطعة…', send: 'إرسال',
-      mode_rules: 'الإجابات مركّبة من القواعد والبطاقات. لا يوجد نموذج لغوي متصل.',
+      mode_rules: 'الإجابات مركّبة من البطاقات وملف القطعة (أسئلة حرة بالعربية أو الفرنسية أو الإنجليزية). لا يوجد نموذج لغوي متصل.',
       mode_llm: 'صياغة بنموذج لغوي اعتماداً على البطاقات المسترجعة فقط، مع التحقق من الأرقام.',
       s_reco: 'التوصية', s_expl: 'الشرح', s_rec: 'البطاقة التقنية', s_data: 'البيانات المستعملة', s_conf: 'درجة الثقة',
       s_miss: 'معلومات ناقصة', s_act: 'الخطوات', s_llm: 'الصياغة (نموذج لغوي)',
@@ -55,20 +55,26 @@
     ['x-mulch', /paill|mulch|تغطية/i], ['jp-tanada', /terrasse|tanada|terrace|棚田|مدرج/i], ['jp-canal-turn', /tour d.eau|canal|okuizumo|دور الماء/i],
     ['jp-solar-sharing', /solar sharing|agrivolta|panneau|ضوئي|شمسي/i], ['jp-satoyama-layers', /satoyama|ساتوياما|里山/i]
   ];
+  var R = window.GAIA_RETRIEVAL;
   function namedRecord(q) { for (var i = 0; i < NAMES.length; i++) if (NAMES[i][1].test(q)) return NAMES[i][0]; return null; }
-  function detect(q) {
-    var rec = namedRecord(q);
+  function detect(q0) {
+    var q = q0 + ' ' + R.norm(q0);
+    var an = R.analyse(q0, KB.records);
+    var rec = namedRecord(q) || an.named[0] || null;
     if (/arabe|arabic|عرب/i.test(q)) return { kind: 'arabic' };
     if (/manqu|missing|ناقص|نقص/i.test(q)) return { kind: 'missing' };
     if (/pourquoi|why|rejet|écart|ecart|refus|لماذا|استبعد/i.test(q)) return { kind: 'why', rec: rec };
+    if (an.facets.length) return { kind: 'facet', facets: an.facets, rec: rec, an: an };
     if (/agrivolta|solar sharing|panneau|ضوئي/i.test(q)) return { kind: 'record', rec: 'jp-solar-sharing' };
     if (/adapt|كيّف|كيف أكيف|تكييف/i.test(q) && rec) return { kind: 'record', rec: rec };
     if (rec) return { kind: 'record', rec: rec };
     if (/japon|japan|ياب/i.test(q)) return { kind: 'origin', origin: 'jp' };
     if (/tunisi|تونس/i.test(q)) return { kind: 'origin', origin: 'tn' };
-    if (/eau|water|ماء|مياه|irrig|سقي|ري/i.test(q)) return { kind: 'water' };
-    if (/recommand|conseil|quoi faire|meilleur|best|توصي|أفضل/i.test(q)) return { kind: 'best' };
-    return { kind: 'unknown' };
+    if (/recommand|conseil|quoi faire|meilleur|best|suggest|توصي|أفضل|انصح/i.test(q)) return { kind: 'best' };
+    if (/\b(eau|water|irrigation)\b|ماء|مياه|سقي|\bالري\b/i.test(q) && !an.parcelTopics.filter(function (k) { return k !== 'water' && k !== 'et0' && k !== 'rain'; }).length) return { kind: 'water' };
+    if (an.parcelTopics.length) return { kind: 'facts', an: an };
+    if (an.hits.length && an.hits[0].score >= 2) return { kind: 'search', an: an };
+    return { kind: 'unknown', an: an };
   }
 
   /* ---------------------------------------------------------- evidence helpers */
@@ -188,18 +194,88 @@
       a.results = [];
     }
 
+    else if (intent.kind === 'facet') {
+      var ids = intent.rec ? [intent.rec] : intent.an.hits.filter(function (h) { return h.score >= 1.5; }).slice(0, 3).map(function (h) { return h.id; });
+      if (!ids.length) ids = all.filter(function (r) { return r.verdict === 'feasible' || r.verdict === 'adapt'; }).slice(0, 3).map(function (r) { return r.record.id; });
+      if (!ids.length) return insufficient(L);
+      var FACET_KEY = { cost: 'cost', risk: 'risks', materials: 'materials', actors: 'actors', regulation: 'regulation' };
+      var FACET_LABEL = ar ? { cost: 'التكلفة', risk: 'المخاطر', materials: 'المواد', actors: 'الفاعلون', regulation: 'التنظيمات', actions: 'الخطوات', sources: 'المصادر' }
+        : { cost: 'Coût', risk: 'Risques', materials: 'Matériaux', actors: 'Acteurs et appuis', regulation: 'Réglementation', actions: 'Étapes', sources: 'Sources' };
+      var facetText = function (rec, f) {
+        if (f === 'actions') return (rec.actions || []).join(' ; ');
+        if (f === 'sources') return rec.sources.map(function (x) { return x.label + (x.verified ? '' : (ar ? ' (رابط للتحقق)' : ' (lien à vérifier)')); }).join(' ; ');
+        return rec[FACET_KEY[f]] || '';
+      };
+      var fs = intent.facets;
+      var rs = ids.map(get).filter(Boolean);
+      a.title = fs.map(function (f) { return FACET_LABEL[f]; }).join(' · ') + ' — ' + rs.map(function (r) { return nameOf(r.record, L); }).join(', ');
+      a.reco = facetText(rs[0].record, fs[0]) || (ar ? 'البطاقة لا تذكر هذه المعلومة.' : 'La fiche ne donne pas cette information.');
+      rs.forEach(function (r, i) {
+        fs.forEach(function (f, j) {
+          if (i === 0 && j === 0) return;
+          a.expl.push(nameOf(r.record, L) + ' — ' + FACET_LABEL[f] + ' : ' + (facetText(r.record, f) || (ar ? 'غير مذكور في البطاقة' : 'non précisé dans la fiche')));
+        });
+        a.expl.push(nameOf(r.record, L) + ' — ' + (ar ? 'لهذه القطعة: ' : 'pour cette parcelle : ') + verdictText(r.verdict, L) + '.');
+      });
+      a.records = rs.map(function (r) { return r.record; });
+      a.results = rs;
+      a.actions = fs.indexOf('actions') !== -1 ? [] : rs[0].record.actions.slice();
+      a.data = dataUsed(dna, rs[0].checks.map(function (x) { return x.cond.field; }));
+    }
+
+    else if (intent.kind === 'facts') {
+      var FL = ar ? { 'soil.texture': 'قوام التربة', 'soil.clay_pct': 'الطين 0–30 سم', 'soil.soc': 'الكربون العضوي', 'climate.rain_mm': 'الأمطار السنوية', 'climate.tmax_hot': 'أقصى حرارة صيفية', 'climate.tmin_cold': 'أدنى حرارة شتوية', 'climate.et0_mm': 'التبخر النتحي المرجعي', 'terrain.slope_pct': 'الانحدار', 'terrain.elev_m': 'الارتفاع', 'terrain.aspect_deg': 'الاتجاه', 'solar.ghi_kwh': 'الإشعاع الشمسي', 'energy.pump': 'الضخ', 'water.source': 'مصدر الماء', 'water.well_depth_m': 'عمق البئر', 'crop': 'الزراعة', 'area_ha': 'المساحة' }
+        : { 'soil.texture': 'Texture du sol', 'soil.clay_pct': 'Argile 0–30 cm', 'soil.soc': 'Carbone organique', 'climate.rain_mm': 'Pluie annuelle', 'climate.tmax_hot': 'Max. du mois le plus chaud', 'climate.tmin_cold': 'Min. du mois le plus froid', 'climate.et0_mm': 'Évapotranspiration de référence', 'terrain.slope_pct': 'Pente', 'terrain.elev_m': 'Altitude', 'terrain.aspect_deg': 'Orientation', 'solar.ghi_kwh': 'Rayonnement solaire', 'energy.pump': 'Pompage', 'water.source': "Source d'eau", 'water.well_depth_m': 'Profondeur du puits', 'crop': 'Culture', 'area_ha': 'Surface' };
+      var TX = ar ? { sandy: 'رملية', loamy: 'طميية', clayey: 'طينية' } : { sandy: 'sableux', loamy: 'limoneux', clayey: 'argileux' };
+      var show = function (p) {
+        var f = D.fieldAt(dna, p);
+        if (!f || f.status !== 'ok' || f.value === null) return { p: p, ok: false, text: FL[p] + ' : ' + (ar ? 'غير متاح' : 'indisponible') + (f && f.note ? ' — ' + f.note : '') };
+        var v = f.value;
+        var txt = typeof v === 'number' ? fmt(v, p === 'terrain.slope_pct' || p === 'solar.ghi_kwh' ? (p === 'solar.ghi_kwh' ? 2 : 1) : 0) + (f.unit ? ' ' + f.unit : '')
+          : Array.isArray(v) ? v.join(', ') : (TX[v] || E.valueLabel(v));
+        return { p: p, ok: true, text: FL[p] + ' : ' + txt + ' (' + f.source + (f.confidence ? ', ' + (ar ? 'ثقة ' : 'confiance ') + t('conf_' + f.confidence) : '') + ')' };
+      };
+      var rows = intent.an.fields.map(show);
+      var okRows = rows.filter(function (x) { return x.ok; });
+      a.title = ar ? 'ما تقوله بيانات قطعتك' : 'Ce que disent les données de votre parcelle';
+      a.reco = okRows.length ? okRows[0].text : rows[0].text;
+      a.expl = rows.slice(1).map(function (x) { return x.text; });
+      var lowSoil = intent.an.fields.some(function (p) { var f = D.fieldAt(dna, p); return p.indexOf('soil.') === 0 && f && f.confidence === 'low'; });
+      if (lowSoil) a.expl.push(ar ? 'قيم التربة جهوية تقريبية وليست قياساً للقطعة: يُنصح بتحليل التربة.' : "Les valeurs de sol sont régionales et approximatives, pas une mesure de la parcelle : une analyse de sol est conseillée.");
+      var fam = intent.an.families;
+      var rel = all.filter(function (r) { return r.verdict !== 'rejected' && (!fam.length || r.record.families.some(function (f) { return fam.indexOf(f) !== -1; })); }).slice(0, 3);
+      if (rel.length) a.expl.push((ar ? 'تقنيات ذات صلة ممكنة هنا: ' : 'Techniques liées possibles ici : ') + rel.map(function (r) { return nameOf(r.record, L) + ' (' + verdictText(r.verdict, L) + ')'; }).join(', ') + '.');
+      a.records = rel.map(function (r) { return r.record; });
+      a.results = rel;
+      a.actions = rel.length ? rel[0].record.actions.slice() : [];
+      a.data = dataUsed(dna, intent.an.fields);
+      a.missing = rows.filter(function (x) { return !x.ok; }).map(function (x) { return x.p; });
+    }
+
+    else if (intent.kind === 'search') {
+      var top3 = intent.an.hits.filter(function (h, i) { return h.score >= 2 || i === 0; }).slice(0, 3).map(function (h) { return get(h.id); }).filter(Boolean);
+      a.title = ar ? 'ما تقوله البطاقات' : 'Ce que disent les fiches';
+      a.reco = nameOf(top3[0].record, L) + ' — ' + top3[0].record.summary;
+      a.expl = top3.map(function (r) { return nameOf(r.record, L) + ' : ' + verdictText(r.verdict, L) + (ar ? ' لهذه القطعة' : ' pour cette parcelle') + (r.adaptation ? ' — ' + r.adaptation.text : '') + '.'; });
+      top3.slice(1).forEach(function (r) { a.expl.push(nameOf(r.record, L) + ' — ' + r.record.summary); });
+      a.records = top3.map(function (r) { return r.record; });
+      a.results = top3;
+      a.actions = top3[0].record.actions.slice();
+      a.data = dataUsed(dna, top3[0].checks.map(function (x) { return x.cond.field; }));
+    }
+
     else return insufficient(L);
 
     var res = a.results || [];
     a.conf = confidence(dna, res.length ? res : all, L);
-    a.missing = missingFor(dna, res);
+    a.missing = (a.missing && a.missing.length ? a.missing.map(function (p) { var f = D.fieldAt(dna, p); return p + (f && f.note ? ' — ' + f.note : ''); }) : []).concat(missingFor(dna, res)).filter(function (x, i, arr) { return arr.indexOf(x) === i; });
     a.lang = L;
     return a;
   }
   function insufficient(L) {
     var ar = L === 'ar';
     return { title: ar ? 'أدلة غير كافية' : 'Preuves insuffisantes', reco: ar ? 'لا أستطيع الإجابة دون اختلاق.' : 'GAIA ne peut pas répondre sans inventer.',
-      expl: [ar ? 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. جرّب أحد الأسئلة المقترحة.' : "Aucune fiche ni donnée ne couvre cette question. Essayez une question proposée, ou ajoutez la technique à la bibliothèque."],
+      expl: [ar ? 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. يمكنك السؤال عن: التربة، الأمطار، الانحدار، الشمس، الضخ، تكلفة أو مخاطر تقنية (الجسور، الطابية، المسقاة، الواحة…).' : "Aucune fiche ni donnée de la parcelle ne couvre cette question. GAIA sait répondre sur : le sol, la pluie, la pente, le soleil, le pompage, la surface, et le coût, les risques, les acteurs ou les étapes d'une technique (jessour, tabia, meskat, oasis, citerne, paillage, tanada, solar sharing…)."],
       records: [], data: [], actions: [], missing: [], conf: { level: 'low', why: ar ? 'لا توجد أدلة' : 'aucune preuve' }, lang: L, insufficient: true };
   }
 
@@ -225,8 +301,12 @@
 
   /* ---------------------------------------------------------- optional LLM */
   function withLLM(q, a, dna, holder) {
-    var ep = G.CONFIG.assistantEndpoint; if (!ep || a.insufficient) return;
-    var payload = { question: q, lang: a.lang, answer: a, profile: { rain_mm: D.value(dna, 'climate.rain_mm'), et0_mm: D.value(dna, 'climate.et0_mm'), slope_pct: D.value(dna, 'terrain.slope_pct'), water: D.value(dna, 'water.source'), crop: D.value(dna, 'crop') }, records: a.records };
+    var ep = G.CONFIG.assistantEndpoint; if (!ep) return;
+    var prof = {};
+    D.walk(dna).forEach(function (x) { if (x.f && x.f.status === 'ok' && x.f.value !== null && typeof x.f.value !== 'object') prof[x.path] = { value: x.f.value, unit: x.f.unit || null, source: x.f.source || null, confidence: x.f.confidence || null }; });
+    var recs = a.records.length ? a.records : KB.records; // nothing retrieved: let the model look at every record, and say so if none applies
+    var verdicts = E.evaluateAll(dna).map(function (r) { return { id: r.record.id, verdict: r.verdict, score: r.score }; });
+    var payload = { question: q, lang: R.lang(q) === 'en' ? 'en' : a.lang, answer: { title: a.title, reco: a.reco, expl: a.expl, actions: a.actions, missing: a.missing, insufficient: !!a.insufficient }, profile: prof, verdicts: verdicts, records: recs };
     var wait = el('p', { class: 'small muted', style: 'margin-top:10px' }, [el('span', { class: 'gp-spin' }), ' …']);
     holder.appendChild(wait);
     fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -234,6 +314,7 @@
       .then(function (res) {
         wait.remove();
         var text = String(res.text || '');
+        if (!text) { holder.appendChild(G.note('info', t('llm_err'))); return; }
         var evidence = JSON.stringify(payload);
         var nums = text.match(/\d+(?:[.,]\d+)?/g) || [];
         var bad = nums.filter(function (n) { return evidence.indexOf(n.replace(',', '.')) === -1 && evidence.indexOf(n) === -1; });
@@ -246,7 +327,7 @@
   function ask(q) {
     var p = G.getParcel(); if (!p || !p.dna) return;
     var intent = detect(q);
-    var L = intent.kind === 'arabic' ? 'ar' : G.lang();
+    var L = intent.kind === 'arabic' || R.lang(q) === 'ar' ? 'ar' : G.lang();
     var a = answer(intent, p.dna, L);
     if (intent.kind !== 'arabic') lastIntent = intent;
     var threadBox = document.getElementById('thread');

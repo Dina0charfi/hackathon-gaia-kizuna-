@@ -108,16 +108,17 @@
       conditions: [
         { dim: 'water', field: 'water.source', op: 'in', value: ['well', 'network', 'shared'], hard: true, why: "L'oasis est un système irrigué." },
         { dim: 'climate', field: 'climate.tmax_hot', op: 'min', value: 30, hard: false, weight: 1, provisional: true, why: "Intérêt de l'ombrage surtout en climat chaud ; seuil à valider." },
-        { dim: 'water', field: 'crop', op: 'in', value: ['palm', 'citrus', 'veg'], hard: false, weight: 1, why: 'Cultures typiques des étages.' }
+        { dim: 'water', field: 'crop', op: 'in', value: ['palm', 'citrus', 'veg'], hard: false, weight: 1, why: 'Cultures typiques des étages.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'max', value: 5, hard: false, weight: 1, provisional: true, why: "Les oasis sont irriguées par gravité sur des terrains plats (fiche FAO GIAHS) ; seuil chiffré à valider." }
       ],
-      materials: 'Plants, réseau d’irrigation existant.',
-      cost: 'Source chiffrée à ajouter.',
+      materials: 'Rejets de palmier, plants fruitiers (grenadier, figuier, agrumes), semences maraîchères ; réseau de séguias existant.',
+      cost: "Non chiffré dans les sources actuelles : le coût dépend surtout de l'accès à l'eau. Demander un devis au CRDA ou au GDA de l'oasis.",
       actors: 'Exploitants, GDA de l’oasis.',
       regulation: 'Accès à l’eau et forages : à valider auprès du CRDA.',
       risks: 'Pression sur les nappes ; salinité.',
       adaptations: [],
       actions: ['Cartographier ce qui pousse à chaque étage.', "Compléter l'étage manquant (souvent l'étage intermédiaire).", "Éclaircir l'étage haut si la lumière manque en bas."],
-      sources: [{ label: 'Source primaire à ajouter (fiche en cours)', url: null, verified: false }],
+      sources: [{ label: 'FAO GIAHS — Gafsa Oases (Tunisie)', url: 'https://www.fao.org/giahs/giahs-around-the-world/tunisia-gafsa-oases/en', verified: false }],
       review: { status: 'draft' }
     },
     {
@@ -127,16 +128,18 @@
       description: "Pratique répandue en zone aride. Les noms locaux (par exemple majel, fesguia) et leurs dimensions sont à confirmer avec une source.",
       conditions: [
         { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 100, hard: true, provisional: true, why: 'Il faut assez de pluie pour remplir la citerne ; seuil à valider.' },
-        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed', 'well'], hard: false, weight: 1, why: 'Surtout utile sans réseau.' }
+        { dim: 'water', field: 'water.source', op: 'in', value: ['rainfed', 'well'], hard: false, weight: 1, why: 'Surtout utile sans réseau.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'min', value: 1, hard: false, weight: 1, provisional: true, why: "L'aire de collecte doit être en pente pour ruisseler vers la citerne ; seuil à valider." }
       ],
-      materials: 'Maçonnerie ou béton, aire de collecte.',
-      cost: 'Source chiffrée à ajouter.',
+      materials: 'Maçonnerie ou béton, enduit étanche, aire de collecte compactée ou cimentée, bassin de décantation.',
+      cost: "Non chiffré dans les sources actuelles : dépend du volume de la citerne. Programmes de mobilisation des eaux du CRDA à consulter.",
       actors: 'Ménages, CRDA (programmes de mobilisation des eaux).',
       regulation: 'À valider.',
       risks: 'Qualité de l’eau ; entretien de l’aire de collecte.',
       adaptations: [],
       actions: ["Estimer le volume collectable : surface de l'aire × pluie × coefficient de ruissellement.", "Nettoyer l'aire de collecte avant les pluies.", "Réserver l'eau stockée à l'appoint des jeunes plants en été."],
-      sources: [{ label: 'Source primaire à ajouter (fiche en cours)', url: null, verified: false }],
+      sources: [{ label: 'Oweis, Prinz et Hachum (2001), Water harvesting: indigenous knowledge for the future of the drier environments, ICARDA — référence bibliographique', url: null, verified: false }],
+      dimNotes: { org: 'Citerne individuelle ou familiale : pas d’organisation collective requise.' },
       review: { status: 'draft' }
     },
     {
@@ -145,8 +148,10 @@
       summary: "Broyer les résidus de taille et les étaler au pied des arbres pour réduire l'évaporation du sol nu (principe mottainai : ne rien gaspiller).",
       description: "Le paillis limite l'évaporation à la surface du sol ; FAO-56 traite de l'effet des paillis sur l'évaporation. Inspiré aussi de la couverture permanente du sol des vergers japonais.",
       conditions: [
-        { dim: 'water', field: 'crop', op: 'in', value: ['olive', 'citrus', 'palm'], hard: false, weight: 1, why: 'Arbres produisant des résidus de taille.' }
+        { dim: 'water', field: 'crop', op: 'in', value: ['olive', 'citrus', 'palm'], hard: false, weight: 1, why: 'Arbres produisant des résidus de taille.' },
+        { dim: 'climate', field: 'climate.et0_mm', op: 'min', value: 1000, hard: false, weight: 1, provisional: true, why: "Le gain est le plus fort là où la demande évaporative est élevée (FAO-56, évaporation du sol nu) ; seuil à valider." }
       ],
+      dimNotes: { terrain: 'Aucune contrainte de pente : le paillis se pose au pied de chaque arbre.' },
       materials: 'Résidus de taille broyés.',
       cost: 'Main-d’œuvre ; broyeur à louer ou à partager.',
       actors: 'Agriculteur ; GDA pour le partage d’un broyeur.',
@@ -154,7 +159,7 @@
       risks: 'Ne pas plaquer le paillis contre le tronc ; risque d’incendie en été à surveiller.',
       adaptations: [],
       actions: ['Broyer les résidus de la taille d’hiver.', 'Étaler un anneau de paillis à la limite de la couronne, pas contre le tronc.', 'Renouveler une fois par an après les premières pluies.'],
-      sources: [{ label: 'FAO-56 (Allen et al., 1998), chapitre sur les paillis — référence à vérifier', url: null, verified: false }],
+      sources: [{ label: 'FAO-56 (Allen et al., 1998), chapitre 11 : paillis de surface', url: 'https://www.fao.org/4/x0490e/x0490e00.htm', verified: false }],
       review: { status: 'draft' }
     },
     {
@@ -188,6 +193,7 @@
       conditions: [
         { dim: 'water', field: 'water.source', op: 'in', value: ['shared', 'network'], hard: true, why: 'Il faut une source partagée entre plusieurs exploitations.' }
       ],
+      dimNotes: { climate: 'Aucune contrainte climatique : la règle de partage vaut sous tout climat.', terrain: 'Aucune contrainte de relief : s’applique au réseau existant.' },
       materials: 'Aucun : un planning partagé.',
       cost: 'Faible.',
       actors: 'GDA (groupement de développement agricole) ou groupe de voisins.',
@@ -205,7 +211,9 @@
       description: "Pratique actuelle au Japon. En Tunisie, l'intérêt dépend d'un usage pour l'électricité (pompage, réseau) et de la tolérance de la culture à l'ombre. Simuler avec la page Agrivoltaïsme.",
       conditions: [
         { dim: 'materials', field: 'energy.pump', op: 'in', value: ['diesel', 'grid', 'solar'], hard: true, why: "Sans pompe ni raccordement, l'électricité n'a pas d'usage sur l'exploitation." },
-        { dim: 'water', field: 'crop', op: 'in', value: ['veg', 'citrus'], hard: false, weight: 1, provisional: true, why: 'Cultures basses ou arbustives plus faciles à couvrir ; tolérance à l’ombre à documenter.' }
+        { dim: 'water', field: 'crop', op: 'in', value: ['veg', 'citrus'], hard: false, weight: 1, provisional: true, why: 'Cultures basses ou arbustives plus faciles à couvrir ; tolérance à l’ombre à documenter.' },
+        { dim: 'climate', field: 'solar.ghi_kwh', op: 'min', value: 4.5, hard: false, weight: 1, provisional: true, why: 'Rayonnement suffisant pour rentabiliser des panneaux espacés (NASA POWER, moyenne annuelle) ; seuil à valider.' },
+        { dim: 'terrain', field: 'terrain.slope_pct', op: 'max', value: 15, hard: false, weight: 1, provisional: true, why: 'Structures surélevées plus simples à ancrer sur pente faible ; seuil à valider.' }
       ],
       materials: 'Structures hautes, panneaux, onduleur ou pompe solaire.',
       cost: 'Prix à saisir et à dater (voir Eau & énergie).',
@@ -214,7 +222,7 @@
       risks: 'Surpompage si le pompage devient gratuit : toujours avec un quota (voir Eau & énergie).',
       adaptations: [],
       actions: ['Simuler hauteur et espacement des panneaux.', 'Calculer le quota d’eau mensuel avant de dimensionner.', 'Vérifier les conditions de raccordement.'],
-      sources: [{ label: "Source primaire sur l'origine japonaise à vérifier", url: null, verified: false }],
+      sources: [{ label: 'MAFF (Japon) — 営農型太陽光発電 (solar sharing) : cadre et lignes directrices', url: 'https://www.maff.go.jp/j/shokusan/renewable/energy/einou.html', verified: false }],
       review: { status: 'draft' }
     },
     {
@@ -223,8 +231,10 @@
       summary: "Gérer la parcelle comme des couches qui s'entraident (arbres, cultures intercalaires, haies), plutôt que comme une monoculture.",
       description: "Le satoyama désigne au Japon la bande où village, bois et champs sont gérés comme un seul système. En Tunisie, la logique rejoint celle de l'oasis ; en zone pluviale, elle se traduit par haies brise-vent et cultures intercalaires.",
       conditions: [
-        { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 200, hard: false, weight: 1, provisional: true, why: 'Les couches intercalaires demandent un minimum d’eau ; seuil à valider.' }
+        { dim: 'climate', field: 'climate.rain_mm', op: 'min', value: 200, hard: false, weight: 1, provisional: true, why: 'Les couches intercalaires demandent un minimum d’eau ; seuil à valider.' },
+        { dim: 'water', field: 'crop', op: 'in', value: ['olive', 'palm', 'citrus', 'cereal', 'veg'], hard: false, weight: 1, why: 'Il faut une culture principale autour de laquelle organiser les couches.' }
       ],
+      dimNotes: { terrain: 'Aucune contrainte de pente : sur pente, combiner avec des terrasses ou des cuvettes.' },
       materials: 'Plants de haie, semences.',
       cost: 'Non chiffré.',
       actors: 'Agriculteurs, voisins (haies partagées).',
@@ -232,7 +242,7 @@
       risks: 'Concurrence pour l’eau entre couches si mal dimensionné.',
       adaptations: [],
       actions: ['Recenser les couches existantes.', 'Ajouter une haie brise-vent côté vents dominants.', 'Tester une culture intercalaire sur une petite surface.'],
-      sources: [{ label: 'Satoyama Initiative (IPSI) — référence à vérifier', url: null, verified: false }],
+      sources: [{ label: 'Satoyama Initiative (IPSI)', url: 'https://satoyama-initiative.org/', verified: false }],
       review: { status: 'draft' }
     }
   ];

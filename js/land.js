@@ -11,13 +11,15 @@
       l_name: 'Nom de la parcelle (facultatif)', l_crop: 'Culture', l_water: 'Eau disponible',
       c_olive: 'Olivier', c_palm: 'Palmier dattier', c_citrus: 'Agrumes', c_cereal: 'Céréales', c_veg: 'Maraîchage', c_other: 'Autre',
       w_rainfed: 'Pluie seulement', w_well: 'Puits ou forage', w_network: "Réseau d'irrigation", w_shared: 'Source partagée (GDA)',
-      l_more: 'Informations complémentaires (facultatif)', l_area: 'Surface (ha)', l_well: 'Profondeur du puits (m)', l_pump: 'Pompage actuel',
+      l_more: 'Votre exploitation', l_more_hint: 'Ces informations affinent le profil. Sans elles, GAIA les marque « manquantes ».',
+      l_demo: 'Pré-remplir avec des valeurs de démonstration', l_demo_done: 'Valeurs de démonstration ajoutées dans les champs vides (marquées « démo » dans le profil). Remplacez-les par les vôtres.',
+      st_none: 'Aucun', k_fill: 'Renseigner', st_approx: 'valeur régionale approximative', na: 'sans objet', l_area: 'Surface (ha)', l_well: 'Profondeur du puits (m)', l_pump: 'Pompage actuel',
       p_none: 'Aucun', p_diesel: 'Pompe diesel', p_grid: 'Pompe sur réseau', p_solar: 'Pompe solaire',
       l_soil: 'Sol (si connu)', s_unknown: 'Je ne sais pas', s_sandy: 'Sableux', s_loamy: 'Limoneux', s_clayey: 'Argileux',
       l_struct: 'Ouvrages déjà présents', st_terr: 'Terrasses',
       l_build: 'Construire le profil LAND DNA', l_build_hint: "Placez d'abord un point sur la carte.", l_ready: 'Point placé. Vous pouvez construire le profil.',
       l_plan: 'Plan', l_sat: 'Satellite',
-      st_climate: 'Climat — Open-Meteo', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Soleil — NASA POWER', st_soil: 'Sol — SoilGrids',
+      st_climate: 'Climat — Open-Meteo', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Soleil — NASA POWER', st_soil: 'Sol — SoilGrids / référence régionale',
       d_empty_t: 'Aucun profil pour l’instant', d_empty_p: 'Le profil LAND DNA apparaîtra ici : chaque valeur avec sa source, sa résolution et sa confiance, et la liste de ce qui manque.',
       d_title: 'LAND DNA', d_conf: 'Confiance globale', d_missing: 'Informations manquantes', d_none_missing: 'Aucune information essentielle ne manque.',
       g_climate: 'Climat', g_terrain: 'Relief', g_solar: 'Soleil', g_soil: 'Sol', g_farm: 'Exploitation',
@@ -36,13 +38,15 @@
       l_name: 'اسم القطعة (اختياري)', l_crop: 'الزراعة', l_water: 'الماء المتوفر',
       c_olive: 'زيتون', c_palm: 'نخيل التمر', c_citrus: 'قوارص', c_cereal: 'حبوب', c_veg: 'خضروات', c_other: 'أخرى',
       w_rainfed: 'أمطار فقط', w_well: 'بئر', w_network: 'شبكة ري', w_shared: 'مصدر مشترك (مجمع تنمية فلاحية)',
-      l_more: 'معلومات إضافية (اختياري)', l_area: 'المساحة (هك)', l_well: 'عمق البئر (م)', l_pump: 'الضخ الحالي',
+      l_more: 'ضيعتك', l_more_hint: 'هذه المعلومات تدقّق الملف. بدونها تعتبرها غايا «ناقصة».',
+      l_demo: 'ملء بقيم تجريبية', l_demo_done: 'أُضيفت قيم تجريبية في الحقول الفارغة (معلّمة «تجريبية» في الملف). عوّضها بقيمك.',
+      st_none: 'لا يوجد', k_fill: 'أدخل', st_approx: 'قيمة جهوية تقريبية', na: 'لا ينطبق', l_area: 'المساحة (هك)', l_well: 'عمق البئر (م)', l_pump: 'الضخ الحالي',
       p_none: 'لا يوجد', p_diesel: 'مضخة ديزل', p_grid: 'مضخة على الشبكة', p_solar: 'مضخة شمسية',
       l_soil: 'التربة (إن كانت معروفة)', s_unknown: 'لا أعرف', s_sandy: 'رملية', s_loamy: 'طميية', s_clayey: 'طينية',
       l_struct: 'المنشآت الموجودة', st_terr: 'مدرجات',
       l_build: 'بناء ملف لاند دي إن إي', l_build_hint: 'ضع نقطة على الخريطة أولاً.', l_ready: 'تم وضع النقطة. يمكنك بناء الملف.',
       l_plan: 'خريطة', l_sat: 'قمر صناعي',
-      st_climate: 'المناخ — أوبن ميتيو', st_terrain: 'التضاريس — كوبرنيكوس', st_solar: 'الشمس — ناسا باور', st_soil: 'التربة — سويل غريدز',
+      st_climate: 'المناخ — أوبن ميتيو', st_terrain: 'التضاريس — كوبرنيكوس', st_solar: 'الشمس — ناسا باور', st_soil: 'التربة — سويل غريدز / مرجع جهوي',
       d_empty_t: 'لا يوجد ملف بعد', d_empty_p: 'سيظهر ملف لاند دي إن إي هنا: كل قيمة مع مصدرها ودقتها ودرجة الثقة، وقائمة بما ينقص.',
       d_title: 'لاند دي إن إي', d_conf: 'الثقة العامة', d_missing: 'معلومات ناقصة', d_none_missing: 'لا تنقص أي معلومة أساسية.',
       g_climate: 'المناخ', g_terrain: 'التضاريس', g_solar: 'الشمس', g_soil: 'التربة', g_farm: 'الضيعة',
@@ -153,9 +157,37 @@
     ['climate', 'terrain', 'solar', 'soil'].forEach(function (k) {
       var s = stepState[k]; if (!s) return;
       var ic = s === 'loading' ? el('span', { class: 'gp-spin' }) : G.icon(s === 'ok' ? 'ok' : 'warn', 16);
-      stepsBox.appendChild(el('li', { class: s === 'ok' ? 's-ok' : s === 'error' ? 's-err' : '' }, [ic, t('st_' + k)]));
+      stepsBox.appendChild(el('li', { class: s === 'ok' ? 's-ok' : s === 'error' ? 's-err' : '' }, [ic, t('st_' + k) + (s === 'approx' ? ' (' + t('st_approx') + ')' : '')]));
     });
   }
+
+  /* ---------------------------------------------------------- demo values */
+  // Typical values for a small Tunisian farm, the same defaults as the farm dashboard
+  // (2 ha, ≈ 60 m total head). Only empty fields are filled, and each one is flagged
+  // so the Land DNA labels it "démonstration" until the farmer changes it.
+  var demoFlags = {};
+  var DEMO = { crop: 'olive', water: 'well', area: '2', well: '50', pump: 'diesel' };
+  var DEMO_KEY = { crop: 'crop', water: 'water', area: 'area', well: 'wellDepth', pump: 'pump' };
+  Object.keys(DEMO).forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () { delete demoFlags[DEMO_KEY[id]]; });
+    document.getElementById(id).addEventListener('change', function () { delete demoFlags[DEMO_KEY[id]]; });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="st"]'), function (c) {
+    c.addEventListener('change', function () {
+      delete demoFlags.structures;
+      if (c.checked && c.value === 'none') Array.prototype.forEach.call(document.querySelectorAll('input[name="st"]'), function (o) { if (o !== c) o.checked = false; });
+      if (c.checked && c.value !== 'none') { var n = document.querySelector('input[name="st"][value="none"]'); if (n) n.checked = false; }
+    });
+  });
+  document.getElementById('demo').addEventListener('click', function () {
+    Object.keys(DEMO).forEach(function (id) {
+      var i = document.getElementById(id);
+      if (id === 'well' && document.getElementById('water').value && document.getElementById('water').value !== 'well') return;
+      if (!i.value) { i.value = DEMO[id]; demoFlags[DEMO_KEY[id]] = true; }
+    });
+    if (!document.querySelector('input[name="st"]:checked')) { document.querySelector('input[name="st"][value="none"]').checked = true; demoFlags.structures = true; }
+    hint.textContent = t('l_demo_done');
+  });
 
   buildB.addEventListener('click', function () {
     var lat = parseFloat(latI.value), lon = parseFloat(lonI.value);
@@ -166,7 +198,7 @@
       crop: document.getElementById('crop').value || null, water: document.getElementById('water').value || null,
       area: document.getElementById('area').value, wellDepth: document.getElementById('well').value,
       pump: document.getElementById('pump').value || null, soilTexture: document.getElementById('soilt').value,
-      structures: structures
+      structures: structures, demo: Object.assign({}, demoFlags)
     };
     buildB.disabled = true; stepState = {};
     showLoading();
@@ -200,11 +232,13 @@
   function row(label, f, opts) {
     opts = opts || {};
     var v;
-    if (!f || f.status !== 'ok' || f.value === null) v = el('span', { class: 'v', style: 'font-size:15px;color:var(--s-no)' }, ['—']);
+    if (f && f.status === 'na') v = el('span', { class: 'v', style: 'font-size:15px;color:var(--g-ink-3)' }, [t('na')]);
+    else if (!f || f.status !== 'ok' || f.value === null) v = el('span', { class: 'v', style: 'font-size:15px;color:var(--s-no)' }, ['—']);
     else if (opts.text) v = el('span', { class: 'v', style: 'font-size:15px' }, [opts.text(f.value)]);
     else v = el('span', { class: 'v' }, [fmt(f.value, opts.digits || 0), ' ', el('small', null, [f.unit || ''])]);
     var src = el('div', { class: 'src' }, [
-      G.confBadge(f ? (f.confidence || (f.status === 'ok' ? 'medium' : 'missing')) : 'missing'),
+      f && f.status === 'na' ? null : G.confBadge(f ? (f.confidence || (f.status === 'ok' ? 'medium' : 'missing')) : 'missing'),
+      f && f.source === 'Valeur de démonstration' ? G.pill('demo', 'démo') : null,
       f && f.source ? (f.url ? el('a', { href: f.url, target: '_blank', rel: 'noopener' }, [f.source]) : el('span', null, [f.source])) : null,
       f && f.resolution ? el('span', null, ['· ' + f.resolution]) : null,
       f && f.period ? el('span', null, ['· ' + f.period]) : null
@@ -212,6 +246,12 @@
     var parts = [el('span', { class: 'k' }, [label]), v, src];
     if (f && f.note) parts.push(el('div', { class: 'src', style: 'margin-top:2px' }, [f.note]));
     if (opts.extra) parts.push(opts.extra);
+    if (opts.input && (!f || f.status === 'missing' || f.source === 'Valeur de démonstration')) {
+      parts.push(el('button', { type: 'button', class: 'gp-btn ghost sm', style: 'margin-top:6px', onclick: function () {
+        var box = document.getElementById('farmbox'); if (box) box.open = true;
+        var i = document.getElementById(opts.input); if (i) { i.scrollIntoView({ behavior: 'smooth', block: 'center' }); i.focus(); }
+      } }, [t('k_fill') + ' →']));
+    }
     return el('div', { class: 'dna-row' }, parts);
   }
 
@@ -250,9 +290,9 @@
       ['g_solar', [row(t('k_ghi'), dna.solar.ghi_kwh, { digits: 2 })]],
       ['g_soil', [row(t('k_texture'), dna.soil.texture, { text: function (v) { return t('s_' + v); } }), row(t('k_clay'), dna.soil.clay_pct), row(t('k_soc'), dna.soil.soc)]],
       ['g_farm', [
-        row(t('k_crop'), dna.crop, { text: vl }), row(t('k_water'), dna.water.source, { text: vl }),
-        row(t('k_well'), dna.water.well_depth_m), row(t('k_pump'), dna.energy.pump, { text: vl }),
-        row(t('k_area'), dna.area_ha, { digits: 1 }), row(t('k_struct'), dna.structures, { text: function (v) { return v.join(', '); } })
+        row(t('k_crop'), dna.crop, { text: vl, input: 'crop' }), row(t('k_water'), dna.water.source, { text: vl, input: 'water' }),
+        row(t('k_well'), dna.water.well_depth_m, { input: 'well' }), row(t('k_pump'), dna.energy.pump, { text: vl, input: 'pump' }),
+        row(t('k_area'), dna.area_ha, { digits: 1, input: 'area' }), row(t('k_struct'), dna.structures, { input: 'st-first', text: function (v) { return v.map(function (x) { return x === 'none' ? t('st_none') : x === 'terraces' ? t('st_terr') : x.charAt(0).toUpperCase() + x.slice(1); }).join(', '); } })
       ]]
     ];
     groups.forEach(function (g) {
@@ -286,6 +326,7 @@
     if (inp.wellDepth) document.getElementById('well').value = inp.wellDepth;
     if (inp.soilTexture) document.getElementById('soilt').value = inp.soilTexture;
     if (saved.name) document.getElementById('pname').value = saved.name;
+    demoFlags = Object.assign({}, inp.demo || {});
     (inp.structures || []).forEach(function (s) { var c = document.querySelector('input[name="st"][value="' + s + '"]'); if (c) c.checked = true; });
     renderDNA(saved.dna);
   } else {

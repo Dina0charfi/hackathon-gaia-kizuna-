@@ -1,0 +1,182 @@
+{
+  "source": "Référence régionale GAIA (ordres de grandeur d’après HWSD v2 FAO/IIASA et SoilGrids 2.0)",
+  "url": "https://www.fao.org/soils-portal/data-hub/soil-maps-and-databases/harmonized-world-soil-database-v20/en/",
+  "columns": [
+    "zone",
+    "lat",
+    "lon",
+    "texture",
+    "clay_pct",
+    "soc_g_kg"
+  ],
+  "points": [
+    [
+      "Kroumirie (Aïn Draham), sols forestiers",
+      36.78,
+      8.69,
+      "clayey",
+      38,
+      18
+    ],
+    [
+      "Vallée de la Medjerda (Jendouba, Béja), vertisols",
+      36.6,
+      9.2,
+      "clayey",
+      45,
+      12
+    ],
+    [
+      "Plaine de Mateur (Bizerte)",
+      37.05,
+      9.67,
+      "clayey",
+      40,
+      12
+    ],
+    [
+      "Basse vallée (Tunis, Manouba)",
+      36.8,
+      10.05,
+      "clayey",
+      32,
+      10
+    ],
+    [
+      "Cap Bon (Nabeul, Menzel Bouzelfa)",
+      36.55,
+      10.7,
+      "loamy",
+      18,
+      8
+    ],
+    [
+      "Dorsale (Siliana, Le Kef)",
+      36.05,
+      9.15,
+      "clayey",
+      33,
+      11
+    ],
+    [
+      "Sahel (Sousse, Monastir)",
+      35.75,
+      10.7,
+      "sandy",
+      14,
+      6
+    ],
+    [
+      "Plaine de Kairouan",
+      35.65,
+      10.05,
+      "loamy",
+      22,
+      7
+    ],
+    [
+      "Oueslatia (Kairouan Ouest)",
+      35.85,
+      9.6,
+      "loamy",
+      24,
+      8
+    ],
+    [
+      "Hautes steppes (Kasserine)",
+      35.2,
+      8.8,
+      "loamy",
+      20,
+      6
+    ],
+    [
+      "Sidi Bouzid",
+      35.04,
+      9.48,
+      "sandy",
+      14,
+      5
+    ],
+    [
+      "Plaine de Sfax",
+      34.75,
+      10.6,
+      "sandy",
+      10,
+      4
+    ],
+    [
+      "Gafsa",
+      34.42,
+      8.78,
+      "sandy",
+      12,
+      4
+    ],
+    [
+      "Djérid (Tozeur, Nefta), sols d’oasis gypseux",
+      33.92,
+      8.13,
+      "sandy",
+      8,
+      5
+    ],
+    [
+      "Nefzaoua (Kébili)",
+      33.7,
+      8.97,
+      "sandy",
+      6,
+      3
+    ],
+    [
+      "Oasis de Gabès",
+      33.88,
+      10.1,
+      "sandy",
+      12,
+      6
+    ],
+    [
+      "Matmata, Béni Khédache (loess des jessour)",
+      33.45,
+      10.15,
+      "loamy",
+      16,
+      4
+    ],
+    [
+      "Plaine de la Jeffara (Médenine)",
+      33.35,
+      10.5,
+      "sandy",
+      10,
+      3
+    ],
+    [
+      "Djerba, Zarzis",
+      33.7,
+      10.9,
+      "sandy",
+      8,
+      3
+    ],
+    [
+      "Dahar (Tataouine)",
+      32.9,
+      10.2,
+      "sandy",
+      8,
+      2
+    ],
+    [
+      "Sahara (Remada, El Borma)",
+      31.5,
+      9.8,
+      "sandy",
+      4,
+      1
+    ]
+  ]
+}
