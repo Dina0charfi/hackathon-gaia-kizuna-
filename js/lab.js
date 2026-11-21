@@ -1,10 +1,12 @@
 /* ==========================================================================
    GAIA AI Lab — contextual assistant.
 
-   Answers are assembled from three things only: the parcel's LAND DNA, the
-   compatibility engine's verdicts, and the knowledge records. Without a
-   configured LLM endpoint the wording comes from templates; with one, the LLM
-   receives only that evidence and its numbers are checked before display.
+   Every question first gets a rule-based answer assembled from the parcel's
+   LAND DNA, the compatibility engine's verdicts and the knowledge records.
+   When a language model is reachable (js/lab-llm.js: GAIA server with Claude,
+   Groq, Hugging Face or Ollama, or a free model inside the browser), it writes
+   the answer from that evidence and the conversation so far; the rule-based
+   sections stay underneath, and figures not found in the evidence are marked.
    ========================================================================== */
 (function () {
   'use strict';
@@ -16,6 +18,14 @@
       ctx: 'Contexte de la parcelle', ask: 'Questions possibles', ph: 'Posez votre question sur cette parcelle…', send: 'Envoyer',
       mode_rules: 'Réponses composées à partir des fiches et du profil de la parcelle (questions libres en français, arabe ou anglais). Aucun modèle de langage n’est connecté : voir backend/README.md pour activer Claude.',
       mode_llm: 'Formulation par modèle de langage, à partir des seules fiches récupérées ; chiffres vérifiés.',
+      mode_none: 'Aucun modèle de langage connecté : réponses composées à partir des fiches et du profil de la parcelle.',
+      mode_srv: 'Réponses rédigées par un modèle de langage ({m}) via le serveur GAIA, à partir des fiches et de votre parcelle ; chiffres vérifiés.',
+      mode_br: 'Réponses rédigées par un modèle gratuit qui tourne dans votre navigateur ({m}) ; aucune donnée ne quitte l’appareil ; chiffres vérifiés.',
+      btn_load: 'Activer le modèle gratuit (dans le navigateur, ≈1 Go, une seule fois)', loading: 'Téléchargement du modèle…',
+      no_webgpu: 'Ce navigateur ne prend pas en charge WebGPU (essayez Chrome ou Edge récents). Autres options gratuites : Ollama sur cet ordinateur, ou une clé Groq gratuite (voir backend/README.md).',
+      load_fail: 'Le modèle n’a pas pu être chargé (mémoire graphique insuffisante ou hors ligne). Les réponses par fiches restent disponibles.',
+      checking: 'Recherche d’un modèle de langage…', recheck: 'Vérifier à nouveau',
+      unv_note: 'Les chiffres surlignés ne figurent pas dans les données GAIA : à vérifier.', details: 'Sources, données et confiance', thinking: 'GAIA réfléchit…',
       s_reco: 'Recommandation', s_expl: 'Explication', s_rec: 'Fiche technique', s_data: 'Données utilisées', s_conf: 'Confiance',
       s_miss: 'Informations manquantes', s_act: 'Actions', s_llm: 'Formulation (modèle de langage)',
       q1: 'Quelles techniques japonaises pourraient marcher ici ?', q2: 'Comment adapter les jessour à cette parcelle ?', q3: "Quelles sont les contraintes en eau ?",
@@ -31,6 +41,14 @@
       ctx: 'سياق القطعة', ask: 'أسئلة مقترحة', ph: 'اطرح سؤالك عن هذه القطعة…', send: 'إرسال',
       mode_rules: 'الإجابات مركّبة من البطاقات وملف القطعة (أسئلة حرة بالعربية أو الفرنسية أو الإنجليزية). لا يوجد نموذج لغوي متصل.',
       mode_llm: 'صياغة بنموذج لغوي اعتماداً على البطاقات المسترجعة فقط، مع التحقق من الأرقام.',
+      mode_none: 'لا يوجد نموذج لغوي متصل: الإجابات مركّبة من البطاقات وملف القطعة.',
+      mode_srv: 'إجابات يكتبها نموذج لغوي ({m}) عبر خادم غايا، اعتماداً على البطاقات وقطعتك، مع التحقق من الأرقام.',
+      mode_br: 'إجابات يكتبها نموذج مجاني يعمل داخل متصفحك ({m})؛ لا تغادر أي بيانات جهازك؛ مع التحقق من الأرقام.',
+      btn_load: 'تفعيل النموذج المجاني (داخل المتصفح، حوالي 1 جيغا، مرة واحدة)', loading: 'جارٍ تنزيل النموذج…',
+      no_webgpu: 'هذا المتصفح لا يدعم WebGPU (جرّب Chrome أو Edge حديثاً). خيارات مجانية أخرى: Ollama على هذا الحاسوب أو مفتاح Groq مجاني (انظر backend/README.md).',
+      load_fail: 'تعذر تحميل النموذج (ذاكرة الرسوميات غير كافية أو لا يوجد اتصال). الإجابات من البطاقات تبقى متاحة.',
+      checking: 'البحث عن نموذج لغوي…', recheck: 'تحقق مجدداً',
+      unv_note: 'الأرقام المظللة غير موجودة في بيانات غايا: يجب التحقق منها.', details: 'المصادر والبيانات ودرجة الثقة', thinking: 'غايا يفكر…',
       s_reco: 'التوصية', s_expl: 'الشرح', s_rec: 'البطاقة التقنية', s_data: 'البيانات المستعملة', s_conf: 'درجة الثقة',
       s_miss: 'معلومات ناقصة', s_act: 'الخطوات', s_llm: 'الصياغة (نموذج لغوي)',
       q1: 'ما التقنيات اليابانية التي قد تنجح هنا؟', q2: 'كيف أكيّف الجسور مع هذه القطعة؟', q3: 'ما هي قيود الماء؟',
@@ -46,6 +64,14 @@
       ctx: 'Plot context', ask: 'Suggested questions', ph: 'Ask your question about this plot…', send: 'Send',
       mode_rules: 'Answers composed from the records and the plot profile (free questions in English, French, Arabic or Japanese). No language model is connected: see backend/README.md to enable Claude.',
       mode_llm: 'Wording by a language model, from the retrieved records only; figures checked.',
+      mode_none: 'No language model connected: answers composed from the records and the plot profile.',
+      mode_srv: 'Answers written by a language model ({m}) through the GAIA server, from the records and your plot; figures checked.',
+      mode_br: 'Answers written by a free model running in your browser ({m}); no data leaves your device; figures checked.',
+      btn_load: 'Turn on the free model (in the browser, about 1 GB, once)', loading: 'Downloading the model…',
+      no_webgpu: 'This browser does not support WebGPU (try a recent Chrome or Edge). Other free options: Ollama on this computer, or a free Groq key (see backend/README.md).',
+      load_fail: 'The model could not be loaded (not enough graphics memory, or offline). Record-based answers still work.',
+      checking: 'Looking for a language model…', recheck: 'Check again',
+      unv_note: 'Highlighted figures are not in GAIA’s data: check them.', details: 'Sources, data and confidence', thinking: 'GAIA is thinking…',
       s_reco: 'Recommendation', s_expl: 'Explanation', s_rec: 'Technical record', s_data: 'Data used', s_conf: 'Confidence',
       s_miss: 'Missing information', s_act: 'Actions', s_llm: 'Wording (language model)',
       q1: 'Which Japanese practices could work here?', q2: 'How can jessour be adapted to this plot?', q3: 'What are the water constraints?',
@@ -61,6 +87,14 @@
       ctx: '区画の状況', ask: '質問の例', ph: 'この区画について質問してください…', send: '送信',
       mode_rules: '回答は記録と区画プロファイルから構成します（日本語・英語・フランス語・アラビア語で自由に質問できます）。言語モデルは接続されていません。Claudeを有効にするにはbackend/README.mdを参照してください。',
       mode_llm: '取得した記録のみをもとに言語モデルが文章化。数値は検証済み。',
+      mode_none: '言語モデルは接続されていません。記録と区画プロファイルから回答を構成します。',
+      mode_srv: 'GAIAサーバー経由で言語モデル（{m}）が記録とあなたの区画をもとに回答します。数値は検証済み。',
+      mode_br: 'ブラウザ内で動く無料モデル（{m}）が回答します。データは端末の外に出ません。数値は検証済み。',
+      btn_load: '無料モデルを有効にする（ブラウザ内、約1GB、初回のみ）', loading: 'モデルをダウンロード中…',
+      no_webgpu: 'このブラウザはWebGPUに対応していません（最新のChromeかEdgeをお試しください）。他の無料の方法：このPCでOllama、または無料のGroqキー（backend/README.md参照）。',
+      load_fail: 'モデルを読み込めませんでした（GPUメモリ不足またはオフライン）。記録による回答は引き続き使えます。',
+      checking: '言語モデルを探しています…', recheck: '再確認',
+      unv_note: '強調表示の数値はGAIAのデータにありません。確認してください。', details: '出典・データ・信頼度', thinking: 'GAIAが考えています…',
       s_reco: '推奨', s_expl: '説明', s_rec: '技術記録', s_data: '使用したデータ', s_conf: '信頼度',
       s_miss: '欠けている情報', s_act: '行動', s_llm: '文章化（言語モデル）',
       q1: 'ここで使えそうな日本の技術は？', q2: 'ジェスールをこの区画に合わせるには？', q3: 'この区画の水の制約は？',
@@ -560,28 +594,62 @@
     return box;
   }
 
-  /* ---------------------------------------------------------- optional LLM */
-  function withLLM(q, a, dna, holder) {
-    var ep = G.CONFIG.assistantEndpoint; if (!ep) return;
+  /* ---------------------------------------------------------- language model (js/lab-llm.js) */
+  var LLM = window.GAIA_LLM, history = [];
+  function llmOn() { var m = LLM && LLM.state().mode; return m === 'server' || m === 'browser'; }
+  function withLLM(q, a, dna, card, details) {
     var prof = {};
     D.walk(dna).forEach(function (x) { if (x.f && x.f.status === 'ok' && x.f.value !== null && typeof x.f.value !== 'object') prof[x.path] = { value: x.f.value, unit: x.f.unit || null, source: x.f.source || null, confidence: x.f.confidence || null }; });
     var recs = a.records.length ? a.records : KB.records; // nothing retrieved: let the model look at every record, and say so if none applies
     var verdicts = E.evaluateAll(dna).map(function (r) { return { id: r.record.id, verdict: r.verdict, score: r.score }; });
-    var payload = { question: q, lang: R.lang(q) === 'en' ? 'en' : a.lang, answer: { title: a.title, reco: a.reco, expl: a.expl, actions: a.actions, missing: a.missing, insufficient: !!a.insufficient }, profile: prof, verdicts: verdicts, records: recs };
-    var wait = el('p', { class: 'small muted', style: 'margin-top:10px' }, [el('span', { class: 'gp-spin' }), ' …']);
-    holder.appendChild(wait);
-    fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    var lang = R.lang(q) === 'en' ? 'en' : a.lang;
+    var payload = { question: q, lang: lang, answer: { title: a.title, reco: a.reco, expl: a.expl, actions: a.actions, missing: a.missing, insufficient: !!a.insufficient }, profile: prof, verdicts: verdicts, records: recs, history: history.slice(-4) };
+    var turn = { q: q, a: a.reco + ' ' + a.expl.slice(0, 3).join(' ') };
+    history.push(turn);
+    var box = el('div', { class: 'llm' }, [el('p', { class: 'small muted' }, [el('span', { class: 'gp-spin' }), ' ', t('thinking')])]);
+    card.insertBefore(box, card.firstChild);
+    var evidence = JSON.stringify(Object.assign({}, payload, { history: [] })); // a figure the model said earlier is not evidence
+    function show(text, final, who) {
+      G.clear(box);
+      var bad = final ? LLM.unverified(text, evidence) : [];
+      box.appendChild(LLM.render(text, bad));
+      if (final) {
+        box.appendChild(el('p', { class: 'small muted', style: 'margin-top:6px' }, [G.pill('live', 'LLM'), ' ', who]));
+        if (bad.length) box.appendChild(G.note('info', t('unv_note')));
+      }
+    }
+    LLM.ask(payload, function (partial) { show(partial, false); })
       .then(function (res) {
-        wait.remove();
-        var text = String(res.text || '');
-        if (!text) { holder.appendChild(G.note('info', t('llm_err'))); return; }
-        var evidence = JSON.stringify(payload);
-        var nums = text.match(/\d+(?:[.,]\d+)?/g) || [];
-        var bad = nums.filter(function (n) { return evidence.indexOf(n.replace(',', '.')) === -1 && evidence.indexOf(n) === -1; });
-        holder.appendChild(bad.length ? G.note('err', t('llm_block')) : el('div', { class: 'sec' }, [el('h4', null, [t('s_llm')]), el('p', null, [text])]));
+        var text = String(res.text || '').trim();
+        if (!text) throw new Error('empty');
+        show(text, true, res.provider === 'browser' ? 'Qwen2.5 1.5B · WebGPU' : (res.provider || '') + (res.model ? ' · ' + res.model : ''));
+        turn.a = text;
       })
-      .catch(function () { wait.remove(); holder.appendChild(G.note('info', t('llm_err'))); });
+      .catch(function () { G.clear(box); box.appendChild(G.note('info', t('llm_err'))); details.open = true; });
+  }
+
+  function modeLine() {
+    var st = LLM ? LLM.state() : { mode: 'none' }, kids;
+    var fill = function (k) { return t(k).replace('{m}', LLM.label()); };
+    if (st.mode === 'server') kids = [G.pill('live', 'LLM · ' + LLM.label()), fill('mode_srv')];
+    else if (st.mode === 'browser') kids = [G.pill('live', 'LLM · ' + LLM.label()), fill('mode_br')];
+    else if (st.loading) {
+      var bar = el('progress', { max: '1', value: String(st.loading.p || 0), style: 'width:140px' });
+      kids = [G.pill('plan', 'LLM'), t('loading') + ' ' + fmt((st.loading.p || 0) * 100) + ' %', bar];
+    } else if (st.checking) kids = [el('span', { class: 'gp-spin' }), t('checking')];
+    else {
+      kids = [G.pill('plan', 'LLM —'), t('mode_none')];
+      if (st.error === 'no_webgpu') kids.push(el('span', null, [t('no_webgpu')]));
+      else if (st.error === 'load_failed') kids.push(el('span', null, [t('load_fail')]));
+      if (LLM && LLM.webgpu() && st.error !== 'load_failed') kids.push(el('button', { type: 'button', class: 'gp-btn', onclick: function () { LLM.loadBrowser(); } }, [t('btn_load')]));
+      else if (LLM && !LLM.webgpu() && st.error !== 'no_webgpu') kids.push(el('span', null, [t('no_webgpu')]));
+      if (LLM) kids.push(el('button', { type: 'button', class: 'gp-btn ghost', onclick: function () { LLM.recheck(); } }, [t('recheck')]));
+    }
+    return el('div', { class: 'mode', id: 'llm-mode' }, kids);
+  }
+  if (LLM) {
+    LLM.on(function () { var m = document.getElementById('llm-mode'); if (m) m.replaceWith(modeLine()); });
+    LLM.start();
   }
 
   /* ---------------------------------------------------------- page */
@@ -594,8 +662,17 @@
     var threadBox = document.getElementById('thread');
     threadBox.appendChild(el('div', { class: 'q' }, [q]));
     var card = renderAnswer(a);
-    threadBox.appendChild(card);
-    withLLM(q, a, p.dna, card);
+    if (llmOn()) {
+      // the model's answer goes first; the rule-based sections stay one click away
+      var details = el('details', { class: 'rules' }, [el('summary', null, [t('details')])]);
+      while (card.firstChild) details.appendChild(card.firstChild);
+      card.appendChild(details);
+      threadBox.appendChild(card);
+      withLLM(q, a, p.dna, card, details);
+    } else {
+      threadBox.appendChild(card);
+      history.push({ q: q, a: a.reco });
+    }
     card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -630,7 +707,7 @@
           el('input', { id: 'qin', type: 'text', placeholder: t('ph'), autocomplete: 'off' }),
           el('button', { class: 'gp-btn primary', type: 'submit' }, [t('send')])
         ]),
-        el('p', { class: 'mode' }, [G.pill(G.CONFIG.assistantEndpoint ? 'live' : 'plan', G.CONFIG.assistantEndpoint ? 'LLM' : 'LLM —'), G.CONFIG.assistantEndpoint ? t('mode_llm') : t('mode_rules')])
+        modeLine()
       ])
     ]);
     app.appendChild(el('div', { class: 'lab' }, [ctx, main]));

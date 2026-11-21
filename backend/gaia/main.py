@@ -30,8 +30,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/health")
 def health() -> dict:
-    llm = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_PROFILE"))
-    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(), "assistant_llm": llm, "plantnet": bool(plantnet.api_key())}
+    llms = assistant.available()
+    return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(),
+            "assistant_llm": bool(llms), "assistant_providers": llms, "plantnet": bool(plantnet.api_key())}
 
 
 @app.get("/knowledge/techniques")
@@ -221,16 +222,17 @@ def feedback(body: FeedbackIn) -> dict:
 
 class AssistantIn(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
-    lang: Literal["fr", "ar", "en"] = "fr"
+    lang: Literal["fr", "ar", "en", "ja"] = "fr"
     answer: dict[str, Any] = {}
     profile: dict[str, Any] = {}
     verdicts: list[dict[str, Any]] = []
     records: list[dict[str, Any]] = Field([], description="records the page retrieved; empty = the whole knowledge base")
+    history: list[dict[str, Any]] = Field([], description="last turns of the conversation: [{q, a}]")
 
 
 @app.post("/assistant")
 def assistant_answer(body: AssistantIn) -> dict:
-    """AI Lab wording by Claude, grounded only in the evidence sent. 503 when no API key is configured."""
+    """AI Lab answer by a language model (Claude, a free OpenAI-compatible service, or local Ollama), grounded in the evidence sent. 503 when none is configured."""
     d = body.model_dump()
     if not d["records"]:
         d["records"] = KB["records"]
