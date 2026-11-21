@@ -2,7 +2,7 @@
 
 Notebook : [`prevision_humidite_sol.ipynb`](prevision_humidite_sol.ipynb)
 
-Il télécharge 9 ans (2016–2024) de données journalières pour 18 sites agricoles tunisiens
+Il télécharge 9 ans (2016–2024) de données journalières pour 26 sites agricoles couvrant les 24 gouvernorats tunisiens
 (Open-Meteo Historical API, réanalyse ERA5 / ERA5-Land), entraîne un modèle LightGBM par horizon
 (J+1 … J+7) pour prédire l'humidité du sol 7–28 cm, l'évalue sur des années et des lieux jamais vus,
 puis transforme la prédiction en plan d'irrigation sur 7 jours.
@@ -20,8 +20,8 @@ Le premier lancement télécharge les données dans `data/` (environ 1 minute) ;
 
 | | Erreur J+1 | Erreur J+7 | Gain moyen vs persistance |
 |---|---|---|---|
-| Années jamais vues | 0,0042 m³/m³ | 0,0144 m³/m³ | 36 % |
-| Lieux jamais vus | 0,0043 m³/m³ | 0,0148 m³/m³ | 38 % |
+| Années jamais vues | 0,0043 m³/m³ | 0,0145 m³/m³ | 39 % |
+| Lieux jamais vus | 0,0043 m³/m³ | 0,0144 m³/m³ | 38 % |
 
 ## Fichiers produits
 
