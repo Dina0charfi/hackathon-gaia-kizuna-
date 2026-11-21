@@ -55,8 +55,9 @@
       kz_tree: 'Arbre', kz_label: 'Ce que vous observez', kz_label_ph: 'ex. œil de paon, carence, rien de grave…', kz_note: 'Commentaire (facultatif)', kz_send: 'Enregistrer la correction',
       kz_saved: 'Correction enregistrée sur cet appareil, en attente de relecture.', kz_sent: 'Correction envoyée au serveur GAIA pour relecture.',
       kz_q: 'Corrections en attente sur cet appareil :', kz_export: 'Exporter (JSON)', kz_need_img: 'Ajoutez d’abord une photo.',
+      tr_kaki: 'Kaki (plaqueminier)', tr_apple: 'Pommier', tr_blueberry: 'Myrtillier', tr_cherry: 'Cerisier', tr_corn: 'Maïs', tr_grape: 'Vigne', tr_peach: 'Pêcher', tr_pepper: 'Poivron', tr_potato: 'Pomme de terre', tr_raspberry: 'Framboisier', tr_soybean: 'Soja', tr_squash: 'Courge', tr_strawberry: 'Fraisier', tr_tomato: 'Tomate',
       tr_olive: 'Olivier', tr_palm: 'Palmier dattier', tr_citrus: 'Agrumes', tr_other: 'Autre / je ne sais pas',
-      supported: 'Arbres pris en charge : olivier, palmier dattier, agrumes.'
+      supported: 'Plantes prises en charge : olivier, palmier dattier, agrumes, kaki, tomate, pomme de terre, poivron, vigne, pommier, pêcher, cerisier, fraisier, maïs, soja, courge, myrtillier, framboisier.'
     },
     ar: {
       h_title: 'صحة النبات',
@@ -94,8 +95,9 @@
       kz_tree: 'الشجرة', kz_label: 'ما تلاحظه', kz_label_ph: 'مثال: عين الطاووس، نقص غذائي، لا شيء خطير…', kz_note: 'تعليق (اختياري)', kz_send: 'حفظ التصحيح',
       kz_saved: 'حُفظ التصحيح على هذا الجهاز في انتظار المراجعة.', kz_sent: 'أُرسل التصحيح إلى خادم غايا للمراجعة.',
       kz_q: 'تصحيحات في الانتظار على هذا الجهاز:', kz_export: 'تصدير (JSON)', kz_need_img: 'أضف صورة أولاً.',
+      tr_kaki: 'كاكا', tr_apple: 'تفاح', tr_blueberry: 'توت أزرق', tr_cherry: 'كرز', tr_corn: 'ذرة', tr_grape: 'عنب', tr_peach: 'خوخ', tr_pepper: 'فلفل', tr_potato: 'بطاطا', tr_raspberry: 'توت العليق', tr_soybean: 'صويا', tr_squash: 'قرع', tr_strawberry: 'فراولة', tr_tomato: 'طماطم',
       tr_olive: 'زيتون', tr_palm: 'نخيل التمر', tr_citrus: 'قوارص', tr_other: 'أخرى / لا أعرف',
-      supported: 'الأشجار المدعومة: الزيتون، نخيل التمر، القوارص.'
+      supported: 'النباتات المدعومة: الزيتون، نخيل التمر، القوارص، الكاكا، الطماطم، البطاطا، الفلفل، العنب، التفاح، الخوخ، الكرز، الفراولة، الذرة، الصويا، القرع، التوت الأزرق، توت العليق.'
     }
   });
 
@@ -280,9 +282,9 @@
       body ? el('div', { class: 'step-b' }, [body]) : null
     ]);
   }
+  var TREE_KEYS = ['olive', 'palm', 'citrus', 'kaki', 'tomato', 'potato', 'pepper', 'grape', 'apple', 'peach', 'cherry', 'strawberry', 'corn', 'soybean', 'squash', 'blueberry', 'raspberry', 'other'];
   function label(x) {
-    var map = { olive: 'tr_olive', palm: 'tr_palm', citrus: 'tr_citrus', other: 'tr_other' };
-    return map[x] ? t(map[x]) : String(x).replace(/_/g, ' ');
+    return TREE_KEYS.indexOf(x) >= 0 ? t('tr_' + x) : String(x).replace(/_/g, ' ');
   }
 
   function uploader() {
@@ -422,7 +424,7 @@
       } }, [
         el('div', { class: 'gp-row' }, [
           el('div', { class: 'gp-field' }, [el('label', { for: 'kz-tree' }, [t('kz_tree')]),
-            el('select', { id: 'kz-tree', name: 'tree' }, ['olive', 'palm', 'citrus', 'other'].map(function (k) { return el('option', { value: k }, [label(k)]); }))]),
+            el('select', { id: 'kz-tree', name: 'tree' }, TREE_KEYS.map(function (k) { return el('option', { value: k }, [label(k)]); }))]),
           el('div', { class: 'gp-field' }, [el('label', { for: 'kz-label' }, [t('kz_label')]), el('input', { id: 'kz-label', name: 'label', required: true, placeholder: t('kz_label_ph') })])
         ]),
         el('div', { class: 'gp-field' }, [el('label', { for: 'kz-note' }, [t('kz_note')]), el('textarea', { id: 'kz-note', name: 'note' })]),
