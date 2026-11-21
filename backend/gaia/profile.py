@@ -75,7 +75,7 @@ async def _get(c: httpx.AsyncClient, url: str, params: dict, waits=(1.5, 4.0)) -
         try:
             r = await c.get(url, params=params)
             if r.status_code == 429 or r.status_code >= 500:
-                if i < len(waits):
+                if i < len(waits) and "daily" not in r.text.lower():  # a daily quota will not clear with a retry
                     ra = r.headers.get("Retry-After", "")
                     await asyncio.sleep(float(ra) if ra.isdigit() and int(ra) <= 10 else waits[i])
                     continue

@@ -57,8 +57,8 @@
   };
   function zone(l, z) { return (ZONES[l] && ZONES[l][z]) || z; }
 
-  function errEN(e) { return e === 'délai dépassé' ? 'timed out' : e === 'réponse vide' ? 'empty response' : e === 'réponse incomplète' ? 'incomplete response' : e === 'paramètre absent' ? 'parameter missing' : e === 'aucune valeur (zone non cartographiée)' ? 'no value (area not mapped)' : e; }
-  function errJA(e) { return e === 'délai dépassé' ? 'タイムアウト' : e === 'réponse vide' ? '空の応答' : e === 'réponse incomplète' ? '不完全な応答' : e === 'paramètre absent' ? 'パラメーターなし' : e === 'aucune valeur (zone non cartographiée)' ? '値なし（未地図化の地域）' : e; }
+  function errEN(e) { if (/, quota journalier atteint$/.test(e)) return errEN(e.replace(/, quota journalier atteint$/, '')) + ', daily quota reached'; return e === 'délai dépassé' ? 'timed out' : e === 'réponse vide' ? 'empty response' : e === 'réponse incomplète' ? 'incomplete response' : e === 'paramètre absent' ? 'parameter missing' : e === 'aucune valeur (zone non cartographiée)' ? 'no value (area not mapped)' : e; }
+  function errJA(e) { if (/, quota journalier atteint$/.test(e)) return errJA(e.replace(/, quota journalier atteint$/, '')) + '、1日の上限に到達'; return e === 'délai dépassé' ? 'タイムアウト' : e === 'réponse vide' ? '空の応答' : e === 'réponse incomplète' ? '不完全な応答' : e === 'paramètre absent' ? 'パラメーターなし' : e === 'aucune valeur (zone non cartographiée)' ? '値なし（未地図化の地域）' : e; }
 
   G.addPhrases({
     en: {

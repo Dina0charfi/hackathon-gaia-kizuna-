@@ -20,7 +20,11 @@
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs || 20000) : null;
     return fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (r) {
       if (timer) clearTimeout(timer);
-      if (!r.ok) { var err = new Error('HTTP ' + r.status); err.status = r.status; err.retryAfter = +r.headers.get('Retry-After') || 0; throw err; }
+      if (!r.ok) {
+        var err = new Error('HTTP ' + r.status); err.status = r.status; err.retryAfter = +r.headers.get('Retry-After') || 0;
+        // Open-Meteo says why it refused: a daily quota will not clear with a retry
+        return r.text().then(function (txt) { err.daily = /daily/i.test(txt || ''); throw err; }, function () { throw err; });
+      }
       return r.json();
     }, function (e) { if (timer) clearTimeout(timer); throw e; });
   }
@@ -33,7 +37,7 @@
     var attempt = function (i) {
       return getJSON(url, timeoutMs).catch(function (e) {
         var retriable = !e.status || e.status === 429 || e.status >= 500;
-        if (!retriable || i >= waits.length || e.name === 'AbortError') throw e;
+        if (!retriable || e.daily || i >= waits.length || e.name === 'AbortError') throw e;
         var ms = e.retryAfter > 0 && e.retryAfter <= 10 ? e.retryAfter * 1000 : waits[i] * (0.8 + Math.random() * 0.4);
         return new Promise(function (res) { setTimeout(res, ms); }).then(function () { return attempt(i + 1); });
       });
@@ -54,10 +58,11 @@
   function cacheSet(key, v) {
     try { global.localStorage.setItem('gaia.cache.' + key, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { /* full or blocked */ }
   }
-  function flagGet(key, minutes) {
-    try { var t = +global.localStorage.getItem('gaia.flag.' + key); return t && Date.now() - t < minutes * 6e4; } catch (e) { return false; }
+  // a flag is a "skip this source until" time
+  function flagGet(key) {
+    try { return +global.localStorage.getItem('gaia.flag.' + key) > Date.now(); } catch (e) { return false; }
   }
-  function flagSet(key) { try { global.localStorage.setItem('gaia.flag.' + key, String(Date.now())); } catch (e) { /* ignore */ } }
+  function flagSet(key, minutes) { try { global.localStorage.setItem('gaia.flag.' + key, String(Date.now() + minutes * 6e4)); } catch (e) { /* ignore */ } }
   function cell(lat, lon, d) { return lat.toFixed(d) + ',' + lon.toFixed(d); }
 
   /* ---------------------------------------------------------- NASA POWER (one request per plot) */
@@ -87,7 +92,8 @@
   // Order: 1) browser cache, 2) Open-Meteo archive (ERA5, 10 years, one request, retried),
   // 3) NASA POWER climatology (same request as the sun) with FAO-56 ET0 computed here,
   // 4) the bundled NASA POWER normals table (js/climate-tn.js), confidence "low".
-  // After a 429, Open-Meteo is skipped for 15 min so a busy network does not keep hitting it.
+  // After a 429, Open-Meteo is skipped for 15 min (6 h when its daily quota is used up, which
+  // happens on shared hackathon / campus IPs: 10 years of daily data weigh ≈ 100 API calls).
   var OM_META = function (p) { return { source: 'Open-Meteo Historical API (réanalyse ERA5 / ERA5-Land)', resolution: '≈ 11–25 km', period: p.start.slice(0, 4) + '–' + p.end.slice(0, 4), url: 'https://open-meteo.com/en/docs/historical-weather-api' }; };
   var POWER_META = { source: 'NASA POWER — climatologie 2001–2025 (MERRA-2)', resolution: '≈ 50 km (0,5° × 0,625°)', period: '2001–2025', url: 'https://power.larc.nasa.gov/' };
 
@@ -147,11 +153,11 @@
     var key = 'climate:' + cell(lat, lon, 2);
     var hit = cacheGet(key);
     if (hit && hit.rain_mm && hit.rain_mm.status === 'ok') return Promise.resolve(hit);
-    var omSkipped = flagGet('om429', 15);
+    var omSkipped = flagGet('om429');
     var primary = omSkipped ? Promise.reject(new Error('HTTP 429')) : openMeteo(lat, lon);
     return primary.then(function (r) { cacheSet(key, r); return r; }, function (e) {
-      if (e.status === 429) flagSet('om429');
-      var reason = 'Open-Meteo indisponible (' + why(e) + ')';
+      if (e.status === 429 && !omSkipped) flagSet('om429', e.daily ? 360 : 15);
+      var reason = 'Open-Meteo indisponible (' + why(e) + (e.daily ? ', quota journalier atteint' : '') + ')';
       return power(lat, lon).then(function (pw) {
         var v = global.GAIA_CLIMATE.fromPower(pw.p, pw.z, pw.fill);
         if (!v || v.rain_mm === null) throw new Error('paramètre absent');
@@ -283,9 +289,9 @@
       return fromGrid({ clay: hit.clay_pct, sand: hit.sand_pct, soc: hit.soc }, gm, note, { clay: hit.km ? 'low' : 'medium', soc: 'low' });
     };
     var viaRest = function () {
-      if (flagGet('soilgrids-down', 360)) return Promise.resolve(bundled('SoilGrids injoignable : API REST en pause.'));
+      if (flagGet('soilgrids-down')) return Promise.resolve(bundled('SoilGrids injoignable : API REST en pause.'));
       return soilGridsRest(lat, lon).then(function (d) { return fromGrid(d, meta); })
-        .catch(function (e) { flagSet('soilgrids-down'); return bundled('SoilGrids injoignable (' + why(e) + ') : API REST en pause.'); });
+        .catch(function (e) { flagSet('soilgrids-down', 360); return bundled('SoilGrids injoignable (' + why(e) + ') : API REST en pause.'); });
     };
     if (!C().soilEndpoint) return viaRest();
     var url = C().soilEndpoint.replace('{lat}', lat).replace('{lon}', lon);
