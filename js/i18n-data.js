@@ -89,7 +89,7 @@
       patterns: [
         [/^(.+?) · (.+)$/, function (m, tr) { return tr(m[1]) + ' · ' + tr(m[2]); }],
         [/^Open-Meteo indisponible \((.*)\) : repli sur NASA POWER\.$/, function (m) { return 'Open-Meteo unavailable (' + errEN(m[1]) + '): using NASA POWER instead.'; }],
-        [/^Open-Meteo indisponible \((.*)\) ; NASA POWER indisponible \((.*)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
+        [/^Open-Meteo indisponible \((.*?)\) ; NASA POWER indisponible \((.*?)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
           return 'Open-Meteo unavailable (' + errEN(m[1]) + '); NASA POWER unavailable (' + errEN(m[2]) + ').' + (m[3] ? ' Values interpolated from the bundled table (nearest point ≈ ' + m[3] + ' km).' : '');
         }],
         [/^Moyenne SoilGrids de la maille voisine \(≈ (\d+) km, côte ou zone non cartographiée\), pas une mesure de la parcelle\.$/, 'SoilGrids mean of the neighbouring cell (≈ $1 km, coast or unmapped area), not a measurement of the plot.'],
@@ -135,7 +135,7 @@
       patterns: [
         [/^(.+?) · (.+)$/, function (m, tr) { return tr(m[1]) + ' · ' + tr(m[2]); }],
         [/^Open-Meteo indisponible \((.*)\) : repli sur NASA POWER\.$/, function (m) { return 'Open-Meteoを取得できません（' + errJA(m[1]) + '）。NASA POWERで代替しています。'; }],
-        [/^Open-Meteo indisponible \((.*)\) ; NASA POWER indisponible \((.*)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
+        [/^Open-Meteo indisponible \((.*?)\) ; NASA POWER indisponible \((.*?)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
           return 'Open-Meteo（' + errJA(m[1]) + '）とNASA POWER（' + errJA(m[2]) + '）を取得できません。' + (m[3] ? '内蔵テーブルから補間した値です（最寄りの格子点まで約' + m[3] + ' km）。' : '');
         }],
         [/^Moyenne SoilGrids de la maille voisine \(≈ (\d+) km, côte ou zone non cartographiée\), pas une mesure de la parcelle\.$/, '隣接セル（約$1 km、海岸または未地図化の地域）のSoilGrids平均値で、区画の実測値ではありません。'],
