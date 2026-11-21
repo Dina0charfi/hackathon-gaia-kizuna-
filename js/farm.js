@@ -157,7 +157,9 @@
   });
 
   G.mountShell('farm');
-  var app = document.getElementById('app');
+  var app = document.getElementById('app'), tabs = document.getElementById('tabs');
+  function drawTabs() { if (tabs && window.GAIA_SEASON) G.clear(tabs).appendChild(window.GAIA_SEASON.subnav('farm')); }
+  drawTabs();
 
   /* ------------------------------------------------ farm & settings */
   var DEMO = { name: null, lat: 35.678, lon: 10.096, crop: 'olive', area: 2, head: 60, kc: 0.70 };
@@ -413,5 +415,5 @@
 
   draw();
   fetchWeather().then(function (w) { WX = w; draw(); });
-  G.onLang(function () { draw(); });
+  G.onLang(function () { drawTabs(); draw(); });
 }());

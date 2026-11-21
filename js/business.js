@@ -255,6 +255,61 @@
     }
   });
 
+  G.addStrings({
+    fr: {
+      rv_t: 'Comment GAIA gagne sa vie', rv_p: 'Trois sources de revenus possibles. Aucun prix n’est pré-rempli : saisissez vos hypothèses, GAIA ne fait que calculer. L’agriculteur individuel reste gratuit.',
+      rv_coops: 'Coopératives abonnées', rv_coop_fee: 'Abonnement par coopérative (TND/mois)', rv_kits: 'Kits vendus via GAIA par an', rv_kit_price: 'Prix moyen d’un kit (TND)',
+      rv_comm: 'Commission de l’installateur (%)', rv_users: 'Utilisateurs payants (version avancée)', rv_user_fee: 'Prix par utilisateur (TND/mois)', rv_cost: 'Coûts annuels de GAIA (TND, facultatif)',
+      rv_need: 'Renseignez au moins une source (nombre et prix) pour voir le revenu annuel.', rv_total: 'Revenu annuel', rv_margin: 'Revenu − coûts', rv_per_yr: 'TND par an',
+      rv_sub: 'Abonnements coopératives', rv_com: 'Commissions installateurs', rv_usr: 'Utilisateurs avancés', rv_assump: 'Hypothèses saisies par vous : ce sont des simulations, pas des prévisions.',
+      pl_t: 'Plan de pilote', pl_p: 'Une première coopérative, un budget clair, des indicateurs de réussite fixés à l’avance. Chiffres saisis par vous.',
+      pl_coops: 'Coopératives', pl_farmers: 'Agriculteurs', pl_months: 'Durée (mois)', pl_kits: 'Kits solaires', pl_kit_price: 'Prix d’un kit (TND)', pl_training: 'Formation (TND)',
+      pl_staff: 'Équipe et suivi (TND)', pl_other: 'Autres coûts (TND)', pl_grant: 'Subvention ou financement obtenu (TND)',
+      pl_need: 'Indiquez le nombre de kits, leur prix et le nombre d’agriculteurs pour calculer le budget.', pl_capex: 'Kits', pl_total: 'Budget total', pl_perfarmer: 'Par agriculteur',
+      pl_gap: 'Reste à financer', pl_cover: 'couvert par le financement', pl_ind_t: 'Indicateurs de réussite', pl_ind_p: 'Fixez vos objectifs avant de commencer, puis mesurez-les avec des données réelles.',
+      pl_i_water: 'Eau économisée (%)', pl_i_ontime: 'Mensualités payées à temps (%)', pl_i_active: 'Agriculteurs qui utilisent le kit (%)', pl_i_diesel: 'Gazole économisé (TND/an)', pl_target: 'Objectif'
+    },
+    ar: {
+      rv_t: 'كيف تكسب غايا عيشها', rv_p: 'ثلاثة مصادر دخل ممكنة. لا يوجد سعر مُعبّأ مسبقاً: أدخل فرضياتك وغايا تحسب فقط. الفلاح الفرد يبقى مجانياً.',
+      rv_coops: 'التعاضديات المشتركة', rv_coop_fee: 'اشتراك التعاضدية (دينار/شهر)', rv_kits: 'مجموعات تُباع عبر غايا في السنة', rv_kit_price: 'متوسط سعر المجموعة (دينار)',
+      rv_comm: 'عمولة المركِّب (%)', rv_users: 'مستخدمون بمقابل (النسخة المتقدمة)', rv_user_fee: 'سعر المستخدم (دينار/شهر)', rv_cost: 'تكاليف غايا السنوية (دينار، اختياري)',
+      rv_need: 'أدخل مصدراً واحداً على الأقل (عدد وسعر) لعرض الدخل السنوي.', rv_total: 'الدخل السنوي', rv_margin: 'الدخل − التكاليف', rv_per_yr: 'دينار في السنة',
+      rv_sub: 'اشتراكات التعاضديات', rv_com: 'عمولات المركِّبين', rv_usr: 'المستخدمون المتقدمون', rv_assump: 'الفرضيات من إدخالك: هذه محاكاة وليست توقعات.',
+      pl_t: 'خطة تجريبية', pl_p: 'تعاضدية أولى، ميزانية واضحة، ومؤشرات نجاح تُحدَّد مسبقاً. الأرقام من إدخالك.',
+      pl_coops: 'التعاضديات', pl_farmers: 'الفلاحون', pl_months: 'المدة (أشهر)', pl_kits: 'مجموعات شمسية', pl_kit_price: 'سعر المجموعة (دينار)', pl_training: 'التكوين (دينار)',
+      pl_staff: 'الفريق والمتابعة (دينار)', pl_other: 'تكاليف أخرى (دينار)', pl_grant: 'منحة أو تمويل مُحصَّل (دينار)',
+      pl_need: 'أدخل عدد المجموعات وسعرها وعدد الفلاحين لحساب الميزانية.', pl_capex: 'المجموعات', pl_total: 'الميزانية الإجمالية', pl_perfarmer: 'لكل فلاح',
+      pl_gap: 'المتبقي للتمويل', pl_cover: 'مغطّى بالتمويل', pl_ind_t: 'مؤشرات النجاح', pl_ind_p: 'حدّد أهدافك قبل البدء ثم قِسها ببيانات حقيقية.',
+      pl_i_water: 'الماء الموفَّر (%)', pl_i_ontime: 'الأقساط المدفوعة في وقتها (%)', pl_i_active: 'الفلاحون الذين يستعملون المجموعة (%)', pl_i_diesel: 'المازوط الموفَّر (دينار/سنة)', pl_target: 'الهدف'
+    },
+    en: {
+      rv_t: 'How GAIA earns its living', rv_p: 'Three possible revenue streams. No price is pre-filled: enter your own assumptions, GAIA only does the arithmetic. The individual farmer stays free.',
+      rv_coops: 'Subscribing cooperatives', rv_coop_fee: 'Subscription per cooperative (TND/month)', rv_kits: 'Kits sold through GAIA per year', rv_kit_price: 'Average kit price (TND)',
+      rv_comm: 'Installer commission (%)', rv_users: 'Paying users (advanced version)', rv_user_fee: 'Price per user (TND/month)', rv_cost: 'GAIA yearly costs (TND, optional)',
+      rv_need: 'Fill in at least one stream (a number and a price) to see the yearly revenue.', rv_total: 'Yearly revenue', rv_margin: 'Revenue − costs', rv_per_yr: 'TND per year',
+      rv_sub: 'Cooperative subscriptions', rv_com: 'Installer commissions', rv_usr: 'Advanced users', rv_assump: 'Assumptions entered by you: these are simulations, not forecasts.',
+      pl_t: 'Pilot plan', pl_p: 'A first cooperative, a clear budget, success indicators set in advance. Figures entered by you.',
+      pl_coops: 'Cooperatives', pl_farmers: 'Farmers', pl_months: 'Duration (months)', pl_kits: 'Solar kits', pl_kit_price: 'Price of one kit (TND)', pl_training: 'Training (TND)',
+      pl_staff: 'Team and follow-up (TND)', pl_other: 'Other costs (TND)', pl_grant: 'Grant or funding secured (TND)',
+      pl_need: 'Enter the number of kits, their price and the number of farmers to work out the budget.', pl_capex: 'Kits', pl_total: 'Total budget', pl_perfarmer: 'Per farmer',
+      pl_gap: 'Still to fund', pl_cover: 'covered by funding', pl_ind_t: 'Success indicators', pl_ind_p: 'Set your targets before starting, then measure them with real data.',
+      pl_i_water: 'Water saved (%)', pl_i_ontime: 'Instalments paid on time (%)', pl_i_active: 'Farmers using the kit (%)', pl_i_diesel: 'Diesel saved (TND/year)', pl_target: 'Target'
+    },
+    ja: {
+      rv_t: 'GAIAの収益の仕組み', rv_p: '考えられる収益源は3つです。価格は入力済みではありません。あなたの前提を入れてください。GAIAは計算するだけです。個人の農家は無料のままです。',
+      rv_coops: '契約する協同組合の数', rv_coop_fee: '協同組合ごとの月額（TND/月）', rv_kits: 'GAIA経由で売れるキット（年）', rv_kit_price: 'キットの平均価格（TND）',
+      rv_comm: '施工業者の手数料（%）', rv_users: '有料ユーザー（上級版）', rv_user_fee: 'ユーザーあたりの月額（TND/月）', rv_cost: 'GAIAの年間コスト（TND、任意）',
+      rv_need: '年間収益を表示するには、少なくとも1つの収益源（数と価格）を入力してください。', rv_total: '年間収益', rv_margin: '収益 − コスト', rv_per_yr: 'TND／年',
+      rv_sub: '協同組合の月額', rv_com: '施工業者の手数料', rv_usr: '上級ユーザー', rv_assump: 'あなたが入力した前提です。予測ではなくシミュレーションです。',
+      pl_t: 'パイロット計画', pl_p: '最初の協同組合、明確な予算、事前に決めた成功指標。数字はあなたが入力します。',
+      pl_coops: '協同組合', pl_farmers: '農家', pl_months: '期間（月）', pl_kits: '太陽光キット', pl_kit_price: 'キット1台の価格（TND）', pl_training: '研修（TND）',
+      pl_staff: 'チームとフォロー（TND）', pl_other: 'その他の費用（TND）', pl_grant: '確保した助成金・資金（TND）',
+      pl_need: '予算を計算するには、キットの数と価格、農家の数を入力してください。', pl_capex: 'キット', pl_total: '総予算', pl_perfarmer: '農家1人あたり',
+      pl_gap: '未調達の額', pl_cover: '資金でカバー', pl_ind_t: '成功指標', pl_ind_p: '始める前に目標を決め、実際のデータで測りましょう。',
+      pl_i_water: '節水量（%）', pl_i_ontime: '期日どおりに支払われた割賦（%）', pl_i_active: 'キットを使う農家（%）', pl_i_diesel: '節約した軽油代（TND/年）', pl_target: '目標'
+    }
+  });
+
   G.mountShell('biz');
   var app = document.getElementById('app');
 
@@ -481,6 +536,72 @@
     })));
   }
 
+  /* --------------------------------------------- GAIA revenue streams and pilot plan (user-entered figures only) */
+  var RV = Object.assign({ coops: '', coop_fee: '', kits: '', kit: NX && NX.kit_tnd ? Math.round(NX.kit_tnd) : '', comm: '', users: '', user_fee: '', cost: '' }, saved.rv || {});
+  var PL = Object.assign({ coops: 1, farmers: '', months: '', kits: '', kit: NX && NX.kit_tnd ? Math.round(NX.kit_tnd) : '', training: '', staff: '', other: '', grant: '', targets: {} }, saved.pl || {});
+  S.rv = RV; S.pl = PL;
+  var rvOut, plOut;
+
+  function simpleField(id, label, obj, key, redraw) {
+    return el('div', { class: 'gp-field' }, [el('label', { for: id }, [t(label)]),
+      el('input', { id: id, type: 'number', step: 'any', min: 0, inputmode: 'decimal', value: obj[key] === null ? '' : obj[key],
+        oninput: function (e) { obj[key] = e.target.value; persist(); redraw(); } })]);
+  }
+
+  function drawRevenue() {
+    G.clear(rvOut);
+    var r = B.revenue({ coops: num(RV.coops), coop_fee_month: num(RV.coop_fee), kits: num(RV.kits), kit_tnd: num(RV.kit), commission_pct: num(RV.comm),
+      users: num(RV.users), user_fee_month: num(RV.user_fee), cost_year: num(RV.cost) });
+    if (r.missing) { rvOut.appendChild(G.note('info', t('rv_need'))); return; }
+    var kp = [kpi(t('rv_total'), fmt(r.total) + ' TND', t('rv_per_yr'), true)];
+    r.streams.forEach(function (x) { if (x.value !== null) kp.push(kpi(t('rv_' + x.key), fmt(x.value) + ' TND', fmt(x.share * 100) + ' %')); });
+    if (r.margin !== null) kp.push(kpi(t('rv_margin'), fmt(r.margin) + ' TND', t('rv_per_yr')));
+    rvOut.appendChild(el('div', { class: 'kpis', style: 'margin-top:12px' }, kp));
+    rvOut.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('rv_assump')]));
+  }
+
+  function revenueCard() {
+    rvOut = el('div', { 'aria-live': 'polite' });
+    var f = function (id, label, key) { return simpleField(id, label, RV, key, drawRevenue); };
+    drawRevenue();
+    return el('section', { class: 'sec-t', 'aria-labelledby': 'h-rv' }, [el('h2', { id: 'h-rv' }, [t('rv_t')]),
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2);max-width:80ch' }, [t('rv_p')]),
+      el('div', { class: 'gp-card', style: 'margin-top:12px' }, [
+        el('div', { class: 'gp-grid gp-cols-3' }, [f('rv-coops', 'rv_coops', 'coops'), f('rv-fee', 'rv_coop_fee', 'coop_fee'), f('rv-kits', 'rv_kits', 'kits'),
+          f('rv-kit', 'rv_kit_price', 'kit'), f('rv-comm', 'rv_comm', 'comm'), f('rv-users', 'rv_users', 'users'), f('rv-ufee', 'rv_user_fee', 'user_fee'), f('rv-cost', 'rv_cost', 'cost')]),
+        rvOut])]);
+  }
+
+  function drawPilot() {
+    G.clear(plOut);
+    var r = B.pilot({ kits: num(PL.kits), kit_tnd: num(PL.kit), farmers: num(PL.farmers), training_tnd: num(PL.training), staff_tnd: num(PL.staff), other_tnd: num(PL.other), grant_tnd: num(PL.grant) });
+    if (r.missing.length) { plOut.appendChild(G.note('info', t('pl_need'))); return; }
+    var kp = [kpi(t('pl_total'), fmt(r.total) + ' TND', PL.months ? fmt(num(PL.months)) + ' ' + t('months_u') : '', true), kpi(t('pl_capex'), fmt(r.capex) + ' TND', fmt(num(PL.kits)) + ' ×'),
+      kpi(t('pl_perfarmer'), fmt(r.per_farmer) + ' TND', fmt(num(PL.farmers)) + ' ' + t('pl_farmers').toLowerCase())];
+    if (r.grant > 0) kp.push(kpi(t('pl_gap'), fmt(r.gap) + ' TND', fmt(r.cover * 100) + ' % ' + t('pl_cover')));
+    plOut.appendChild(el('div', { class: 'kpis', style: 'margin-top:12px' }, kp));
+  }
+
+  function pilotCard() {
+    plOut = el('div', { 'aria-live': 'polite' });
+    var f = function (id, label, key) { return simpleField(id, label, PL, key, drawPilot); };
+    drawPilot();
+    var inds = ['water', 'ontime', 'active', 'diesel'].map(function (k) {
+      return el('div', { class: 'gp-field' }, [el('label', { for: 'pl-i-' + k }, [t('pl_i_' + k) + ' — ' + t('pl_target')]),
+        el('input', { id: 'pl-i-' + k, type: 'number', step: 'any', min: 0, inputmode: 'decimal', value: PL.targets[k] === undefined ? '' : PL.targets[k],
+          oninput: function (e) { PL.targets[k] = e.target.value; persist(); } })]);
+    });
+    return el('section', { class: 'sec-t', 'aria-labelledby': 'h-pl' }, [el('h2', { id: 'h-pl' }, [t('pl_t')]),
+      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2);max-width:80ch' }, [t('pl_p')]),
+      el('div', { class: 'gp-card', style: 'margin-top:12px' }, [
+        el('div', { class: 'gp-grid gp-cols-3' }, [f('pl-coops', 'pl_coops', 'coops'), f('pl-farmers', 'pl_farmers', 'farmers'), f('pl-months', 'pl_months', 'months'), f('pl-kits', 'pl_kits', 'kits'),
+          f('pl-kit', 'pl_kit_price', 'kit'), f('pl-training', 'pl_training', 'training'), f('pl-staff', 'pl_staff', 'staff'), f('pl-other', 'pl_other', 'other'), f('pl-grant', 'pl_grant', 'grant')]),
+        plOut,
+        el('h3', { style: 'margin-top:18px' }, [t('pl_ind_t')]),
+        el('p', { class: 'assump' }, [t('pl_ind_p')]),
+        el('div', { class: 'gp-grid gp-cols-3', style: 'margin-top:8px' }, inds)])]);
+  }
+
   function draw() { if (!out) return; drawPayg(); drawCoop(); drawAdoption(); drawRes(); }
 
   function renderAll() {
@@ -508,6 +629,8 @@
     rsOut = el('div');
     app.appendChild(el('section', { class: 'sec-t', 'aria-labelledby': 'h-rs' }, [el('h2', { id: 'h-rs' }, [t('rs_t')]),
       el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2);max-width:80ch' }, [t('rs_p')]), rsOut]));
+    app.appendChild(revenueCard());
+    app.appendChild(pilotCard());
     app.appendChild(el('details', { class: 'gp-card gp-more', style: 'margin-top:24px' }, [
       el('summary', null, [t('method_t')]),
       el('div', { class: 'formula' }, ['financed = kit × (1 − deposit) ; total = financed × (1 + rate × term / 12)']),

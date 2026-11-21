@@ -235,7 +235,7 @@
   /* ---------------------------------------------------------- shell */
   var NAV = [
     ['home', 'home.html', 'nav_home'], ['land', 'land.html', 'nav_land'], ['engine', 'engine.html', 'nav_engine'],
-    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'], ['season', 'season.html', 'nav_season'],
+    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
     ['biz', 'business.html', 'nav_biz'], ['agv', 'agrivoltaic.html', 'nav_agv'], ['lib', 'library.html', 'nav_lib']
   ];
 

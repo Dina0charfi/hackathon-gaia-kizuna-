@@ -52,7 +52,7 @@
     }
   });
 
-  G.mountShell('season');
+  G.mountShell('farm');
   var tabs = document.getElementById('tabs'), app = document.getElementById('app');
   var p = G.getParcel();
   var crop = S.parcelCrop() || 'olive';
