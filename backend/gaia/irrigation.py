@@ -1,11 +1,13 @@
 """GAIA 7-day irrigation plan — trained model (LightGBM), not a rule.
 
-The models are trained in ml/prevision_humidite_sol.ipynb on 9 years (2016–2024) of
-Open-Meteo ERA5 / ERA5-Land data for 26 sites covering the 24 Tunisian governorates.
-Each model h (1..7) predicts the change of root-zone soil moisture (7–28 cm) between
-today and day J+h. build_features() must stay identical to the notebook's
-construire_variables(); tests/test_irrigation.py checks it against the reference
-prediction the notebook stores in meta.json.
+The models are trained in ml/prevision_humidite_sol.ipynb on Open-Meteo data from 2020 to
+yesterday for 26 sites covering the 24 Tunisian governorates. Soil moisture and weather come
+from the ECMWF IFS model (what the Open-Meteo archive serves since 2017); live, the same
+model is read from the Open-Meteo forecast API, up to yesterday and with the coming days.
+Each model h (1..8) predicts the change of root-zone soil moisture (7–28 cm) between
+yesterday (the last complete day) and day J+h: today and the 7 following days.
+build_features() must stay identical to the notebook's construire_variables();
+tests/test_irrigation.py checks it against the reference prediction stored in meta.json.
 
 The reserve is relative to the nearest training site's own history (0 % = its 5th
 percentile, 100 % = its 95th). The irrigation thresholds are demonstration assumptions,
@@ -28,7 +30,6 @@ ROOT = Path(__file__).resolve().parents[2]
 MODEL_DIR = Path(os.environ.get("GAIA_IRRIGATION_MODELS", ROOT / "ml" / "models"))
 TARGET = "sm_7_28"
 IRRIGATE, SOON = 0.30, 0.35          # demonstration thresholds on the relative reserve
-ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 FORECAST = "https://api.open-meteo.com/v1/forecast"
 DAILY = ["et0_fao_evapotranspiration", "precipitation_sum", "temperature_2m_max",
          "temperature_2m_min", "shortwave_radiation_sum", "wind_speed_10m_max"]
@@ -70,8 +71,10 @@ def available() -> bool:
         return False
 
 
-def build_features(df: pd.DataFrame, horizons=range(1, 8)) -> pd.DataFrame:
-    """Same variables as construire_variables() in the notebook."""
+def build_features(df: pd.DataFrame, horizons=None) -> pd.DataFrame:
+    """Same variables as construire_variables() in the notebook (one set of future-weather columns per model)."""
+    if horizons is None:
+        horizons = range(1, max(load()["boosters"]) + 1)
     g = df.sort_values("date").copy()
     s = g[TARGET]
     for lag in [1, 2, 3, 7]:
@@ -109,52 +112,55 @@ def nearest_site(lat: float, lon: float) -> dict[str, Any]:
     return best | {"distance_km": round(km(best), 1)}
 
 
-def _daily_table(j: dict) -> pd.DataFrame:
-    h = pd.DataFrame(j["hourly"])
-    h["date"] = pd.to_datetime(h.pop("time")).dt.floor("D")
-    h = h.groupby("date").mean()
-    d = pd.DataFrame(j["daily"])
+def _weather_table(j: dict) -> pd.DataFrame:
+    d = pd.DataFrame(j["daily"]).rename(columns=RENAME)
     d["date"] = pd.to_datetime(d.pop("time"))
-    return d.set_index("date").join(h).rename(columns=RENAME).reset_index()
+    return d
+
+
+def _soil_table(j: dict) -> pd.DataFrame:
+    h = pd.DataFrame(j["hourly"]).rename(columns=RENAME)
+    h["date"] = pd.to_datetime(h.pop("time")).dt.floor("D")
+    return h.groupby("date").mean().reset_index()
 
 
 async def _fetch(lat: float, lon: float) -> tuple[pd.DataFrame, pd.DataFrame, float]:
+    """Last 60 days and next 10 days from the Open-Meteo forecast API, ECMWF IFS model:
+    the same source as the training data (the archive serves ECMWF IFS since 2017), with no publication delay."""
     import httpx
-    today = date.today()
     async with httpx.AsyncClient(timeout=60) as c:
-        a = await c.get(ARCHIVE, params=dict(latitude=lat, longitude=lon, timezone="Africa/Tunis",
-                                             start_date=str(today - timedelta(days=75)), end_date=str(today),
-                                             daily=",".join(DAILY), hourly=",".join(HOURLY)))
-        a.raise_for_status()
-        f = await c.get(FORECAST, params=dict(latitude=lat, longitude=lon, timezone="Africa/Tunis", past_days=14,
-                                              forecast_days=16, daily="et0_fao_evapotranspiration,precipitation_sum"))
-        f.raise_for_status()
-    ja = a.json()
-    hist = _daily_table(ja)
-    fut = pd.DataFrame(f.json()["daily"]).rename(columns=RENAME)
-    fut["date"] = pd.to_datetime(fut.pop("time"))
-    return hist, fut, float(ja["elevation"])
+        r = await c.get(FORECAST, params=dict(latitude=lat, longitude=lon, timezone="Africa/Tunis", models="ecmwf_ifs",
+                                              past_days=60, forecast_days=10,
+                                              daily=",".join(DAILY), hourly=",".join(HOURLY)))
+        r.raise_for_status()
+    j = r.json()
+    t = _weather_table(j).merge(_soil_table(j), on="date", how="left")
+    yesterday = pd.Timestamp(date.today()) - pd.Timedelta(days=1)       # last complete day
+    return t[t.date <= yesterday], t[t.date > yesterday], float(j["elevation"])
 
 
 async def forecast(lat: float, lon: float) -> dict[str, Any]:
-    key = (round(lat, 3), round(lon, 3))
+    key = (round(lat, 3), round(lon, 3), str(date.today()))
     hit = _cache.get(key)
     if hit and time.time() - hit[0] < CACHE_S:
         return hit[1]
-    meta = load()["meta"]
+    m = load()
+    meta, max_h = m["meta"], max(m["boosters"])
     hist, fut, elevation = await _fetch(lat, lon)
     complete = hist.dropna(subset=[TARGET, "et0", "pluie"])
     if len(complete) < 40:
-        raise ValueError("Not enough recent soil moisture data for this point (sea or missing ERA5-Land cell).")
+        raise ValueError("Not enough recent soil moisture data for this point (sea or missing model cell).")
     state_day = complete.date.max()
-    hist = hist[hist.date <= state_day]
-    future = fut[fut.date > state_day].head(7)
-    if len(future) < 7:
-        raise ValueError("Weather forecast for the next 7 days is not available.")
-    hist = hist.assign(lat=lat, lon=lon, altitude=elevation)
+    today = pd.Timestamp(date.today())
+    lag = (today - state_day).days
+    if lag + 7 > max_h:
+        raise ValueError(f"The last soil state is {lag} days old; the models reach J+{max_h} only.")
+    hist = complete.assign(lat=lat, lon=lon, altitude=elevation)
+    future = fut[fut.date > state_day].head(max_h)
+    if len(future) < lag + 7:
+        raise ValueError("Weather for the coming days is not available.")
     feats = build_features(pd.concat([hist, future], ignore_index=True))
-    row = feats[feats.date == state_day]
-    preds = predict_row(row)
+    preds = predict_row(feats[feats.date == state_day])
 
     site = nearest_site(lat, lon)
     th = meta["seuils_sites"][site["id"]]
@@ -162,25 +168,28 @@ async def forecast(lat: float, lon: float) -> dict[str, Any]:
     reserve = lambda v: float(min(1.0, max(0.0, (v - th["sec"]) / span)))
     rmse = {r["horizon"]: r["rmse_modele"] for r in meta["resultats"] if r["test"] == "lieux jamais vus"}
 
-    days = []
-    for h, theta in preds.items():
+    def day(h: int, theta: float) -> dict[str, Any]:
         w = future.iloc[h - 1]
-        r = reserve(theta)
-        days.append(dict(date=w.date.strftime("%Y-%m-%d"), horizon=h,
-                         rain_mm=None if pd.isna(w.pluie) else round(float(w.pluie), 1),
-                         et0_mm=None if pd.isna(w.et0) else round(float(w.et0), 2),
-                         soil_moisture=round(theta, 4), reserve=round(r, 3),
-                         reserve_error=round(rmse.get(h, float("nan")) / span, 3),
-                         decision="irrigate" if r < IRRIGATE else ("soon" if r < SOON else "none")))
-    today_theta = float(row[TARGET].iloc[0])
+        r, err = reserve(theta), rmse[h] / span
+        return dict(date=w.date.strftime("%Y-%m-%d"), horizon=h, is_today=bool(w.date == today),
+                    rain_mm=None if pd.isna(w.pluie) else round(float(w.pluie), 1),
+                    et0_mm=None if pd.isna(w.et0) else round(float(w.et0), 2),
+                    soil_moisture=round(theta, 4), reserve=round(r, 3), reserve_error=round(err, 3),
+                    reserve_low=round(max(0.0, r - err), 3), reserve_high=round(min(1.0, r + err), 3),
+                    decision="irrigate" if r < IRRIGATE else ("soon" if r < SOON else "none"))
+
+    # today (estimated, unless the soil state is from today) and the 7 following days
+    days = [day(h, preds[h]) for h in range(max(lag, 1), lag + 8)]
+    state_theta = float(complete[complete.date == state_day][TARGET].iloc[0])
     out = dict(
         method="trained model (LightGBM), one model per horizon",
         model=dict(trained_on=f"{len(meta['sites'])} sites, 24 Tunisian governorates", period=meta["periode"],
-                   source=meta["source"], target="soil moisture 7–28 cm (m³/m³)",
+                   split=meta.get("decoupage"), source=meta["source"], target="soil moisture 7–28 cm (m³/m³)",
                    error_unseen_sites_m3m3={h: round(v, 4) for h, v in rmse.items()}),
         location=dict(lat=lat, lon=lon, elevation_m=elevation),
-        state=dict(date=state_day.strftime("%Y-%m-%d"), soil_moisture=round(today_theta, 4), reserve=round(reserve(today_theta), 3),
-                   note="Latest soil state from Open-Meteo; the last few days may come from a forecast model rather than ERA5-Land."),
+        state=dict(date=state_day.strftime("%Y-%m-%d"), lag_days=lag, soil_moisture=round(state_theta, 4),
+                   reserve=round(reserve(state_theta), 3),
+                   note="Last complete day (yesterday), ECMWF IFS analysis via the Open-Meteo forecast API; the following days use forecast weather."),
         reference_site=site,
         thresholds=dict(irrigate=IRRIGATE, soon=SOON, note="Demonstration assumption, to be replaced by the crop's FAO-56 thresholds."),
         days=days,

@@ -7,7 +7,8 @@
   4,
   5,
   6,
-  7
+  7,
+  8
  ],
  "variables": {
   "1": [
@@ -226,231 +227,283 @@
    "pluie_fut_7",
    "pluie_max_fut_7",
    "et0_fut_7"
+  ],
+  "8": [
+   "sm_0_7",
+   "sm_7_28",
+   "sm_28_100",
+   "sm_lag1",
+   "sm_lag2",
+   "sm_lag3",
+   "sm_lag7",
+   "sm_diff1",
+   "pluie",
+   "et0",
+   "tmax",
+   "tmin",
+   "rayonnement",
+   "vent",
+   "pluie_1j",
+   "pluie_3j",
+   "pluie_7j",
+   "pluie_30j",
+   "et0_3j",
+   "et0_7j",
+   "et0_30j",
+   "lat",
+   "lon",
+   "altitude",
+   "saison_sin",
+   "saison_cos",
+   "pluie_fut_8",
+   "pluie_max_fut_8",
+   "et0_fut_8"
   ]
  },
- "source": "Open-Meteo Historical API (ERA5 / ERA5-Land)",
+ "source": "Open-Meteo, modèle ECMWF IFS (archive et API de prévision)",
  "periode": [
-  "2016-01-01",
-  "2024-12-31"
+  "2020-01-01",
+  "2026-11-20"
  ],
+ "decoupage": {
+  "entrainement": "2020–2023",
+  "validation": 2024,
+  "test": "2025 →"
+ },
  "resultats": [
   {
    "horizon": 1,
    "test": "années jamais vues",
-   "rmse_modele": 0.00435,
-   "rmse_persistance": 0.00677,
-   "gain": 0.35795,
+   "rmse_modele": 0.00556,
+   "rmse_persistance": 0.00696,
+   "gain": 0.20117,
    "arbres": 307
   },
   {
    "horizon": 1,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.00431,
-   "rmse_persistance": 0.00678,
-   "gain": 0.36523,
+   "rmse_modele": 0.00489,
+   "rmse_persistance": 0.00696,
+   "gain": 0.29819,
    "arbres": 307
   },
   {
    "horizon": 2,
    "test": "années jamais vues",
-   "rmse_modele": 0.00731,
-   "rmse_persistance": 0.01156,
-   "gain": 0.36784,
-   "arbres": 191
+   "rmse_modele": 0.00935,
+   "rmse_persistance": 0.01146,
+   "gain": 0.18435,
+   "arbres": 112
   },
   {
    "horizon": 2,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.00781,
-   "rmse_persistance": 0.01178,
-   "gain": 0.33674,
-   "arbres": 191
+   "rmse_modele": 0.00831,
+   "rmse_persistance": 0.01163,
+   "gain": 0.28569,
+   "arbres": 112
   },
   {
    "horizon": 3,
    "test": "années jamais vues",
-   "rmse_modele": 0.00936,
-   "rmse_persistance": 0.01521,
-   "gain": 0.38477,
-   "arbres": 340
+   "rmse_modele": 0.01183,
+   "rmse_persistance": 0.01484,
+   "gain": 0.20275,
+   "arbres": 116
   },
   {
    "horizon": 3,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.00991,
-   "rmse_persistance": 0.01553,
-   "gain": 0.36153,
-   "arbres": 340
+   "rmse_modele": 0.01106,
+   "rmse_persistance": 0.0152,
+   "gain": 0.27215,
+   "arbres": 116
   },
   {
    "horizon": 4,
    "test": "années jamais vues",
-   "rmse_modele": 0.011,
-   "rmse_persistance": 0.01819,
-   "gain": 0.39501,
-   "arbres": 418
+   "rmse_modele": 0.01373,
+   "rmse_persistance": 0.0176,
+   "gain": 0.2199,
+   "arbres": 104
   },
   {
    "horizon": 4,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.01149,
-   "rmse_persistance": 0.01855,
-   "gain": 0.38037,
-   "arbres": 418
+   "rmse_modele": 0.01312,
+   "rmse_persistance": 0.01813,
+   "gain": 0.27641,
+   "arbres": 104
   },
   {
    "horizon": 5,
    "test": "années jamais vues",
-   "rmse_modele": 0.01227,
-   "rmse_persistance": 0.02072,
-   "gain": 0.40762,
-   "arbres": 426
+   "rmse_modele": 0.0152,
+   "rmse_persistance": 0.01995,
+   "gain": 0.23829,
+   "arbres": 82
   },
   {
    "horizon": 5,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.01255,
-   "rmse_persistance": 0.0211,
-   "gain": 0.40539,
-   "arbres": 426
+   "rmse_modele": 0.01508,
+   "rmse_persistance": 0.02066,
+   "gain": 0.27026,
+   "arbres": 82
   },
   {
    "horizon": 6,
    "test": "années jamais vues",
-   "rmse_modele": 0.01347,
-   "rmse_persistance": 0.02295,
-   "gain": 0.41323,
-   "arbres": 458
+   "rmse_modele": 0.0164,
+   "rmse_persistance": 0.02197,
+   "gain": 0.25333,
+   "arbres": 78
   },
   {
    "horizon": 6,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.01364,
-   "rmse_persistance": 0.02332,
-   "gain": 0.41519,
-   "arbres": 458
+   "rmse_modele": 0.0166,
+   "rmse_persistance": 0.02286,
+   "gain": 0.27395,
+   "arbres": 78
   },
   {
    "horizon": 7,
    "test": "années jamais vues",
-   "rmse_modele": 0.01449,
-   "rmse_persistance": 0.02498,
-   "gain": 0.4202,
-   "arbres": 373
+   "rmse_modele": 0.01753,
+   "rmse_persistance": 0.02375,
+   "gain": 0.26175,
+   "arbres": 77
   },
   {
    "horizon": 7,
    "test": "lieux jamais vus",
-   "rmse_modele": 0.01441,
-   "rmse_persistance": 0.0253,
-   "gain": 0.43049,
-   "arbres": 373
+   "rmse_modele": 0.01793,
+   "rmse_persistance": 0.02477,
+   "gain": 0.27612,
+   "arbres": 77
+  },
+  {
+   "horizon": 8,
+   "test": "années jamais vues",
+   "rmse_modele": 0.01861,
+   "rmse_persistance": 0.02533,
+   "gain": 0.26534,
+   "arbres": 157
+  },
+  {
+   "horizon": 8,
+   "test": "lieux jamais vus",
+   "rmse_modele": 0.01879,
+   "rmse_persistance": 0.02648,
+   "gain": 0.29028,
+   "arbres": 157
   }
  ],
  "seuils_sites": {
   "ariana": {
-   "sec": 0.142,
-   "humide": 0.3233
+   "sec": 0.1434,
+   "humide": 0.3437
   },
   "beja": {
-   "sec": 0.222,
-   "humide": 0.4439
+   "sec": 0.2421,
+   "humide": 0.4692
   },
   "benarous": {
    "sec": 0.132,
-   "humide": 0.3402
+   "humide": 0.374
   },
   "bousalem": {
-   "sec": 0.0734,
-   "humide": 0.3124
+   "sec": 0.1212,
+   "humide": 0.3332
   },
   "capbon": {
-   "sec": 0.234,
-   "humide": 0.4321
+   "sec": 0.2503,
+   "humide": 0.4655
   },
   "gabes": {
-   "sec": 0.0031,
-   "humide": 0.1283
+   "sec": 0.002,
+   "humide": 0.108
   },
   "gafsa": {
    "sec": 0.0,
-   "humide": 0.115
+   "humide": 0.1049
   },
   "jendouba": {
-   "sec": 0.0862,
-   "humide": 0.3095
+   "sec": 0.1111,
+   "humide": 0.3243
   },
   "kairouan": {
-   "sec": 0.085,
-   "humide": 0.2505
+   "sec": 0.0874,
+   "humide": 0.2511
   },
   "kasserine": {
-   "sec": 0.0099,
-   "humide": 0.2247
+   "sec": 0.0064,
+   "humide": 0.2304
   },
   "kebili": {
    "sec": 0.0,
-   "humide": 0.096
+   "humide": 0.1101
   },
   "kef": {
-   "sec": 0.0699,
-   "humide": 0.2894
+   "sec": 0.094,
+   "humide": 0.2966
   },
   "mahdia": {
-   "sec": 0.116,
-   "humide": 0.2946
+   "sec": 0.1189,
+   "humide": 0.3276
   },
   "manouba": {
-   "sec": 0.1318,
-   "humide": 0.3019
+   "sec": 0.1314,
+   "humide": 0.3258
   },
   "mateur": {
-   "sec": 0.113,
-   "humide": 0.3292
+   "sec": 0.1186,
+   "humide": 0.3405
   },
   "medenine": {
-   "sec": 0.0094,
-   "humide": 0.167
+   "sec": 0.0065,
+   "humide": 0.146
   },
   "monastir": {
-   "sec": 0.132,
-   "humide": 0.3132
+   "sec": 0.1375,
+   "humide": 0.3343
   },
   "msaken": {
-   "sec": 0.1152,
-   "humide": 0.2866
+   "sec": 0.1226,
+   "humide": 0.3074
   },
   "sbeitla": {
-   "sec": 0.0113,
-   "humide": 0.2451
+   "sec": 0.0051,
+   "humide": 0.263
   },
   "sfax": {
-   "sec": 0.003,
-   "humide": 0.192
+   "sec": 0.002,
+   "humide": 0.2547
   },
   "sidibouzid": {
-   "sec": 0.002,
-   "humide": 0.2231
+   "sec": 0.0009,
+   "humide": 0.2137
   },
   "siliana": {
-   "sec": 0.1097,
-   "humide": 0.3139
+   "sec": 0.1172,
+   "humide": 0.3333
   },
   "tataouine": {
-   "sec": 0.059,
-   "humide": 0.1929
+   "sec": 0.1071,
+   "humide": 0.191
   },
   "tozeur": {
    "sec": 0.0,
-   "humide": 0.125
+   "humide": 0.138
   },
   "tunis": {
-   "sec": 0.1172,
-   "humide": 0.3084
+   "sec": 0.1224,
+   "humide": 0.3513
   },
   "zaghouan": {
-   "sec": 0.1426,
-   "humide": 0.3256
+   "sec": 0.1436,
+   "humide": 0.3482
   }
  },
  "sites": [
@@ -641,13 +694,14 @@
   "site": "msaken",
   "date": "2023-06-18",
   "predictions": {
-   "1": 0.17664923545565717,
-   "2": 0.17329213945727706,
-   "3": 0.17120379213855272,
-   "4": 0.16872621193556736,
-   "5": 0.1681188093281451,
-   "6": 0.16840816203810455,
-   "7": 0.16689933483291264
+   "1": 0.17623926188412958,
+   "2": 0.17174970076908302,
+   "3": 0.167765503842609,
+   "4": 0.16715212249602118,
+   "5": 0.16729709203833895,
+   "6": 0.1646343162605707,
+   "7": 0.1642082218306989,
+   "8": 0.16048435530340013
   }
  }
 }

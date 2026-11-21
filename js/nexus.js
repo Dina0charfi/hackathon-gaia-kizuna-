@@ -227,37 +227,61 @@
   /* ---------------------------------------------------- 7-day plan (trained model) */
   G.addStrings({
     fr: {
-      fc_t: 'Plan des 7 prochains jours', fc_badge: 'Modèle entraîné',
-      fc_lead: "Un modèle d'apprentissage automatique (LightGBM) prédit l'humidité du sol dans la zone des racines pour chacun des 7 prochains jours, à partir de l'état actuel du sol et de la météo prévue. Il a appris sur 9 ans de données ERA5-Land (2016–2024), 26 sites couvrant les 24 gouvernorats.",
+      fc_t: "Plan d'irrigation : aujourd'hui et les 7 prochains jours", fc_badge: 'Modèle entraîné',
+      fc_lead: "Un modèle d'apprentissage automatique (LightGBM) prévoit, jour par jour, l'état du sol dans la zone des racines (7–28 cm), à partir du dernier état connu du sol et de la météo prévue.",
       fc_loading: 'Prévision en cours…',
       fc_off: "Le service de prévision n'est pas démarré. Depuis le dossier du projet, lancez : python -m uvicorn gaia.main:app --app-dir backend --port 8000",
       fc_err: 'Prévision indisponible :',
-      fc_today: "Réserve du sol au", fc_week: 'Besoin de la culture sur 7 jours (Kc × ET0)',
-      th_day: 'Jour', th_rain: 'Pluie prévue', th_et0: 'ET0', th_etc: 'Besoin culture', th_res: 'Réserve prévue', th_dec: 'Décision',
-      d_irrigate: 'Irriguer', d_soon: 'Bientôt', d_none: 'Pas besoin',
+      v_irrigate: 'Irrigation conseillée à partir de {d}.',
+      v_soon: "Pas d'irrigation nécessaire pour l'instant, mais la réserve approche du seuil à partir de {d}.",
+      v_none: "Pas d'irrigation nécessaire cette semaine : la réserve du sol reste suffisante.",
+      v_sub: "Réserve du sol estimée aujourd'hui : {r} (probablement entre {lo} et {hi}).",
+      b_state: 'Dernier état connu du sol', b_state_u: 'ECMWF IFS · {d} (hier, dernier jour complet)',
+      b_today: "Aujourd'hui (estimé)", b_today_u: 'probablement entre {lo} et {hi}',
+      b_week: 'Consommation de la culture sur 7 jours', b_week_u: 'Kc × ET0 · {v} m³ par ha',
+      today: "aujourd'hui",
+      th_day: 'Jour', th_rain: 'Pluie prévue', th_et0: 'Évaporation de référence (ET0)', th_etc: 'Consommation de la culture',
+      th_res: 'Réserve du sol', th_range: 'Fourchette probable', th_dec: 'Conseil',
+      d_irrigate: 'Irriguer', d_soon: 'Irriguer bientôt', d_none: 'Réserve suffisante',
       c_res_t: 'Réserve du sol prévue (%)',
-      fc_ref: 'Réserve relative : 0 % = aussi sec que les 5 % des jours les plus secs du site de référence, 100 % = aussi humide que les 5 % les plus humides. Site de référence :',
-      fc_thr: "Seuils de décision (hypothèse de démonstration, à remplacer par ceux de la culture FAO-56) : irriguer sous 30 %, bientôt sous 35 %.",
-      fc_err_note: "± = erreur moyenne du modèle sur des sites jamais vus à l'entraînement ; elle augmente avec l'horizon.",
+      how_t: 'Comment lire ce plan',
+      how_res: "Réserve du sol : l'état du sol comparé à son historique dans la région depuis 2020. 0 % = aussi sec que les jours les plus secs, 100 % = aussi humide que les jours les plus humides. Ce n'est pas le pourcentage d'eau dans le sol.",
+      how_range: "Fourchette probable : l'erreur habituelle du modèle, mesurée sur des régions qu'il n'a jamais vues. Elle s'élargit avec les jours : plus on prévoit loin, moins c'est sûr.",
+      how_dec: "Conseil : « Irriguer » quand la réserve prévue passe sous 30 %, « Irriguer bientôt » entre 30 et 35 %, « Réserve suffisante » au-dessus. Ces seuils sont une hypothèse de démonstration, les mêmes pour toutes les cultures ; ils seront remplacés par ceux de la culture (FAO-56).",
+      how_need: "« Réserve suffisante » ne veut pas dire que la plante ne boit pas : la colonne « Consommation de la culture » montre ce qu'elle utilise chaque jour. Cela veut dire que l'eau déjà dans le sol couvre ce besoin.",
+      how_irr: "Le modèle décrit un sol non irrigué de la région : il ne sait pas si votre parcelle a été arrosée. Un capteur d'humidité du sol permettra de le corriger.",
+      fc_ref: 'Site de référence pour la réserve :',
+      fc_src: 'Données :',
       fc_sim: 'Prédiction de modèle entraîné, pas une mesure.',
-      fc_state_note: "L'état du sol vient d'Open-Meteo ; les tout derniers jours peuvent venir d'un modèle de prévision plutôt que d'ERA5-Land.",
       wd: ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam']
     },
     ar: {
-      fc_t: 'خطة الأيام السبعة القادمة', fc_badge: 'نموذج مُدرَّب',
-      fc_lead: 'يتنبأ نموذج تعلّم آلي (LightGBM) برطوبة التربة في منطقة الجذور لكل يوم من الأيام السبعة القادمة، انطلاقاً من حالة التربة الحالية والطقس المتوقع. تعلّم من 9 سنوات من بيانات ERA5-Land (2016–2024) في 26 موقعاً تغطي الولايات الـ24.',
+      fc_t: 'خطة الري: اليوم والأيام السبعة القادمة', fc_badge: 'نموذج مُدرَّب',
+      fc_lead: 'يتنبأ نموذج تعلّم آلي (LightGBM)، يوماً بيوم، بحالة التربة في منطقة الجذور (7–28 سم)، انطلاقاً من آخر حالة معروفة للتربة والطقس المتوقع.',
       fc_loading: 'جارٍ التنبؤ…',
       fc_off: 'خدمة التنبؤ غير مشغّلة. من مجلد المشروع، شغّل: python -m uvicorn gaia.main:app --app-dir backend --port 8000',
       fc_err: 'التنبؤ غير متاح:',
-      fc_today: 'مخزون التربة في', fc_week: 'حاجة الزراعة خلال 7 أيام (Kc × ET0)',
-      th_day: 'اليوم', th_rain: 'المطر المتوقع', th_et0: 'ET0', th_etc: 'حاجة الزراعة', th_res: 'المخزون المتوقع', th_dec: 'القرار',
-      d_irrigate: 'اسقِ', d_soon: 'قريباً', d_none: 'لا حاجة',
+      v_irrigate: 'يُنصح بالري ابتداءً من {d}.',
+      v_soon: 'لا حاجة للري حالياً، لكن المخزون يقترب من العتبة ابتداءً من {d}.',
+      v_none: 'لا حاجة للري هذا الأسبوع: مخزون التربة يبقى كافياً.',
+      v_sub: 'مخزون التربة المقدّر اليوم: {r} (على الأرجح بين {lo} و{hi}).',
+      b_state: 'آخر حالة معروفة للتربة', b_state_u: 'ECMWF IFS · {d} (أمس، آخر يوم كامل)',
+      b_today: 'اليوم (تقدير)', b_today_u: 'على الأرجح بين {lo} و{hi}',
+      b_week: 'استهلاك الزراعة خلال 7 أيام', b_week_u: 'Kc × ET0 · {v} م³ للهكتار',
+      today: 'اليوم',
+      th_day: 'اليوم', th_rain: 'المطر المتوقع', th_et0: 'التبخر المرجعي (ET0)', th_etc: 'استهلاك الزراعة',
+      th_res: 'مخزون التربة', th_range: 'المجال المرجّح', th_dec: 'النصيحة',
+      d_irrigate: 'اسقِ', d_soon: 'اسقِ قريباً', d_none: 'المخزون كافٍ',
       c_res_t: 'مخزون التربة المتوقع (%)',
-      fc_ref: 'مخزون نسبي: 0 % = جاف مثل أجفّ 5 % من أيام الموقع المرجعي، 100 % = رطب مثل أرطب 5 %. الموقع المرجعي:',
-      fc_thr: 'عتبات القرار (فرضية للعرض، تُعوَّض بعتبات الزراعة حسب FAO-56): اسقِ تحت 30 %، قريباً تحت 35 %.',
-      fc_err_note: '± = متوسط خطأ النموذج في مواقع لم يرها أثناء التدريب؛ يزداد مع بُعد الأفق.',
+      how_t: 'كيف تقرأ هذه الخطة',
+      how_res: 'مخزون التربة: حالة التربة مقارنة بتاريخها في المنطقة منذ 2020. 0 % = جافة مثل أجفّ الأيام، 100 % = رطبة مثل أرطب الأيام. ليست نسبة الماء في التربة.',
+      how_range: 'المجال المرجّح: الخطأ المعتاد للنموذج، مقيساً في مناطق لم يرها أثناء التدريب. يتّسع مع الأيام: كلما ابتعد التنبؤ قلّ اليقين.',
+      how_dec: 'النصيحة: «اسقِ» عندما ينزل المخزون المتوقع تحت 30 %، «اسقِ قريباً» بين 30 و35 %، «المخزون كافٍ» فوق ذلك. هذه العتبات فرضية للعرض، واحدة لكل الزراعات، وستُعوَّض بعتبات كل زراعة (FAO-56).',
+      how_need: '«المخزون كافٍ» لا يعني أن النبتة لا تشرب: عمود «استهلاك الزراعة» يبيّن ما تستعمله كل يوم. المعنى أن الماء الموجود في التربة يغطي هذه الحاجة.',
+      how_irr: 'يصف النموذج تربة غير مسقية في المنطقة: لا يعرف إن كانت قطعتك قد سُقيت. سيسمح مستشعر رطوبة التربة بتصحيح ذلك.',
+      fc_ref: 'الموقع المرجعي للمخزون:',
+      fc_src: 'البيانات:',
       fc_sim: 'تنبؤ نموذج مُدرَّب وليس قياساً.',
-      fc_state_note: 'حالة التربة من Open-Meteo؛ قد تأتي الأيام الأخيرة من نموذج تنبؤ بدل ERA5-Land.',
       wd: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
     }
   });
@@ -281,9 +305,13 @@
       });
   }
 
-  function dayLabel(iso) {
+  function dayLabel(iso, isToday) {
     var d = new Date(iso + 'T12:00:00');
-    return t('wd')[d.getDay()] + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+    var s = t('wd')[d.getDay()] + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+    return isToday ? t('today') + ' · ' + s : s;
+  }
+  function fill(key, vals) {
+    return t(key).replace(/\{(\w+)\}/g, function (_, k) { return vals[k]; });
   }
 
   function forecastCard() {
@@ -295,44 +323,68 @@
     if (FC.status === 'error') { card.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('err', t('fc_err') + ' ' + FC.error)])); return card; }
 
     var d = FC.data, kc = num(S.kc), pct = function (x) { return fmt(x * 100) + ' %'; };
+    var today = d.days.filter(function (x) { return x.is_today; })[0] || d.days[0];
+    var week = d.days.filter(function (x) { return !x.is_today; }).slice(0, 7);
     var etc = d.days.map(function (x) { return kc !== null && x.et0_mm !== null ? kc * x.et0_mm : null; });
-    var week = etc.every(function (v) { return v !== null; }) ? etc.reduce(function (a, b) { return a + b; }, 0) : null;
+    var etcWeek = week.map(function (x) { return kc !== null && x.et0_mm !== null ? kc * x.et0_mm : null; });
+    var weekSum = etcWeek.every(function (v) { return v !== null; }) ? etcWeek.reduce(function (a, b) { return a + b; }, 0) : null;
     var decision = { irrigate: ['no', 'd_irrigate'], soon: ['adapt', 'd_soon'], none: ['ok', 'd_none'] };
 
+    // 1. the verdict, in one sentence
+    var first = function (kind) { return d.days.filter(function (x) { return x.decision === kind; })[0]; };
+    var irr = first('irrigate'), soon = first('soon');
+    var verdict = irr ? ['err', fill('v_irrigate', { d: dayLabel(irr.date, irr.is_today) })]
+      : soon ? ['info', fill('v_soon', { d: dayLabel(soon.date, soon.is_today) })]
+      : ['ok', t('v_none')];
+    card.appendChild(el('div', { style: 'margin-top:12px' }, [G.note(verdict[0], verdict[1])]));
+    card.appendChild(el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [
+      fill('v_sub', { r: pct(today.reserve), lo: pct(today.reserve_low), hi: pct(today.reserve_high) })]));
+
+    // 2. last known state, today, crop use over the week
     card.appendChild(el('div', { class: 'flow', style: 'margin-top:12px' }, [
-      el('div', { class: 'fbox water' }, [el('b', null, [t('fc_today') + ' ' + dayLabel(d.state.date)]), el('div', { class: 'v' }, [pct(d.state.reserve)]), el('span', { class: 'u' }, [fmt(d.state.soil_moisture, 3) + ' m³/m³'])]),
-      el('div', { class: 'fbox water' }, [el('b', null, [t('fc_week')]), el('div', { class: 'v' }, [week === null ? '—' : fmt(week, 1) + ' mm']), el('span', { class: 'u' }, [week === null ? '' : fmt(week * 10) + ' m³ ' + t('per_ha')])])
+      el('div', { class: 'fbox water' }, [el('b', null, [t('b_state')]), el('div', { class: 'v' }, [pct(d.state.reserve)]),
+        el('span', { class: 'u' }, [fill('b_state_u', { d: dayLabel(d.state.date), n: d.state.lag_days })])]),
+      el('div', { class: 'fbox water' }, [el('b', null, [t('b_today')]), el('div', { class: 'v' }, [pct(today.reserve)]),
+        el('span', { class: 'u' }, [fill('b_today_u', { lo: pct(today.reserve_low), hi: pct(today.reserve_high) })])]),
+      el('div', { class: 'fbox water' }, [el('b', null, [t('b_week')]), el('div', { class: 'v' }, [weekSum === null ? '—' : fmt(weekSum, 1) + ' mm']),
+        el('span', { class: 'u' }, [weekSum === null ? '' : fill('b_week_u', { v: fmt(weekSum * 10) })])])
     ]));
 
+    // 3. chart and table
     var chart = el('div', { style: 'margin-top:12px' });
     card.appendChild(chart);
-    G.barChart(chart, { labels: d.days.map(function (x) { return dayLabel(x.date); }), unit: '%', title: t('c_res_t'),
+    G.barChart(chart, { labels: d.days.map(function (x) { return x.is_today ? t('today') : dayLabel(x.date); }), unit: '%', title: t('c_res_t'),
       series: [{ name: t('c_res_t'), color: '#2F5A75', values: d.days.map(function (x) { return x.reserve * 100; }) }] });
 
     card.appendChild(el('div', { class: 'gp-table-wrap', style: 'margin-top:10px' }, [el('table', { class: 'gp-table' }, [
       el('thead', null, [el('tr', null, [el('th', null, [t('th_day')]), el('th', { class: 'num' }, [t('th_rain')]), el('th', { class: 'num' }, [t('th_et0')]),
-        el('th', { class: 'num' }, [t('th_etc')]), el('th', { class: 'num' }, [t('th_res')]), el('th', null, [t('th_dec')])])]),
+        el('th', { class: 'num' }, [t('th_etc')]), el('th', { class: 'num' }, [t('th_res')]), el('th', { class: 'num' }, [t('th_range')]), el('th', null, [t('th_dec')])])]),
       el('tbody', null, d.days.map(function (x, i) {
         var dec = decision[x.decision];
-        return el('tr', null, [
-          el('td', null, [dayLabel(x.date)]),
+        return el('tr', x.is_today ? { style: 'font-weight:600' } : null, [
+          el('td', null, [dayLabel(x.date, x.is_today)]),
           el('td', { class: 'num' }, [x.rain_mm === null ? '—' : fmt(x.rain_mm, 1) + ' mm']),
           el('td', { class: 'num' }, [x.et0_mm === null ? '—' : fmt(x.et0_mm, 1) + ' mm']),
           el('td', { class: 'num' }, [etc[i] === null ? '—' : fmt(etc[i], 1) + ' mm']),
-          el('td', { class: 'num' }, [pct(x.reserve) + ' ± ' + fmt(x.reserve_error * 100)]),
+          el('td', { class: 'num' }, [pct(x.reserve)]),
+          el('td', { class: 'num muted' }, [fmt(x.reserve_low * 100) + '–' + pct(x.reserve_high)]),
           el('td', null, [G.pill(dec[0], t(dec[1]))])
         ]);
       }))
     ])]));
-
-    var ref = d.reference_site;
     card.appendChild(el('p', { class: 'assump', style: 'margin-top:8px' }, [t('fc_sim')]));
-    card.appendChild(el('details', { class: 'gp-more', style: 'margin-top:6px' }, [
+
+    // 4. how to read it, always visible
+    card.appendChild(el('div', { class: 'gp-note', style: 'margin-top:12px' }, [G.icon('info'), el('div', null, [el('b', null, [t('how_t')]),
+      el('ul', { style: 'margin:6px 0 0;padding-inline-start:18px;display:grid;gap:4px' },
+        ['how_res', 'how_range', 'how_dec', 'how_need', 'how_irr'].map(function (k) { return el('li', null, [t(k)]); }))])]));
+
+    // 5. sources
+    var ref = d.reference_site;
+    card.appendChild(el('details', { class: 'gp-more', style: 'margin-top:8px' }, [
       el('summary', null, [t('method_t')]),
       el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_ref') + ' ' + ref.nom + ' (' + fmt(ref.distance_km) + ' km).']),
-      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_thr')]),
-      el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2)' }, [t('fc_err_note')]),
-      el('p', { class: 'assump', style: 'margin-top:6px' }, [t('fc_state_note') + ' ' + d.model.source + ' · ' + d.model.period.join(' – ')])
+      el('p', { class: 'assump', style: 'margin-top:6px' }, [t('fc_src') + ' ' + d.model.source + ' · ' + d.model.period.join(' → ') + ' · ' + d.model.trained_on])
     ]));
     return card;
   }

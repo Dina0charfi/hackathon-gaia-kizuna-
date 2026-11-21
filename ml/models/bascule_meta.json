@@ -1,7 +1,7 @@
 {
  "question": "la réserve passe-t-elle sous le seuil dans les 7 prochains jours ? (jours où elle est encore au-dessus)",
  "seuil_reserve": 0.3,
- "seuil_probabilite": 0.3999999999999999,
+ "seuil_probabilite": 0.5399999999999999,
  "variables": [
   "sm_0_7",
   "sm_7_28",
@@ -41,115 +41,115 @@
  ],
  "seuils_sites_entrainement": {
   "ariana": {
-   "sec": 0.137,
-   "humide": 0.3218
+   "sec": 0.14,
+   "humide": 0.3197
   },
   "beja": {
-   "sec": 0.219,
-   "humide": 0.4383
+   "sec": 0.237,
+   "humide": 0.4358
   },
   "benarous": {
-   "sec": 0.137,
-   "humide": 0.3425
+   "sec": 0.1294,
+   "humide": 0.3375
   },
   "bousalem": {
-   "sec": 0.0341,
-   "humide": 0.3123
+   "sec": 0.111,
+   "humide": 0.3013
   },
   "capbon": {
    "sec": 0.233,
-   "humide": 0.4382
+   "humide": 0.4255
   },
   "gabes": {
-   "sec": 0.0033,
-   "humide": 0.1355
+   "sec": 0.001,
+   "humide": 0.0974
   },
   "gafsa": {
-   "sec": 0.002,
-   "humide": 0.126
+   "sec": 0.0,
+   "humide": 0.0476
   },
   "jendouba": {
-   "sec": 0.0663,
-   "humide": 0.3093
+   "sec": 0.1008,
+   "humide": 0.3029
   },
   "kairouan": {
-   "sec": 0.089,
-   "humide": 0.2657
+   "sec": 0.0826,
+   "humide": 0.2213
   },
   "kasserine": {
-   "sec": 0.1118,
-   "humide": 0.2329
+   "sec": 0.0034,
+   "humide": 0.2167
   },
   "kebili": {
    "sec": 0.0,
-   "humide": 0.0931
+   "humide": 0.0891
   },
   "kef": {
-   "sec": 0.0487,
-   "humide": 0.3013
+   "sec": 0.084,
+   "humide": 0.2856
   },
   "mahdia": {
-   "sec": 0.1327,
-   "humide": 0.2946
+   "sec": 0.1126,
+   "humide": 0.2738
   },
   "manouba": {
-   "sec": 0.121,
-   "humide": 0.3025
+   "sec": 0.1178,
+   "humide": 0.294
   },
   "mateur": {
-   "sec": 0.1031,
-   "humide": 0.3303
+   "sec": 0.0989,
+   "humide": 0.3222
   },
   "medenine": {
-   "sec": 0.066,
-   "humide": 0.1716
+   "sec": 0.0046,
+   "humide": 0.128
   },
   "monastir": {
-   "sec": 0.1261,
-   "humide": 0.3125
+   "sec": 0.1311,
+   "humide": 0.2898
   },
   "msaken": {
-   "sec": 0.1002,
-   "humide": 0.2958
+   "sec": 0.1074,
+   "humide": 0.2492
   },
   "sbeitla": {
-   "sec": 0.1113,
-   "humide": 0.2534
+   "sec": 0.0014,
+   "humide": 0.2291
   },
   "sfax": {
-   "sec": 0.076,
-   "humide": 0.1938
+   "sec": 0.0,
+   "humide": 0.1727
   },
   "sidibouzid": {
-   "sec": 0.1097,
-   "humide": 0.2442
+   "sec": 0.0,
+   "humide": 0.1845
   },
   "siliana": {
-   "sec": 0.1056,
-   "humide": 0.3213
+   "sec": 0.108,
+   "humide": 0.2986
   },
   "tataouine": {
-   "sec": 0.017,
-   "humide": 0.1896
+   "sec": 0.117,
+   "humide": 0.192
   },
   "tozeur": {
-   "sec": 0.0005,
-   "humide": 0.123
+   "sec": -0.0,
+   "humide": 0.032
   },
   "tunis": {
-   "sec": 0.103,
-   "humide": 0.3073
+   "sec": 0.114,
+   "humide": 0.301
   },
   "zaghouan": {
-   "sec": 0.145,
-   "humide": 0.34
+   "sec": 0.1378,
+   "humide": 0.303
   }
  },
  "resultats": [
   {
    "test": "années jamais vues",
    "méthode": "Persistance",
-   "bascules réelles": 888,
+   "bascules réelles": 409,
    "bascules annoncées": 0,
    "Précision": 0.0,
    "Rappel": 0.0,
@@ -158,34 +158,34 @@
   {
    "test": "années jamais vues",
    "méthode": "Tendance (3 derniers jours)",
-   "bascules réelles": 888,
-   "bascules annoncées": 1158,
-   "Précision": 0.3921,
-   "Rappel": 0.5113,
-   "F1": 0.4438
+   "bascules réelles": 409,
+   "bascules annoncées": 719,
+   "Précision": 0.3129,
+   "Rappel": 0.5501,
+   "F1": 0.3989
   },
   {
    "test": "années jamais vues",
    "méthode": "Trajectoire des 7 modèles",
-   "bascules réelles": 888,
-   "bascules annoncées": 805,
-   "Précision": 0.6149,
-   "Rappel": 0.5574,
-   "F1": 0.5848
+   "bascules réelles": 409,
+   "bascules annoncées": 379,
+   "Précision": 0.5435,
+   "Rappel": 0.5037,
+   "F1": 0.5228
   },
   {
    "test": "années jamais vues",
    "méthode": "Modèle dédié aux bascules",
-   "bascules réelles": 888,
-   "bascules annoncées": 848,
-   "Précision": 0.6167,
-   "Rappel": 0.589,
-   "F1": 0.6025
+   "bascules réelles": 409,
+   "bascules annoncées": 338,
+   "Précision": 0.5769,
+   "Rappel": 0.4768,
+   "F1": 0.5221
   },
   {
    "test": "lieux jamais vus",
    "méthode": "Persistance",
-   "bascules réelles": 129,
+   "bascules réelles": 56,
    "bascules annoncées": 0,
    "Précision": 0.0,
    "Rappel": 0.0,
@@ -194,29 +194,29 @@
   {
    "test": "lieux jamais vus",
    "méthode": "Tendance (3 derniers jours)",
-   "bascules réelles": 129,
-   "bascules annoncées": 195,
-   "Précision": 0.2923,
-   "Rappel": 0.4419,
-   "F1": 0.3519
+   "bascules réelles": 56,
+   "bascules annoncées": 70,
+   "Précision": 0.2286,
+   "Rappel": 0.2857,
+   "F1": 0.254
   },
   {
    "test": "lieux jamais vus",
    "méthode": "Trajectoire des 7 modèles",
-   "bascules réelles": 129,
-   "bascules annoncées": 79,
-   "Précision": 0.7342,
-   "Rappel": 0.4496,
-   "F1": 0.5577
+   "bascules réelles": 56,
+   "bascules annoncées": 34,
+   "Précision": 0.6471,
+   "Rappel": 0.3929,
+   "F1": 0.4889
   },
   {
    "test": "lieux jamais vus",
    "méthode": "Modèle dédié aux bascules",
-   "bascules réelles": 129,
-   "bascules annoncées": 152,
-   "Précision": 0.5132,
-   "Rappel": 0.6047,
-   "F1": 0.5552
+   "bascules réelles": 56,
+   "bascules annoncées": 27,
+   "Précision": 0.8148,
+   "Rappel": 0.3929,
+   "F1": 0.5301
   }
  ]
 }
