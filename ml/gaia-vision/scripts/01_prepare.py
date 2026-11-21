@@ -9,11 +9,12 @@ import argparse, collections, csv, hashlib, re
 from pathlib import Path
 
 EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-COMMON = {"healthy": "healthy", "buena": "healthy", "sana": "healthy", "health": "healthy"}
+COMMON = {"healthy": "healthy", "buena": "healthy", "sana": "healthy", "health": "healthy", "healthy_sample": "healthy"}
 OLIVE = {"aculus": "aculus_olearius", "scab": "peacock_spot", "olive_peacock_spot": "peacock_spot", "knot": "knot_disease"}
 
 def norm(name, tree):
     n = re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+    n = re.sub(r"^\d+_", "", n)   # Mendeley palm folders are numbered: "9. Healthy sample" -> healthy_sample
     if n in COMMON: return COMMON[n]
     return OLIVE.get(n, n) if tree == "olive" else n   # olive aliases must not touch other crops
 

@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 backend/data/feedback.jsonl
 .pytest_cache/
+.env
+*.env
+!.env.example
