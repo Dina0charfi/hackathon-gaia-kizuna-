@@ -121,12 +121,12 @@
   function emit() { R.listeners.forEach(function (f) { try { f(); } catch (e) { /* ignore */ } }); }
 
   function post(path, body) {
-    return G.apiReady.then(function () { return fetch(base() + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); })
+    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status); return j; }); });
   }
   function refresh() {
     var w = where(); if (!base() || !w) return Promise.resolve(null);
-    return G.apiReady.then(function () { return fetch(base() + '/state?lat=' + w.lat + '&lon=' + w.lon); }).then(function (r) { return r.json(); })
+    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + '/state?lat=' + w.lat + '&lon=' + w.lon); }).then(function (r) { return r.json(); })
       .then(function (j) { R.status = 'ok'; R.data = j; notifyNew(j); emit(); return j; })
       .catch(function () { R.status = 'off'; emit(); return null; });
   }

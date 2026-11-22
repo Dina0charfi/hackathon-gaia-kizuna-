@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Énergie des déchets — GAIA</title>
+<meta name="description" content="Les déchets de la ferme (fumier, grignons, margines, résidus) deviennent du biogaz pour cuisiner, de l'électricité et de l'engrais : simulation d'une année jour par jour.">
+<meta name="theme-color" content="#1F3A2B">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="platform.css">
+<style>
+  .wa { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .wa { grid-template-columns: minmax(0, 1fr); } }
+  .wa-in { position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow-y: auto; }
+  @media (max-width: 1000px) { .wa-in { position: static; max-height: none; } }
+  .wa-in .gp-field { margin-top: 10px; }
+  .wa-h { font-size: 15px; margin-top: 16px; }
+  .wa-check { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; color: var(--g-ink-2); cursor: pointer; }
+  .wa-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--g-forest); }
+  .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kpi { background: var(--g-paper); border: 1px solid var(--g-line); border-radius: 12px; padding: 12px 14px; }
+  .kpi b { display: block; font-size: 12px; color: var(--g-ink-3); font-weight: 600; }
+  .kpi .v { font-family: var(--g-display); font-size: 23px; font-weight: 600; color: var(--g-forest); margin-top: 2px; }
+  body.gp[dir="rtl"] .kpi .v { font-family: var(--g-ar); }
+  .kpi .u { font-size: 12.5px; color: var(--g-ink-3); }
+  .kpi.hi { border-color: var(--g-gold); background: var(--s-adapt-bg); }
+  .wa-sim { display: flex; gap: 18px; align-items: center; margin-top: 14px; }
+  .wa-tank { display: grid; justify-items: center; gap: 6px; }
+  .wa-gauge { width: 64px; height: 120px; border: 2px solid var(--g-forest); border-radius: 32px 32px 12px 12px; position: relative; overflow: hidden; background: var(--g-ivory); }
+  .wa-gauge i { position: absolute; left: 0; right: 0; bottom: 0; height: 50%; background: linear-gradient(180deg, #8DB36E, #4E7A3A); transition: height .15s; }
+  .wa-day { font-family: var(--g-display); font-size: 22px; font-weight: 600; color: var(--g-forest); }
+  .wa-prog { height: 10px; border-radius: 999px; background: var(--g-sand-soft); overflow: hidden; margin-top: 8px; }
+  .wa-prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #24432F, #D9B86A); }
+  .wa-bars { display: grid; gap: 6px; margin-top: 8px; }
+  .wa-bar { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr) 52px; gap: 10px; align-items: center; font-size: 13.5px; color: var(--g-ink-2); }
+  .wa-bar i { height: 10px; border-radius: 999px; background: var(--g-sand-soft); overflow: hidden; }
+  .wa-bar i b { display: block; height: 100%; background: #5E8C4A; border-radius: 999px; }
+  .wa-bar .num { text-align: end; font-variant-numeric: tabular-nums; }
+  .assump { font-size: 12.5px; color: var(--g-ink-3); }
+</style>
+</head>
+<body class="gp">
+<main id="main" class="wrap">
+  <header class="gp-head">
+    <p class="eyebrow">GAIA · ÉNERGIE VERTE</p>
+    <h1><span data-i18n="w_title">Énergie des déchets</span><span class="jp-mark">循 · 環</span></h1>
+    <p class="lead" data-i18n="w_lead">Vos déchets agricoles deviennent du gaz pour cuisiner, de l’électricité et de l’engrais.</p>
+  </header>
+  <div id="app"></div>
+</main>
+<script src="js/gaia-core.js?v=20261122"></script>
+<script src="js/i18n-data.js"></script>
+<script src="js/nexus-core.js"></script>
+<script src="js/waste-core.js?v=2"></script>
+<script src="js/waste.js?v=2"></script>
+</body>
+</html>
