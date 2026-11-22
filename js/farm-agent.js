@@ -121,14 +121,15 @@
   function emit() { R.listeners.forEach(function (f) { try { f(); } catch (e) { /* ignore */ } }); }
 
   function post(path, body) {
-    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status); return j; }); });
+    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, G.auth.headers()), body: body ? JSON.stringify(body) : undefined }); })
+      .then(function (r) { return r.json().then(function (j) { if (r.status === 401) throw new Error(t('fr_login')); if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status); return j; }); });
   }
   function refresh() {
     var w = where(); if (!base() || !w) return Promise.resolve(null);
-    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + '/state?lat=' + w.lat + '&lon=' + w.lon); }).then(function (r) { return r.json(); })
+    if (!G.auth.user()) { R.status = 'login'; R.data = null; emit(); return Promise.resolve(null); }
+    return (G.apiReady || Promise.resolve()).then(function () { return fetch(base() + '/state?lat=' + w.lat + '&lon=' + w.lon, { headers: G.auth.headers() }); }).then(function (r) { if (!r.ok) throw r.status; return r.json(); })
       .then(function (j) { R.status = 'ok'; R.data = j; notifyNew(j); emit(); return j; })
-      .catch(function () { R.status = 'off'; emit(); return null; });
+      .catch(function (e) { R.status = e === 401 ? 'login' : 'off'; R.data = null; emit(); return null; });
   }
 
   // browser notifications for new unread alerts (free, no external service)
@@ -190,7 +191,7 @@
     var got = shown ? Promise.resolve(shown) : (function () {
       var st = (R.data && R.data.settings) || {}, b = { lat: w.lat, lon: w.lon, mode: 'solar', crop: st.crop || 'olive', kc: st.kc > 0 ? st.kc : 0.65 };
       ['area_ha', 'ea', 'head_m', 'pump_eff', 'flow_m3h', 'pv_kwp', 'pr'].forEach(function (k) { if (st[k] > 0) b[k] = st[k]; });
-      return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
+      return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, G.auth.headers()), body: JSON.stringify(b) })
         .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status); return { data: j, mode: b.mode }; }); });
     }());
     got.then(function (x) {
@@ -209,6 +210,11 @@
     var c = el('div', { class: 'gp-card', style: 'margin-top:16px' }, [head, el('p', { class: 'small', style: 'margin-top:6px;color:var(--g-ink-2);max-width:80ch' }, [t('fr_lead')])]);
     if (!base() || !where()) return c;
     if (R.status === 'idle') { R.status = 'loading'; refresh(); }
+    if (R.status === 'login') {
+      c.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('info', t('fr_login'))]));
+      c.appendChild(el('p', { style: 'margin-top:10px' }, [el('a', { class: 'gp-btn primary sm', href: 'account.html' }, [t('fr_login_b')])]));
+      return c;
+    }
     if (R.status === 'off') { c.appendChild(el('div', { style: 'margin-top:10px' }, [G.note('info', t('fr_off'))])); return c; }
     if (!R.data) { c.appendChild(el('p', { class: 'muted small', style: 'margin-top:10px' }, [el('span', { class: 'gp-spin' })])); return c; }
     var s = R.data;
@@ -315,5 +321,19 @@
   // keep the record fresh while the page is open (new morning alerts → notification)
   setInterval(function () { if (R.status === 'ok') refresh(); }, 5 * 60 * 1000);
 
+  G.addStrings({
+    fr: { fr_login: 'Connectez-vous pour garder votre plan, vos arrosages et vos alertes : ils sont privés.', fr_login_b: 'Se connecter' },
+    en: { fr_login: 'Sign in to keep your plan, waterings and alerts: they are private.', fr_login_b: 'Sign in' },
+    ar: { fr_login: 'سجّل الدخول لحفظ خطتك وسقيك وتنبيهاتك: هي خاصة بك.', fr_login_b: 'تسجيل الدخول' },
+    ja: { fr_login: 'ログインすると計画・灌漑・警報を保存できます。内容は非公開です。', fr_login_b: 'ログイン' }
+  });
+  // another account, or signed out: nothing of the previous one stays on the page
+  var who = G.auth.user() ? G.auth.user().id : null;
+  G.auth.onChange(function (u) {
+    var id = u ? u.id : null; if (id === who) return;
+    who = id; R.status = 'idle'; R.data = null; R.seen = null; R.err = null;
+    if (window.GAIA_SOILPLAN) GAIA_SOILPLAN.clear();
+    refresh(); emit();
+  });
   window.GAIA_FARMREC = { card: card, apply: apply, describe: describe, refresh: refresh, state: function () { return R.data; }, onChange: function (f) { R.listeners.push(f); } };
 }());

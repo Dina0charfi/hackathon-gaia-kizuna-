@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendre ma récolte — GAIA</title>
+<meta name="description" content="Où vendre sa récolte en Tunisie : souk, marché de gros, huilerie, Office des Céréales, stations de dattes, export, avec le Teikei, la vente groupée JA et les Michi-no-eki japonais, calés sur la Land DNA de la parcelle.">
+<meta name="theme-color" content="#1F3A2B">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="platform.css">
+<style>
+  .mk-top { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 1000px) { .mk-top { grid-template-columns: 1fr; } }
+  .mk-in .gp-field { margin-top: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 860px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kpi { background: var(--g-paper); border: 1px solid var(--g-line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+  .kpi b { display: block; font-size: 12px; color: var(--g-ink-3); font-weight: 600; }
+  .kpi .v { font-family: var(--g-display); font-size: 21px; font-weight: 600; color: var(--g-forest); margin-top: 2px; overflow-wrap: anywhere; }
+  body.gp[dir="rtl"] .kpi .v { font-family: var(--g-ar); }
+  .kpi .u { font-size: 12.5px; color: var(--g-ink-3); }
+  .kpi.hi { border-color: var(--g-gold); background: var(--s-adapt-bg); }
+  .assump { font-size: 12.5px; color: var(--g-ink-3); }
+  .sec-t { margin-top: 30px; }
+  .formula { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background: var(--g-ivory); border: 1px solid var(--g-line); border-radius: 8px; padding: 8px 10px; direction: ltr; text-align: left; overflow-x: auto; }
+
+  /* 旬 selling calendar */
+  .mk-cal { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; margin-top: 12px; }
+  .mk-m { position: relative; display: grid; gap: 4px; justify-items: center; padding: 6px 0 8px; border-radius: 8px; font-size: 12px; color: var(--g-ink-2); }
+  .mk-m i { display: block; width: 100%; height: 16px; border-radius: 4px; background: var(--g-sand-soft); }
+  .mk-m.h i { background: var(--g-forest); }
+  .mk-m.k i { background: #9DB07A; }
+  .mk-m.l i { background: repeating-linear-gradient(135deg, #9DB07A 0 5px, #D9B86A 5px 10px); }
+  .mk-m.now { outline: 2px solid var(--g-gold); outline-offset: 1px; font-weight: 700; color: var(--g-ink); }
+  .mk-m .sg { position: absolute; top: 22px; font-size: 13px; color: #B5432F; }
+  .mk-leg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+  .mk-leg i.h { background: var(--g-forest); } .mk-leg i.k { background: #9DB07A; }
+  .mk-leg i.l { background: repeating-linear-gradient(135deg, #9DB07A 0 4px, #D9B86A 4px 8px); }
+  @media (max-width: 560px) { .mk-cal { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 8px; } }
+
+  /* channels */
+  .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 12px; }
+  .mk-ch { display: flex; flex-direction: column; gap: 6px; }
+  .mk-ch.jp { border-color: rgba(181, 67, 47, .35); background: linear-gradient(180deg, #FFF8F3, var(--g-paper) 40%); }
+  .mk-ch-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .mk-ch-top .pill { margin-inline-start: auto; }
+  .mk-ch h3 { font-size: 16.5px; margin: 2px 0 0; }
+  .mk-desc { font-size: 13.5px; color: var(--g-ink-2); margin: 0; }
+  .mk-why { margin: 2px 0 0; padding-inline-start: 18px; font-size: 13px; color: var(--g-ink-2); display: grid; gap: 2px; }
+  .mk-meta { margin: 0; font-size: 13px; color: var(--g-ink-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .mk-meta svg { color: var(--g-gold-ink); }
+  .mk-price { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 8px; margin-top: auto; padding-top: 6px; }
+  .mk-price .gp-field:only-child { grid-column: 1 / -1; }
+  .mk-net { font-size: 14px; color: var(--s-ok); background: var(--s-ok-bg); border-radius: 10px; padding: 8px 10px; }
+  .mk-net.neg { color: var(--s-no); background: var(--s-no-bg); }
+  .mk-kanji { font-family: var(--g-jp); color: #B5432F; font-size: 15px; }
+  .mk-kanji.big { font-size: 30px; line-height: 1; writing-mode: vertical-rl; letter-spacing: 2px; }
+
+  /* Japanese methods */
+  .mk-jp { display: grid; gap: 14px; margin-top: 30px; }
+  .mk-sec.jp { border-color: rgba(181, 67, 47, .3); }
+  .mk-sec-h { display: flex; gap: 14px; align-items: flex-start; }
+  .mk-sec-h h2 { font-size: 20px; }
+  .mk-sec-h p { margin: 4px 0 0; color: var(--g-ink-2); max-width: 80ch; }
+  .mk-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 10px; margin-top: 12px; }
+  .mk-list { margin: 8px 0 0; padding-inline-start: 20px; font-size: 13.5px; color: var(--g-ink-2); display: grid; gap: 3px; }
+  .mk-contract { white-space: pre-wrap; font: 13.5px/1.55 var(--g-sans); background: var(--g-ivory); border: 1px solid var(--g-line); border-radius: 10px; padding: 12px 14px; margin: 10px 0 0; }
+  body.gp[dir="rtl"] .mk-contract { font-family: var(--g-ar); }
+  .mk-members { display: grid; gap: 8px; margin-top: 10px; }
+  .mk-mrow { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 40px; gap: 6px; align-items: end; }
+  .mk-mrow label { display: grid; gap: 2px; }
+  .mk-mrow .lab { font-size: 11.5px; font-weight: 600; color: var(--g-ink-3); }
+  .mk-mrow input { width: 100%; min-height: 38px; border: 1px solid var(--g-line-2); border-radius: 8px; padding: 0 8px; font: 14px var(--g-sans); background: #fff; }
+  .mk-mrow button { border: 1px solid var(--g-line-2); background: #fff; border-radius: 8px; min-height: 38px; font: 600 16px var(--g-sans); cursor: pointer; color: var(--g-ink-2); }
+  .mk-grade { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--g-sand-soft); }
+  .mk-grade h3 { font-size: 15px; margin: 0; }
+
+  /* producer's-face label */
+  .mk-lb-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .mk-lb-sec { grid-template-columns: 1fr; } }
+  .mk-label { background: #fff; border: 2px solid var(--g-forest); border-radius: 14px; padding: 16px; display: grid; gap: 6px; max-width: 360px; }
+  .mk-lb-head { display: flex; gap: 10px; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed var(--g-line-2); }
+  .mk-lb-head .gp-seal { font-family: var(--g-jp); }
+  .mk-lb-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+  .mk-lb-row .k { color: var(--g-ink-3); }
+  .mk-lb-row .v { font-weight: 600; color: var(--g-ink); text-align: end; }
+  .mk-lb-src { font-size: 11px; color: var(--g-ink-3); margin: 6px 0 0; }
+  @media print {
+    body.mk-print * { visibility: hidden; }
+    body.mk-print #mk-label, body.mk-print #mk-label * { visibility: visible; }
+    body.mk-print #mk-label { position: absolute; top: 0; left: 0; }
+  }
+</style>
+</head>
+<body class="gp">
+<main id="main" class="wrap">
+  <header class="gp-head">
+    <p class="eyebrow" data-i18n="mk_eyebrow">GAIA MARCHÉ · M7</p>
+    <h1><span data-i18n="mk_title">Où vendre ma récolte</span><span class="jp-mark">旬 · 縁</span></h1>
+    <p class="lead" data-i18n="mk_lead">Les circuits tunisiens vérifiés pour votre parcelle, avec trois méthodes japonaises adaptées.</p>
+  </header>
+  <div id="app"></div>
+</main>
+<script src="js/gaia-core.js?v=20261122b"></script>
+<script src="js/i18n-data.js"></script>
+<script src="js/landdna.js"></script>
+<script src="js/nexus-core.js"></script>
+<script src="js/market-core.js"></script>
+<script src="js/market-i18n.js"></script>
+<script src="js/market.js"></script>
+</body>
+</html>

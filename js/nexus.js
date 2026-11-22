@@ -1178,7 +1178,7 @@
     PL.key = key; PL.status = 'loading';
     clearTimeout(PL.timer);
     PL.timer = setTimeout(function () {
-      (G.apiReady || Promise.resolve()).then(function () { return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key }); })
+      (G.apiReady || Promise.resolve()).then(function () { return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, G.auth.headers()), body: key }); })
         .then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || res.status); return j; }); })
         .then(function (j) { if (PL.key !== key) return; PL.status = 'ok'; PL.data = j; PL.error = null; draw(); })
         .catch(function (e) { if (PL.key !== key) return; PL.status = e instanceof TypeError ? 'off' : 'error'; PL.error = String(e.message || e); draw(); });
@@ -1452,7 +1452,7 @@
     var history = AG.turns.filter(function (x) { return x.content; }).map(function (x) { return { role: x.role, content: x.content }; });
     AG.turns.push({ role: 'user', content: q.trim() });
     AG.status = 'loading'; AG.draft = ''; AG.error = null; AG.code = null; draw();
-    fetch(G.CONFIG.agentEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    fetch(G.CONFIG.agentEndpoint, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, G.auth.headers()),
       body: JSON.stringify({ question: q.trim(), lang: G.lang(), parcel: parcel, history: history }) })
       .then(function (res) { return res.json().then(function (j) { if (!res.ok) { var e = new Error((j.detail && (j.detail.message || j.detail)) || res.status); e.code = j.detail && j.detail.status; throw e; } return j; }); })
       .then(function (j) { AG.turns.push({ role: 'assistant', content: G.noEmoji(j.text), steps: j.steps || [], engine: j.engine, model: j.model, provider: j.provider,
