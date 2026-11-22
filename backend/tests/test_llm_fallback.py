@@ -32,7 +32,7 @@ ASKS = [lambda h: assistant.answer({"question": "x"}, http=h), lambda h: leaf.ex
 
 
 @pytest.mark.parametrize("ask", ASKS)
-@pytest.mark.parametrize("code", [429, 413, 404])
+@pytest.mark.parametrize("code", [429, 413, 404, 400])
 def test_next_model_answers(groq, ask, code):
     h = Http([code, 200])
     out = ask(h)
