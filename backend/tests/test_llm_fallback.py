@@ -67,3 +67,32 @@ def test_an_empty_answer_goes_to_the_next_model(groq, ask):
     h = Http([200], ["", "ok"])
     assert ask(h)["text"] == "ok" and len(h.models) == 2
     assert h.payloads[0]["reasoning_effort"] == "low"
+
+
+def test_waits_once_when_every_model_is_busy(groq, monkeypatch):
+    class Busy(Http):
+        def post(self, *a, **k):
+            r = super().post(*a, **k)
+            r.headers = {"retry-after": "4"}
+            return r
+
+    waits = []
+    monkeypatch.setattr(assistant.time, "sleep", waits.append)
+    h = Busy([429, 429, 429, 200])
+    assert assistant.answer({"question": "x"}, http=h)["text"] == "ok" and waits == [4.5] and len(h.models) == 4
+    h = Busy([429])
+    monkeypatch.setattr(assistant, "MAX_WAIT", 1.0)
+    with pytest.raises(assistant.AssistantUnavailable):
+        assistant.answer({"question": "x"}, http=h)
+    assert len(h.models) == 3 and len(waits) == 1
+
+
+def test_prompts_fit_the_free_limit():
+    from gaia import main
+    body = {"question": "Que planter ?", "records": main.KB["records"], "profile": {"rain": 269}}
+    assert len(assistant.build_prompt(body)) > 13000
+    p = assistant.build_prompt(assistant.fit_body(body, 13000))
+    assert len(p) <= 13000 and all(r["id"] in p for r in main.KB["records"]) and "269" in p
+    import json
+    slim = json.loads(agent._slim_text(json.dumps({"kwh": 1, "months": [1] * 12, "next": list(range(14)), "x": None})))
+    assert slim == {"kwh": 1, "next": list(range(8))}

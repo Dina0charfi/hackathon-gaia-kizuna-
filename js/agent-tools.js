@@ -54,7 +54,7 @@
     var g = SM && SM.ghi && SM.ghi.every(function (v) { return v > 0; }) ? SM.ghi : (CM && CM.ghi && CM.ghi.every(function (v) { return v > 0; }) ? CM.ghi : null);
     return g ? { ghi: g, approx: false } : { ghi: GHI_TN, approx: true };
   }
-  function fold(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z؀-ۿ぀-鿿 ]+/g, ' ').trim(); }
+  function fold(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').normalize('NFC').replace(/[^a-z؀-ۿ぀-鿿 ]+/g, ' ').trim(); }
   function placeIn(text) {
     var f = ' ' + fold(text) + ' ', best = null;
     PLACES.forEach(function (p) { if (f.indexOf(' ' + p[0] + ' ') !== -1 && (!best || p[0].length > best[0].length)) best = p; });
@@ -91,14 +91,14 @@
   function cropKey(c) {
     c = fold(c || '');
     if (/oliv|zitoun|زيتون|オリーブ/.test(c)) return 'olive';
-    if (/palm|dat|nakhl|نخيل|ナツメヤシ|deglet/.test(c)) return 'palm';
-    if (/citr|agrum|orang|lemon|citron|قوارص|柑橘/.test(c)) return 'citrus';
-    if (/ble|wheat|cereal|orge|barley|قمح|شعير|小麦|穀物/.test(c)) return 'cereal';
+    if (/palm|\bdatt|\bdates\b|nakhl|نخيل|ナツメヤシ|deglet/.test(c)) return 'palm';
+    if (/\bcitr|agrum|\borang|lemon|قوارص|柑橘/.test(c)) return 'citrus';
+    if (/\bbles?\b|wheat|cereal|\borges?\b|barley|قمح|شعير|小麦|穀物/.test(c)) return 'cereal';
     if (/tomat|طماطم|トマト/.test(c)) return 'tomato';
     if (/pomme de terre|potato|batata|بطاطا|ジャガイモ/.test(c)) return 'potato';
     if (/piment|pepper|felfel|فلفل|ピーマン/.test(c)) return 'pepper';
     if (/vigne|grape|raisin|عنب|ブドウ/.test(c)) return 'grape';
-    if (/veg|maraich|خضر|野菜/.test(c)) return 'veg';
+    if (/\bveg\b|vegetable|legume|maraich|خضر|野菜/.test(c)) return 'veg';
     return c ? 'other' : null;
   }
   function nexusCrop(k) { return k === 'tomato' || k === 'potato' || k === 'pepper' ? 'veg' : (k === 'grape' ? 'other' : k); }
@@ -313,7 +313,7 @@
         var T = g.totals;
         return Promise.resolve({
           summary: W({ fr: 'capacité ', en: 'capacity ', ar: 'القدرة ', ja: '揚水能力 ' }) + r1(T.capacity, 0) + ' m³ · ' + W({ fr: 'besoin ', en: 'need ', ar: 'الحاجة ', ja: '必要量 ' }) + r1(T.need, 0) + ' m³ · ' + W({ fr: 'bloqué ', en: 'blocked ', ar: 'محجوب ', ja: '抑制 ' }) + r1(T.blocked, 0) + ' m³',
-          data: { status: g.status, kwp: r1(g.kwp, 1), kwp_source: g.kwp_source, over_ratio: r1(T.over_ratio, 2), peak_daily_m3: r1(T.peak_daily_m3, 1), totals: Object.keys(T).reduce(function (o, k) { o[k] = typeof T[k] === 'number' ? r1(T[k], T[k] < 10 ? 2 : 0) : T[k]; return o; }, {}),
+          data: { status: g.status, reading: (g.kwp_source === 'sized' ? 'kwp is the size the pump would need, not an installed array. ' : '') + 'blocked = water the panels could lift beyond the crop need; the controller cap keeps it in the aquifer. ' + (a.safe_yield_m3_year > 0 ? '' : 'The safe yield of the aquifer is unknown: do not state one.'), kwp: r1(g.kwp, 1), kwp_source: g.kwp_source, over_ratio: r1(T.over_ratio, 2), peak_daily_m3: r1(T.peak_daily_m3, 1), totals: Object.keys(T).reduce(function (o, k) { o[k] = typeof T[k] === 'number' ? r1(T[k], T[k] < 10 ? 2 : 0) : T[k]; return o; }, {}),
             months: g.months.map(function (m, i) { return { month: i + 1, need_m3: r1(m.need_m3, 0), capacity_m3: r1(m.capacity_m3, 0), allowed_m3: r1(m.allowed_m3, 0), blocked_m3: r1(m.blocked_m3, 0), daily_cap_m3: r1(m.daily_cap_m3, 1), hours_per_day: r1(m.hours_per_day, 1) }; }),
             missing: g.missing, sun_data: GH.approx ? 'approximate Tunisian monthly values (no NASA POWER data for this plot)' : 'NASA POWER', assumption: 'pump efficiency 0.45, PR 0.75, head = well depth + 10 m, drip 90 %' }
         });

@@ -32,12 +32,13 @@
 
   // irrigation forecast, planner, farm record and irrigation agent: the first server found above
   var GAIA_API = SERVER_BASES[0] || 'http://127.0.0.1:8000';
+  try { var lastBase = global.sessionStorage.getItem('gaia.apiBase'); if (lastBase && SERVER_BASES.indexOf(lastBase) !== -1) GAIA_API = lastBase; } catch (e) { /* no storage */ }
 
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
-    plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
+    plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? GAIA_API + '/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
     irrigationEndpoint: GAIA_API + '/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
     planEndpoint: GAIA_API + '/irrigation/plan',   // optimal irrigation planner + solar pumping (backend/gaia/planner.py); null = off
@@ -45,9 +46,26 @@
     replayEndpoint: GAIA_API + '/irrigation/replay', // season replay on real past data; null = off
     agentEndpoint: GAIA_API + '/agent',            // irrigation agent (free Gemini / Groq key in backend/.env); null = off
     effectiveRainTable: 'ml/models/pluie_efficace_meta.json', // learned effective rain per month and site (ml/, section 11); null = USDA-SCS only
-    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/auth' : null, // accounts (backend /auth/*). null = guest only
+    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? GAIA_API + '/auth' : null, // accounts (backend /auth/*). null = guest only
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
+
+  // The server may run on :8000 or :8765. Every call to the server goes to the one that answers.
+  var API_READY = (function () {
+    if (SERVER_BASES.length < 2 || !global.fetch) return Promise.resolve(GAIA_API);
+    var order = [GAIA_API].concat(SERVER_BASES.filter(function (b) { return b !== GAIA_API; }));
+    function use(base) {
+      if (base !== GAIA_API) Object.keys(CONFIG).forEach(function (k) {
+        if (/Endpoint$/.test(k) && typeof CONFIG[k] === 'string' && CONFIG[k].indexOf(GAIA_API) === 0) CONFIG[k] = base + CONFIG[k].slice(GAIA_API.length);
+      });
+      GAIA_API = base;
+      try { global.sessionStorage.setItem('gaia.apiBase', base); } catch (e) { /* no storage */ }
+      return base;
+    }
+    return order.reduce(function (p, base) {
+      return p.catch(function () { return global.fetch(base + '/health').then(function (r) { if (!r.ok) throw r.status; return use(base); }); });
+    }, Promise.reject(0)).catch(function () { return GAIA_API; });
+  }());
 
   /* ---------------------------------------------------------- storage */
   function load(key, fallback) {
@@ -233,6 +251,9 @@
   }
   function authCall(path, opts) {   // path relative to /auth; '../share/x' style paths go to the API root
     if (!CONFIG.authEndpoint) return Promise.reject({ code: 'no_server' });
+    return API_READY.then(function () { return authSend(path, opts); });
+  }
+  function authSend(path, opts) {
     var s = session(), h = { 'Content-Type': 'application/json' };
     if (s && s.token) h.Authorization = 'Bearer ' + s.token;
     var url = path.indexOf('/share/') === 0 ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
@@ -539,7 +560,7 @@
   }
 
   global.GAIA = {
-    CONFIG: CONFIG, serverBases: SERVER_BASES, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
+    CONFIG: CONFIG, serverBases: SERVER_BASES, apiReady: API_READY, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
     lang: function () { return lang; }, onLang: function (fn) { langListeners.push(fn); },
     getParcel: getParcel, setParcel: setParcel, load: load, save: save, auth: auth,
     el: el, clear: clear, fmt: fmt, icon: icon, pill: pill, note: note, confBadge: confBadge,

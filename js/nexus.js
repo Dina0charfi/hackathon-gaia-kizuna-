@@ -610,7 +610,7 @@
   var loc = dna.location || {}, fLat = p.lat != null ? p.lat : loc.lat, fLon = p.lon != null ? p.lon : loc.lon;
   if (G.CONFIG.irrigationEndpoint && fLat != null && fLon != null) {
     FC.status = 'loading';
-    fetch(G.CONFIG.irrigationEndpoint.replace('{lat}', fLat).replace('{lon}', fLon))
+    G.apiReady.then(function () { return fetch(G.CONFIG.irrigationEndpoint.replace('{lat}', fLat).replace('{lon}', fLon)); })
       .then(function (r) {
         return r.json().then(function (j) {
           if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status);
@@ -1170,7 +1170,7 @@
     PL.key = key; PL.status = 'loading';
     clearTimeout(PL.timer);
     PL.timer = setTimeout(function () {
-      fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key })
+      G.apiReady.then(function () { return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key }); })
         .then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || res.status); return j; }); })
         .then(function (j) { if (PL.key !== key) return; PL.status = 'ok'; PL.data = j; PL.error = null; draw(); })
         .catch(function (e) { if (PL.key !== key) return; PL.status = e instanceof TypeError ? 'off' : 'error'; PL.error = String(e.message || e); draw(); });

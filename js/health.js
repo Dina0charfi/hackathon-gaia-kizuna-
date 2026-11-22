@@ -21,7 +21,7 @@
   G.addStrings({
     fr: {
       h_title: 'Santé des plantes',
-      h_lead: "Photographiez une feuille d'agrume, de palmier dattier, de vigne, de tomate, de pomme de terre ou de poivron. GAIA vérifie d'abord la photo, reconnaît la plante, puis donne la maladie probable — ou dit qu'il n'est pas sûr.",
+      h_lead: "Photographiez une feuille d'olivier, d'agrume, de palmier dattier, de vigne, de tomate, de pomme de terre ou de poivron. GAIA vérifie d'abord la photo, reconnaît la plante, puis donne la maladie probable — ou dit qu'il n'est pas sûr.",
       up_t: 'Ajouter une photo de feuille', up_p: 'Une seule feuille, à plat, bien éclairée, qui remplit le cadre.',
       up_file: 'Choisir une image', up_cam: 'Prendre une photo', up_drop: 'ou déposez une image ici',
       up_change: 'Changer de photo', up_privacy: "L'image est analysée dans votre navigateur. Elle n'est envoyée nulle part, sauf si vous choisissez vous-même l'identification Pl@ntNet (bouton avec votre accord).",
@@ -63,7 +63,7 @@
     },
     ar: {
       h_title: 'صحة النبات',
-      h_lead: 'صوّر ورقة قوارص أو نخيل أو عنب أو طماطم أو بطاطا أو فلفل. تتحقق غايا أولاً من جودة الصورة، ثم تتعرف على النبتة، ثم تقترح المرض المحتمل — أو تقول إنها غير متأكدة.',
+      h_lead: 'صوّر ورقة زيتون أو قوارص أو نخيل أو عنب أو طماطم أو بطاطا أو فلفل. تتحقق غايا أولاً من جودة الصورة، ثم تتعرف على النبتة، ثم تقترح المرض المحتمل — أو تقول إنها غير متأكدة.',
       up_t: 'أضف صورة ورقة', up_p: 'ورقة واحدة، مسطحة، جيدة الإضاءة، تملأ الإطار.',
       up_file: 'اختر صورة', up_cam: 'التقط صورة', up_drop: 'أو اسحب الصورة إلى هنا',
       up_change: 'تغيير الصورة', up_privacy: 'تُحلَّل الصورة داخل متصفحك ولا تُرسل إلى أي مكان، إلا إذا اخترتَ بنفسك التعرّف عبر Pl@ntNet (زر بموافقتك).',
@@ -105,7 +105,7 @@
     },
     en: {
       h_title: 'Plant health',
-      h_lead: 'Photograph a leaf of citrus, date palm, grape, tomato, potato or pepper. GAIA first checks the photo, recognises the plant, then gives the likely disease — or says it is not sure.',
+      h_lead: 'Photograph a leaf of olive, citrus, date palm, grape, tomato, potato or pepper. GAIA first checks the photo, recognises the plant, then gives the likely disease — or says it is not sure.',
       up_t: 'Add a photo of a leaf', up_p: 'A single leaf, flat, well lit, filling the frame.',
       up_file: 'Choose an image', up_cam: 'Take a photo', up_drop: 'or drop an image here',
       up_change: 'Change photo', up_privacy: 'The image is analysed in your browser. It is not sent anywhere, unless you choose the Pl@ntNet identification yourself (button, with your consent).',
@@ -147,7 +147,7 @@
     },
     ja: {
       h_title: '植物の健康',
-      h_lead: '柑橘、ナツメヤシ、ブドウ、トマト、ジャガイモ、ピーマンの葉を撮影してください。GAIAはまず写真を確認し、植物を識別してから、考えられる病気を示します。確信がなければそう伝えます。',
+      h_lead: 'オリーブ、柑橘、ナツメヤシ、ブドウ、トマト、ジャガイモ、ピーマンの葉を撮影してください。GAIAはまず写真を確認し、植物を識別してから、考えられる病気を示します。確信がなければそう伝えます。',
       up_t: '葉の写真を追加', up_p: '葉は1枚、平らにして明るく、画面いっぱいに。',
       up_file: '画像を選ぶ', up_cam: '写真を撮る', up_drop: 'または画像をここにドロップ',
       up_change: '写真を変更', up_privacy: '画像はブラウザ内で分析され、どこにも送信されません。ただし、ご自身でPl@ntNetによる同定を選んだ場合のみ、同意のうえで送信されます。',

@@ -88,11 +88,9 @@
   function parseGoal(g) {
     var f = g.toLowerCase(), o = { text: g };
     o.place = T.placeIn(g);
-    o.crop = T.cropKey(g);
+    o.crop = T.cropKey(g); if (o.crop === 'other') o.crop = null;   // a sentence without a crop: keep the crop of the plot
     var m = f.match(/(\d+(?:[.,]\d+)?)\s*(?:ha\b|hect|هكتار|ヘクタール)/); if (m) o.area = +m[1].replace(',', '.');
     m = f.match(/(?:puits|forage|well|بئر|井戸)[^\d]{0,15}(\d{1,3})\s*(?:m|م)|(\d{1,3})\s*(?:m|م)(?:\s*(?:de\s*)?(?:puits|well|deep|profond)|\s*بئر)/); if (m) o.well = +(m[1] || m[2]);
-    // "rentable", "possible"... contain "ble" (wheat) and any other sentence falls into "other": keep only a real crop word
-    o.bizCrop = T.cropKey(f.replace(/[a-z]+ble[a-z]*/g, ' ').replace(/\bdat(?:e|a)\b/g, ' ')); if (o.bizCrop === 'other') o.bizCrop = null;
     o.solar = /solai|solar|panneau|panel|شمس|ألواح|ソーラー|太陽|agrivolt|photovolt/.test(f);
     o.nappe = /nappe|aquif|groundwater|over.?pump|épuis|المائدة|استنزاف|地下水/.test(f);
     if (o.solar && !o.crop && /tomat|طماطم|トマト/.test(f)) o.crop = 'tomato';
@@ -147,7 +145,6 @@
     step('plot_profile', {}, W({ fr: 'Lire le profil de la parcelle', en: 'Read the plot profile', ar: 'قراءة ملف القطعة', ja: '区画プロファイルを読む' }));
     if (P.biz) {
       // a money question: measure the water and energy first, then price the kit from them
-      P.crop = P.bizCrop;
       var ba = {};
       if (P.crop) ba.crop = P.crop;
       if (P.kit) ba.kit_tnd = P.kit;
@@ -361,10 +358,23 @@
   /* ------------------------------------------------------------------ 2. language model with tool calling (server) */
   var LANG_NAME = { fr: 'French', ar: 'Arabic', en: 'English', ja: 'Japanese' };
   function serverUrl() { var s = LLM && LLM.state(); return s && s.server ? s.server.replace(/\/assistant$/, '/agent/step') : null; }
+  // A number the model gives to a tool must come from the farmer's words, the plot or an earlier result: an invented one
+  // would come back as if it had been measured.
+  function groundedArgs(args, goal) {
+    var have = G.getParcel(), known = [goal, have ? JSON.stringify(T.profileData(have)) : ''].concat(S.steps.filter(function (x) { return x.result && x.result.data; }).map(function (x) { return JSON.stringify(x.result.data); })).join(' ');
+    var nums = (known.replace(/(\d)[\s  ](?=\d{3}\b)/g, '$1').replace(/(\d),(?=\d{3}\b)/g, '$1').match(/-?\d+(?:[.,]\d+)?/g) || []).map(function (x) { return parseFloat(x.replace(',', '.')); });
+    var out = {};
+    Object.keys(args || {}).forEach(function (k) {
+      var v = args[k];
+      if (typeof v === 'number' && k !== 'days' && !nums.some(function (n) { return Math.abs(n - v) < 1e-6 || Math.abs(Math.abs(n) - Math.abs(v)) < 5e-4 * Math.abs(v); })) return;
+      out[k] = v;
+    });
+    return out;
+  }
   function llmAgent(goal) {
     var url = serverUrl(), have = G.getParcel();
     var ctxLine = have ? 'A plot is saved: ' + JSON.stringify(T.profileData(have)).slice(0, 900) : 'No plot is saved yet: use find_place and build_land_dna (ask nothing, use the place in the goal, or Sidi Bouzid olives 2 ha well 50 m as a labelled demo).';
-    var msgs = [{ role: 'user', content: 'GOAL: ' + goal + '\nLANG: ' + LANG_NAME[L()] + '\nTODAY: ' + new Date().toISOString().slice(0, 10) + '\n' + ctxLine }];
+    var msgs = [{ role: 'user', content: 'GOAL: ' + goal + '\nRULES: every date must be today or later; leave a numeric tool argument out unless the farmer or a tool gave it; no limit, quota or equipment size of your own; write only in LANG.\nLANG: ' + LANG_NAME[L()] + '\nTODAY: ' + new Date().toISOString().slice(0, 10) + '\n' + ctxLine }];
     var tools = T.schemas(), rounds = 0;
     function post() {
       return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs, tools: tools }) })
@@ -381,7 +391,7 @@
           thought(j.text);
           msgs.push({ role: 'assistant', content: j.text || '', tool_calls: j.calls });
           return Promise.all(j.calls.map(function (c) {
-            return call(c.name, c.args).then(function (r) { return { role: 'tool', tool_call_id: c.id, name: c.name, content: JSON.stringify(r.error ? { error: r.error, hint: r.hint } : r.data) }; });
+            return call(c.name, groundedArgs(c.args, goal)).then(function (r) { return { role: 'tool', tool_call_id: c.id, name: c.name, content: JSON.stringify(r.error ? { error: r.error, hint: r.hint } : r.data) }; });
           })).then(function (outs) { outs.forEach(function (o) { msgs.push(o); }); return loop(); });
         }
         return { text: j.text, source: 'llm' };
@@ -493,7 +503,7 @@
       .replace(new RegExp('\\s*[\\(（]\\s*(?:outils?|tools?|module)?\\s*[*_`]*(?:' + names + ')[*_`]*(?:\\s*[,;+&/]\\s*[*_`]*(?:' + names + ')[*_`]*)*\\s*[\\)）]', 'gi'), '')
       .replace(new RegExp('\\s*[–—-]\\s*[*_`]+(?:' + names + ')[*_`]+(?:\\s*\\([^)]*\\))?', 'gi'), '')
       .replace(new RegExp('[*_`]*\\b(' + names + ')\\b[*_`]*', 'gi'), function (m, n) { return cat(n.toLowerCase()).toLowerCase(); })
-      .replace(/^#+\s*actions?\s*$/gim, '**' + t('ag_do') + '**').replace(/^#+\s*watch\s*$/gim, '**' + t('ag_watch') + '**').replace(/^(\s*[-*•]\s*)\[([^\]]+)\]/gm, '$1**$2** :');
+      .replace(/^#+\s*actions?\s*$/gim, '**' + t('ag_do') + '**').replace(/^#+\s*watch\s*$/gim, '**' + t('ag_watch') + '**').replace(/^(\s*[-*•]\s*)\[([^\]]+)\]/gm, '$1**$2** :').replace(/(^|[^*])\*(?!\*)/g, '$1');
   }
   function plainLines(x) { return String(x || '').replace(PICTO, ''); }
   // one short title, then the explanation: easier to read than one long sentence
@@ -606,5 +616,10 @@
   mount();
   // ?goal=... runs the agent at once (used by the demo link on the home page)
   var q = new URLSearchParams(location.search).get('goal');
-  if (q) { input.value = q; run(q); }
+  if (q) {
+    input.value = q;
+    // wait for the search of an online model (a few seconds at most), or the link would always start without it
+    var started = false, start = function () { if (!started) { started = true; run(q); } };
+    if (LLM && LLM.state().checking) { LLM.on(function () { if (!LLM.state().checking) start(); }); setTimeout(start, 5000); } else start();
+  }
 }());

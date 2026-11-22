@@ -31,3 +31,10 @@ def test_same_prediction_as_notebook(meta):
 
 def test_nearest_site(meta):
     assert irrigation.nearest_site(33.71, 8.96)["id"] == "kebili"
+
+
+def test_model_files_survive_windows_line_ends(tmp_path):
+    from gaia import irrigation
+    f = tmp_path / "m.txt"
+    f.write_bytes(b"tree\r\nversion=v4\r\n")
+    assert irrigation._model_text(f) == "tree\nversion=v4\n"

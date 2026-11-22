@@ -51,7 +51,7 @@ MODEL = env("GAIA_LLM_MODEL", "claude-opus-5-5")
 
 # OpenAI-compatible presets. Default models are small, multilingual (French, Arabic) and free on each service.
 PRESETS: dict[str, dict[str, str]] = {
-    "groq": {"base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"},
+    "groq": {"base_url": "https://api.groq.com/openai/v1", "model": "openai/gpt-oss-120b"},
     "huggingface": {"base_url": "https://router.huggingface.co/v1", "model": "Qwen/Qwen2.5-72B-Instruct"},
     "openrouter": {"base_url": "https://openrouter.ai/api/v1", "model": "meta-llama/llama-3.3-70b-instruct:free"},
     "ollama": {"base_url": "http://127.0.0.1:11434/v1", "model": "qwen2.5:3b"},
@@ -99,6 +99,35 @@ def _history(body: dict[str, Any]) -> list[dict[str, str]]:
         if q and a:
             out.append({"q": q, "a": a})
     return out
+
+
+# Groq's free limit is 8,000 tokens a minute per model, question and answer together.
+PROMPT_CHARS = {"groq": 13000}
+
+
+def _short(x: Any, n: int) -> Any:
+    if isinstance(x, str):
+        return x if len(x) <= n else x[:n].rsplit(" ", 1)[0] + "…"
+    if isinstance(x, list):
+        return [_short(v, n) for v in x[:4]]
+    if isinstance(x, dict):
+        return {k: _short(v, n) for k, v in x.items()}
+    return x
+
+
+def fit_body(body: dict[str, Any], limit: int) -> dict[str, Any]:
+    """Shorten the records, then drop the last ones, until the prompt fits. The plot and GAIA's own answer are kept whole."""
+    if len(build_prompt(body)) <= limit:
+        return body
+    recs = [_compact_record(r) for r in (body.get("records") or [])]
+    for n in (400, 220, 120):
+        out = {**body, "records": [_short(r, n) for r in recs]}
+        if len(build_prompt(out)) <= limit:
+            return out
+    brief = [{k: _short(r[k], 160) for k in ("id", "name", "origin", "summary") if k in r} for r in recs]
+    while brief and len(build_prompt({**body, "records": brief})) > limit:
+        brief.pop()
+    return {**body, "records": brief}
 
 
 def build_prompt(body: dict[str, Any]) -> str:
@@ -166,6 +195,15 @@ def model_options(model: str) -> dict[str, Any]:
 FALLBACK_MODELS = {"groq": ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b")}
 RETRY_HTTP = (400, 404, 413, 429, 500, 502, 503)
 MAX_MODELS = 3
+MAX_WAIT = 20.0     # seconds: when every model is busy, wait once for the first one to be free
+
+
+def retry_after(r: Any) -> float | None:
+    """Seconds the provider asks to wait (HTTP 429), or None."""
+    try:
+        return float(getattr(r, "headers", {}).get("retry-after"))
+    except (TypeError, ValueError):
+        return None
 
 
 def with_fallback(cfg: dict[str, str], ask: Any) -> dict[str, Any]:
@@ -174,14 +212,21 @@ def with_fallback(cfg: dict[str, str], ask: Any) -> dict[str, Any]:
     extra = () if raw.lower() == "none" else tuple(x.strip() for x in raw.split(",") if x.strip()) or FALLBACK_MODELS.get(cfg["provider"], ())
     models = [cfg["model"]] + [m for m in extra if m != cfg["model"]]
     last: AssistantUnavailable | None = None
+    busy: list[tuple[float, str]] = []
     for m in models[:MAX_MODELS]:
         try:
             return ask({**cfg, "model": m})
         except AssistantUnavailable as e:
             last = e
+            if e.detail.get("http") == 429 and e.detail.get("retry_after") is not None:
+                busy.append((e.detail["retry_after"], m))
             if e.detail.get("http") not in RETRY_HTTP:   # wrong key, unreachable...: another model would not help
                 break
     assert last is not None
+    if busy and min(busy)[0] <= MAX_WAIT:
+        wait, m = min(busy)
+        time.sleep(wait + 0.5)
+        return ask({**cfg, "model": m})
     raise last
 
 
@@ -235,14 +280,14 @@ def _openai(body: dict[str, Any], cfg: dict[str, str], http: Any = None) -> dict
     if cfg.get("key"):
         headers["Authorization"] = "Bearer " + cfg["key"]
     payload = {"model": cfg["model"], **model_options(cfg["model"]), "temperature": 0.3, "max_tokens": 700,
-               "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": build_prompt(body)}]}
+               "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": build_prompt(fit_body(body, PROMPT_CHARS.get(cfg["provider"], 60000)))}]}
     http = http or httpx
     try:
         r = http.post(cfg["base_url"] + "/chat/completions", json=payload, headers=headers, timeout=120)
     except httpx.HTTPError as e:
         raise AssistantUnavailable({"status": "api_unreachable", "message": f"{cfg['provider']} unreachable"}) from e
     if r.status_code != 200:
-        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code})
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code, "retry_after": retry_after(r)})
     try:
         text = (r.json()["choices"][0]["message"]["content"] or "").strip()
     except (ValueError, KeyError, IndexError, TypeError) as e:
