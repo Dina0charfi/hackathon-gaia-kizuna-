@@ -156,6 +156,35 @@ def openai_config() -> dict[str, str] | None:
     return {"provider": name, "base_url": base, "key": key, "model": model}
 
 
+def model_options(model: str) -> dict[str, Any]:
+    """gpt-oss models think before answering; short thinking, or the answer can run out of tokens and come back empty."""
+    return {"reasoning_effort": "low"} if "gpt-oss" in model else {}
+
+
+# Groq counts its free limits per model: when one is busy (429), too small for the request (413) or withdrawn (404),
+# the next one is tried. GAIA_LLM_FALLBACK_MODELS = "a,b" replaces this list for any provider; "none" turns it off.
+FALLBACK_MODELS = {"groq": ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b")}
+RETRY_HTTP = (404, 413, 429, 500, 502, 503)
+MAX_MODELS = 3
+
+
+def with_fallback(cfg: dict[str, str], ask: Any) -> dict[str, Any]:
+    """Call ask(cfg) with the configured model, then with the fallback models when the model itself is the problem."""
+    raw = env("GAIA_LLM_FALLBACK_MODELS")
+    extra = () if raw.lower() == "none" else tuple(x.strip() for x in raw.split(",") if x.strip()) or FALLBACK_MODELS.get(cfg["provider"], ())
+    models = [cfg["model"]] + [m for m in extra if m != cfg["model"]]
+    last: AssistantUnavailable | None = None
+    for m in models[:MAX_MODELS]:
+        try:
+            return ask({**cfg, "model": m})
+        except AssistantUnavailable as e:
+            last = e
+            if e.detail.get("http") not in RETRY_HTTP:   # wrong key, unreachable...: another model would not help
+                break
+    assert last is not None
+    raise last
+
+
 def anthropic_configured() -> bool:
     return bool(env("ANTHROPIC_API_KEY") or env("ANTHROPIC_AUTH_TOKEN") or env("ANTHROPIC_PROFILE"))
 
@@ -205,7 +234,7 @@ def _openai(body: dict[str, Any], cfg: dict[str, str], http: Any = None) -> dict
     headers = {"Content-Type": "application/json"}
     if cfg.get("key"):
         headers["Authorization"] = "Bearer " + cfg["key"]
-    payload = {"model": cfg["model"], "temperature": 0.3, "max_tokens": 700,
+    payload = {"model": cfg["model"], **model_options(cfg["model"]), "temperature": 0.3, "max_tokens": 700,
                "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": build_prompt(body)}]}
     http = http or httpx
     try:
@@ -213,13 +242,15 @@ def _openai(body: dict[str, Any], cfg: dict[str, str], http: Any = None) -> dict
     except httpx.HTTPError as e:
         raise AssistantUnavailable({"status": "api_unreachable", "message": f"{cfg['provider']} unreachable"}) from e
     if r.status_code != 200:
-        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}"})
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code})
     try:
         text = (r.json()["choices"][0]["message"]["content"] or "").strip()
     except (ValueError, KeyError, IndexError, TypeError) as e:
         raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']}: unexpected answer"}) from e
     if "</think>" in text:  # reasoning models (Qwen3, DeepSeek-R1) put their thoughts first
         text = text.split("</think>", 1)[1].strip()
+    if not text:
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']}: empty answer", "http": 502})
     return {"text": text, "status": "ok", "model": cfg["model"], "provider": cfg["provider"]}
 
 
@@ -234,7 +265,7 @@ def answer(body: dict[str, Any], client: Any = None, http: Any = None) -> dict[s
     cfg = openai_config()
     if cfg:
         try:
-            return _openai(body, cfg, http)
+            return with_fallback(cfg, lambda c: _openai(body, c, http))
         except AssistantUnavailable as e:
             errors.append({"provider": cfg["provider"], **e.detail})
     if not cfg or cfg["provider"] != "ollama":

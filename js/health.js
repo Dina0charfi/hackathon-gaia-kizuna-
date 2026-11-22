@@ -45,7 +45,7 @@
       run: 'Lancer le diagnostic', running: 'Analyse en cours…',
       tree: 'Plante reconnue', disease: 'Maladie probable', conf: 'Confiance calibrée', top: 'Probabilités',
       unsure_t: 'Je ne suis pas sûr', unsure_p: 'La confiance est sous le seuil fixé pour ce modèle. GAIA préfère ne pas répondre. Reprenez une photo d’une autre feuille, ou montrez la plante à un technicien.',
-      other_t: 'Plante non reconnue', other_p: 'Cette feuille ne ressemble à aucune des plantes que le modèle connaît ({l}). L’olivier n’est pas encore dans le modèle.',
+      other_t: 'Plante non reconnue', other_p: 'Cette feuille ne ressemble à aucune des plantes que le modèle connaît ({l}).',
       hes_t: 'GAIA hésite', hes_p: 'Le modèle penche pour « autre plante » mais n’exclut pas : {c}. Reprenez une seule feuille, à plat, sur un fond uni, puis relancez.',
       tr_other_res: 'Autre plante (hors modèle)', supported_t: 'Plantes reconnues par le modèle actuel : {l}.',
       g_none: "Aucune fiche de conseil validée par un expert n'est encore associée à ce résultat.",
@@ -87,7 +87,7 @@
       run: 'ابدأ التشخيص', running: 'جارٍ التحليل…',
       tree: 'النبتة', disease: 'المرض المحتمل', conf: 'الثقة بعد المعايرة', top: 'الاحتمالات',
       unsure_t: 'لست متأكدة', unsure_p: 'الثقة أقل من العتبة المحددة لهذا النموذج، لذلك تفضّل غايا عدم الإجابة. صوّر ورقة أخرى أو اعرض النبتة على تقني.',
-      other_t: 'نبتة غير معروفة', other_p: 'لا تشبه هذه الورقة أيّاً من النباتات التي يعرفها النموذج ({l}). الزيتون ليس في النموذج بعد.',
+      other_t: 'نبتة غير معروفة', other_p: 'لا تشبه هذه الورقة أيّاً من النباتات التي يعرفها النموذج ({l}).',
       hes_t: 'غايا مترددة', hes_p: 'يميل النموذج إلى «نبتة أخرى» لكنه لا يستبعد: {c}. صوّر ورقة واحدة مسطحة على خلفية موحدة ثم أعد المحاولة.',
       tr_other_res: 'نبتة أخرى (خارج النموذج)', supported_t: 'النباتات التي يتعرف عليها النموذج الحالي: {l}.',
       g_none: 'لا توجد بعد بطاقة نصح مصادق عليها من خبير لهذه النتيجة.',
@@ -129,7 +129,7 @@
       run: 'Run the diagnosis', running: 'Analysing…',
       tree: 'Plant recognised', disease: 'Likely disease', conf: 'Calibrated confidence', top: 'Probabilities',
       unsure_t: 'I am not sure', unsure_p: 'Confidence is below the threshold set for this model. GAIA prefers not to answer. Take a photo of another leaf, or show the plant to a technician.',
-      other_t: 'Plant not recognised', other_p: 'This leaf does not look like any of the plants the model knows ({l}). Olive is not in the model yet.',
+      other_t: 'Plant not recognised', other_p: 'This leaf does not look like any of the plants the model knows ({l}).',
       hes_t: 'GAIA is hesitating', hes_p: 'The model leans towards “other plant” but does not rule out: {c}. Take a single leaf, flat, on a plain background, and run it again.',
       tr_other_res: 'Other plant (not in the model)', supported_t: 'Plants the current model recognises: {l}.',
       g_none: 'No advice record validated by an expert is linked to this result yet.',
@@ -171,7 +171,7 @@
       run: '診断を実行', running: '分析中…',
       tree: '識別した植物', disease: '考えられる病気', conf: '調整済みの信頼度', top: '確率',
       unsure_t: '確信がありません', unsure_p: '信頼度がこのモデルのしきい値を下回っています。GAIAは回答を控えます。別の葉を撮影するか、技術者に植物を見てもらってください。',
-      other_t: '認識できない植物', other_p: 'この葉は、モデルが知っている植物（{l}）のどれにも似ていません。オリーブはまだモデルに含まれていません。',
+      other_t: '認識できない植物', other_p: 'この葉は、モデルが知っている植物（{l}）のどれにも似ていません。',
       hes_t: 'GAIAは迷っています', hes_p: 'モデルは「その他の植物」に傾いていますが、次の可能性も残ります：{c}。葉を1枚、平らにして無地の背景で撮り直し、もう一度実行してください。',
       tr_other_res: 'その他の植物（モデル外）', supported_t: '現在のモデルが認識できる植物：{l}。',
       g_none: 'この結果に結びついた、専門家検証済みの助言記録はまだありません。',
@@ -787,6 +787,7 @@
       var rb = resultBlocks(); if (rb) right = right.concat(rb);
       right.push(plBlock());
       if (ran && (state.result.stage1.abstain || state.result.stage1.top.label === 'other')) { var pb1 = pnBlock(); if (pb1) right.push(pb1); }
+      if (ran && window.GAIA_LEAF) right.push(window.GAIA_LEAF.card(state, PL, label));   // language model: what is it, what to do (health-llm.js)
     }
     right.push(el('div', { class: 'gp-card' }, [
       el('h3', null, [t('limits_t')]),

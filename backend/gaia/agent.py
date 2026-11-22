@@ -130,7 +130,7 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
     headers = {"Content-Type": "application/json"}
     if cfg.get("key"):
         headers["Authorization"] = "Bearer " + cfg["key"]
-    payload = {"model": cfg["model"], "temperature": 0.2, "max_tokens": MAX_TOKENS, "messages": _to_openai(messages),
+    payload = {"model": cfg["model"], **A.model_options(cfg["model"]), "temperature": 0.2, "max_tokens": MAX_TOKENS, "messages": _to_openai(messages),
                "tools": [{"type": "function", "function": {"name": t["name"], "description": t.get("description", ""),
                                                            "parameters": t.get("parameters") or {"type": "object", "properties": {}}}} for t in tools],
                "tool_choice": "auto"}
@@ -140,7 +140,7 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
     except httpx.HTTPError as e:
         raise AssistantUnavailable({"status": "api_unreachable", "message": f"{cfg['provider']} unreachable"}) from e
     if r.status_code != 200:
-        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}"})
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code})
     try:
         msg = r.json()["choices"][0]["message"]
     except (ValueError, KeyError, IndexError, TypeError) as e:
@@ -150,6 +150,8 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
         text = text.split("</think>", 1)[1].strip()
     calls = [{"id": c.get("id") or f"c{i}", "name": c["function"]["name"], "args": _args(c["function"].get("arguments"))}
              for i, c in enumerate(msg.get("tool_calls") or []) if c.get("function", {}).get("name")]
+    if not calls and not text:
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']}: empty answer", "http": 502})
     return {"type": "tool_calls" if calls else "final", "calls": calls, "text": text, "provider": cfg["provider"], "model": cfg["model"]}
 
 
@@ -164,7 +166,7 @@ def step(messages: list[dict[str, Any]], tools: list[dict[str, Any]], client: An
     cfg = A.openai_config()
     if cfg:
         try:
-            return _openai(messages, tools, cfg, http)
+            return A.with_fallback(cfg, lambda c: _openai(messages, tools, c, http))
         except AssistantUnavailable as e:
             errors.append({"provider": cfg["provider"], **e.detail})
     if not cfg or cfg["provider"] != "ollama":

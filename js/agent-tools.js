@@ -494,7 +494,12 @@
         return Promise.resolve({
           summary: W({ fr: 'apport ', en: 'deposit ', ar: 'دفعة أولى ', ja: '頭金 ' }) + r1(pg.deposit, 0) + ' TND · ' + r1(pg.avg_installment, 0) + ' TND/' + W({ fr: 'mois', en: 'month', ar: 'شهر', ja: '月' }) + ' × ' + pg.term +
             ' · ' + r1(100 * pg.ratio, 0) + ' % ' + W({ fr: 'des économies', en: 'of savings', ar: 'من الوفر', ja: '（節約額比）' }) + ' · ' + pg.verdict,
-          data: { status: 'ok', verdict: pg.verdict, kit_tnd: r1(kit, 0), diesel_tnd_year: r1(diesel, 0), maintenance_tnd_year: r1(inp.maint_tnd_year, 0), fee_rate_pct: r1(100 * inp.fee_rate, 1), kit_life_years: inp.life_y, sources: src,
+          data: { status: 'ok',
+            reading: (pg.life_gain > 0 ? 'The farmer gains ' + r1(pg.life_gain, 0) + ' TND over the kit life: the kit does pay itself back. ' : 'The farmer loses ' + r1(-pg.life_gain, 0) + ' TND over the kit life. ') +
+              'The kit is sized for the full crop need: never say it lacks energy, never advise a smaller kit. The verdict only judges the PAYMENT TERMS (installments against savings). ' +
+              (pg.verdict === 'ok' ? 'These terms are affordable.' : pg.suggested_term ? 'MAIN ADVICE: the same kit spread over ' + pg.suggested_term + ' months instead of ' + pg.term + ' is affordable.' : 'No term up to 84 months is affordable: lower price, grant or shared kit.') +
+              ' ' + (pg.break_even_month ? 'Cash turns positive in month ' + pg.break_even_month + ' of the payments.' : 'Cash is negative during the payments and recovers afterwards.') + ' Adoption tests marked unk are not filled in yet, not failed.',
+            verdict: pg.verdict, kit_tnd: r1(kit, 0), diesel_tnd_year: r1(diesel, 0), maintenance_tnd_year: r1(inp.maint_tnd_year, 0), fee_rate_pct: r1(100 * inp.fee_rate, 1), kit_life_years: inp.life_y, sources: src,
             deposit_tnd: r1(pg.deposit, 0), financed_tnd: r1(pg.financed, 0), fee_tnd: r1(pg.fee, 0), total_tnd: r1(pg.total, 0), term_months: pg.term, seasonal: pg.seasonal,
             avg_installment_tnd: r1(pg.avg_installment, 0), max_installment_tnd: r1(pg.max_installment, 0), installments_over_savings_pct: r1(100 * pg.ratio, 0), share_cap_pct: r1(100 * pg.share_cap, 0),
             months_paying_more_than_saved: pg.negative_months, break_even_month: pg.break_even_month, suggested_term_months: pg.suggested_term,

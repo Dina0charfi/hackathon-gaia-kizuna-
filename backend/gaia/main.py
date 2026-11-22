@@ -16,7 +16,7 @@ from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadF
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import agent, assistant, auth, business, engine, guard, nexus, plantnet, solar, vision
+from . import agent, assistant, auth, business, engine, guard, leaf, nexus, plantnet, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -352,6 +352,20 @@ def assistant_answer(body: AssistantIn) -> dict:
         d["records"] = KB["records"]
     try:
         return assistant.answer(d)
+    except assistant.AssistantUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
+
+
+class LeafIn(BaseModel):
+    evidence: dict[str, Any]
+    lang: Literal["fr", "ar", "en", "ja"] = "fr"
+
+
+@app.post("/leaf/explain")
+def leaf_explain(body: LeafIn) -> dict:
+    """Plant health: a language model explains the leaf result and gives safe first steps. The photo is not sent. 503 when no model is configured."""
+    try:
+        return leaf.explain(body.evidence, body.lang)
     except assistant.AssistantUnavailable as e:
         raise HTTPException(503, detail=e.detail) from e
 

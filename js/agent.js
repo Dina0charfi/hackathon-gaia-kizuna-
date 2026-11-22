@@ -398,7 +398,10 @@
     if (S.running || !goal.trim()) return;
     S = { running: true, stop: false, steps: [], plan: null, goal: goal, started: performance.now(), provider: null, note: null, mode: null };
     var ls = LLM && LLM.state(), useServer = !!(ls && ls.mode === 'server' && serverUrl());
-    S.mode = useServer ? 'server' : (ls && ls.engine ? 'browser' : 'planner');
+    // money questions stay with the planner: language models were seen writing wrong instalments
+    var money = parseGoal(goal).biz;
+    if (money) useServer = false;
+    S.mode = useServer ? 'server' : (ls && ls.engine && !money ? 'browser' : 'planner');
     draw();
     var p;
     if (useServer) {
