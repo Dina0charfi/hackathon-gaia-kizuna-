@@ -117,7 +117,7 @@ HEAD = u'''<!doctype html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="{fonts}" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20261122c">
-<script src="js/a11y.js?v=20261122c" defer></script>
+<script src="js/a11y.js?v=20261122d" defer></script>
 </head>
 <body class="paper-noise">
 
