@@ -874,3 +874,82 @@ html[lang="ja"] .gp h1, html[lang="ja"] .gp h2, html[lang="ja"] .gp h3 { font-fa
 .gp-chart-data th[scope="row"], .gp-chart-data thead th:first-child { text-align: start; }
 /* on a phone the header scrolls away: it no longer covers a third of the screen */
 @media (max-width: 600px) { body.gp > .gp-top { position: relative; } }
+
+/* ---------------------------------------------------------------- header v2: two clear rows
+   Row 1: brand on the left; plot, language and the sign-in button on the right (where people look for it).
+   Row 2: the tabs on one line, under a thin gold rule; what does not fit goes under "More". */
+@media (min-width: 1101px) {
+  .gp-top-in {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "brand tools" "nav nav";
+    align-items: center; column-gap: 24px; row-gap: 0; padding: 12px 0 0;
+  }
+  .gp-brand { grid-area: brand; margin-inline-end: 0; }
+  .gp-tools { grid-area: tools; justify-self: end; gap: 10px; }
+  .gp-top .gp-nav {
+    grid-area: nav; flex-wrap: nowrap; min-width: 0; overflow: visible; gap: 2px;
+    margin-top: 12px; padding: 8px 0 10px; border-top: 1px solid rgba(217, 184, 106, 0.18);
+    -webkit-mask-image: none; mask-image: none;
+  }
+  .gp-top .gp-menu-btn { display: none; }
+}
+/* the tools: plot and language first, then a divider, then the account at the very end */
+.gp-tools .gp-parcel { order: 1; }
+.gp-tools .gp-lang { order: 2; }
+.gp-tools .gp-account { order: 3; padding-inline-start: 12px; margin-inline-start: 2px; border-inline-start: 1px solid rgba(217, 184, 106, 0.28); }
+/* sign in: the one filled gold button of the bar */
+.gp .gp-acc.in {
+  min-height: 40px; padding: 0 18px 0 14px; gap: 8px; font-size: 14px; font-weight: 700; letter-spacing: .01em;
+  color: #0F1C15; background: linear-gradient(145deg, #EBD08E, #C9A65A 55%, #A88746); border: 1px solid rgba(255, 236, 180, 0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 20px -10px rgba(217, 184, 106, 0.8);
+  transition: transform .2s, box-shadow .2s, filter .2s;
+}
+.gp .gp-acc.in svg { color: #0F1C15; }
+.gp .gp-acc.in:hover { background: linear-gradient(145deg, #F2DCA2, #D2B06A 55%, #B0904E); transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 12px 26px -10px rgba(217, 184, 106, 0.95); }
+.gp .gp-acc.in:focus-visible { outline: 3px solid #FFFDF8; outline-offset: 3px; }
+/* "More": looks like a tab, opens a card of the pages that did not fit */
+.gp-more { position: relative; flex: none; }
+.gp-more[hidden] { display: none; }
+.gp-nav a[hidden] { display: none !important; }
+.gp-more-btn {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 12px 0 13px; border-radius: 999px; cursor: pointer;
+  border: 0; background: transparent; color: #C9D2C0; font: 500 15px var(--g-sans); transition: color .2s, background .25s;
+}
+[dir="rtl"] .gp-more-btn { font-family: var(--g-ar); padding: 0 13px 0 12px; }
+.gp-more-btn > svg { width: 16px; height: 16px; color: var(--g-gold-2); opacity: .9; }
+.gp-more-caret { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(217, 184, 106, 0.14); transition: transform .25s, background .25s; }
+.gp-more-caret svg { width: 12px; height: 12px; color: #F3DFA8; }
+.gp-more-btn:hover { background: rgba(255, 255, 255, 0.07); color: #FFFDF8; }
+.gp-more.open .gp-more-btn { background: rgba(217, 184, 106, 0.14); color: #F3DFA8; box-shadow: 0 0 0 1px rgba(217, 184, 106, 0.45) inset; }
+.gp-more.open .gp-more-caret { transform: rotate(180deg); background: rgba(217, 184, 106, 0.3); }
+.gp-more.current .gp-more-btn { color: #F3DFA8; box-shadow: 0 0 0 1px rgba(217, 184, 106, 0.45) inset, 0 0 22px -6px var(--g-gold-glow); }
+.gp-more-list {
+  position: fixed; z-index: 500; width: 300px; padding: 8px;
+  display: grid; gap: 4px; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(19, 35, 26, 0.98), rgba(27, 49, 37, 0.98));
+  border: 1px solid rgba(217, 184, 106, 0.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 28px 60px -20px rgba(0, 0, 0, 0.75), 0 0 40px -18px rgba(217, 184, 106, 0.5);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  animation: gpMoreIn .18s ease-out;
+}
+@keyframes gpMoreIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+.gp-more-list[hidden] { display: none; }
+body.gp > .gp-more-list { position: fixed; z-index: 500; }
+.gp-more-list a {
+  display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 10px; border-radius: 12px; text-decoration: none;
+  color: #E9EDE4; transition: background .2s, transform .2s;
+}
+.gp-more-list .ic {
+  flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; color: #0F1C15;
+  background: linear-gradient(145deg, #E7C97F, #A88746 60%, #7A5F24); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22) inset, 0 6px 14px -8px rgba(217, 184, 106, 0.8);
+}
+.gp-more-list .tx { min-width: 0; display: grid; gap: 1px; }
+.gp-more-list .tx b { font: 600 15px var(--g-sans); color: #FFFDF8; }
+.gp-more-list .tx small { font: 400 12.5px/1.35 var(--g-sans); color: #A9B89A; }
+[dir="rtl"] .gp-more-list .tx b, [dir="rtl"] .gp-more-list .tx small { font-family: var(--g-ar); }
+.gp-more-list a:hover, .gp-more-list a:focus-visible { background: rgba(217, 184, 106, 0.1); transform: translateX(2px); outline: none; box-shadow: 0 0 0 1px rgba(217, 184, 106, 0.45) inset; }
+[dir="rtl"] .gp-more-list a:hover, [dir="rtl"] .gp-more-list a:focus-visible { transform: translateX(-2px); }
+.gp-more-list a[aria-current="page"] { background: rgba(217, 184, 106, 0.14); box-shadow: 0 0 0 1px rgba(217, 184, 106, 0.5) inset; }
+.gp-more-list a[aria-current="page"] .tx b { color: #F3DFA8; }
+@media (prefers-reduced-motion: reduce) { .gp-more-list { animation: none; } .gp-more-caret, .gp-more-list a { transition: none; } }
+@media (max-width: 1100px) { .gp-tools .gp-account { padding-inline-start: 0; margin-inline-start: 0; border-inline-start: 0; } }

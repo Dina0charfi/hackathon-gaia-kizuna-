@@ -22,7 +22,7 @@
   /* ------------------------------------------------------------ words */
   var W = {
     fr: {
-      open: 'Accessibilité : texte, contraste et voix', btn: 'Aide',
+      open: 'Accessibilité : texte, contraste et voix', btn: 'Accessibilité',
       title: 'Rendre GAIA plus facile', intro: 'Choisissez ce qui vous aide. GAIA s\'en souvient sur cet appareil.',
       see: 'Voir', hear: 'Écouter et parler',
       size: 'Taille du texte', contrast: 'Contraste élevé', contrast_d: 'Noir sur blanc, liens soulignés',
@@ -38,7 +38,7 @@
       no_stt: 'La dictée n\'existe pas dans ce navigateur (essayez Chrome ou Edge).', again: 'Touchez encore pour ouvrir'
     },
     ar: {
-      open: 'إمكانية الوصول: النص والتباين والصوت', btn: 'مساعدة',
+      open: 'إمكانية الوصول: النص والتباين والصوت', btn: 'إمكانية الوصول',
       title: 'اجعل غايا أسهل', intro: 'اختر ما يساعدك. يحفظ غايا اختيارك على هذا الجهاز.',
       see: 'الرؤية', hear: 'الاستماع والكلام',
       size: 'حجم الكتابة', contrast: 'تباين عالٍ', contrast_d: 'أسود على أبيض، والروابط مسطّرة',
@@ -54,7 +54,7 @@
       no_stt: 'الكتابة بالصوت غير متوفرة في هذا المتصفح (جرّب Chrome أو Edge).', again: 'المس مرة أخرى للفتح'
     },
     en: {
-      open: 'Accessibility: text, contrast and voice', btn: 'Help',
+      open: 'Accessibility: text, contrast and voice', btn: 'Accessibility',
       title: 'Make GAIA easier', intro: 'Pick what helps you. GAIA remembers it on this device.',
       see: 'See', hear: 'Listen and speak',
       size: 'Text size', contrast: 'High contrast', contrast_d: 'Black on white, underlined links',
@@ -70,7 +70,7 @@
       no_stt: 'Voice typing is not available in this browser (try Chrome or Edge).', again: 'Tap again to open'
     },
     ja: {
-      open: 'アクセシビリティ：文字・コントラスト・音声', btn: 'ヘルプ',
+      open: 'アクセシビリティ：文字・コントラスト・音声', btn: 'アクセシビリティ',
       title: 'GAIAを使いやすく', intro: '役に立つものを選んでください。この端末に保存されます。',
       see: '見る', hear: '聞く・話す',
       size: '文字の大きさ', contrast: 'ハイコントラスト', contrast_d: '白地に黒、リンクに下線',
@@ -194,6 +194,52 @@
     '@keyframes a11y-pulse { 50% { box-shadow: 0 0 0 10px rgba(179,38,30,.25); } }',
     '.a11y-toast { position: fixed; z-index: 980; inset-inline: 12px; top: 12px; margin-inline: auto; max-width: 520px; padding: 14px 16px; border-radius: 14px; background: #111; color: #fff; font: 600 16px/1.35 system-ui, -apple-system, "Segoe UI", Tahoma, "IBM Plex Sans Arabic", sans-serif; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.4); }',
     '.a11y-toast[hidden] { display: none; }',
+
+    /* ---- GAIA template skin: dark lacquer, gold seal, ivory card (same controls and sizes as above) */
+    '.a11y-fab { background: linear-gradient(180deg, #0F1C15, #1F3A2B); color: #FFFDF8; border: 1px solid rgba(217,184,106,.65); padding: 6px 20px 6px 6px; font-family: var(--g-sans, "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif); font-weight: 600; box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset, 0 14px 34px -12px rgba(0,0,0,.55), 0 0 26px -6px rgba(217,184,106,.45); transition: transform .25s, box-shadow .25s; }',
+    '.a11y-fab:hover { background: linear-gradient(180deg, #0F1C15, #2B4A38); transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 18px 38px -12px rgba(0,0,0,.6), 0 0 34px -4px rgba(217,184,106,.6); }',
+    '.a11y-fab svg { width: 44px; height: 44px; padding: 7px; border-radius: 50%; color: #0F1C15; background: linear-gradient(145deg, #E7C97F, #A88746 60%, #7A5F24); box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset, 0 6px 16px -6px rgba(217,184,106,.6); }',
+    '[dir=rtl] .a11y-fab { padding: 6px 6px 6px 20px; font-family: var(--g-ar, "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif); }',
+    '.a11y-fab:focus-visible, .a11y-ui button:focus-visible, .a11y-ui a:focus-visible { outline: 3px solid #E7C97F; outline-offset: 3px; box-shadow: 0 0 0 6px #0F1C15; }',
+    '.a11y-panel { background: #FFFDF8; color: #1E2622; border: 1px solid rgba(168,135,70,.55); border-radius: 20px; box-shadow: 0 30px 70px -20px rgba(15,28,21,.6); font-family: var(--g-sans, "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif); }',
+    '.a11y-panel[dir=rtl] { font-family: var(--g-ar, "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif); }',
+    '.a11y-panel::backdrop { background: rgba(8,14,11,.6); }',
+    '.a11y-hd { background: linear-gradient(180deg, #0F1C15, #1F3A2B); border-bottom: 1px solid rgba(217,184,106,.55); }',
+    '.a11y-hd > svg { width: 40px; height: 40px; padding: 6px; border-radius: 50%; color: #0F1C15; background: linear-gradient(145deg, #E7C97F, #A88746 60%, #7A5F24); }',
+    '.a11y-hd h2 { font-family: var(--g-display, "Shippori Mincho B1", "Noto Serif JP", Georgia, serif) !important; font-weight: 700 !important; color: #FFFDF8 !important; }',
+    '.a11y-panel[dir=rtl] .a11y-hd h2 { font-family: var(--g-ar, "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif) !important; font-weight: 700 !important; }',
+    '.a11y-x { border: 1px solid rgba(217,184,106,.6); color: #F3DFA8; background: rgba(217,184,106,.1); }',
+    '.a11y-x:hover { background: rgba(217,184,106,.22); }',
+    '.a11y-intro { color: #4B5650; }',
+    '.a11y-panel[lang=ja] .a11y-hd h2 { font-family: var(--g-jp, "Shippori Mincho B1", "Noto Serif JP", serif) !important; }',
+    '.a11y-grp { color: #7A5F24 !important; border-top: 1px solid rgba(168,135,70,.35); padding-top: 12px; }',
+    '.a11y-big-btn { background: linear-gradient(180deg, #1F3A2B, #2B4A38); color: #FFFDF8; border: 1px solid rgba(217,184,106,.55); box-shadow: 0 8px 20px -10px rgba(15,28,21,.6); }',
+    '.a11y-big-btn:hover { background: linear-gradient(180deg, #0F1C15, #1F3A2B); }',
+    '.a11y-big-btn svg { color: #E7C97F; }',
+    '.a11y-row { border: 1px solid rgba(30,38,34,.18); background: #fff; color: #1E2622; }',
+    '.a11y-row:hover { border-color: #A88746; background: #FBF6EA; }',
+    '.a11y-row .ic { background: linear-gradient(180deg, #0F1C15, #1F3A2B); color: #E7C97F; }',
+    '.a11y-row .tx b { color: #1F3A2B; }',
+    '.a11y-row .tx small { color: #4B5650; }',
+    '.a11y-sw { background: #C9C2B2; }',
+    '.a11y-row[aria-checked=true] { border-color: #A88746; background: #FBF6EA; box-shadow: inset 0 0 0 1px rgba(168,135,70,.35); }',
+    '.a11y-row[aria-checked=true] .a11y-sw { background: linear-gradient(90deg, #1F3A2B, #2B4A38); box-shadow: inset 0 0 0 1px #A88746; }',
+    '.a11y-row[aria-checked=true] .a11y-sw::after { background: #E7C97F; }',
+    '.a11y-sizes button { border: 1px solid rgba(30,38,34,.2); background: #fff; color: #1F3A2B; font-family: var(--g-display, "Shippori Mincho B1", "Noto Serif JP", Georgia, serif); }',
+    '.a11y-sizes button:hover { border-color: #A88746; background: #FBF6EA; }',
+    '.a11y-sizes button[aria-pressed=true] { background: linear-gradient(180deg, #1F3A2B, #2B4A38); border-color: #A88746; color: #FFFDF8; box-shadow: inset 0 0 0 1px rgba(217,184,106,.6); }',
+    '.a11y-note { background: #F7F0DC; color: #4A3600; border: 1px solid rgba(168,135,70,.45); }',
+    '.a11y-reset { border: 1px solid #A88746; color: #1F3A2B; background: #fff; }',
+    '.a11y-reset:hover { background: #FBF6EA; }',
+    '.a11y-bar, .a11y-toast { font-family: var(--g-sans, "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif); }',
+    '[dir=rtl] .a11y-bar, [dir=rtl] .a11y-toast, .a11y-bar[dir=rtl] { font-family: var(--g-ar, "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif); }',
+    '.a11y-bar, .a11y-toast { background: linear-gradient(180deg, #0F1C15, #1F3A2B); color: #FFFDF8; border: 1px solid rgba(217,184,106,.55); }',
+    '.a11y-bar .lbl svg { color: #E7C97F; }',
+    '.a11y-bar button { border: 1px solid rgba(217,184,106,.65); color: #F3DFA8; }',
+    '.a11y-bar button.stop { background: linear-gradient(145deg, #E7C97F, #A88746); color: #0F1C15; border-color: #E7C97F; }',
+    '.a11y-mic { background: linear-gradient(180deg, #0F1C15, #1F3A2B); color: #E7C97F; border: 1px solid rgba(217,184,106,.7); }',
+    '.a11y-speaking { outline-color: #D9B86A !important; background-color: rgba(217,184,106,.2) !important; }',
+    '.a11y-armed { outline-color: #1F3A2B !important; }',
 
     /* high contrast */
     'html.a11y-contrast { --g-ivory: #fff; --g-paper: #fff; --g-sand-soft: #F2F2F2; --g-sage-soft: #F2F2F2; --g-ink: #000; --g-ink-2: #111; --g-ink-3: #222; --g-forest: #00331A; --g-forest-2: #00331A; --g-gold: #5C4300; --g-gold-ink: #4A3600; --g-line: #000; --g-line-2: #000; --cream: #fff; --ivory: #fff; --ink: #000; --ink-soft: #111; --ink-mute: #222; }',

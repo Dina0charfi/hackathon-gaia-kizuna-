@@ -82,7 +82,7 @@
     fr: {
       tagline: "L'intelligence qui comprend la terre",
       nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab', nav_agent: 'Agent',
-      nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_waste: 'Énergie des déchets', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_market: 'Vendre ma récolte', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
+      nav_more: 'Plus', nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_waste: 'Énergie des déchets', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_market: 'Vendre ma récolte', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
       skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte', acc_admin: 'Administration',
       foot_line: "GAIA n'impose pas la technologie à la terre. GAIA adapte la technologie à la terre.",
@@ -102,7 +102,7 @@
     ar: {
       tagline: 'ذكاء يفهم الأرض',
       nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء', nav_agent: 'الوكيل',
-      nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_waste: 'طاقة النفايات', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_market: 'بيع محصولي', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
+      nav_more: 'المزيد', nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_waste: 'طاقة النفايات', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_market: 'بيع محصولي', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
       skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي', acc_admin: 'الإدارة',
       foot_line: 'غايا لا تفرض التكنولوجيا على الأرض، بل تكيّف التكنولوجيا مع الأرض.',
@@ -122,7 +122,7 @@
     en: {
       tagline: 'Intelligence that understands the land',
       nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab', nav_agent: 'Agent',
-      nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_waste: 'Energy from waste', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_market: 'Sell my crop', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
+      nav_more: 'More', nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_waste: 'Energy from waste', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_market: 'Sell my crop', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
       skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account', acc_admin: 'Administration',
       foot_line: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
@@ -142,7 +142,7 @@
     ja: {
       tagline: '土地を理解するインテリジェンス',
       nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ', nav_agent: 'エージェント',
-      nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_waste: '廃棄物エネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_market: '作物を売る', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
+      nav_more: 'その他', nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_waste: '廃棄物エネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_market: '作物を売る', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
       skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント', acc_admin: '管理',
       foot_line: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
@@ -463,6 +463,92 @@
   }
   function onLang(fn) { langListeners.push(fn); }
 
+  /* ---------------------------------------------------------- header: one line of tabs, the rest under "More"
+     (priority+ pattern): on a wide screen every tab shows; when they do not fit, the last ones move into a
+     "More" menu instead of wrapping onto a second line. The current page always stays visible. */
+  function fitNav(nav) {
+    if (!nav) return;
+    var links = [].slice.call(nav.querySelectorAll(':scope > a'));
+    var byHref = {};
+    NAV.forEach(function (n) { byHref[n[1]] = n; });
+    var svgNS = 'http://www.w3.org/2000/svg';
+    function mini(paths) {                                           // small inline icons for the button
+      var g = document.createElementNS(svgNS, 'svg');
+      g.setAttribute('viewBox', '0 0 24 24'); g.setAttribute('aria-hidden', 'true');
+      g.innerHTML = paths; return g;
+    }
+    var wrap = el('div', { class: 'gp-more' });
+    var btn = el('button', { type: 'button', class: 'gp-more-btn', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'gp-more-list' }, [
+      mini('<circle cx="5" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="19" cy="12" r="1.9" fill="currentColor"/>'),
+      el('span', { 'data-i18n': 'nav_more' }),
+      el('span', { class: 'gp-more-caret' }, [mini('<path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>')])
+    ]);
+    var list = el('div', { id: 'gp-more-list', class: 'gp-more-list', role: 'menu', hidden: true });
+    wrap.appendChild(btn); nav.appendChild(wrap);
+    document.body.appendChild(list);                                  // outside the header, which clips what overflows it
+    function place() {
+      var r = btn.getBoundingClientRect(), rtl = getComputedStyle(nav).direction === 'rtl';
+      list.style.top = Math.round(r.bottom + 10) + 'px';
+      if (rtl) { list.style.left = Math.round(r.left) + 'px'; list.style.right = 'auto'; }
+      else { list.style.right = Math.round(document.documentElement.clientWidth - r.right) + 'px'; list.style.left = 'auto'; }
+    }
+    function close() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); wrap.classList.remove('open'); }
+    function items() { return [].slice.call(list.querySelectorAll('a')); }
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = list.hidden;
+      if (open) place();
+      list.hidden = !open; btn.setAttribute('aria-expanded', String(open)); wrap.classList.toggle('open', open);
+      if (open) { var f = items()[0]; if (f) f.focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!wrap.contains(e.target) && !list.contains(e.target)) close(); });
+    function keys(e) {
+      if (list.hidden) return;
+      var a = items(), k = a.indexOf(document.activeElement);
+      if (e.key === 'Escape') { close(); btn.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); (a[k + 1] || a[0]).focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (a[k - 1] || a[a.length - 1]).focus(); }
+      else if (e.key === 'Tab' && list.contains(document.activeElement)) { close(); }
+    }
+    wrap.addEventListener('keydown', keys); list.addEventListener('keydown', keys);
+    global.addEventListener('scroll', function () { if (!list.hidden) place(); }, { passive: true });
+
+    // one card per page that did not fit: gold icon, name, one plain line
+    function card(a) {
+      var n = byHref[a.getAttribute('href')] || [null, a.getAttribute('href'), null];
+      return el('a', { href: n[1], role: 'menuitem', 'aria-current': a.getAttribute('aria-current') }, [
+        el('span', { class: 'ic' }, [icon(NAV_ICON[n[0]] || 'info', 20)]),
+        el('span', { class: 'tx' }, [el('b', null, [n[2] ? t(n[2]) : a.textContent]), n[0] ? el('small', null, [t('nd_' + n[0])]) : null])
+      ]);
+    }
+    function fit() {
+      if (getComputedStyle(nav).display === 'none') return;           // phone: the Menu button takes over
+      links.forEach(function (a) { a.hidden = false; });
+      wrap.hidden = false;
+      var rtl = getComputedStyle(nav).direction === 'rtl';
+      var edge = function () { var r = nav.getBoundingClientRect(); return rtl ? r.left : r.right; };
+      var over = function (n) { var r = n.getBoundingClientRect(); return rtl ? r.left < edge() - 1 : r.right > edge() + 1; };
+      var visible = links.slice(), moved = [];
+      while (visible.length > 1 && over(wrap)) {
+        var i = visible.length - 1;
+        if (visible[i].getAttribute('aria-current') === 'page') i--;     // keep the current page in sight
+        var a = visible.splice(i, 1)[0];
+        a.hidden = true;                                                // out of the bar now, so the next check sees the space
+        moved.unshift(a);
+      }
+      clear(list);
+      moved.forEach(function (a) { list.appendChild(card(a)); });
+      wrap.hidden = !moved.length;
+      wrap.classList.toggle('current', moved.some(function (a) { return a.getAttribute('aria-current') === 'page'; }));
+    }
+    var t0 = null;
+    function later() { close(); clearTimeout(t0); t0 = setTimeout(fit, 60); }
+    global.addEventListener('resize', later);
+    langListeners.push(function () { setTimeout(fit, 0); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    setTimeout(fit, 0);
+  }
+
   function mountShell(current) {
     var menu = navMenu(current);
     var header = el('header', { class: 'gp-top' }, [
@@ -491,6 +577,7 @@
     document.body.insertBefore(header, document.body.firstChild);
     document.body.insertBefore(skip, document.body.firstChild);
     document.body.appendChild(menu.dlg);
+    fitNav(header.querySelector('.gp-nav'));
 
     var foot = el('footer', { class: 'gp-foot' }, [
       el('div', { class: 'wrap gp-foot-in' }, [
