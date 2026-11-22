@@ -64,6 +64,12 @@
       ag_steps: 'ステップ', ag_tools: 'ツール呼び出し', ag_ms: 'ms'
     }
   });
+  G.addStrings({
+    fr: { ag_do: 'À faire', ag_watch: 'À surveiller', ag_how: 'Comment l’agent a vérifié', ag_unavail: 'non disponible', ag_empty: 'Écrivez votre objectif, le plan s’affichera ici.', ag_m_server: 'IA en ligne', ag_m_browser: 'IA dans le navigateur', ag_m_planner: 'calcul GAIA' },
+    ar: { ag_do: 'ما يجب فعله', ag_watch: 'للمتابعة', ag_how: 'كيف تحقق الوكيل', ag_unavail: 'غير متاح', ag_empty: 'اكتب هدفك، وستظهر الخطة هنا.', ag_m_server: 'ذكاء اصطناعي عبر الإنترنت', ag_m_browser: 'ذكاء اصطناعي في المتصفح', ag_m_planner: 'حساب GAIA' },
+    en: { ag_do: 'To do', ag_watch: 'To watch', ag_how: 'How the agent checked', ag_unavail: 'not available', ag_empty: 'Write your goal, the plan will appear here.', ag_m_server: 'online AI', ag_m_browser: 'AI in the browser', ag_m_planner: 'GAIA calculation' },
+    ja: { ag_do: 'すること', ag_watch: '注意点', ag_how: 'エージェントの確認内容', ag_unavail: '利用できません', ag_empty: '目標を書くと、ここに計画が表示されます。', ag_m_server: 'オンラインAI', ag_m_browser: 'ブラウザ内のAI', ag_m_planner: 'GAIAの計算' }
+  });
   var t = G.t;
   function L() { return G.lang(); }
   function W(o) { var l = L(); return o[l] !== undefined ? o[l] : o.en; }
@@ -244,7 +250,8 @@
         ar: r.disease + ': خطر ' + (r.level === 'high' ? 'مرتفع' : 'متوسط') + ' (' + dts + '). ' + r.scout + '؛ لا معالجة إلا بعد التأكيد وموافقة المندوبية',
         ja: r.disease + '：リスク' + (r.level === 'high' ? '高' : '中') + '（' + dts + '）。' + r.scout + '。確認され普及員が認めた場合のみ処置' }), 'disease_risk', r.level === 'high' ? 2 : 4);
     });
-    if (ph && ph.disease && ph.disease !== 'healthy') add(W({ fr: 'maintenant', en: 'now', ar: 'الآن', ja: '今すぐ' }), null, W({ fr: 'Dernière photo : ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). La montrer à un technicien pour confirmation', en: 'Last photo: ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). Show it to a technician to confirm', ar: 'آخر صورة: ' + ph.disease.replace(/_/g, ' ') + ' (' + n0(100 * ph.confidence) + ' %). اعرضها على تقني للتأكيد', ja: '最新の写真：' + ph.disease.replace(/_/g, ' ') + '（' + n0(100 * ph.confidence) + '%）。技術者に確認してもらう' }), 'plant_health_last', 3);
+    var phName = ph && ph.disease ? (ph.disease_names ? W(ph.disease_names) : ph.disease.replace(/_/g, ' ')) : '';
+    if (ph && ph.plant && ph.disease && ph.disease !== 'healthy') add(W({ fr: 'maintenant', en: 'now', ar: 'الآن', ja: '今すぐ' }), null, W({ fr: 'Dernière photo : ' + phName + ' (' + n0(100 * ph.confidence) + ' %). La montrer à un technicien pour confirmation', en: 'Last photo: ' + phName + ' (' + n0(100 * ph.confidence) + ' %). Show it to a technician to confirm', ar: 'آخر صورة: ' + phName + ' (' + n0(100 * ph.confidence) + ' %). اعرضها على تقني للتأكيد', ja: '最新の写真：' + phName + '（' + n0(100 * ph.confidence) + '%）。技術者に確認してもらう' }), 'plant_health_last', 3);
 
     // satellite vigour
     var nd = res.satellite_ndvi && res.satellite_ndvi.data;
@@ -339,11 +346,14 @@
     if (!bm && (!ph || ph.status === 'none')) watch.push(W({ fr: 'Aucune photo de feuille : une photo dans Santé des plantes confirmerait les risques de maladie.', en: 'No leaf photo yet: a photo in Plant health would confirm the disease risks.', ar: 'لا صورة ورقة بعد: صورة في صحة النبات تؤكد أخطار الأمراض.', ja: '葉の写真がまだありません：「植物の健康」で撮影すると病害リスクを確認できます。' }));
 
     acts.sort(function (a, b) { return a.prio - b.prio || ((a.date || '9') < (b.date || '9') ? -1 : 1); });
+    var CROPS = { olive: { fr: 'oliviers', en: 'olive trees', ar: 'زيتون', ja: 'オリーブ' }, palm: { fr: 'palmiers dattiers', en: 'date palms', ar: 'نخيل', ja: 'ナツメヤシ' }, citrus: { fr: 'agrumes', en: 'citrus', ar: 'قوارص', ja: '柑橘' },
+      cereal: { fr: 'céréales', en: 'cereals', ar: 'حبوب', ja: '穀物' }, veg: { fr: 'légumes', en: 'vegetables', ar: 'خضر', ja: '野菜' }, grape: { fr: 'vigne', en: 'grapevine', ar: 'عنب', ja: 'ブドウ' } };
+    var cn = pr && pr.crop && CROPS[pr.crop] ? W(CROPS[pr.crop]) : '', ha = pr && pr.area_ha ? G.fmt(pr.area_ha, 1) : '';
     var situation = pr ? W({
-      fr: (pr.name || 'Parcelle') + ' : ' + (pr.crop || 'culture ?') + ', ' + (pr.area_ha ? pr.area_ha + ' ha' : 'surface ?') + ', ' + n0(pr.climate.rain_mm) + ' mm de pluie par an pour une ET0 de ' + n0(pr.climate.et0_mm) + ' mm' + (wx ? ' ; 14 prochains jours : ' + n0(wx.rain_next_mm) + ' mm de pluie, ET0 ' + n0(wx.et0_next_mm) + ' mm.' : '.'),
-      en: (pr.name || 'Plot') + ': ' + (pr.crop || 'crop ?') + ', ' + (pr.area_ha ? pr.area_ha + ' ha' : 'area ?') + ', ' + n0(pr.climate.rain_mm) + ' mm of rain a year against an ET0 of ' + n0(pr.climate.et0_mm) + ' mm' + (wx ? '; next 14 days: ' + n0(wx.rain_next_mm) + ' mm rain, ET0 ' + n0(wx.et0_next_mm) + ' mm.' : '.'),
-      ar: (pr.name || 'القطعة') + ': ' + (pr.crop || '?') + '، ' + (pr.area_ha ? pr.area_ha + ' هكتار' : '?') + '، ' + n0(pr.climate.rain_mm) + ' مم أمطار سنوياً مقابل تبخر ' + n0(pr.climate.et0_mm) + ' مم' + (wx ? '؛ الأيام الـ14 القادمة: ' + n0(wx.rain_next_mm) + ' مم أمطار.' : '.'),
-      ja: (pr.name || '区画') + '：' + (pr.crop || '作物?') + '、' + (pr.area_ha ? pr.area_ha + ' ha' : '面積?') + '、年間降水' + n0(pr.climate.rain_mm) + ' mmに対しET0 ' + n0(pr.climate.et0_mm) + ' mm' + (wx ? '。今後14日：降水' + n0(wx.rain_next_mm) + ' mm、ET0 ' + n0(wx.et0_next_mm) + ' mm。' : '。')
+      fr: 'Votre parcelle' + (pr.name ? ' (' + pr.name + ')' : '') + (ha || cn ? ' : ' + [ha ? ha + ' ha' : '', cn].filter(Boolean).join(/^[aeiouyh]/i.test(cn) ? ' d\'' : ' de ') : '') + '. Il y pleut ' + n0(pr.climate.rain_mm) + ' mm par an, alors que la chaleur en évapore jusqu\'à ' + n0(pr.climate.et0_mm) + ' mm.' + (wx ? ' Dans les 14 prochains jours : ' + n0(wx.rain_next_mm) + ' mm de pluie attendus.' : ''),
+      en: 'Your plot' + (pr.name ? ' (' + pr.name + ')' : '') + (ha || cn ? ': ' + [ha ? ha + ' ha' : '', cn].filter(Boolean).join(' of ') : '') + '. It gets ' + n0(pr.climate.rain_mm) + ' mm of rain a year, while the heat can evaporate ' + n0(pr.climate.et0_mm) + ' mm.' + (wx ? ' Next 14 days: ' + n0(wx.rain_next_mm) + ' mm of rain expected.' : ''),
+      ar: 'قطعتك' + (pr.name ? ' (' + pr.name + ')' : '') + (ha || cn ? ': ' + [ha ? ha + ' هكتار' : '', cn].filter(Boolean).join(' ') : '') + '. تنزل فيها ' + n0(pr.climate.rain_mm) + ' مم من الأمطار سنوياً، بينما يمكن للحرارة أن تبخر ' + n0(pr.climate.et0_mm) + ' مم.' + (wx ? ' خلال 14 يوماً القادمة: ' + n0(wx.rain_next_mm) + ' مم من الأمطار.' : ''),
+      ja: 'あなたの区画' + (pr.name ? '（' + pr.name + '）' : '') + (ha || cn ? '：' + [cn, ha ? ha + ' ha' : ''].filter(Boolean).join(' ') : '') + '。年間の雨は' + n0(pr.climate.rain_mm) + ' mm、暑さで最大' + n0(pr.climate.et0_mm) + ' mmが蒸発します。' + (wx ? '今後14日の雨の予想は' + n0(wx.rain_next_mm) + ' mmです。' : '')
     }) : '';
     return { situation: situation, actions: acts.slice(0, 8), watch: watch.slice(0, 5), source: 'planner' };
   }
@@ -408,7 +418,7 @@
     var p;
     if (useServer) {
       p = llmAgent(goal).catch(function (e) {
-        thought(t('ag_fallback') + ' (' + e.message + ')');
+        S.steps = []; thought(t('ag_fallback'));   // the planner measures everything again: no duplicate lines
         S.mode = 'planner';
         return planner(goal).then(function (res) { return { plan: synth(res) }; });
       });
@@ -448,62 +458,107 @@
   /* ------------------------------------------------------------------ page */
   G.mountShell('agent');
   var app = document.getElementById('app'), traceBox, planBox, modeBox, form, input, goBtn;
-  var ICON = { satellite_ndvi: '🛰️', find_place: '📍', build_land_dna: '🧬', plot_profile: '🗺️', weather_forecast: '🌦️', water_need: '💧', groundwater_guard: '🛡️', check_practices: '⚖️', solar_brain: '☀️', disease_risk: '🦠', plant_health_last: '🌿', search_knowledge: '📚' };
+  // what each tool is called for the farmer (no function names on the page)
+  var CAT = {
+    find_place: { fr: 'Lieu', en: 'Place', ar: 'المكان', ja: '場所' }, build_land_dna: { fr: 'Terrain', en: 'Land', ar: 'الأرض', ja: '土地' },
+    plot_profile: { fr: 'Votre parcelle', en: 'Your plot', ar: 'قطعتك', ja: 'あなたの区画' }, weather_forecast: { fr: 'Météo', en: 'Weather', ar: 'الطقس', ja: '天気' },
+    water_need: { fr: 'Irrigation', en: 'Irrigation', ar: 'الري', ja: '灌漑' }, groundwater_guard: { fr: 'Nappe', en: 'Groundwater', ar: 'المائدة المائية', ja: '地下水' },
+    check_practices: { fr: 'Pratiques', en: 'Practices', ar: 'الممارسات', ja: '農法' }, solar_brain: { fr: 'Solaire', en: 'Solar', ar: 'الطاقة الشمسية', ja: '太陽光' },
+    disease_risk: { fr: 'Maladies', en: 'Diseases', ar: 'الأمراض', ja: '病害' }, satellite_ndvi: { fr: 'Satellite', en: 'Satellite', ar: 'القمر الصناعي', ja: '衛星' },
+    plant_health_last: { fr: 'Dernière photo', en: 'Last photo', ar: 'آخر صورة', ja: '最新の写真' }, search_knowledge: { fr: 'Connaissances', en: 'Knowledge', ar: 'المعارف', ja: '知識' },
+    business_model: { fr: 'Financement', en: 'Financing', ar: 'التمويل', ja: '資金計画' }
+  };
+  function cat(name) { return CAT[name] ? W(CAT[name]) : ''; }
+  var WORDS = {
+    fr: { moderate: 'modéré', high: 'élevé', low: 'faible', feasible: 'possibles', adapt: 'à adapter', insufficient: 'à compléter', rejected: 'écartées', no: 'trop cher', ok: 'abordable' },
+    ar: { moderate: 'متوسط', high: 'مرتفع', low: 'ضعيف', feasible: 'ممكنة', adapt: 'للتكييف', insufficient: 'ناقصة', rejected: 'مستبعدة', no: 'مكلف جداً', ok: 'في المتناول' },
+    en: { adapt: 'to adapt', insufficient: 'incomplete', no: 'too expensive', ok: 'affordable' },
+    ja: { moderate: '中', high: '高', low: '低', feasible: '件可能', adapt: '件要調整', insufficient: '件データ不足', rejected: '件不可', no: '高すぎる', ok: '支払い可能' }
+  };
+  var PICTO = /[\p{Extended_Pictographic}\p{Regional_Indicator}️]/gu;
+  function plain(x) { return String(x || '').replace(PICTO, '').replace(/\s{2,}/g, ' ').trim(); }
+  var EASY = {
+    fr: [[/\s*\(quota FAO-56 du mois\)/g, ''], [/(\d) mm, FAO-56\)/g, '$1 mm)'], [/,\s*FAO-56\b/g, ''], [/≈\s*/g, 'environ '], [/ ; /g, '. '], [/\bNDVI\s+(-?\d)/g, 'indice de végétation $1'], [/ bloqués pour la nappe/g, ' restent dans la nappe'],
+      [/Les panneaux pourraient remonter/gi, 'sans ce réglage, les panneaux pourraient pomper'], [/(\d)×/g, '$1 fois'], [/\bLER\b/g, 'rendement total du sol'], [/risque modéré/g, 'risque moyen'], [/C'est le besoin agronomique, ne pas pomper plus/g, 'C\'est tout ce dont la culture a besoin : ne pompez pas plus']],
+    en: [[/\s*\(this month's FAO-56 quota\)/g, ''], [/,\s*FAO-56\b/g, ''], [/≈\s*/g, 'about '], [/; /g, '. '], [/\bNDVI\s+(-?\d)/g, 'vegetation index $1'], [/(\d)×/g, '$1 times']],
+    ar: [[/≈\s*/g, 'حوالي '], [/\bNDVI\s+(-?\d)/g, 'مؤشر الغطاء النباتي $1']],
+    ja: [[/、FAO-56/g, ''], [/≈\s*/g, '約']]
+  };
+  function easy(x) { return (EASY[L()] || []).reduce(function (v, r) { return v.replace(r[0], r[1]); }, plain(x)); }
+  function summary(x) { var m = WORDS[L()] || {}; return plain(x).replace(/\b[a-z]+\b(?=\s*(?:·|$))/g, function (w) { return m[w] || w; }).replace(/ · manquant : 0| · missing: 0/g, '').replace(/^\? · /, '').replace(/_/g, ' '); }
+  // the language model sometimes writes tool names: the farmer does not need them
+  function cleanText(x) {
+    var names = Object.keys(CAT).join('|');
+    return plainLines(x)
+      .replace(new RegExp('\\s*[\\(（]\\s*(?:outils?|tools?|module)?\\s*[*_`]*(?:' + names + ')[*_`]*(?:\\s*[,;+&/]\\s*[*_`]*(?:' + names + ')[*_`]*)*\\s*[\\)）]', 'gi'), '')
+      .replace(new RegExp('\\s*[–—-]\\s*[*_`]+(?:' + names + ')[*_`]+(?:\\s*\\([^)]*\\))?', 'gi'), '')
+      .replace(new RegExp('[*_`]*\\b(' + names + ')\\b[*_`]*', 'gi'), function (m, n) { return cat(n.toLowerCase()).toLowerCase(); })
+      .replace(/^#+\s*actions?\s*$/gim, '**' + t('ag_do') + '**').replace(/^#+\s*watch\s*$/gim, '**' + t('ag_watch') + '**').replace(/^(\s*[-*•]\s*)\[([^\]]+)\]/gm, '$1**$2** :');
+  }
+  function plainLines(x) { return String(x || '').replace(PICTO, ''); }
+  // one short title, then the explanation: easier to read than one long sentence
+  function cap(x) { return x.replace(/(^|[.!?]\s+)([a-zàâçéèêëîïôûù])/g, function (m, a, c) { return a + c.toUpperCase(); }); }
+  function split(text) {
+    var x = easy(text).replace(/^(?:Mettre en place|Set up|طبّق|導入)\s*[:：]\s*/, ''), cut = -1, len = 0;
+    [' : ', '：', ': ', ' — '].forEach(function (k) { var i = x.indexOf(k); if (i > 5 && i < 90 && (cut === -1 || i < cut)) { cut = i; len = k.length; } });
+    if (cut === -1) [' (', '（'].forEach(function (k) { var i = x.indexOf(k); if (i > 12 && (cut === -1 || i < cut)) { cut = i; len = -k.length; } });
+    if (cut === -1) [', ', '、', '، '].forEach(function (k) { var i = x.indexOf(k); if (i > 18 && (cut === -1 || i < cut)) { cut = i; len = k.length; } });
+    if (cut === -1) return { lead: x, rest: '' };
+    var rest = x.slice(cut + Math.abs(len));
+    if (len < 0) rest = rest.replace(/[)）]\s*[,、،]?/, function (m) { return /[,、،]/.test(m) ? ',' : ''; });
+    return { lead: x.slice(0, cut), rest: cap(rest.trim()) };
+  }
 
   function modeLine() {
     G.clear(modeBox);
     var ls = LLM && LLM.state(), m = S.running || S.plan ? S.mode : (ls && ls.mode === 'server' ? 'server' : ls && ls.engine ? 'browser' : 'planner');
-    modeBox.appendChild(el('span', { class: 'ag-chip ' + m }, [t('ag_mode') + ' : ' + t('ag_m_' + m) + (m === 'server' && LLM ? ' (' + (S.provider || LLM.label()) + ')' : '')]));
+    modeBox.appendChild(el('span', { class: 'ag-chip ' + m }, [t('ag_mode') + ' : ' + t('ag_m_' + m)]));
     if (m === 'planner' && LLM && LLM.webgpu() && !(ls && ls.loading)) modeBox.appendChild(el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { LLM.loadBrowser(); } }, [t('ag_turn_on')]));
     if (m === 'planner' && !(ls && (ls.checking || ls.mode === 'server'))) modeBox.appendChild(el('div', { class: 'small muted', style: 'flex-basis:100%;margin-top:4px' }, [t('ag_no_server')]));
     if (ls && ls.loading) modeBox.appendChild(el('span', { class: 'small muted' }, ['Qwen2.5 · ' + Math.round(100 * (ls.loading.p || 0)) + ' %']));
   }
 
-  function argText(a) { var k = Object.keys(a || {}).filter(function (x) { return a[x] !== undefined && a[x] !== null && a[x] !== ''; }); return k.length ? k.map(function (x) { return x + '=' + (typeof a[x] === 'string' ? a[x] : JSON.stringify(a[x])); }).join(', ') : ''; }
   function drawTrace() {
     G.clear(traceBox);
-    var tools = S.steps.filter(function (s) { return s.kind === 'tool'; });
-    if (!S.steps.length) { traceBox.appendChild(el('p', { class: 'muted small' }, ['—'])); return; }
+    if (!S.steps.length) { traceBox.parentNode.hidden = true; return; }
+    traceBox.parentNode.hidden = false;
     if (S.note) traceBox.appendChild(G.note('info', S.note));
-    var ol = el('ol', { class: 'ag-steps' });
-    S.steps.forEach(function (s, i) {
-      if (s.kind === 'thinking') { ol.appendChild(el('li', { class: 'ag-step thinking' }, [el('span', { class: 'ag-ico' }, ['🧠']), el('span', { class: 'ag-dots' }, [t('ag_running')])])); return; }
-      if (s.kind === 'thought') { ol.appendChild(el('li', { class: 'ag-step thought' }, [el('span', { class: 'ag-ico' }, ['💭']), el('div', null, [el('b', null, [t('ag_think') + ' · ']), s.text])])); return; }
-      var res = s.result || {}, raw = res.data || res;
-      ol.appendChild(el('li', { class: 'ag-step ' + s.status }, [
-        el('span', { class: 'ag-ico' }, [s.name === 'business_model' ? G.icon('cash', 16) : (ICON[s.name] || '🔧')]),
-        el('div', { class: 'ag-body' }, [
-          el('div', { class: 'ag-head' }, [el('code', null, [s.name + '(' + argText(s.args) + ')']),
-            el('span', { class: 'ag-st' }, [s.status === 'running' ? t('ag_running') : s.status === 'error' ? t('ag_err') : (s.ms + ' ' + t('ag_ms'))])]),
-          s.why ? el('div', { class: 'ag-why' }, [s.why]) : null,
-          s.status === 'done' ? el('div', { class: 'ag-sum' }, [res.summary || '']) : s.status === 'error' ? el('div', { class: 'ag-sum err' }, [s.error]) : null,
-          s.status !== 'running' ? el('details', null, [el('summary', null, [t('ag_raw')]), el('pre', null, [JSON.stringify(raw, null, 1).slice(0, 4000)])]) : null
-        ])
-      ]));
+    var ul = el('ul', { class: 'ag-checks' });
+    S.steps.forEach(function (s) {
+      if (s.kind === 'thinking') return;
+      if (s.kind === 'thought') { ul.appendChild(el('li', { class: 'thought' }, [plain(cleanText(s.text))])); return; }
+      var res = s.result || {};
+      ul.appendChild(el('li', { class: s.status }, [el('b', null, [cat(s.name)]),
+        el('span', null, [s.status === 'running' ? t('ag_running') : s.status === 'error' ? t('ag_unavail') : summary(res.summary)])]));
     });
-    traceBox.appendChild(ol);
-    if (!S.running && S.ms) traceBox.appendChild(el('p', { class: 'small muted' }, [tools.length + ' ' + t('ag_tools') + ' · ' + G.fmt(S.ms / 1000, 1) + ' s']));
+    traceBox.appendChild(ul);
   }
 
   function drawPlan() {
     G.clear(planBox);
     if (S.error) { planBox.appendChild(G.note('err', S.error)); return; }
-    if (!S.plan) { if (S.running) planBox.appendChild(el('p', { class: 'muted' }, [t('ag_running')])); return; }
+    if (!S.plan) {
+      var now = S.steps.filter(function (x) { return x.kind === 'tool'; }).slice(-1)[0];
+      planBox.appendChild(S.running ? el('p', { class: 'ag-now', role: 'status' }, [el('span', { class: 'gp-spin' }), ' ' + (now ? (now.why || cat(now.name)) : t('ag_running')) + '…']) : el('p', { class: 'muted' }, [t('ag_empty')]));
+      return;
+    }
     var P = S.plan, body = el('div', { class: 'ag-plan' });
     if (P.text) {
       var evidence = JSON.stringify(S.steps.filter(function (s) { return s.result; }).map(function (s) { return s.result.data; })) + ' ' + S.goal;
-      body.appendChild(LLM.render(P.text, LLM.unverified(P.text, evidence)));
+      var shown = cleanText(P.text);
+      body.appendChild(LLM.render(shown, LLM.unverified(shown, evidence)));
     } else {
       var st = P.struct;
-      body.appendChild(el('p', { class: 'ag-sit' }, [st.situation]));
+      body.appendChild(el('p', { class: 'ag-sit' }, [plain(st.situation)]));
       body.appendChild(el('ol', { class: 'ag-acts' }, st.actions.map(function (a) {
-        return el('li', null, [el('span', { class: 'ag-when' }, [a.when]), el('span', { class: 'ag-txt' }, [a.text]), el('span', { class: 'ag-src' }, [(ICON[a.tool] || '') + ' ' + a.tool])]);
+        var x = split(a.text);
+        return el('li', null, [el('p', { class: 'ag-when' }, [cap(plain(a.when)), el('span', { class: 'ag-src' }, [cat(a.tool)])]), el('h3', { class: 'ag-lead' }, [x.lead]), x.rest ? el('p', { class: 'ag-txt' }, [x.rest]) : null]);
       })));
-      if (st.watch.length) body.appendChild(el('div', { class: 'ag-watch' }, [el('h4', null, [W({ fr: 'À surveiller', en: 'Watch', ar: 'للمتابعة', ja: '注意点' })]), el('ul', null, st.watch.map(function (w) { return el('li', null, [w]); }))]));
+      if (st.watch.length) body.appendChild(el('div', { class: 'ag-watch' }, [el('h4', null, [t('ag_watch')]), el('ul', null, st.watch.map(function (w) { return el('li', null, [cap(easy(w))]); }))]));
     }
     body.appendChild(el('p', { class: 'assump', style: 'margin-top:10px' }, [t('ag_honest')]));
     var copyBtn = el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () {
-      var txt = P.text || (P.struct.situation + '\n' + P.struct.actions.map(function (a) { return '- [' + a.when + '] ' + a.text; }).join('\n') + '\n' + P.struct.watch.map(function (w) { return '- ' + w; }).join('\n'));
+      var txt = (P.text && cleanText(P.text)) || (P.struct.situation + '\n' + P.struct.actions.map(function (a) { return '- [' + a.when + '] ' + a.text; }).join('\n') + '\n' + P.struct.watch.map(function (w) { return '- ' + w; }).join('\n'));
       try { navigator.clipboard.writeText(txt).then(function () { copyBtn.textContent = t('ag_copied'); }); } catch (e) { /* no clipboard */ }
     } }, [t('ag_copy')]);
     if (T.ctx.unsaved && T.ctx.parcel) {
@@ -541,10 +596,8 @@
     traceBox = el('div', { class: 'ag-trace', 'aria-live': 'polite' });
     planBox = el('div', { 'aria-live': 'polite' });
     app.appendChild(el('section', { class: 'gp-card ag-top' }, [form, ex, modeBox]));
-    app.appendChild(el('div', { class: 'ag-grid' }, [
-      el('section', { class: 'gp-card' }, [el('h2', { class: 'ag-h' }, [t('ag_trace')]), traceBox]),
-      el('section', { class: 'gp-card' }, [el('h2', { class: 'ag-h' }, [t('ag_plan')]), planBox])
-    ]));
+    app.appendChild(el('section', { class: 'gp-card ag-main' }, [el('h2', { class: 'ag-h' }, [t('ag_plan')]), planBox]));
+    app.appendChild(el('details', { class: 'gp-card ag-how', hidden: true }, [el('summary', null, [t('ag_how')]), traceBox]));
     draw();
   }
 

@@ -505,7 +505,7 @@
       try {
         var s2 = res.stage2;
         G.save('gaia.health.last', { at: new Date().toISOString(), plant: (res.stage1.abstain && !res.routed) || res.doubt ? null : res.tree, plant_doubt: res.doubt ? 'GAIA said ' + res.tree + ', Pl@ntNet sees no Solanaceae' : undefined, routed_by_plantnet: !!res.routed, species: PL.top ? PL.top[0].species : null,
-          plant_confidence: res.stage1.top.p, disease: s2 && !s2.abstain ? s2.top.label : null, confidence: s2 ? s2.top.p : null,
+          plant_confidence: res.stage1.top.p, disease: s2 && !s2.abstain ? s2.top.label : null, disease_names: s2 && !s2.abstain ? DISEASE[s2.top.label] : undefined, confidence: s2 ? s2.top.p : null,
           unsure: !!(res.stage1.abstain || res.doubt || (s2 && s2.abstain)), model: m.version || null });
       } catch (e) { /* storage full or private mode */ }
     }).catch(function (e) {
@@ -523,7 +523,7 @@
       .then(function (s2) { r.tree = lab; r.manual = true; r.stage2 = s2; }, function (e) { r.error = e.message; })
       .then(function () {
         state.running = false; render();
-        try { var last = G.load('gaia.health.last', null); if (last) { last.plant = lab; last.plant_chosen_by_farmer = true; last.routed_by_plantnet = false; last.plant_confidence = null; last.disease = r.stage2 && !r.stage2.abstain ? r.stage2.top.label : null; last.confidence = r.stage2 ? r.stage2.top.p : null; last.unsure = !!(r.stage2 && r.stage2.abstain); G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
+        try { var last = G.load('gaia.health.last', null); if (last) { last.plant = lab; last.plant_chosen_by_farmer = true; last.routed_by_plantnet = false; last.plant_confidence = null; last.disease = r.stage2 && !r.stage2.abstain ? r.stage2.top.label : null; last.disease_names = last.disease ? DISEASE[last.disease] : undefined; last.confidence = r.stage2 ? r.stage2.top.p : null; last.unsure = !!(r.stage2 && r.stage2.abstain); G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
       });
   }
   function pickPlant(current) {

@@ -164,7 +164,7 @@ def model_options(model: str) -> dict[str, Any]:
 # Groq counts its free limits per model: when one is busy (429), too small for the request (413) or withdrawn (404),
 # the next one is tried. GAIA_LLM_FALLBACK_MODELS = "a,b" replaces this list for any provider; "none" turns it off.
 FALLBACK_MODELS = {"groq": ("openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b")}
-RETRY_HTTP = (404, 413, 429, 500, 502, 503)
+RETRY_HTTP = (400, 404, 413, 429, 500, 502, 503)
 MAX_MODELS = 3
 
 
