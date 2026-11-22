@@ -12,6 +12,24 @@
   /* ---------------------------------------------------------- config */
   // Integration boundaries. Leave an endpoint null and the page says so
   // instead of inventing a result.
+  // Where the GAIA server (backend/) runs. Tried in order:
+  //  1. ?server=http://192.168.1.20:8000 in any page URL (remembered on this browser; ?server=off forgets it),
+  //  2. this computer (127.0.0.1:8000, then :8765) when the site is opened on localhost or as a file,
+  //  3. the computer that serves the site (same host, :8000 then :8765), so friends on the same Wi-Fi
+  //     use the server of the person who runs it (start it with --host 0.0.0.0).
+  var SERVER_BASES = (function () {
+    var loc = global.location || {}, saved = null, h = loc.hostname || '';
+    try {
+      var q = new URLSearchParams(loc.search || '').get('server');
+      if (q) { if (q === 'off') global.localStorage.removeItem('gaia.server'); else global.localStorage.setItem('gaia.server', q.replace(/\/+$/, '')); }
+      saved = global.localStorage.getItem('gaia.server');
+    } catch (e) { /* no storage */ }
+    if (saved) return [saved];
+    if (loc.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(h)) return ['http://127.0.0.1:8000', 'http://127.0.0.1:8765'];
+    if (loc.protocol === 'http:' && h) return ['http://' + h + ':8000', 'http://' + h + ':8765'];
+    return [];
+  }());
+
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
@@ -512,7 +530,7 @@
   }
 
   global.GAIA = {
-    CONFIG: CONFIG, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
+    CONFIG: CONFIG, serverBases: SERVER_BASES, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
     lang: function () { return lang; }, onLang: function (fn) { langListeners.push(fn); },
     getParcel: getParcel, setParcel: setParcel, load: load, save: save, auth: auth,
     el: el, clear: clear, fmt: fmt, icon: icon, pill: pill, note: note, confBadge: confBadge,

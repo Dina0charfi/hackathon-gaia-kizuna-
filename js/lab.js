@@ -129,7 +129,7 @@
     if (/manqu|missing|ناقص|نقص|足りな|不足|欠け/i.test(q)) return { kind: 'missing' };
     if (/pourquoi|why|rejet|écart|ecart|refus|ruled out|لماذا|استبعد|なぜ|どうして|理由|除外/i.test(q)) return { kind: 'why', rec: rec };
     var crop = cropIn(q);
-    if (!namedRecord(q) && HEALTH.test(q)) return { kind: 'health', crop: crop };
+    if (!namedRecord(q) && HEALTH.test(q)) return { kind: 'health', crop: crop, q: q0 };
     // a short follow-up that only names another crop ("not olives but peach") keeps the previous question
     if (crop && lastIntent && an.tokens.length <= 5 && !GOAL.test(q) && ['health', 'goal'].indexOf(lastIntent.kind) !== -1)
       return Object.assign({}, lastIntent, { crop: crop, followUp: true });
@@ -149,10 +149,10 @@
     return { kind: 'unknown', an: an };
   }
   // plant health and disease prevention
-  var HEALTH = new RegExp(['health', 'healthy', 'disease', 'sick', 'pest', 'insect', 'fung', 'mildew', 'blight', 'rot\\b', 'infect', 'leaf spot', 'yellow', 'wilt',
-    'sant[eé]', 'maladi', 'malade', 'ravageur', 'insecte', 'champignon', 'parasite', 'jaunis', 'traitement',
-    'صحة', 'صحه', 'مرض', 'أمراض', 'امراض', 'آفة', 'آفات', 'افات', 'حشر', 'فطر', 'اصفرار',
-    '病気', '病害', '害虫', '健康', 'カビ', '害'].join('|'), 'i');
+  var HEALTH = new RegExp(['health', 'healthy', 'disease', 'sick', 'pest', 'insect', 'fung', 'mildew', 'blight', 'rot\\b', 'infect', 'leaf spot', '\\bspots?\\b', 'spotted', 'lesion', 'yellow', 'wilt', 'blotch', 'scab', 'canker', 'mould', 'mold', 'rust\\b', 'leaves? (are|turn|have|show)', 'leafs?\\b.*(dark|brown|black|spot|hole|curl|dry)',
+    'sant[eé]', 'maladi', 'malade', 'ravageur', 'insecte', 'champignon', 'parasite', 'jaunis', 'traitement', 'tache', 'l[eé]sion', 'pourri', 'rouille', 'feuilles? (qui|sont|ont|se)',
+    'صحة', 'صحه', 'مرض', 'أمراض', 'امراض', 'آفة', 'آفات', 'افات', 'حشر', 'فطر', 'اصفرار', 'بقع', 'تبقع', 'تعفن', 'ذبول',
+    '病気', '病害', '害虫', '健康', 'カビ', '害', '斑点', '枯れ', 'しおれ'].join('|'), 'i');
   // crops a farmer may name, in the profile's keys where GAIA has them (others keep their own key)
   var CROP_WORDS = [
     ['olive', /olive|olivier|زيتون|オリーブ/i], ['palm', /date palm|palm|dattier|palmier|datte|نخيل|نخل|تمر|ナツメヤシ/i],
@@ -464,6 +464,11 @@
         if (known && known.length) a.expl.push(W(L, { fr: 'Pour ' + cn + ', le modèle de Santé des plantes reconnaît : ', ar: 'بالنسبة لـ' + cn + '، يتعرف نموذج صحة النباتات على: ', en: 'For ' + cn + ', the Plant health model recognises: ', ja: cn + 'について「植物の健康」のモデルが認識できるのは：' }) + known.map(function (c) { return c.replace(/_/g, ' '); }).join(', ') + dt);
         else a.expl.push(W(L, { fr: 'Culture « ' + cn + ' » : pas encore dans le modèle de Santé des plantes ; la page propose alors l’identification Pl@ntNet, et un technicien doit confirmer.', ar: cn + ' ليس بعد في نموذج صحة النباتات: تقترح الصفحة حينها التعرف عبر Pl@ntNet، ويجب أن يؤكد تقني النتيجة.', en: 'Crop “' + cn + '”: not in the Plant health model yet; the page then offers Pl@ntNet identification, and a technician must confirm.', ja: cn + 'はまだ「植物の健康」のモデルに含まれていません。ページではPl@ntNetによる同定を提案します。結果は技術者に確認してもらってください。' }));
       }
+      if (/spot|tache|بقع|斑点/i.test(intent.q || '') && ['peach', 'almond', 'apricot', 'cherry', 'plum'].indexOf(hc) !== -1) a.expl.unshift(W(L, {
+        fr: 'Connaissance générale (pas une fiche GAIA) : sur pêcher et amandier, des petites taches sombres qui se dessèchent et laissent des trous évoquent la criblure (Wilsonomyces) ou la bactériose (Xanthomonas arboricola pv. pruni), favorisées par les pluies d’automne et de printemps. À confirmer par un technicien.',
+        ar: 'معرفة عامة (ليست بطاقة غايا): على الخوخ واللوز، البقع الداكنة الصغيرة التي تجف وتترك ثقوباً تشير إلى مرض التثقب (Wilsonomyces) أو التبقع البكتيري (Xanthomonas arboricola pv. pruni)، وتشجعهما أمطار الخريف والربيع. يجب أن يؤكدها تقني.',
+        en: 'General knowledge (not a GAIA record): on peach and almond, small dark spots that dry out and leave holes point to shot-hole disease (Wilsonomyces) or bacterial spot (Xanthomonas arboricola pv. pruni), both favoured by autumn and spring rain. Have a technician confirm.',
+        ja: '一般知識（GAIAの記録ではありません）：モモやアーモンドで、小さな黒い斑点が乾いて穴になる場合は、せん孔病（Wilsonomyces）や細菌性せん孔病（Xanthomonas arboricola pv. pruni）が疑われ、秋と春の雨で広がります。技術者に確認してください。' }));
       if (intent.followUp) a.expl.unshift(W(L, { fr: 'Réponse reprise pour : ', ar: 'الإجابة معدّلة لـ: ', en: 'Answer adjusted for: ', ja: '次の作物について回答：' }) + cn + dt);
       a.expl.push(W(L, { fr: 'GAIA ne prescrit aucun produit chimique : pour un traitement, voir le CRDA ou un technicien en protection des végétaux.', ar: 'لا تصف غايا أي مبيد كيميائي: للمعالجة، اتصل بالمندوبية الجهوية للفلاحة أو بتقني في وقاية النباتات.', en: 'GAIA prescribes no chemical product: for a treatment, ask the CRDA or a plant-protection technician.', ja: 'GAIAは化学薬剤を処方しません。処置は地域の農業局（CRDA）や植物防疫の技術者に相談してください。' }));
       a.actions = W(L, {
@@ -638,7 +643,7 @@
       kids = [G.pill('plan', 'LLM'), t('loading') + ' ' + fmt((st.loading.p || 0) * 100) + ' %', bar];
     } else if (st.checking) kids = [el('span', { class: 'gp-spin' }), t('checking')];
     else {
-      kids = [G.pill('plan', 'LLM —'), t('mode_none')];
+      kids = [G.pill('plan', 'LLM · off'), t('mode_none')];
       if (st.error === 'no_webgpu') kids.push(el('span', null, [t('no_webgpu')]));
       else if (st.error === 'load_failed') kids.push(el('span', null, [t('load_fail')]));
       if (LLM && LLM.webgpu() && st.error !== 'load_failed') kids.push(el('button', { type: 'button', class: 'gp-btn', onclick: function () { LLM.loadBrowser(); } }, [t('btn_load')]));

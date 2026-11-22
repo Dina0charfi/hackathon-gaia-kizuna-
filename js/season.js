@@ -9,7 +9,7 @@
     fr: {
       ms_title: 'Ma saison', ms_lead: "Ce mois-ci sur votre parcelle : quoi faire, ce qui arrive, et l'eau utilisée face au besoin de la culture. Uniquement des données réelles ou saisies par vous.",
       ms_month: 'Ma saison', ms_actions_n: '{n} étapes en cours pour votre culture ce mois-ci.', ms_actions_1: 'Une étape en cours pour votre culture ce mois-ci.', ms_actions_0: 'Pas d’étape majeure ce mois-ci : un bon moment pour observer et entretenir.', ms_no_crop_h: 'Culture non prise en charge par le calendrier',
-      ms_no_crop: "Le calendrier couvre l'olivier, le palmier dattier, les agrumes et les céréales. Déclarez votre culture dans Land Intelligence pour voir les actions du mois.",
+      ms_crop_unsup: 'Culture déclarée : {c}. Le calendrier ne couvre pour l’instant que l’olivier, le palmier dattier, les agrumes et les céréales.', ms_no_crop: "Le calendrier couvre l'olivier, le palmier dattier, les agrumes et les céréales. Déclarez votre culture dans Land Intelligence pour voir les actions du mois.",
       ms_sekki: 'Saison japonaise', ms_sekki_next: 'Ensuite : {k} {r}, vers le {d}',
       ms_todo: 'À faire ce mois-ci', ms_todo_p: 'Étapes du calendrier cultural en cours ce mois-ci, pour votre culture.',
       ms_practice: 'Pratique courante, à valider par un technicien.', ms_water_stage: "Stade sensible au manque d'eau",
@@ -43,7 +43,7 @@
     ar: {
       ms_title: 'موسمي', ms_lead: 'هذا الشهر في قطعتك: ماذا تفعل، ماذا سيحدث، والماء المستعمل مقارنة بحاجة الزراعة. بيانات حقيقية فقط أو مما تُدخله أنت.',
       ms_month: 'موسمي', ms_actions_n: '{n} مراحل جارية لزراعتك هذا الشهر.', ms_actions_1: 'مرحلة واحدة جارية لزراعتك هذا الشهر.', ms_actions_0: 'لا مرحلة كبرى هذا الشهر: وقت مناسب للملاحظة والصيانة.', ms_no_crop_h: 'الزراعة غير مشمولة بالرزنامة',
-      ms_no_crop: 'تشمل الرزنامة الزيتون ونخيل التمر والقوارص والحبوب. صرّح بزراعتك في صفحة ذكاء الأرض لرؤية أعمال الشهر.',
+      ms_crop_unsup: 'الزراعة المصرّح بها: {c}. لا تشمل الرزنامة حالياً إلا الزيتون ونخيل التمر والقوارص والحبوب.', ms_no_crop: 'تشمل الرزنامة الزيتون ونخيل التمر والقوارص والحبوب. صرّح بزراعتك في صفحة ذكاء الأرض لرؤية أعمال الشهر.',
       ms_sekki: 'الفصل الياباني', ms_sekki_next: 'بعده: {k} {r}، حوالي {d}',
       ms_todo: 'أعمال هذا الشهر', ms_todo_p: 'مراحل الرزنامة الفلاحية الجارية هذا الشهر لزراعتك.',
       ms_practice: 'ممارسة شائعة، يجب التثبت منها مع تقني.', ms_water_stage: 'مرحلة حساسة لنقص الماء',
@@ -77,7 +77,7 @@
     en: {
       ms_title: 'My season', ms_lead: "This month on your parcel: what to do, what is coming, and the water used against the crop's need. Only real data, or data you entered.",
       ms_month: 'My season', ms_actions_n: '{n} stages under way for your crop this month.', ms_actions_1: 'One stage under way for your crop this month.', ms_actions_0: 'No major stage this month: a good time to observe and maintain.', ms_no_crop_h: 'Crop not covered by the calendar',
-      ms_no_crop: 'The calendar covers olive, date palm, citrus and cereals. Declare your crop in Land Intelligence to see this month’s actions.',
+      ms_crop_unsup: 'Declared crop: {c}. The calendar only covers olive, date palm, citrus and cereals for now.', ms_no_crop: 'The calendar covers olive, date palm, citrus and cereals. Declare your crop in Land Intelligence to see this month’s actions.',
       ms_sekki: 'Japanese season', ms_sekki_next: 'Next: {k} {r}, around {d}',
       ms_todo: 'To do this month', ms_todo_p: 'Stages of the crop calendar under way this month, for your crop.',
       ms_practice: 'Common practice, to check with an extension officer.', ms_water_stage: 'Stage sensitive to water shortage',
@@ -111,7 +111,7 @@
     ja: {
       ms_title: 'わたしの季節', ms_lead: '今月のあなたの区画：やるべきこと、これから来るもの、作物の必要量に対する使用水量。実データか、あなたが入力したデータだけを使います。',
       ms_month: 'わたしの季節', ms_actions_n: '今月、あなたの作物で進行中の段階は{n}つです。', ms_actions_1: '今月、あなたの作物で進行中の段階は1つです。', ms_actions_0: '今月は大きな段階はありません。観察と手入れによい時期です。', ms_no_crop_h: 'この作物は暦の対象外です',
-      ms_no_crop: '暦はオリーブ、ナツメヤシ、柑橘、穀物に対応しています。土地インテリジェンスで作物を登録すると、今月の作業が表示されます。',
+      ms_crop_unsup: '登録された作物：{c}。暦は現在、オリーブ、ナツメヤシ、柑橘、穀物のみに対応しています。', ms_no_crop: '暦はオリーブ、ナツメヤシ、柑橘、穀物に対応しています。土地インテリジェンスで作物を登録すると、今月の作業が表示されます。',
       ms_sekki: '日本の季節', ms_sekki_next: '次は {k}（{r}）、{d}ごろ',
       ms_todo: '今月やること', ms_todo_p: 'あなたの作物について、今月進行中の作物暦の段階です。',
       ms_practice: '一般的な方法です。普及員に確認してください。', ms_water_stage: '水不足に弱い段階',
@@ -148,6 +148,7 @@
   var tabs = document.getElementById('tabs'), app = document.getElementById('app');
   var p = G.getParcel();
 
+  function noCropMsg() { var c = p && p.dna ? D.value(p.dna, 'crop') : null; return c ? fill(t('ms_crop_unsup'), { c: c }) : t('ms_no_crop'); }
   function fill(s, o) { return String(s).replace(/\{(\w+)\}/g, function (_, k) { return o[k] === undefined ? '' : o[k]; }); }
   function L() { return S.lang(); }
   function today() { var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
@@ -155,7 +156,7 @@
   function dim(y, m) { return new Date(y, m + 1, 0).getDate(); }
 
   /* ------------------------------------------------ weather (live, cached for the session) */
-  var WX = null, wxErr = null, wxPending = false;
+  var WX = null, wxErr = null, wxPending = false, wxNote = null;
   function loadWeather(done) {
     if (WX || wxErr) { done(); return; }
     if (wxPending) return;
@@ -165,6 +166,7 @@
     var timer = null;
     window.GAIA_DNA.forecastJSON(url, 60, 15000).then(function (j) {
       var d = j.daily;
+      wxNote = j._stale ? 'Open-Meteo: ' + j._error + ' · ' + j._stale.slice(0, 16).replace('T', ' ') : j._source ? j._source + ' · Open-Meteo: ' + j._error : null;
       WX = d.time.map(function (date, i) { return { date: date, rain: d.precipitation_sum[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] }; });
     }).catch(function (e) { clearTimeout(timer); wxErr = e.name === 'AbortError' ? 'timeout' : e.message; })
       .then(function () { wxPending = false; done(); });
@@ -175,7 +177,8 @@
     var past = WX.filter(function (d) { return d.date < now; }).slice(-90);
     var next = WX.filter(function (d) { return d.date >= now; });
     // 1. drought: observed rain over the last 90 days vs the parcel's ERA5 normals for the same days
-    if (cm && cm.rain && cm.rain.every(function (v) { return v !== null; })) {
+    if (past.length < 60) { /* forecast-only source (MET Norway fallback): no observed rain to compare */ }
+    else if (cm && cm.rain && cm.rain.every(function (v) { return v !== null; })) {
       var obs = 0, norm = 0;
       past.forEach(function (d) {
         var y = +d.date.slice(0, 4), m = +d.date.slice(5, 7) - 1;
@@ -244,7 +247,7 @@
       el('div', null, [
         el('p', { class: 'eyebrow' }, [t('ms_month') + ' · ' + (L() === 'ja' ? new Date().getFullYear() + '年' + mNames[mi] : mNames[mi] + ' ' + new Date().getFullYear())]),
         el('h2', null, [(p.name || t('nav_land')) + (crop ? ' · ' + t('crop_' + crop) : '')]),
-        el('p', null, [crop ? (stages.length === 0 ? t('ms_actions_0') : stages.length === 1 ? t('ms_actions_1') : fill(t('ms_actions_n'), { n: stages.length })) : t('ms_no_crop')])
+        el('p', null, [crop ? (stages.length === 0 ? t('ms_actions_0') : stages.length === 1 ? t('ms_actions_1') : fill(t('ms_actions_n'), { n: stages.length })) : noCropMsg()])
       ]),
       el('div', { class: 'ss-sekki' }, [
         el('div', { class: 'eyebrow' }, [t('ms_sekki')]),
@@ -258,7 +261,7 @@
 
   function todo(crop, stages) {
     var sec = el('section', { class: 'ss-sec', 'aria-labelledby': 'h-todo' }, [el('h2', { id: 'h-todo' }, [t('ms_todo')]), el('p', { class: 'lead' }, [t('ms_todo_p')])]);
-    if (!crop) { sec.appendChild(G.note('info', t('ms_no_crop'))); return sec; }
+    if (!crop) { sec.appendChild(G.note('info', noCropMsg())); return sec; }
     var list = el('ul', { class: 'ss-list' });
     stages.forEach(function (s) {
       var tx = S.loc(s), src = s.src ? S.source(s.src) : null;
@@ -287,7 +290,7 @@
       box.appendChild(el('ul', { class: 'ss-list', 'aria-live': 'polite' }, alerts().map(function (a) {
         return el('li', { class: 'ss-al ' + cls[a[0]] }, [el('span', { class: 'tag' }, [t('tag_' + a[0])]), el('span', { class: 'txt' }, [a[1]])]);
       })));
-      box.appendChild(el('p', { class: 'small muted', style: 'margin-top:8px' }, [t('ms_src_wx')]));
+      box.appendChild(el('p', { class: 'small muted', style: 'margin-top:8px' }, [t('ms_src_wx') + (wxNote ? ' — ' + wxNote : '')]));
     }
     draw();
     loadWeather(draw);

@@ -39,9 +39,7 @@
   function candidates() {
     var ep = G.CONFIG.assistantEndpoint;
     if (ep) return [ep];
-    var h = global.location && global.location.hostname, proto = global.location && global.location.protocol;
-    if (proto === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(h || '')) return ['http://127.0.0.1:8000/assistant', 'http://127.0.0.1:8765/assistant'];
-    return [];
+    return (G.serverBases || []).map(function (b) { return b + '/assistant'; });
   }
   function checkServer() {
     var c = candidates();

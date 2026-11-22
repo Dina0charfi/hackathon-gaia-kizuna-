@@ -123,7 +123,14 @@ and any figure the model writes that is not in the evidence is highlighted. The 
 | **Hugging Face** / **OpenRouter** | free token / free models | `GAIA_LLM_PROVIDER=huggingface` (or `openrouter`) and `GAIA_LLM_API_KEY=...` |
 | **Claude** | paid key | `ANTHROPIC_API_KEY=...` |
 
-Start the server with `cd backend && uvicorn gaia.main:app --reload`. On localhost the Lab finds it on port 8000 or
+Start the server with `cd backend && uvicorn gaia.main:app --reload`.
+
+**Sharing with friends.** Each browser looks for the server on its own computer (localhost), so a friend who only
+opens the site gets the offline planner. To share your AI: start the server with
+`uvicorn gaia.main:app --host 0.0.0.0 --port 8000`, serve the site (`npx serve .`) and have friends on the same Wi-Fi open
+`http://YOUR-IP:3000/agent.html`: the pages then use the server on the same computer. Or add
+`?server=http://YOUR-IP:8000` to any page URL (remembered; `?server=off` forgets it). An `https://` site cannot call an
+`http://` server: deploy the backend behind https and set `assistantEndpoint`. On localhost the Lab finds it on port 8000 or
 8765; elsewhere set `window.GAIA_CONFIG = { assistantEndpoint: 'https://your-server/assistant' }` before
 `js/gaia-core.js`. Never commit a key: `backend/.env` is git-ignored.
 

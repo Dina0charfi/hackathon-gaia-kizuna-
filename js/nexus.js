@@ -38,7 +38,7 @@
       sat_load: 'Lecture des cartes WaPOR (12 mois)…', sat_err: 'Données WaPOR indisponibles ici ({e}). Le calcul FAO-56 reste valable.',
       sat_etc: 'Besoin calculé (Kc × ET0)', sat_aeti: 'Eau réellement évaporée (satellite)', sat_kc: 'Coefficient cultural mesuré : {k} (calculé : {kc}).',
       sat_year: 'Sur les 12 derniers mois : {a} mm évaporés (satellite), contre {b} mm de besoin calculé.', sat_rsm: 'Humidité relative du sol ({d}) : {v} % de la capacité.',
-      sat_use: 'Utiliser le coefficient mesuré', sat_note: 'Le pixel inclut le sol nu entre les arbres : sur un verger clairsemé, le coefficient mesuré est normalement plus bas que celui des tables. Un écart très supérieur au calcul signale une irrigation plus forte que le besoin.',
+      sat_bare: 'Coefficient mesuré : {k} (calculé : {kc}). C’est presque l’évaporation d’un sol nu : le pixel de 100 m ne voit pas de culture irriguée (sol nu, jeune plantation, ou mauvais point sur la carte). GAIA ne l’utilise pas comme coefficient de culture ; vérifiez la position de la parcelle.', sat_use: 'Utiliser le coefficient mesuré', sat_note: 'Le pixel inclut le sol nu entre les arbres : sur un verger clairsemé, le coefficient mesuré est normalement plus bas que celui des tables. Un écart très supérieur au calcul signale une irrigation plus forte que le besoin.',
       s_etc: 'Besoin ETc', s_pe: 'Pluie efficace', s_irg: 'Irrigation brute',
       solar_t: 'Champ solaire nécessaire', solar_p: 'Dimensionné sur le mois le plus exigeant', solar_none: 'Pas de dimensionnement : il manque la surface, la hauteur de pompage ou le rayonnement.',
       cost_t: 'Coût annuel comparé', cost_none: 'Saisissez au moins un prix pour comparer.',
@@ -85,7 +85,7 @@
       sat_load: 'قراءة خرائط WaPOR (12 شهراً)…', sat_err: 'بيانات WaPOR غير متاحة هنا ({e}). حساب FAO-56 يبقى صالحاً.',
       sat_etc: 'الحاجة المحسوبة (Kc × ET0)', sat_aeti: 'الماء المتبخر فعلاً (قمر صناعي)', sat_kc: 'المعامل الزراعي المقيس: {k} (المحسوب: {kc}).',
       sat_year: 'خلال آخر 12 شهراً: {a} مم متبخرة (قمر صناعي) مقابل {b} مم حاجة محسوبة.', sat_rsm: 'الرطوبة النسبية للتربة ({d}): {v} % من السعة.',
-      sat_use: 'استعمال المعامل المقيس', sat_note: 'يشمل البكسل التربة العارية بين الأشجار: في بستان متباعد يكون المعامل المقيس عادة أقل من الجداول. فرق أعلى بكثير من الحساب يدل على ري أكثر من الحاجة.',
+      sat_bare: 'المعامل المقاس: {k} (المحسوب: {kc}). هذا يكاد يكون تبخر تربة عارية: لا يرى البكسل (100 م) زراعة مروية (تربة عارية، غراسة فتية، أو نقطة خاطئة على الخريطة). لا تستعمله غايا كمعامل زراعة؛ تحقق من موقع القطعة.', sat_use: 'استعمال المعامل المقيس', sat_note: 'يشمل البكسل التربة العارية بين الأشجار: في بستان متباعد يكون المعامل المقيس عادة أقل من الجداول. فرق أعلى بكثير من الحساب يدل على ري أكثر من الحاجة.',
       s_etc: 'الحاجة ETc', s_pe: 'المطر الفعّال', s_irg: 'الري الإجمالي',
       solar_t: 'الحقل الشمسي اللازم', solar_p: 'محسوب على الشهر الأكثر طلباً', solar_none: 'لا يمكن الحساب: تنقص المساحة أو ارتفاع الضخ أو الإشعاع.',
       cost_t: 'مقارنة الكلفة السنوية', cost_none: 'أدخل سعراً واحداً على الأقل للمقارنة.',
@@ -132,7 +132,7 @@
       sat_load: 'Reading WaPOR maps (12 months)…', sat_err: 'WaPOR data unavailable here ({e}). The FAO-56 calculation still stands.',
       sat_etc: 'Computed need (Kc × ET0)', sat_aeti: 'Water actually evaporated (satellite)', sat_kc: 'Measured crop coefficient: {k} (computed: {kc}).',
       sat_year: 'Over the last 12 months: {a} mm evaporated (satellite), against {b} mm of computed need.', sat_rsm: 'Relative soil moisture ({d}): {v} % of capacity.',
-      sat_use: 'Use the measured coefficient', sat_note: 'The pixel includes bare soil between trees: in a sparse orchard the measured coefficient is normally lower than the tables. A value far above the computation points to more irrigation than the crop needs.',
+      sat_bare: "Measured coefficient: {k} (computed: {kc}). That is close to bare-soil evaporation: the 100 m pixel sees no irrigated crop (bare soil, young planting, or the wrong point on the map). GAIA does not use it as a crop coefficient; check the plot's position.", sat_use: 'Use the measured coefficient', sat_note: 'The pixel includes bare soil between trees: in a sparse orchard the measured coefficient is normally lower than the tables. A value far above the computation points to more irrigation than the crop needs.',
       s_etc: 'Need ETc', s_pe: 'Effective rainfall', s_irg: 'Gross irrigation',
       solar_t: 'Solar array needed', solar_p: 'Sized for the most demanding month', solar_none: 'No sizing: the area, pumping head or radiation is missing.',
       cost_t: 'Annual cost compared', cost_none: 'Enter at least one price to compare.',
@@ -179,7 +179,7 @@
       sat_load: 'WaPORの地図を読み込み中（12か月）…', sat_err: 'この地点のWaPORデータは利用できません（{e}）。FAO-56の計算はそのまま有効です。',
       sat_etc: '計算した必要量（Kc × ET0）', sat_aeti: '実際に蒸発した水（衛星）', sat_kc: '実測の作物係数：{k}（計算値：{kc}）。',
       sat_year: '過去12か月：衛星で{a} mmの蒸発、計算上の必要量は{b} mm。', sat_rsm: '土壌の相対水分（{d}）：容量の{v} %。',
-      sat_use: '実測の係数を使う', sat_note: '画素には樹間の裸地も含まれるため、まばらな果樹園では実測係数は通常、表の値より低くなります。計算よりずっと高い場合は必要以上の灌漑を示します。',
+      sat_bare: '実測係数：{k}（計算値：{kc}）。これは裸地の蒸発に近い値です。100 mの画素には灌漑された作物が見えていません（裸地、若い植栽、または地図上の位置違い）。GAIAは作物係数として使いません。区画の位置を確認してください。', sat_use: '実測の係数を使う', sat_note: '画素には樹間の裸地も含まれるため、まばらな果樹園では実測係数は通常、表の値より低くなります。計算よりずっと高い場合は必要以上の灌漑を示します。',
       s_etc: '必要量ETc', s_pe: '有効雨量', s_irg: '総灌漑量',
       solar_t: '必要な太陽光アレイ', solar_p: '最も需要の大きい月に合わせて設計', solar_none: '設計できません：面積、揚程、または日射量が不足しています。',
       cost_t: '年間コストの比較', cost_none: '比較するには価格を1つ以上入力してください。',
@@ -339,7 +339,8 @@
     var chart = el('div');
     card.appendChild(chart);
     card.appendChild(el('p', { style: 'margin-top:8px' }, [fillS(t('sat_year'), { a: fmt(sumA), b: fmt(sumE) })]));
-    if (SAT.kcSat !== null) card.appendChild(el('p', null, [fillS(t('sat_kc'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) }), ' ',
+    if (SAT.kcSat !== null && SAT.kcSat < 0.25) card.appendChild(G.note('warn', fillS(t('sat_bare'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) })));
+    else if (SAT.kcSat !== null) card.appendChild(el('p', null, [fillS(t('sat_kc'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) }), ' ',
       el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { S.kc = Math.round(SAT.kcSat * 100) / 100; persist(); renderAll(); } }, [t('sat_use')])]));
     if (SAT.rsm) card.appendChild(el('p', null, [fillS(t('sat_rsm'), { d: SAT.rsm.start || SAT.rsm.period, v: fmt(SAT.rsm.value * 100, 0) })]));
     card.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('sat_note')]));

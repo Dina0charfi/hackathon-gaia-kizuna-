@@ -195,15 +195,70 @@
   // Open-Meteo forecast calls from the other pages (Dashboard, My season, Agrivoltaics) go through this:
   // a short browser cache (the forecast changes a few times a day) and the same 429 skip flag as the
   // climate archive, so a used-up quota is not hit again from every page.
+  // Weather forecasts, cached. When Open-Meteo refuses (HTTP 429: the free quota is shared by everyone on the same
+  // network) or is unreachable: 1) the last forecast kept on this device, if under 2 days old, marked stale;
+  // 2) MET Norway's free forecast (api.met.no, ~9 days, no key), put in the same shape, with ET0 from Hargreaves.
+  // The answer carries _source / _stale so pages say which one they show.
   function forecastJSON(url, ttlMin, timeoutMs) {
     var key = 'wx:' + url, x = null;
     try { x = JSON.parse(global.localStorage.getItem('gaia.cache.' + key)); } catch (e) { /* no storage */ }
     if (x && Date.now() - x.t < (ttlMin || 60) * 6e4) return Promise.resolve(x.v);
-    if (flagGet('om429')) { var err = new Error('HTTP 429'); err.status = 429; return Promise.reject(err); }
+    function fallback(err) {
+      if (x && x.v && Date.now() - x.t < 2 * 864e5) return Object.assign({}, x.v, { _stale: new Date(x.t).toISOString(), _error: err.message });
+      var q = /latitude=([-\d.]+).*longitude=([-\d.]+)/.exec(url);
+      if (!q) throw err;
+      return metForecast(+q[1], +q[2], timeoutMs).then(function (j) { j._error = err.message; return j; }, function () { throw err; });
+    }
+    if (flagGet('om429')) { var err = new Error('HTTP 429'); err.status = 429; return Promise.resolve().then(function () { return fallback(err); }); }
     return getJSON(url, timeoutMs || 15000).then(function (j) { cacheSet(key, j); return j; }, function (e) {
       if (e.status === 429) flagSet('om429', e.daily ? 360 : 15);
-      throw e;
+      return fallback(e);
     });
+  }
+
+  // MET Norway locationforecast (hourly for ~2.5 days, then 6-hourly): reshaped like Open-Meteo's daily + hourly.
+  function metForecast(lat, lon, timeoutMs) {
+    var mkey = 'wx:met:' + lat.toFixed(2) + ',' + lon.toFixed(2), hit = null;
+    try { hit = JSON.parse(global.localStorage.getItem('gaia.cache.' + mkey)); } catch (e) { /* no storage */ }
+    if (hit && Date.now() - hit.t < 2 * 36e5) return Promise.resolve(hit.v);
+    var url = 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=' + lat.toFixed(3) + '&lon=' + lon.toFixed(3);
+    return getJSON(url, timeoutMs || 15000).then(function (m) {
+      var ts = (m.properties && m.properties.timeseries) || [], tz = Math.round(lon / 15) * 36e5, H = [], byDay = {};
+      ts.forEach(function (e, i) {
+        var t0 = Date.parse(e.time), nx = ts[i + 1] ? Date.parse(ts[i + 1].time) : t0 + 36e5, dt = Math.max(1, Math.round((nx - t0) / 36e5));
+        var d = e.data || {}, ins = (d.instant && d.instant.details) || {};
+        var n = dt === 1 ? d.next_1_hours : dt === 6 ? d.next_6_hours : (d.next_1_hours || d.next_6_hours);
+        var rain = n && n.details && typeof n.details.precipitation_amount === 'number' ? n.details.precipitation_amount : 0;
+        for (var k = 0; k < dt; k++) {
+          var lt = new Date(t0 + k * 36e5 + tz).toISOString();
+          H.push({ t: lt.slice(0, 13) + ':00', temp: ins.air_temperature, rh: ins.relative_humidity, rain: rain / dt, wind: (ins.wind_speed || 0) * 3.6 });
+        }
+      });
+      H.forEach(function (h) { var day = h.t.slice(0, 10); (byDay[day] = byDay[day] || []).push(h); });
+      var days = Object.keys(byDay).sort().filter(function (day) { return byDay[day].length >= 12; });
+      function stat(a, f) { return a.reduce(function (s, h) { return f(s, h); }, null); }
+      var D = { time: [], temperature_2m_max: [], temperature_2m_min: [], precipitation_sum: [], et0_fao_evapotranspiration: [], wind_speed_10m_max: [], relative_humidity_2m_mean: [] };
+      days.forEach(function (day) {
+        var a = byDay[day], tx = stat(a, function (s, h) { return s === null || h.temp > s ? h.temp : s; }), tn = stat(a, function (s, h) { return s === null || h.temp < s ? h.temp : s; });
+        var doy = Math.round((Date.parse(day) - Date.parse(day.slice(0, 4) + '-01-01')) / 864e5) + 1;
+        D.time.push(day); D.temperature_2m_max.push(tx); D.temperature_2m_min.push(tn);
+        D.precipitation_sum.push(Math.round(a.reduce(function (s, h) { return s + h.rain; }, 0) * 10) / 10);
+        D.et0_fao_evapotranspiration.push(Math.round(hargreaves(lat, doy, tx, tn) * 10) / 10);
+        D.wind_speed_10m_max.push(Math.round(stat(a, function (s, h) { return s === null || h.wind > s ? h.wind : s; })));
+        D.relative_humidity_2m_mean.push(Math.round(a.reduce(function (s, h) { return s + (h.rh || 0); }, 0) / a.length));
+      });
+      var out = { daily: D, hourly: { time: H.map(function (h) { return h.t; }), temperature_2m: H.map(function (h) { return h.temp; }), relative_humidity_2m: H.map(function (h) { return h.rh; }), precipitation: H.map(function (h) { return h.rain; }) },
+        _source: 'MET Norway locationforecast 2.0 (api.met.no, ECMWF-based; ET0 by Hargreaves)', _fallback: 'met' };
+      cacheSet(mkey, out);
+      return out;
+    });
+  }
+  // FAO-56 eq. 52 (Hargreaves), mm/day, with extraterrestrial radiation from latitude and day of year
+  function hargreaves(lat, doy, tx, tn) {
+    var phi = lat * Math.PI / 180, dr = 1 + 0.033 * Math.cos(2 * Math.PI * doy / 365), dec = 0.409 * Math.sin(2 * Math.PI * doy / 365 - 1.39);
+    var ws = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(dec))));
+    var ra = 24 * 60 / Math.PI * 0.082 * dr * (ws * Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.sin(ws));
+    return Math.max(0, 0.0023 * 0.408 * ra * ((tx + tn) / 2 + 17.8) * Math.sqrt(Math.max(0, tx - tn)));
   }
 
   /* ---------------------------------------------------------- terrain */

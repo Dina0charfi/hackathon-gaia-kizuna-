@@ -16,7 +16,7 @@
   var G = global.GAIA, D = global.GAIA_DNA, N = global.GAIA_NEXUS, GG = global.GAIA_GUARD,
     E = global.GAIA_ENGINE, A = global.GAIA_AGV_AI, KB = global.GAIA_KB, R = global.GAIA_RETRIEVAL;
 
-  var ctx = { parcel: null };
+  var ctx = { parcel: null, demo: false, unsaved: false };
   function parcel() { return ctx.parcel || G.getParcel(); }
   function r1(x, d) { if (x === null || x === undefined || isNaN(x)) return null; var k = Math.pow(10, d || 0); return Math.round(x * k) / k; }
   function V(dna, p) { return D.value(dna, p); }
@@ -77,7 +77,7 @@
           wind: d.wind_speed_10m_max[i], rh: d.relative_humidity_2m_mean ? d.relative_humidity_2m_mean[i] : null };
       });
       var hours = h.time.map(function (t, i) { return { t: t, temp: h.temperature_2m[i], rh: h.relative_humidity_2m[i], rain: h.precipitation[i] }; });
-      return { days: days, hours: hours, source: 'Open-Meteo forecast (ECMWF / DWD ICON / Météo-France blend)' };
+      return { days: days, hours: hours, source: (j._source || 'Open-Meteo forecast (ECMWF / DWD ICON / Météo-France blend)') + (j._stale ? ' — copy kept on this device from ' + j._stale.slice(0, 16).replace('T', ' ') + ' (Open-Meteo: ' + j._error + ')' : j._fallback ? ' — Open-Meteo: ' + j._error : '') };
     });
     wxCache[key].catch(function () { delete wxCache[key]; });
     return wxCache[key];
@@ -204,7 +204,7 @@
     },
     {
       name: 'build_land_dna',
-      description: "Build the plot's Land DNA from open data (ERA5 climate, elevation and slope, NASA POWER sun, SoilGrids soil) and save it as the farmer's plot. Use when there is no plot yet or the farmer names another place.",
+      description: "Build the plot's Land DNA from open data (ERA5 climate, elevation and slope, NASA POWER sun, SoilGrids soil); later tools use it. It is saved as the farmer's plot only if they have none (otherwise the page offers to save it). Use when there is no plot yet or the farmer names another place.",
       parameters: { type: 'object', properties: {
         lat: { type: 'number' }, lon: { type: 'number' }, name: { type: 'string' },
         crop: { type: 'string', enum: ['olive', 'palm', 'citrus', 'cereal', 'veg', 'other'] },
@@ -215,9 +215,10 @@
         var input = { lat: +a.lat, lon: +a.lon, name: a.name || null, crop: crop, water: a.water || null, area: a.area_ha || '', wellDepth: a.well_depth_m || '', pump: a.pump || null, soilTexture: 'unknown', structures: [] };
         return D.build(input).then(function (dna) {
           ctx.parcel = { lat: input.lat, lon: input.lon, name: input.name, input: input, dna: dna };
-          G.setParcel(ctx.parcel);
+          // never overwrite the farmer's own plot (or save a demo one) behind their back: the page offers a button
+          if (!G.getParcel() && !ctx.demo) G.setParcel(ctx.parcel); else ctx.unsaved = true;
           var d = profileData(ctx.parcel);
-          return { summary: (input.name || '') + ' · ' + W({ fr: 'pluie ', en: 'rain ', ar: 'أمطار ', ja: '降水 ' }) + d.climate.rain_mm + ' mm · ET0 ' + d.climate.et0_mm + ' mm · ' + W({ fr: 'pente ', en: 'slope ', ar: 'انحدار ', ja: '傾斜 ' }) + d.terrain.slope_pct + ' %', data: d };
+          return { summary: (input.name || '') + ' · ' + W({ fr: 'pluie ', en: 'rain ', ar: 'أمطار ', ja: '降水 ' }) + d.climate.rain_mm + ' mm' + (/POWER/.test(d.climate.source || '') ? ' (NASA POWER)' : /ERA5|Open-Meteo/.test(d.climate.source || '') ? ' (ERA5)' : '') + ' · ET0 ' + d.climate.et0_mm + ' mm · ' + W({ fr: 'pente ', en: 'slope ', ar: 'انحدار ', ja: '傾斜 ' }) + d.terrain.slope_pct + ' %', data: d };
         });
       }
     },
@@ -247,12 +248,12 @@
             if (d.rain >= 20) alerts.push({ date: d.date, kind: 'heavy_rain', value: d.rain });
           });
           var rainNext = next.reduce(function (t, d) { return t + (d.rain || 0); }, 0);
-          if (rainNext < 2 && past30 < 5) alerts.push({ kind: 'dry_spell', past30_mm: r1(past30, 0), next_mm: r1(rainNext, 1) });
+          if (s.past.length && rainNext < 2 && past30 < 5) alerts.push({ kind: 'dry_spell', past30_mm: r1(past30, 0), next_mm: r1(rainNext, 1) });
           var hot = next.reduce(function (b, d) { return !b || d.tmax > b.tmax ? d : b; }, null);
           return {
-            summary: n + W({ fr: ' j : max ', en: ' d: max ', ar: ' يوم: أقصى ', ja: '日：最高 ' }) + r1(hot.tmax, 0) + ' °C (' + hot.date.slice(5) + ') · ' + W({ fr: 'pluie ', en: 'rain ', ar: 'أمطار ', ja: '降水 ' }) + r1(rainNext, 0) + ' mm · ' +
+            summary: (/MET Norway/.test(wx.source) ? 'MET Norway · ' : /kept on this device/.test(wx.source) ? W({ fr: 'copie locale · ', en: 'saved copy · ', ar: 'نسخة محفوظة · ', ja: '保存データ · ' }) : '') + next.length + W({ fr: ' j : max ', en: ' d: max ', ar: ' يوم: أقصى ', ja: '日：最高 ' }) + r1(hot.tmax, 0) + ' °C (' + hot.date.slice(5) + ') · ' + W({ fr: 'pluie ', en: 'rain ', ar: 'أمطار ', ja: '降水 ' }) + r1(rainNext, 0) + ' mm · ' +
               (alerts.length ? alerts.length + W({ fr: ' alerte(s)', en: ' alert(s)', ar: ' تنبيه', ja: '件の警報' }) : W({ fr: 'pas d\'alerte', en: 'no alert', ar: 'لا تنبيه', ja: '警報なし' })),
-            data: { source: wx.source, today: today(), rain_last_30d_mm: r1(past30, 0), rain_next_mm: r1(rainNext, 1), et0_next_mm: r1(next.reduce(function (t, d) { return t + (d.et0 || 0); }, 0), 0),
+            data: { source: wx.source, today: today(), rain_last_30d_mm: s.past.length ? r1(past30, 0) : null, forecast_days: next.length, rain_next_mm: r1(rainNext, 1), et0_next_mm: r1(next.reduce(function (t, d) { return t + (d.et0 || 0); }, 0), 0),
               days: next.map(function (d) { return { date: d.date, tmax: r1(d.tmax, 0), tmin: r1(d.tmin, 0), rain: r1(d.rain, 1), et0: r1(d.et0, 1), wind: r1(d.wind, 0) }; }), alerts: alerts }
           };
         });
@@ -528,7 +529,7 @@
     return {
       name: p.name || null, lat: r1(p.lat, 4), lon: r1(p.lon, 4),
       crop: f('crop'), area_ha: f('area_ha'), water_source: f('water.source'), well_depth_m: f('water.well_depth_m'), pump: f('energy.pump'),
-      climate: { rain_mm: r1(f('climate.rain_mm'), 0), et0_mm: r1(f('climate.et0_mm'), 0), tmax_hot: r1(f('climate.tmax_hot'), 1), tmin_cold: r1(f('climate.tmin_cold'), 1), confidence: conf('climate.rain_mm') },
+      climate: { rain_mm: r1(f('climate.rain_mm'), 0), et0_mm: r1(f('climate.et0_mm'), 0), tmax_hot: r1(f('climate.tmax_hot'), 1), tmin_cold: r1(f('climate.tmin_cold'), 1), confidence: conf('climate.rain_mm'), source: (D.fieldAt(dna, 'climate.rain_mm') || {}).source || null },
       terrain: { elev_m: r1(f('terrain.elev_m'), 0), slope_pct: r1(f('terrain.slope_pct'), 1), aspect_deg: r1(f('terrain.aspect_deg'), 0) },
       sun_kwh_m2_day: r1(f('solar.ghi_kwh'), 2),
       soil: { texture: f('soil.texture'), clay_pct: r1(f('soil.clay_pct'), 0), organic_carbon: r1(f('soil.soc'), 1), confidence: conf('soil.clay_pct') },
