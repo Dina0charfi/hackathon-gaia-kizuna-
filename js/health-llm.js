@@ -95,16 +95,16 @@
 
   /* What the models found, and how sure: computed here, never by the language model. */
   function evidence(state, PL, label) {
-    var r = state.result, ok = r && !r.error, plantKnown = ok && (r.routed || !r.stage1.abstain) && r.tree !== 'other', s2 = plantKnown ? r.stage2 : null;
+    var r = state.result, ok = r && !r.error, plantKnown = ok && (r.manual || (!r.doubt && (r.routed || !r.stage1.abstain))) && r.tree !== 'other', s2 = plantKnown ? r.stage2 : null;
     var pn = state.pn && state.pn.status === 'done' && state.pn.data && !state.pn.data.not_a_plant ? state.pn.data : null;
     var dis = s2 && !s2.abstain ? s2.top : null, sure = 'unknown', fact = dis ? F[r.tree + '/' + dis.label] : null;
     if (dis) {
-      var pp = r.routed ? r.routed.p : r.stage1.top.p, m = Math.min(pp, dis.p);
+      var pp = r.manual ? 1 : r.routed ? r.routed.p : r.stage1.top.p, m = Math.min(pp, dis.p);
       sure = m >= 0.8 ? 'good' : m >= 0.5 ? 'medium' : 'low';
-      if (state.quality && state.quality.overall !== 'pass' && sure === 'good') sure = 'medium';
+      if (sure === 'good' && (r.manual || (state.quality && state.quality.overall !== 'pass'))) sure = 'medium';
     }
     var ev = { certainty: sure,
-      gaia_plant: plantKnown ? r.tree : 'not recognised', gaia_plant_confidence: plantKnown ? pc(r.routed ? r.routed.p : r.stage1.top.p) : null,
+      gaia_plant: plantKnown ? r.tree : 'not recognised', gaia_plant_confidence: plantKnown && r.manual ? 'chosen by the farmer' : plantKnown ? pc(r.routed ? r.routed.p : r.stage1.top.p) : null,
       gaia_result: dis ? dis.label.replace(/_/g, ' ') : 'no disease recognised', gaia_result_confidence: dis ? pc(dis.p) : null,
       photo_quality: state.quality ? state.quality.overall : null,
       species_on_device: PL.status === 'done' && PL.top ? PL.top.slice(0, 3).filter(function (s) { return s.p >= 0.3; }).map(function (s) { return { species: s.species, family: s.family, confidence: pc(s.p) }; }) : null };
@@ -115,6 +115,7 @@
       if (d.length) ev.possible_anomalies = d.map(function (x) { return { code: x.label, confidence: pc(x.score) }; });
     }
     // the names of the page, already translated: the model must not translate a disease name itself
+    if (ok && r.doubt && !r.manual) ev.plant_doubt = 'GAIA and Pl@ntNet disagree on the plant: the plant is not known';
     if (label && plantKnown) ev.names_to_use = { plant: label(r.tree), result: dis ? label(dis.label) : null };
     if (fact) { ev.fact_sheet_draft = { what: fact[0], safe_first_steps: fact[1], regulated: !!fact[2] }; }
     return ev;

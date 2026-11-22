@@ -455,7 +455,7 @@
     var ls = LLM && LLM.state(), m = S.running || S.plan ? S.mode : (ls && ls.mode === 'server' ? 'server' : ls && ls.engine ? 'browser' : 'planner');
     modeBox.appendChild(el('span', { class: 'ag-chip ' + m }, [t('ag_mode') + ' : ' + t('ag_m_' + m) + (m === 'server' && LLM ? ' (' + (S.provider || LLM.label()) + ')' : '')]));
     if (m === 'planner' && LLM && LLM.webgpu() && !(ls && ls.loading)) modeBox.appendChild(el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { LLM.loadBrowser(); } }, [t('ag_turn_on')]));
-    if (m === 'planner' && !(ls && ls.checking)) modeBox.appendChild(el('div', { class: 'small muted', style: 'flex-basis:100%;margin-top:4px' }, [t('ag_no_server')]));
+    if (m === 'planner' && !(ls && (ls.checking || ls.mode === 'server'))) modeBox.appendChild(el('div', { class: 'small muted', style: 'flex-basis:100%;margin-top:4px' }, [t('ag_no_server')]));
     if (ls && ls.loading) modeBox.appendChild(el('span', { class: 'small muted' }, ['Qwen2.5 · ' + Math.round(100 * (ls.loading.p || 0)) + ' %']));
   }
 
