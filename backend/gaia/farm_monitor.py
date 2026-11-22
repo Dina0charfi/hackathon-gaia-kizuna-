@@ -80,7 +80,8 @@ async def loop(every_s: int = 600) -> None:
                 last = (m.get("last_run") or "")[:10]
                 if m.get("enabled") and last != now.date().isoformat() and now.hour >= int(m.get("hour", 7)):
                     try:
-                        await check(s["lat"], s["lon"])
+                        with farm_state.as_user(s.get("owner")):
+                            await check(s["lat"], s["lon"])
                     except Exception as e:  # Open-Meteo down: try again at the next round
                         log.warning("morning check failed for %s: %s", farm_state.key(s["lat"], s["lon"]), e)
         except Exception as e:

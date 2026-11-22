@@ -1,4 +1,7 @@
-"""What the agent can change, kept on the server for each parcel (backend/data/farm/, never committed).
+"""What the agent can change, kept on the server for each account and parcel (backend/data/farm/, never committed).
+
+A record belongs to one account: the web routes run inside as_user(account id), so an account only ever reads and writes
+its own files, even when it knows the coordinates of somebody else's plot. ANON reads nothing.
 
   settings        crop, Kc, area, pump flow, pumping head, solar power… (used by the morning check)
   plan            the irrigation calendar the farmer confirmed (date, net mm, m³, pumping hours)
@@ -11,6 +14,8 @@ applied when the farmer presses "Confirm" on the page (POST /farm/action).
 """
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import json
 import os
 import threading
@@ -37,28 +42,55 @@ def _quota(v):
 SETTING_KEYS = {"crop": str, "kc": float, "area_ha": float, "ea": float, "head_m": float, "pump_eff": float,
                 "flow_m3h": float, "pv_kwp": float, "pr": float, "months": _months, "quota_m3_month": _quota}
 _lock = threading.Lock()
+ANON = 0                     # nobody signed in: no record can exist for this id
+_user: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("gaia_farm_user", default=None)
+
+
+@contextlib.contextmanager
+def as_user(user_id: Optional[int]):
+    """Whose records load(), apply()... work on. None: a record without owner (tests, old files)."""
+    tok = _user.set(user_id)
+    try:
+        yield
+    finally:
+        _user.reset(tok)
 
 
 def key(lat: float, lon: float) -> str:
     return f"{round(lat, 3):.3f}_{round(lon, 3):.3f}"
 
 
-def _file(lat: float, lon: float) -> Path:
-    return DIR / f"{key(lat, lon)}.json"
+def _file(lat: float, lon: float, owner: Optional[int] = None) -> Path:
+    return DIR / (f"u{int(owner)}_{key(lat, lon)}.json" if owner is not None else f"{key(lat, lon)}.json")
+
+
+def adopt(user_id: int, lat: float, lon: float) -> None:
+    """A record kept before accounts existed goes to the account whose linked plot it is (called by the web routes)."""
+    old, new = _file(lat, lon), _file(lat, lon, user_id)
+    with _lock:
+        if old.exists() and not new.exists():
+            s = json.loads(old.read_text(encoding="utf-8"))
+            s["owner"] = user_id
+            save(s)
+            old.unlink()
 
 
 def load(lat: float, lon: float) -> dict[str, Any]:
-    f = _file(lat, lon)
-    base = {"lat": lat, "lon": lon, "settings": {}, "plan": [], "irrigation_log": [],
+    owner = _user.get()
+    f = _file(lat, lon, owner)
+    base = {"lat": lat, "lon": lon, "owner": owner, "settings": {}, "plan": [], "irrigation_log": [],
             "monitoring": {"enabled": False, "hour": 7, "last_run": None}, "alerts": []}
     if f.exists():
         base.update(json.loads(f.read_text(encoding="utf-8")))
+        base["owner"] = owner
     return base
 
 
 def save(state: dict[str, Any]) -> None:
     DIR.mkdir(parents=True, exist_ok=True)
-    f = _file(state["lat"], state["lon"])
+    if state.get("owner") == ANON:
+        raise ValueError("a record needs an account")
+    f = _file(state["lat"], state["lon"], state.get("owner"))
     tmp = f.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
     tmp.replace(f)

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -28,7 +28,7 @@ def _load_env_file() -> None:
 
 _load_env_file()
 
-from . import (agent, assistant, auth, business, engine, farm_monitor, farm_state, guard, irrigation, irrigation_agent, leaf,
+from . import (admin, agent, assistant, auth, business, engine, farm_monitor, farm_state, guard, irrigation, irrigation_agent, leaf,
                nexus, planner, plantnet, solar, vision)
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -130,6 +130,13 @@ def auth_forgot(body: ForgotIn, request: Request) -> dict:
 def auth_reset(body: ResetIn) -> dict:
     """Code + new password: sets the password, closes every other session, signs in."""
     return _auth_call(auth.confirm_reset, body.identifier, body.code, body.password)
+
+
+@app.get("/admin/overview")
+def admin_overview(response: Response, authorization: Optional[str] = Header(None)) -> dict:
+    """Admin dashboard (read only). 401 without a session, 403 for an account that is not an administrator."""
+    response.headers["Cache-Control"] = "no-store"
+    return _auth_call(admin.overview, _bearer(authorization))
 
 
 @app.put("/auth/farm")
@@ -348,14 +355,15 @@ class PlanIn(BaseModel):
 
 
 @app.post("/irrigation/plan")
-async def irrigation_plan(body: PlanIn) -> dict:
+async def irrigation_plan(body: PlanIn, authorization: Optional[str] = Header(None)) -> dict:
     """Optimal 8-day irrigation plan (model predictive control) and solar pumping hours."""
     if not (30 <= body.lat <= 38 and 7 <= body.lon <= 12):
         raise HTTPException(422, "Point outside the Tunisia bounding box.")
     try:
         d = body.model_dump()
         d["plan_override"] = d.pop("plan_mm")
-        return await planner.plan(**d)
+        with farm_state.as_user(_reader(authorization)):
+            return await planner.plan(**d)
     except irrigation.ModelMissing as e:
         raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
     except ValueError as e:
@@ -395,6 +403,23 @@ def irrigation_replay(body: ReplayIn) -> dict:
         raise HTTPException(422, detail={"status": "no_data", "message": str(e)})
 
 
+def _farm_owner(authorization: Optional[str], lat: float, lon: float) -> int:
+    """The signed-in account, owner of the farm record. 401 without a session."""
+    user = auth.user_for(_bearer(authorization))
+    if not user:
+        raise HTTPException(401, detail={"status": "no_session", "message": "Sign in to keep a farm record."})
+    f = user.get("farm")
+    if f and farm_state.key(f["lat"], f["lon"]) == farm_state.key(lat, lon):
+        farm_state.adopt(user["id"], lat, lon)
+    return user["id"]
+
+
+def _reader(authorization: Optional[str]) -> int:
+    """Account whose reported irrigations a plan may use; ANON (none) without a session."""
+    user = auth.user_for(_bearer(authorization))
+    return user["id"] if user else farm_state.ANON
+
+
 def _tunisia(lat: float, lon: float) -> None:
     if not (30 <= lat <= 38 and 7 <= lon <= 12):
         raise HTTPException(422, "Point outside the Tunisia bounding box.")
@@ -409,10 +434,11 @@ async def _start_morning_check() -> None:
 
 
 @app.get("/farm/state")
-def farm_get(lat: float, lon: float) -> dict:
+def farm_get(lat: float, lon: float, authorization: Optional[str] = Header(None)) -> dict:
     """Saved irrigation calendar, reported irrigations, settings, morning check and alerts of a parcel."""
     _tunisia(lat, lon)
-    return farm_state.load(lat, lon)
+    with farm_state.as_user(_farm_owner(authorization, lat, lon)):
+        return farm_state.load(lat, lon)
 
 
 class FarmActionIn(BaseModel):
@@ -422,22 +448,26 @@ class FarmActionIn(BaseModel):
 
 
 @app.post("/farm/action")
-def farm_action(body: FarmActionIn) -> dict:
+def farm_action(body: FarmActionIn, authorization: Optional[str] = Header(None)) -> dict:
     """Apply ONE action the farmer confirmed on the page (the agent only proposes them)."""
     _tunisia(body.lat, body.lon)
+    owner = _farm_owner(authorization, body.lat, body.lon)
     try:
-        return farm_state.apply(body.lat, body.lon, body.action)
+        with farm_state.as_user(owner):
+            return farm_state.apply(body.lat, body.lon, body.action)
     except (ValueError, KeyError, TypeError) as e:
         raise HTTPException(422, detail={"status": "bad_action", "message": str(e)})
 
 
 @app.post("/farm/check")
-async def farm_check(lat: float, lon: float) -> dict:
+async def farm_check(lat: float, lon: float, authorization: Optional[str] = Header(None)) -> dict:
     """Run the morning check now for this parcel: re-plan and record an alert."""
     _tunisia(lat, lon)
+    owner = _farm_owner(authorization, lat, lon)
     try:
-        await farm_monitor.check(lat, lon)
-        return farm_state.load(lat, lon)
+        with farm_state.as_user(owner):
+            await farm_monitor.check(lat, lon)
+            return farm_state.load(lat, lon)
     except irrigation.ModelMissing as e:
         raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
     except Exception as e:
@@ -473,12 +503,13 @@ class IrrigationAgentIn(BaseModel):
 
 
 @app.post("/agent")
-async def agent_answer(body: IrrigationAgentIn) -> dict:
+async def agent_answer(body: IrrigationAgentIn, authorization: Optional[str] = Header(None)) -> dict:
     """Smart irrigation agent (free Gemini / Groq model, or Claude): calls the soil forecast, optimal planner, what-if simulator and solar forecast. 503 without a key."""
     if not (30 <= body.parcel.lat <= 38 and 7 <= body.parcel.lon <= 12):
         raise HTTPException(422, "Point outside the Tunisia bounding box.")
     try:
-        return await irrigation_agent.answer(body.model_dump())
+        with farm_state.as_user(_reader(authorization)):
+            return await irrigation_agent.answer(body.model_dump())
     except irrigation_agent.AgentUnavailable as e:
         raise HTTPException(503, detail=e.detail) from e
 

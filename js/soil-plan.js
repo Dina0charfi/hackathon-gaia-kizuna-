@@ -35,11 +35,11 @@
       if (sy && need > sy) body.quota_m3_month = r.months.map(function (m) { return Math.round((m.vol || 0) * sy / need * 10) / 10; });
       if (!body.pv_kwp && r.solar) body.pv_kwp = Math.round(r.solar.kwp * 10) / 10;
     }
-    var key = JSON.stringify(body) + today();
+    var me = G.auth.user(), key = JSON.stringify(body) + today() + '|' + (me ? me.id : '');
     if (cache[key]) return cache[key];
     var ctl = global.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 20000) : null;
     cache[key] = G.apiReady.then(function () {
-      return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined });
+      return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, G.auth.headers()), body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined });
     }).then(function (x) { if (!x.ok) throw new Error(x.status); return x.json(); }).then(function (d) {
       clearTimeout(timer);
       var days = d.days || [], first = days[0] || {};
