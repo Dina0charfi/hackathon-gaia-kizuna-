@@ -27,12 +27,13 @@
   .thead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
   .thead h3 { font-size: 21px; margin-inline-end: auto; }
   .thead .jp { color: var(--g-gold); font-size: 15px; margin-inline-start: 8px; }
-  .dims { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+  .dims { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+  @media (max-width: 1100px) { .dims { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   .dim { border-radius: 9px; padding: 8px 10px; font-size: 12.5px; background: var(--g-ivory); border: 1px solid var(--g-line); }
   .dim b { display: block; font-size: 12px; color: var(--g-ink-3); font-weight: 600; margin-bottom: 3px; }
   .dim span { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; }
   .dim span svg { width: 13px; height: 13px; }
-  .dim.pass span { color: var(--s-ok); } .dim.fail span { color: var(--s-no); } .dim.partial span { color: var(--s-adapt); }
+  .dim.pass span { color: var(--s-ok); } .dim.fail span { color: var(--s-no); } .dim.partial span, .dim.below span, .dim.adapted span { color: var(--s-adapt); }
   .dim.unknown span, .dim.info span, .dim.none span { color: var(--s-unk); }
   .tcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
   .tcols h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--g-ink-3); }

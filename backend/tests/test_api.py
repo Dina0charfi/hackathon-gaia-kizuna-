@@ -301,11 +301,74 @@ def test_regional_soil_reference():
     assert regional_soil(45.0, 2.0) is None      # far from Tunisia: no guess
 
 
-def test_assistant_without_key_is_503(monkeypatch):
-    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+def _no_llm(monkeypatch, tmp_path):
+    from gaia import assistant
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE", "GAIA_LLM_PROVIDER", "GAIA_LLM_API_KEY",
+              "GAIA_LLM_BASE_URL", "GAIA_LLM_OPENAI_MODEL"):
         monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(assistant, "ENV_FILE", tmp_path / "none.env")
+    monkeypatch.setattr(assistant, "ollama_model", lambda: None)
+    return assistant
+
+
+def test_assistant_without_key_is_503(monkeypatch, tmp_path):
+    _no_llm(monkeypatch, tmp_path)
     r = client.post("/assistant", json={"question": "Combien coûte une citerne ?"})
     assert r.status_code == 503 and r.json()["detail"]["status"] == "no_api_key"
+    assert "Ollama" in r.json()["detail"]["message"]
+    assert client.get("/health").json()["assistant_providers"] == []
+
+
+class _Resp:
+    def __init__(self, status, data):
+        self.status_code, self._d = status, data
+
+    def json(self):
+        return self._d
+
+
+class _Http:
+    def __init__(self, status=200, text="D'après la fiche Jessour…"):
+        self.calls, self.status, self.text = [], status, text
+
+    def post(self, url, json=None, headers=None, timeout=None):
+        self.calls.append({"url": url, "json": json, "headers": headers})
+        return _Resp(self.status, {"choices": [{"message": {"content": self.text}}]})
+
+
+def test_assistant_free_provider_groq(monkeypatch, tmp_path):
+    a = _no_llm(monkeypatch, tmp_path)
+    (tmp_path / "none.env").write_text("GAIA_LLM_PROVIDER=groq\nGAIA_LLM_API_KEY=gsk_test\n", encoding="utf-8")
+    http = _Http(text="<think>hmm</think>D'après la fiche Jessour…")
+    out = a.answer({"question": "Et les jessour ?", "lang": "fr", "records": [],
+                    "history": [{"q": "Quelle pluie ici ?", "a": "180 mm par an."}]}, http=http)
+    assert out == {"text": "D'après la fiche Jessour…", "status": "ok", "model": "llama-3.3-70b-versatile", "provider": "groq"}
+    call = http.calls[0]
+    assert call["url"] == "https://api.groq.com/openai/v1/chat/completions"
+    assert call["headers"]["Authorization"] == "Bearer gsk_test"
+    user = call["json"]["messages"][1]["content"]
+    assert "conversation_so_far" in user and "Quelle pluie ici" in user
+    assert a.available() == ["groq"]
+
+
+def test_assistant_falls_back_to_local_ollama(monkeypatch, tmp_path):
+    a = _no_llm(monkeypatch, tmp_path)
+    monkeypatch.setattr(a, "ollama_model", lambda: "qwen2.5:3b")
+    http = _Http()
+    out = a.answer({"question": "Que planter ?", "lang": "fr"}, http=http)
+    assert out["provider"] == "ollama-local" and out["model"] == "qwen2.5:3b"
+    assert http.calls[0]["url"] == "http://127.0.0.1:11434/v1/chat/completions" and "Authorization" not in http.calls[0]["headers"]
+    assert client.get("/health").json()["assistant_providers"] == ["ollama-local"]
+
+
+def test_assistant_provider_error_is_503(monkeypatch, tmp_path):
+    a = _no_llm(monkeypatch, tmp_path)
+    monkeypatch.setenv("GAIA_LLM_PROVIDER", "huggingface")
+    monkeypatch.setenv("GAIA_LLM_API_KEY", "hf_x")
+    import pytest as _p
+    with _p.raises(a.AssistantUnavailable) as e:
+        a.answer({"question": "x"}, http=_Http(status=401))
+    assert e.value.detail["status"] == "api_error" and "huggingface" in e.value.detail["message"]
 
 
 def test_assistant_grounded_prompt():
@@ -324,10 +387,10 @@ def test_assistant_grounded_prompt():
     rec = next(r for r in KB["records"] if r["id"] == "tn-tabia")
     out = assistant.answer({"question": "Quels risques pour la tabia ?", "lang": "fr", "records": [rec],
                             "profile": {"climate.rain_mm": {"value": 180, "unit": "mm/an"}}}, client=Fake)
-    assert out == {"text": "Selon la fiche Tabia…", "status": "ok", "model": assistant.MODEL}
+    assert out == {"text": "Selon la fiche Tabia…", "status": "ok", "model": assistant.MODEL, "provider": "claude"}
     prompt = seen["messages"][0]["content"]
     assert "tn-tabia" in prompt and "180" in prompt and "Quels risques" in prompt
-    assert "ONLY the evidence" in seen["system"]
+    assert "evidence in the user message first" in seen["system"] and "General knowledge" in seen["system"]
 
 
 def test_lab_retrieval_free_questions():
@@ -365,3 +428,68 @@ def test_diagnose_with_shipped_model():
     body = r.json()
     assert body["status"] in {"ok", "unsure", "unsupported_tree", "no_disease_model"}
     assert body["stage1"]["top"]["label"] in m.vision.load_manifest(m.MODEL_DIR)["stage1"]["classes"]
+
+
+# ---------------------------------------------------------------- Farm Agent (POST /agent/step)
+TOOLS = [{"name": "water_need", "description": "FAO-56 water need", "parameters": {"type": "object", "properties": {"crop": {"type": "string"}}}}]
+
+
+class _ToolHttp:
+    """OpenAI-compatible server that asks for one tool, then answers."""
+    def __init__(self):
+        self.calls = []
+
+    def post(self, url, json=None, headers=None, timeout=None):
+        self.calls.append(json)
+        if not any(m["role"] == "tool" for m in json["messages"]):
+            msg = {"content": "", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "water_need", "arguments": "{\"crop\": \"olive\"}"}}]}
+        else:
+            msg = {"content": "Situation.\n## Actions\n- [this week] Irrigate 954 m³ — water_need"}
+        return _Resp(200, {"choices": [{"message": msg}]})
+
+
+def test_agent_step_tool_call_then_final(monkeypatch, tmp_path):
+    a = _no_llm(monkeypatch, tmp_path)
+    from gaia import agent
+    (tmp_path / "none.env").write_text("GAIA_LLM_PROVIDER=groq\nGAIA_LLM_API_KEY=gsk_test\n", encoding="utf-8")
+    http = _ToolHttp()
+    msgs = [{"role": "user", "content": "GOAL: summer plan\nLANG: English"}]
+    out = agent.step(msgs, TOOLS, http=http)
+    assert out["type"] == "tool_calls" and out["calls"] == [{"id": "call_1", "name": "water_need", "args": {"crop": "olive"}}]
+    sent = http.calls[0]
+    assert sent["tools"][0]["function"]["name"] == "water_need" and sent["messages"][0]["role"] == "system"
+    msgs += [{"role": "assistant", "content": "", "tool_calls": out["calls"]},
+             {"role": "tool", "tool_call_id": "call_1", "name": "water_need", "content": "{\"year\": {\"m3\": 23111}}"}]
+    out = agent.step(msgs, TOOLS, http=http)
+    assert out["type"] == "final" and "## Actions" in out["text"]
+    tool_msg = http.calls[1]["messages"][-1]
+    assert tool_msg == {"role": "tool", "tool_call_id": "call_1", "content": "{\"year\": {\"m3\": 23111}}"}
+    assert http.calls[1]["messages"][-2]["tool_calls"][0]["function"]["arguments"] == "{\"crop\": \"olive\"}"
+
+
+def test_agent_step_claude_tool_use():
+    from types import SimpleNamespace
+    from gaia import agent
+    seen = {}
+
+    class Fake:
+        class messages:
+            @staticmethod
+            def create(**kw):
+                seen.update(kw)
+                return SimpleNamespace(model=kw["model"], content=[SimpleNamespace(type="text", text="I need the water need."),
+                                                                   SimpleNamespace(type="tool_use", id="tu_1", name="water_need", input={"crop": "olive"})])
+
+    msgs = [{"role": "user", "content": "GOAL: x"},
+            {"role": "assistant", "content": "", "tool_calls": [{"id": "tu_0", "name": "water_need", "args": {}}]},
+            {"role": "tool", "tool_call_id": "tu_0", "name": "water_need", "content": "{}"}]
+    out = agent.step(msgs, TOOLS, client=Fake)
+    assert out["type"] == "tool_calls" and out["calls"][0] == {"id": "tu_1", "name": "water_need", "args": {"crop": "olive"}}
+    assert seen["tools"][0]["input_schema"]["type"] == "object"
+    assert seen["messages"][2] == {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "tu_0", "content": "{}"}]}
+
+
+def test_agent_step_without_model_is_503(monkeypatch, tmp_path):
+    _no_llm(monkeypatch, tmp_path)
+    r = client.post("/agent/step", json={"messages": [{"role": "user", "content": "x"}], "tools": TOOLS})
+    assert r.status_code == 503 and r.json()["detail"]["status"] == "no_api_key"

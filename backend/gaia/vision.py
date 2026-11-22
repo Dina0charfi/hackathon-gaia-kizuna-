@@ -106,6 +106,32 @@ def run_stage(model_dir: Path, spec: dict, x: np.ndarray) -> dict:
     return {"ranked": ranked, "top": ranked[0], "abstain": ranked[0]["p"] < spec.get("threshold", 0.5)}
 
 
+GAIA_GENUS = [("olive", r"^Olea "), ("palm", r"^Phoenix "), ("citrus", r"^Citrus "), ("grape", r"^Vitis "), ("potato", r"^Solanum tuberosum")]
+
+
+@lru_cache(maxsize=2)
+def _species_groups(path: str) -> dict:
+    import re
+    lab = json.loads(Path(path).read_text(encoding="utf-8"))
+    return {k: [i for i, s in enumerate(lab["species"]) if re.match(p, s)] for k, p in GAIA_GENUS} | {"_species": lab["species"]}
+
+
+def species(model_dir: Path, m: dict, image: bytes) -> dict | None:
+    """Pl@ntNet species model (manifest species_model): top species and the probability of each GAIA plant."""
+    sp = m.get("species_model")
+    if not sp or not (model_dir / sp["file"]).is_file() or not (model_dir / sp.get("labels", "")).is_file():
+        return None
+    path = model_dir / sp["file"]
+    sess = _session(str(path), path.stat().st_mtime)
+    z = sess.run([sp.get("output", "logits")], {sess.get_inputs()[0].name: preprocess(image, sp.get("input") or {})})[0]
+    p = softmax(z)
+    g = _species_groups(str(model_dir / sp["labels"]))
+    plants = {k: float(p[v].sum()) for k, v in g.items() if k != "_species"}
+    best = max(plants, key=plants.get)
+    top = [{"species": g["_species"][i], "p": round(float(p[i]), 4)} for i in np.argsort(-p)[:3]]
+    return {"top": top, "plant": {"label": best, "p": round(plants[best], 4)}}
+
+
 def diagnose(model_dir: Path, image: bytes) -> dict:
     m = load_manifest(model_dir)
     x = preprocess(image, m.get("input") or {})
@@ -113,6 +139,15 @@ def diagnose(model_dir: Path, image: bytes) -> dict:
     tree = s1["top"]["label"]
     res: dict[str, Any] = {"status": "ok", "model_version": m.get("version"), "tree": tree, "stage1": s1,
                            "stage2": None, "disease": None, "guidance": None}
+    # fusion with the Pl@ntNet species model, same rule as js/health.js (field photos: 59 % -> 80 % plants right)
+    sp = species(model_dir, m, image)
+    if sp:
+        res["species"] = sp
+        pp, s1lab = sp["plant"], (None if s1["abstain"] else tree)
+        if pp["label"] != s1lab and (pp["p"] >= 0.5 or (pp["p"] >= 0.15 and s1lab not in ("tomato", "pepper"))):
+            tree = res["tree"] = pp["label"]
+            res["routed"] = {"by": "plantnet", "p": pp["p"], "stage1": s1lab}
+            s1 = dict(s1, abstain=False)
     if s1["abstain"]:
         res["status"] = "unsure"
         return res
@@ -123,7 +158,9 @@ def diagnose(model_dir: Path, image: bytes) -> dict:
     if not spec2:
         res["status"] = "no_disease_model"
         return res
-    s2 = run_stage(model_dir, spec2, x)
+    # a stage-2 head can run on another backbone with its own input size (v4: Pl@ntNet MobileNetV4 at 512 px)
+    x2 = preprocess(image, spec2["input"]) if spec2.get("input") else x
+    s2 = run_stage(model_dir, spec2, x2)
     res["stage2"] = s2
     if s2["abstain"]:
         res["status"] = "unsure"

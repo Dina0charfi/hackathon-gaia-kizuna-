@@ -10,6 +10,11 @@
       fd_title: 'Tableau de bord de la ferme',
       fd_lead: "Mesurer pour gérer : l'eau pompée face au quota de la culture, l'énergie du soleil, ce que cela fait économiser, et ce qui arrive cette semaine.",
       fd_farm: 'Ferme', fd_demo_farm: 'Ferme de démonstration · oliveraie près de Kairouan', fd_your_parcel: 'Votre parcelle',
+      fd_src_meter_real: 'Compteur d’eau : vos relevés ({n} jours mesurés)', s_pumped_real: 'Eau pompée (compteur)',
+      rd_t: 'Relevés du compteur', rd_p: 'Le tableau de bord utilise vos relevés d’index (m³), saisis dans « Ma saison » ou importés ici depuis un compteur ou un enregistreur (CSV : date,index ; heures possibles, ex. 2026-11-18T23:00). Deux relevés de nuit (22 h–5 h) qui montent signalent une fuite.',
+      rd_none: 'Aucun relevé pour cette parcelle : les volumes ci-dessus sont une démonstration simulée. Ajoutez au moins deux relevés pour voir vos vrais chiffres.',
+      rd_import: 'Importer un CSV', rd_added: '{n} relevés importés.', rd_bad: 'Aucune ligne lisible (format attendu : date,index).', rd_season: 'Saisir un relevé dans Ma saison', rd_count: '{n} relevés enregistrés pour cette parcelle.',
+      method_real: 'Volumes pompés calculés à partir de vos relevés d’index, interpolés jour par jour. Les jours sans relevé autour restent vides ; le quota est comparé sur les mêmes jours.',
       fd_src_meter: 'Compteur d’eau et onduleur : simulés pour la démo', fd_src_wx_live: 'Météo : prévision Open-Meteo en direct', fd_src_wx_sim: 'Météo : simulée (prévision injoignable)',
       fd_loading: 'Lecture de la prévision météo…',
       fd_today: "Aujourd'hui",
@@ -47,6 +52,11 @@
       fd_title: 'لوحة متابعة الضيعة',
       fd_lead: 'نقيس لنُحسن التصرّف: الماء المضخوخ مقارنة بحصة الزراعة، طاقة الشمس، ما توفّره، وما ينتظرنا هذا الأسبوع.',
       fd_farm: 'الضيعة', fd_demo_farm: 'ضيعة تجريبية · غابة زيتون قرب القيروان', fd_your_parcel: 'قطعتك',
+      fd_src_meter_real: 'عدّاد الماء: قراءاتك ({n} أيام مقيسة)', s_pumped_real: 'الماء المضخوخ (العدّاد)',
+      rd_t: 'قراءات العدّاد', rd_p: 'تستعمل لوحة القيادة قراءات المؤشر (م³) التي تدخلها في «موسمي» أو تستوردها هنا من عدّاد أو مسجّل بيانات (CSV: التاريخ,المؤشر؛ يمكن إضافة الساعة). قراءتان ليليتان (22–5) مرتفعتان تدلان على تسرّب.',
+      rd_none: 'لا توجد قراءات لهذه القطعة: الأحجام أعلاه محاكاة للعرض. أضف قراءتين على الأقل لترى أرقامك الحقيقية.',
+      rd_import: 'استيراد CSV', rd_added: 'تم استيراد {n} قراءة.', rd_bad: 'لا يوجد سطر مقروء (الصيغة: التاريخ,المؤشر).', rd_season: 'إدخال قراءة في موسمي', rd_count: '{n} قراءة مسجلة لهذه القطعة.',
+      method_real: 'الأحجام المضخوخة محسوبة من قراءات المؤشر، موزّعة يوماً بيوم. الأيام بلا قراءات تبقى فارغة، وتُقارن الحصة على الأيام نفسها.',
       fd_src_meter: 'عدّاد الماء والمموّج: محاكاة للعرض', fd_src_wx_live: 'الطقس: توقعات Open-Meteo مباشرة', fd_src_wx_sim: 'الطقس: محاكاة (التوقعات غير متاحة)',
       fd_loading: 'قراءة توقعات الطقس…',
       fd_today: 'اليوم',
@@ -84,6 +94,11 @@
       fd_title: 'Farm dashboard',
       fd_lead: 'Measure to manage: water pumped against the crop’s quota, energy from the sun, what it saves, and what is coming this week.',
       fd_farm: 'Farm', fd_demo_farm: 'Demo farm · olive grove near Kairouan', fd_your_parcel: 'Your plot',
+      fd_src_meter_real: 'Water meter: your readings ({n} days measured)', s_pumped_real: 'Water pumped (meter)',
+      rd_t: 'Meter readings', rd_p: 'The dashboard uses your meter index readings (m³), typed in My season or imported here from a meter or data logger (CSV: date,index; times allowed, e.g. 2026-11-18T23:00). Two night readings (22:00–05:00) that rise flag a leak.',
+      rd_none: 'No readings for this plot: the volumes above are a simulated demo. Add at least two readings to see your real figures.',
+      rd_import: 'Import a CSV', rd_added: '{n} readings imported.', rd_bad: 'No readable line (expected: date,index).', rd_season: 'Add a reading in My season', rd_count: '{n} readings saved for this plot.',
+      method_real: 'Volumes pumped are computed from your index readings, interpolated day by day. Days not between two readings stay empty; the quota is compared over the same days.',
       fd_src_meter: 'Water meter and inverter: simulated for the demo', fd_src_wx_live: 'Weather: live Open-Meteo forecast', fd_src_wx_sim: 'Weather: simulated (forecast unreachable)',
       fd_loading: 'Reading the weather forecast…',
       fd_today: 'Today',
@@ -121,6 +136,11 @@
       fd_title: '農場ダッシュボード',
       fd_lead: '測ることで管理する：作物の割当量に対する揚水量、太陽のエネルギー、その節約額、そして今週の見通し。',
       fd_farm: '農場', fd_demo_farm: 'デモ農場 · カイルアン近郊のオリーブ園', fd_your_parcel: 'あなたの区画',
+      fd_src_meter_real: '水量計：あなたの記録（計測{n}日）', s_pumped_real: '揚水量（メーター）',
+      rd_t: 'メーター記録', rd_p: 'ダッシュボードは「マイシーズン」で入力した、またはここでメーターやデータロガーから取り込んだ積算値（m³）を使います（CSV：日付,積算値。時刻も可、例 2026-11-18T23:00）。夜間（22時–5時）の2つの記録で値が増えていれば漏水の疑いです。',
+      rd_none: 'この区画の記録はありません。上の量はデモ用のシミュレーションです。実際の数値を見るには記録を2つ以上追加してください。',
+      rd_import: 'CSVを取り込む', rd_added: '{n}件の記録を取り込みました。', rd_bad: '読み取れる行がありません（形式：日付,積算値）。', rd_season: 'マイシーズンで記録を入力', rd_count: 'この区画の記録：{n}件。',
+      method_real: '揚水量は積算値の記録から日ごとに補間して計算します。記録に挟まれていない日は空欄のまま、割当量も同じ日で比較します。',
       fd_src_meter: '水量計とインバーター：デモ用のシミュレーション', fd_src_wx_live: '天気：Open-Meteoのリアルタイム予報', fd_src_wx_sim: '天気：シミュレーション（予報に接続できません）',
       fd_loading: '天気予報を読み込み中…',
       fd_today: '今日',
@@ -196,6 +216,16 @@
     return s;
   }
 
+  /* ------------------------------------------------ meter readings (shared with My season) */
+  var MKEY = 'gaia.season.meter', pkey = hasParcel ? (p.lat.toFixed(4) + ',' + p.lon.toFixed(4)) : '';
+  function readings() { return hasParcel ? (G.load(MKEY, {})[pkey] || []) : []; }
+  function addReadings(list) {
+    var all = G.load(MKEY, {}), cur = all[pkey] || [], byDate = {};
+    cur.concat(list).forEach(function (r) { byDate[r.date] = r; });
+    all[pkey] = Object.keys(byDate).sort().map(function (d) { return byDate[d]; }); G.save(MKEY, all);
+  }
+  var importMsg = null;
+
   /* ------------------------------------------------ weather */
   var WX = null, wxLive = false;
   function todayStr() { var d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
@@ -203,13 +233,8 @@
   function fetchWeather() {
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + farm.lat.toFixed(3) + '&longitude=' + farm.lon.toFixed(3) +
       '&daily=et0_fao_evapotranspiration,precipitation_sum,shortwave_radiation_sum,temperature_2m_max&past_days=30&forecast_days=8&timezone=auto';
-    var ctl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
-    return fetch(url, ctl ? { signal: ctl.signal } : undefined).then(function (r) {
-      clearTimeout(timer);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    }).then(function (j) {
+    var timer = null;
+    return window.GAIA_DNA.forecastJSON(url, 60, 12000).then(function (j) {
       var d = j.daily, rows = d.time.map(function (date, i) {
         return { date: date, et0: d.et0_fao_evapotranspiration[i], rain: d.precipitation_sum[i] || 0,
           ghi: d.shortwave_radiation_sum[i] !== null ? d.shortwave_radiation_sum[i] / 3.6 : null, tmax: d.temperature_2m_max[i] };
@@ -241,7 +266,7 @@
   /* ------------------------------------------------ render */
   function header() {
     var chips = el('div', { class: 'fd-src' }, [
-      el('span', { class: 'fd-chip demo' }, [G.icon('info', 14), t('fd_src_meter')]),
+      REAL ? el('span', { class: 'fd-chip live' }, [G.icon('ok', 14), fill(t('fd_src_meter_real'), { n: REAL })]) : el('span', { class: 'fd-chip demo' }, [G.icon('info', 14), t('fd_src_meter')]),
       WX ? el('span', { class: 'fd-chip ' + (wxLive ? 'live' : 'demo') }, [G.icon(wxLive ? 'ok' : 'info', 14), t(wxLive ? 'fd_src_wx_live' : 'fd_src_wx_sim')]) : null
     ]);
     return el('div', { class: 'fd-farm' }, [
@@ -281,6 +306,7 @@
     return fill(t('al_' + a.code), map);
   }
 
+  var REAL = 0;
   function draw() {
     G.clear(app);
     app.appendChild(header());
@@ -290,7 +316,10 @@
     var all = WX.past.concat(WX.next);
     var autoKwp = !(s.kwp > 0);
     if (autoKwp) s.kwp = F.sizeKwp(all, s);
-    var hist = F.simulateMeter(WX.past, s, farm.lat, farm.lon);
+    var rd = readings(), real = rd.length >= 2 ? F.fromReadings(WX.past, s, rd) : null;
+    REAL = real && real.some(function (h) { return h.measured; }) ? real.filter(function (h) { return h.measured; }).length : 0;
+    var hist = REAL ? real : F.simulateMeter(WX.past, s, farm.lat, farm.lon);
+    G.clear(app); app.appendChild(header());
     var fc = F.forecast(WX.next, s);
     var sum = F.summary(hist, s, WX.today);
     var al = F.alerts(hist, fc, sum);
@@ -355,7 +384,7 @@
     var hChart = el('div', { class: 'fd-chart' }), sChart = el('div', { class: 'fd-chart' });
     var labs = hist.map(function (h, i) { var d = new Date(h.date + 'T12:00:00Z').getUTCDate(); return i % 3 === (hist.length - 1) % 3 ? String(d) : ''; });
     var rows = hist.slice().reverse().map(function (h) {
-      return el('tr', null, [el('td', null, [shortDate(h.date) + (h.partial ? ' ' + t('partial') : '')]), el('td', null, [fmt(h.quota, 1)]), el('td', null, [fmt(h.pumped, 1)]),
+      return el('tr', null, [el('td', null, [shortDate(h.date) + (h.partial ? ' ' + t('partial') : '')]), el('td', null, [fmt(h.quota, 1)]), el('td', null, [h.pumped === null ? '—' : fmt(h.pumped, 1)]),
         el('td', null, [fmt(h.solar, 1)]), el('td', null, [fmt(h.rain, 1)]), el('td', null, [fmt(h.et0, 1)])]);
     });
     app.appendChild(el('section', { class: 'gp-card', 'aria-labelledby': 'fd-h-h', style: 'margin-top:16px' }, [
@@ -373,12 +402,32 @@
     ]));
     G.barChart(hChart, { labels: labs, unit: 'm³', title: t('h_chart_t'), digits: 1, series: [
       { name: t('s_quota'), color: '#9CB7C9', values: hist.map(function (h) { return h.quota; }) },
-      { name: t('s_pumped'), color: '#2F5A75', values: hist.map(function (h) { return h.pumped; }) }
+      { name: t(REAL ? 's_pumped_real' : 's_pumped'), color: '#2F5A75', values: hist.map(function (h) { return h.pumped; }) }
     ] });
     G.barChart(sChart, { labels: labs, unit: 'kWh', title: t('h_solar_t'), digits: 1, series: [
       { name: t('s_solar'), color: '#D8BE7E', values: hist.map(function (h) { return h.solar; }) },
       { name: t('s_used'), color: '#A88746', values: hist.map(function (h) { return h.solarUsed; }) }
     ] });
+
+    /* meter readings: import */
+    if (hasParcel) {
+      var fileIn = el('input', { type: 'file', accept: '.csv,.txt,text/csv', id: 'fd-csv', class: 'sr', onchange: function (e) {
+        var f = e.target.files && e.target.files[0]; if (!f) return;
+        var fr = new FileReader();
+        fr.onload = function () { var l = F.parseReadings(fr.result); if (l.length) addReadings(l); importMsg = l.length ? ['ok', fill(t('rd_added'), { n: l.length })] : ['err', t('rd_bad')]; draw(); };
+        fr.readAsText(f);
+      } });
+      app.appendChild(el('section', { class: 'gp-card', style: 'margin-top:16px' }, [
+        el('h2', null, [t('rd_t')]), el('p', { class: 'small muted', style: 'margin-top:4px' }, [t('rd_p')]),
+        REAL ? null : G.note('info', t('rd_none')),
+        importMsg ? G.note(importMsg[0], importMsg[1]) : null,
+        el('p', { class: 'small', style: 'margin-top:8px' }, [fill(t('rd_count'), { n: rd.length })]),
+        el('p', { style: 'margin-top:10px;display:flex;gap:8px;flex-wrap:wrap' }, [
+          fileIn, el('label', { for: 'fd-csv', class: 'gp-btn sm', style: 'cursor:pointer' }, [t('rd_import')]),
+          el('a', { class: 'gp-btn ghost sm', href: 'season.html' }, [t('rd_season')])
+        ])
+      ]));
+    }
 
     /* settings + method */
     function field(id, key, label, hint, attrs) {
@@ -405,7 +454,8 @@
       el('section', { class: 'gp-card' }, [
         el('h2', null, [t('method_t')]),
         el('p', { class: 'small', style: 'margin-top:6px' }, [t('method_p')]),
-        el('p', { class: 'small', style: 'margin-top:8px' }, [G.pill('demo', t('demo')), ' ', t('method_sim')]),
+        REAL ? el('p', { class: 'small', style: 'margin-top:8px' }, [G.pill('live', t('live')), ' ', t('method_real')])
+          : el('p', { class: 'small', style: 'margin-top:8px' }, [G.pill('demo', t('demo')), ' ', t('method_sim')]),
         el('p', { class: 'small muted', style: 'margin-top:8px' }, [t('src_wx') + ' ' + (wxLive ? 'Open-Meteo Forecast API (ECMWF / DWD ICON / Météo-France), ET0 FAO-56 Penman-Monteith' : t('fd_src_wx_sim'))]),
         el('p', { style: 'margin-top:12px;display:flex;gap:8px;flex-wrap:wrap' }, [
           el('a', { class: 'gp-btn ghost sm', href: 'nexus.html' }, [t('to_nexus')]),

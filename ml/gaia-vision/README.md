@@ -1,6 +1,7 @@
 # GAIA vision — train & plug in the models (steps 2–6)
 
-**v2 (current model, `models/gaia-vision/`)**: leakage-free split, frozen EfficientNet-B0 + linear heads, lab vs field
+**v3 (current model, `models/gaia-vision/`)**: v2 plus olive (3,400 grove photos) and Tomato-Village farm photos, see the top of [TRAINING_REPORT.md](TRAINING_REPORT.md).
+**v2**: leakage-free split, frozen EfficientNet-B0 + linear heads, lab vs field
 evaluation. Why v1 looked perfect but overfit, the results and the commands: [TRAINING_REPORT.md](TRAINING_REPORT.md).
 The notebooks below are the v1 pipeline (kept for olive / Kaggle data); prefer `scripts/10_*`–`14_*`.
 

@@ -22,7 +22,7 @@ import json
 import os
 from typing import Any
 
-from . import agent
+from . import irrigation_agent as agent
 
 PROVIDERS = {
     # measured on the free tier (21/11/2026): gemini-3.5-flash ~6 s per step, gemini-3.1-flash-lite ~1.5 s;

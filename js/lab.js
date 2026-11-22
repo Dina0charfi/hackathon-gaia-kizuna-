@@ -1,10 +1,12 @@
 /* ==========================================================================
    GAIA AI Lab — contextual assistant.
 
-   Answers are assembled from three things only: the parcel's LAND DNA, the
-   compatibility engine's verdicts, and the knowledge records. Without a
-   configured LLM endpoint the wording comes from templates; with one, the LLM
-   receives only that evidence and its numbers are checked before display.
+   Every question first gets a rule-based answer assembled from the parcel's
+   LAND DNA, the compatibility engine's verdicts and the knowledge records.
+   When a language model is reachable (js/lab-llm.js: GAIA server with Claude,
+   Groq, Hugging Face or Ollama, or a free model inside the browser), it writes
+   the answer from that evidence and the conversation so far; the rule-based
+   sections stay underneath, and figures not found in the evidence are marked.
    ========================================================================== */
 (function () {
   'use strict';
@@ -16,10 +18,18 @@
       ctx: 'Contexte de la parcelle', ask: 'Questions possibles', ph: 'Posez votre question sur cette parcelle…', send: 'Envoyer',
       mode_rules: 'Réponses composées à partir des fiches et du profil de la parcelle (questions libres en français, arabe ou anglais). Aucun modèle de langage n’est connecté : voir backend/README.md pour activer Claude.',
       mode_llm: 'Formulation par modèle de langage, à partir des seules fiches récupérées ; chiffres vérifiés.',
+      mode_none: 'Aucun modèle de langage connecté : réponses composées à partir des fiches et du profil de la parcelle.',
+      mode_srv: 'Réponses rédigées par un modèle de langage ({m}) via le serveur GAIA, à partir des fiches et de votre parcelle ; chiffres vérifiés.',
+      mode_br: 'Réponses rédigées par un modèle gratuit qui tourne dans votre navigateur ({m}) ; aucune donnée ne quitte l’appareil ; chiffres vérifiés.',
+      btn_load: 'Activer le modèle gratuit (dans le navigateur, ≈1 Go, une seule fois)', loading: 'Téléchargement du modèle…',
+      no_webgpu: 'Ce navigateur ne prend pas en charge WebGPU (essayez Chrome ou Edge récents). Autres options gratuites : Ollama sur cet ordinateur, ou une clé Groq gratuite (voir backend/README.md).',
+      load_fail: 'Le modèle n’a pas pu être chargé (mémoire graphique insuffisante ou hors ligne). Les réponses par fiches restent disponibles.',
+      checking: 'Recherche d’un modèle de langage…', recheck: 'Vérifier à nouveau',
+      unv_note: 'Les chiffres surlignés ne figurent pas dans les données GAIA : à vérifier.', details: 'Sources, données et confiance', thinking: 'GAIA réfléchit…',
       s_reco: 'Recommandation', s_expl: 'Explication', s_rec: 'Fiche technique', s_data: 'Données utilisées', s_conf: 'Confiance',
       s_miss: 'Informations manquantes', s_act: 'Actions', s_llm: 'Formulation (modèle de langage)',
       q1: 'Quelles techniques japonaises pourraient marcher ici ?', q2: 'Comment adapter les jessour à cette parcelle ?', q3: "Quelles sont les contraintes en eau ?",
-      q4: "L'agrivoltaïsme peut-il convenir ici ?", q5: 'Pourquoi GAIA a-t-il écarté les terrasses japonaises ?', q6: 'Explique la recommandation en arabe.', q7: 'Quelles informations manquent ?',
+      q4: "L'agrivoltaïsme peut-il convenir ici ?", q5: 'Pourquoi GAIA a-t-il écarté les terrasses japonaises ?', q6: 'Explique la recommandation en arabe.', q7: 'Quelles informations manquent ?', q0: 'Comment gagner plus avec cette parcelle ?',
       k_rain: 'Pluie', k_slope: 'Pente', k_water: 'Eau', k_crop: 'Culture', k_ghi: 'Soleil',
       insufficient: 'Preuves insuffisantes', insufficient_p: "Je n'ai pas de fiche ni de donnée qui permette de répondre à cette question sans inventer. Essayez une des questions proposées, ou ajoutez la technique à la bibliothèque.",
       none_missing: 'Aucune information essentielle ne manque.',
@@ -31,10 +41,18 @@
       ctx: 'سياق القطعة', ask: 'أسئلة مقترحة', ph: 'اطرح سؤالك عن هذه القطعة…', send: 'إرسال',
       mode_rules: 'الإجابات مركّبة من البطاقات وملف القطعة (أسئلة حرة بالعربية أو الفرنسية أو الإنجليزية). لا يوجد نموذج لغوي متصل.',
       mode_llm: 'صياغة بنموذج لغوي اعتماداً على البطاقات المسترجعة فقط، مع التحقق من الأرقام.',
+      mode_none: 'لا يوجد نموذج لغوي متصل: الإجابات مركّبة من البطاقات وملف القطعة.',
+      mode_srv: 'إجابات يكتبها نموذج لغوي ({m}) عبر خادم غايا، اعتماداً على البطاقات وقطعتك، مع التحقق من الأرقام.',
+      mode_br: 'إجابات يكتبها نموذج مجاني يعمل داخل متصفحك ({m})؛ لا تغادر أي بيانات جهازك؛ مع التحقق من الأرقام.',
+      btn_load: 'تفعيل النموذج المجاني (داخل المتصفح، حوالي 1 جيغا، مرة واحدة)', loading: 'جارٍ تنزيل النموذج…',
+      no_webgpu: 'هذا المتصفح لا يدعم WebGPU (جرّب Chrome أو Edge حديثاً). خيارات مجانية أخرى: Ollama على هذا الحاسوب أو مفتاح Groq مجاني (انظر backend/README.md).',
+      load_fail: 'تعذر تحميل النموذج (ذاكرة الرسوميات غير كافية أو لا يوجد اتصال). الإجابات من البطاقات تبقى متاحة.',
+      checking: 'البحث عن نموذج لغوي…', recheck: 'تحقق مجدداً',
+      unv_note: 'الأرقام المظللة غير موجودة في بيانات غايا: يجب التحقق منها.', details: 'المصادر والبيانات ودرجة الثقة', thinking: 'غايا يفكر…',
       s_reco: 'التوصية', s_expl: 'الشرح', s_rec: 'البطاقة التقنية', s_data: 'البيانات المستعملة', s_conf: 'درجة الثقة',
       s_miss: 'معلومات ناقصة', s_act: 'الخطوات', s_llm: 'الصياغة (نموذج لغوي)',
       q1: 'ما التقنيات اليابانية التي قد تنجح هنا؟', q2: 'كيف أكيّف الجسور مع هذه القطعة؟', q3: 'ما هي قيود الماء؟',
-      q4: 'هل تناسب الزراعة الضوئية هذه القطعة؟', q5: 'لماذا استبعدت غايا المدرجات اليابانية؟', q6: 'اشرح التوصية بالعربية.', q7: 'ما المعلومات الناقصة؟',
+      q4: 'هل تناسب الزراعة الضوئية هذه القطعة؟', q5: 'لماذا استبعدت غايا المدرجات اليابانية؟', q6: 'اشرح التوصية بالعربية.', q7: 'ما المعلومات الناقصة؟', q0: 'كيف أربح أكثر من هذه القطعة؟',
       k_rain: 'الأمطار', k_slope: 'الانحدار', k_water: 'الماء', k_crop: 'الزراعة', k_ghi: 'الشمس',
       insufficient: 'أدلة غير كافية', insufficient_p: 'لا توجد بطاقة ولا بيانات تسمح بالإجابة عن هذا السؤال دون اختلاق. جرّب أحد الأسئلة المقترحة.',
       none_missing: 'لا تنقص أي معلومة أساسية.',
@@ -46,10 +64,18 @@
       ctx: 'Plot context', ask: 'Suggested questions', ph: 'Ask your question about this plot…', send: 'Send',
       mode_rules: 'Answers composed from the records and the plot profile (free questions in English, French, Arabic or Japanese). No language model is connected: see backend/README.md to enable Claude.',
       mode_llm: 'Wording by a language model, from the retrieved records only; figures checked.',
+      mode_none: 'No language model connected: answers composed from the records and the plot profile.',
+      mode_srv: 'Answers written by a language model ({m}) through the GAIA server, from the records and your plot; figures checked.',
+      mode_br: 'Answers written by a free model running in your browser ({m}); no data leaves your device; figures checked.',
+      btn_load: 'Turn on the free model (in the browser, about 1 GB, once)', loading: 'Downloading the model…',
+      no_webgpu: 'This browser does not support WebGPU (try a recent Chrome or Edge). Other free options: Ollama on this computer, or a free Groq key (see backend/README.md).',
+      load_fail: 'The model could not be loaded (not enough graphics memory, or offline). Record-based answers still work.',
+      checking: 'Looking for a language model…', recheck: 'Check again',
+      unv_note: 'Highlighted figures are not in GAIA’s data: check them.', details: 'Sources, data and confidence', thinking: 'GAIA is thinking…',
       s_reco: 'Recommendation', s_expl: 'Explanation', s_rec: 'Technical record', s_data: 'Data used', s_conf: 'Confidence',
       s_miss: 'Missing information', s_act: 'Actions', s_llm: 'Wording (language model)',
       q1: 'Which Japanese practices could work here?', q2: 'How can jessour be adapted to this plot?', q3: 'What are the water constraints?',
-      q4: 'Could agrivoltaics fit here?', q5: 'Why did GAIA rule out the Japanese terraces?', q6: 'Explain the recommendation in Arabic.', q7: 'What information is missing?',
+      q4: 'Could agrivoltaics fit here?', q5: 'Why did GAIA rule out the Japanese terraces?', q6: 'Explain the recommendation in Arabic.', q7: 'What information is missing?', q0: 'How can I earn more from this plot?',
       k_rain: 'Rainfall', k_slope: 'Slope', k_water: 'Water', k_crop: 'Crop', k_ghi: 'Sun',
       insufficient: 'Not enough evidence', insufficient_p: 'I have no record or data that lets me answer this question without inventing. Try one of the suggested questions, or add the practice to the library.',
       none_missing: 'No essential information is missing.',
@@ -61,10 +87,18 @@
       ctx: '区画の状況', ask: '質問の例', ph: 'この区画について質問してください…', send: '送信',
       mode_rules: '回答は記録と区画プロファイルから構成します（日本語・英語・フランス語・アラビア語で自由に質問できます）。言語モデルは接続されていません。Claudeを有効にするにはbackend/README.mdを参照してください。',
       mode_llm: '取得した記録のみをもとに言語モデルが文章化。数値は検証済み。',
+      mode_none: '言語モデルは接続されていません。記録と区画プロファイルから回答を構成します。',
+      mode_srv: 'GAIAサーバー経由で言語モデル（{m}）が記録とあなたの区画をもとに回答します。数値は検証済み。',
+      mode_br: 'ブラウザ内で動く無料モデル（{m}）が回答します。データは端末の外に出ません。数値は検証済み。',
+      btn_load: '無料モデルを有効にする（ブラウザ内、約1GB、初回のみ）', loading: 'モデルをダウンロード中…',
+      no_webgpu: 'このブラウザはWebGPUに対応していません（最新のChromeかEdgeをお試しください）。他の無料の方法：このPCでOllama、または無料のGroqキー（backend/README.md参照）。',
+      load_fail: 'モデルを読み込めませんでした（GPUメモリ不足またはオフライン）。記録による回答は引き続き使えます。',
+      checking: '言語モデルを探しています…', recheck: '再確認',
+      unv_note: '強調表示の数値はGAIAのデータにありません。確認してください。', details: '出典・データ・信頼度', thinking: 'GAIAが考えています…',
       s_reco: '推奨', s_expl: '説明', s_rec: '技術記録', s_data: '使用したデータ', s_conf: '信頼度',
       s_miss: '欠けている情報', s_act: '行動', s_llm: '文章化（言語モデル）',
       q1: 'ここで使えそうな日本の技術は？', q2: 'ジェスールをこの区画に合わせるには？', q3: 'この区画の水の制約は？',
-      q4: '営農型太陽光はここに向いていますか？', q5: 'GAIAはなぜ日本の棚田を除外したのですか？', q6: 'おすすめをアラビア語で説明して。', q7: '足りない情報は？',
+      q4: '営農型太陽光はここに向いていますか？', q5: 'GAIAはなぜ日本の棚田を除外したのですか？', q6: 'おすすめをアラビア語で説明して。', q7: '足りない情報は？', q0: 'この区画でもっと稼ぐには？',
       k_rain: '降水量', k_slope: '傾斜', k_water: '水', k_crop: '作物', k_ghi: '日射',
       insufficient: '根拠不足', insufficient_p: '推測せずにこの質問に答えられる記録やデータがありません。質問の例を試すか、ライブラリに技術を追加してください。',
       none_missing: '欠けている重要な情報はありません。',
@@ -94,6 +128,12 @@
     if (/arabe|arabic|عرب|アラビア/i.test(q)) return { kind: 'arabic' };
     if (/manqu|missing|ناقص|نقص|足りな|不足|欠け/i.test(q)) return { kind: 'missing' };
     if (/pourquoi|why|rejet|écart|ecart|refus|ruled out|لماذا|استبعد|なぜ|どうして|理由|除外/i.test(q)) return { kind: 'why', rec: rec };
+    var crop = cropIn(q);
+    if (!namedRecord(q) && HEALTH.test(q)) return { kind: 'health', crop: crop, q: q0 };
+    // a short follow-up that only names another crop ("not olives but peach") keeps the previous question
+    if (crop && lastIntent && an.tokens.length <= 5 && !GOAL.test(q) && ['health', 'goal'].indexOf(lastIntent.kind) !== -1)
+      return Object.assign({}, lastIntent, { crop: crop, followUp: true });
+    if (!rec && GOAL.test(q)) return { kind: 'goal', an: an, crop: crop };
     if (an.facets.length) return { kind: 'facet', facets: an.facets, rec: rec, an: an };
     if (/agrivolta|solar sharing|panneau|ضوئي|営農型|ソーラー/i.test(q)) return { kind: 'record', rec: 'jp-solar-sharing' };
     if (/adapt|كيّف|كيف أكيف|تكييف|合わせ|調整/i.test(q) && rec) return { kind: 'record', rec: rec };
@@ -104,8 +144,47 @@
     if (/\b(eau|water|irrigation)\b|ماء|مياه|سقي|\bالري\b|水|灌漑/i.test(q) && !an.parcelTopics.filter(function (k) { return k !== 'water' && k !== 'et0' && k !== 'rain'; }).length) return { kind: 'water' };
     if (an.parcelTopics.length) return { kind: 'facts', an: an };
     if (an.hits.length && an.hits[0].score >= 2) return { kind: 'search', an: an };
+    // a greeting, a test or a one- or two-word message is not off-topic: show the plot overview and what to ask
+    if (an.tokens.length <= 2 || /^\s*(test|hi|hello|hey|salut|bonjour|merci|thanks|مرحبا|سلام|السلام|こんにちは|テスト)\b/i.test(q0)) return { kind: 'overview' };
     return { kind: 'unknown', an: an };
   }
+  // plant health and disease prevention
+  var HEALTH = new RegExp(['health', 'healthy', 'disease', 'sick', 'pest', 'insect', 'fung', 'mildew', 'blight', 'rot\\b', 'infect', 'leaf spot', '\\bspots?\\b', 'spotted', 'lesion', 'yellow', 'wilt', 'blotch', 'scab', 'canker', 'mould', 'mold', 'rust\\b', 'leaves? (are|turn|have|show)', 'leafs?\\b.*(dark|brown|black|spot|hole|curl|dry)',
+    'sant[eé]', 'maladi', 'malade', 'ravageur', 'insecte', 'champignon', 'parasite', 'jaunis', 'traitement', 'tache', 'l[eé]sion', 'pourri', 'rouille', 'feuilles? (qui|sont|ont|se)',
+    'صحة', 'صحه', 'مرض', 'أمراض', 'امراض', 'آفة', 'آفات', 'افات', 'حشر', 'فطر', 'اصفرار', 'بقع', 'تبقع', 'تعفن', 'ذبول',
+    '病気', '病害', '害虫', '健康', 'カビ', '害', '斑点', '枯れ', 'しおれ'].join('|'), 'i');
+  // crops a farmer may name, in the profile's keys where GAIA has them (others keep their own key)
+  var CROP_WORDS = [
+    ['olive', /olive|olivier|زيتون|オリーブ/i], ['palm', /date palm|palm|dattier|palmier|datte|نخيل|نخل|تمر|ナツメヤシ/i],
+    ['citrus', /citrus|orange|lemon|mandarin|agrume|citron|قوارص|برتقال|ليمون|柑橘|みかん|オレンジ|レモン/i],
+    ['potato', /potato|pomme de terre|patate|بطاطا|بطاطس|ジャガイモ|じゃがいも/i], ['tomato', /tomato|tomate|طماطم|بندورة|トマト/i],
+    ['pepper', /pepper|poivron|piment|فلفل|ピーマン|唐辛子/i], ['grape', /grape|vine|vigne|raisin|عنب|كرم|ブドウ|葡萄/i],
+    ['peach', /peach|p[eê]che|pêcher|خوخ|دراق|モモ|桃/i], ['apple', /apple|pommier|\bpommes?\b(?! de terre)|تفاح|リンゴ|りんご/i],
+    ['almond', /almond|amande|لوز|アーモンド/i], ['fig', /\bfigs?\b|figue|figuier|تين|イチジク/i], ['pomegranate', /pomegranate|grenad|رمان|ザクロ/i],
+    ['cereal', /cereal|wheat|barley|c[eé]r[eé]ale|bl[eé]\b|orge|حبوب|قمح|شعير|小麦|大麦|穀物/i], ['veg', /vegetable|l[eé]gume|maraîch|خضر|野菜/i]
+  ];
+  // the crop named last wins: "not olives but peach" → peach
+  function cropIn(q) {
+    var best = null, at = -1;
+    CROP_WORDS.forEach(function (c) { var m = q.search(c[1]); if (m > at) { at = m; best = c[0]; } });
+    return best;
+  }
+  var CROP_NAME = {
+    fr: { olive: 'olivier', palm: 'palmier dattier', citrus: 'agrumes', potato: 'pomme de terre', tomato: 'tomate', pepper: 'poivron', grape: 'vigne', peach: 'pêcher', apple: 'pommier', almond: 'amandier', fig: 'figuier', pomegranate: 'grenadier', cereal: 'céréales', veg: 'maraîchage', other: 'autre culture' },
+    ar: { olive: 'الزيتون', palm: 'النخيل', citrus: 'القوارص', potato: 'البطاطا', tomato: 'الطماطم', pepper: 'الفلفل', grape: 'العنب', peach: 'الخوخ', apple: 'التفاح', almond: 'اللوز', fig: 'التين', pomegranate: 'الرمان', cereal: 'الحبوب', veg: 'الخضر', other: 'زراعة أخرى' },
+    en: { olive: 'olive', palm: 'date palm', citrus: 'citrus', potato: 'potato', tomato: 'tomato', pepper: 'pepper', grape: 'grape', peach: 'peach', apple: 'apple', almond: 'almond', fig: 'fig', pomegranate: 'pomegranate', cereal: 'cereals', veg: 'vegetables', other: 'other crop' },
+    ja: { olive: 'オリーブ', palm: 'ナツメヤシ', citrus: '柑橘', potato: 'ジャガイモ', tomato: 'トマト', pepper: 'ピーマン', grape: 'ブドウ', peach: 'モモ', apple: 'リンゴ', almond: 'アーモンド', fig: 'イチジク', pomegranate: 'ザクロ', cereal: '穀物', veg: '野菜', other: 'その他の作物' }
+  };
+  // the plant-health model's plants and diseases, read from its manifest (no fixed list)
+  var VISION = null;
+  try { fetch(G.CONFIG.visionManifest, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) { VISION = m; }).catch(function () {}); } catch (e) { /* no model */ }
+
+  // broad goal questions: earn more, produce more, improve the farm, what to do
+  var GOAL = new RegExp(['gain', 'income', 'revenue', 'profit', 'earn', 'money', 'yield', 'productiv', 'improve', 'increase', 'boost', 'make more', 'more from',
+    'what (should|can|could) i do', 'advice', 'help me', 'grow more', 'better harvest',
+    'revenu', 'gagner', 'b[eé]n[eé]fice', 'rendement', 'am[eé]liorer', 'augmenter', 'rentab', 'que (dois|puis|peux)[- ]je faire', 'produire plus', 'récolte', 'recolte',
+    'ربح', 'أرباح', 'ارباح', 'دخل', 'مدخول', 'مردود', 'إنتاج', 'انتاج', 'تحسين', 'زيادة', 'زياده', 'ماذا (أفعل|افعل)', 'نصيحة', 'نصيحه',
+    '収入', '収益', '利益', '収量', '増や', '改善', '儲', '何をすれば', '生産性', 'もうけ'].join('|'), 'i');
 
   /* ---------------------------------------------------------- evidence helpers */
   // W(L, { fr, ar, en, ja }): the answer's wording in its language (French when missing)
@@ -144,6 +223,19 @@
     var paths = {};
     results.forEach(function (r) { r.unknown.forEach(function (x) { paths[x.cond.field] = 1; }); });
     return Object.keys(paths).map(function (p) { return noteOf(dna, p); });
+  }
+
+  // annual rain, ET0 and the crop's net irrigation need (FAO-56 Kc, USDA-SCS effective rain), from the plot's monthly climate
+  var NEXUS_CROP = { tomato: 'veg', potato: 'veg', pepper: 'veg' };
+  function waterBalance(dna, cropOver) {
+    var rain = D.value(dna, 'climate.rain_mm'), et0 = D.value(dna, 'climate.et0_mm');
+    if (rain === null || et0 === null) return null;
+    var out = { rain: rain, et0: et0, irn: null }, N = window.GAIA_NEXUS, CM = dna.climateMonthly, crop = cropOver ? (NEXUS_CROP[cropOver] || cropOver) : D.value(dna, 'crop');
+    if (N && CM && CM.et0 && CM.rain && crop && N.CROPS[crop] && N.CROPS[crop].kc) {
+      var r = N.compute({ et0: CM.et0, rain: CM.rain, kc: N.CROPS[crop].kc, months: N.CROPS[crop].months, ea: 1, pump_eff: 0.45, pr: 0.75 });
+      if (r.totals && typeof r.totals.irn === 'number') out.irn = r.totals.irn;
+    }
+    return out;
   }
 
   /* ---------------------------------------------------------- answer builders */
@@ -333,6 +425,133 @@
       a.data = dataUsed(dna, top3[0].checks.map(function (x) { return x.cond.field; }));
     }
 
+    else if (intent.kind === 'health') {
+      var hc = intent.crop || D.value(dna, 'crop'), cn = (CROP_NAME[L] || CROP_NAME.fr)[hc] || hc, dt = L === 'ja' ? '。' : '.';
+      var known = VISION && VISION.stage2 && hc && VISION.stage2[hc] ? VISION.stage2[hc].classes.filter(function (c) { return c !== 'healthy'; }) : null;
+      a.title = W(L, { fr: 'Garder les arbres et les cultures en bonne santé', ar: 'الحفاظ على صحة الأشجار والزراعات', en: 'Keeping trees and crops healthy', ja: '木と作物を健康に保つには' }) + (hc ? ' — ' + cn : '');
+      a.reco = W(L, {
+        fr: 'Prévenir plutôt que traiter : observer souvent, garder un feuillage aéré et sec, éviter le stress hydrique, et faire confirmer tout symptôme par un technicien avant un traitement.',
+        ar: 'الوقاية خير من العلاج: راقب باستمرار، حافظ على أوراق مهوّاة وجافة، تجنّب العطش، واطلب من تقني تأكيد أي عرض قبل أي معالجة.',
+        en: 'Prevent rather than treat: inspect often, keep the foliage airy and dry, avoid water stress, and have any symptom confirmed by a technician before any treatment.',
+        ja: '治療より予防：こまめに観察し、葉の風通しを良く乾いた状態に保ち、水ストレスを避け、症状は処置の前に技術者に確認してもらいましょう。'
+      });
+      a.expl = W(L, {
+        fr: ['Observer chaque semaine au printemps et après les pluies : dessus et dessous des feuilles, rameaux, fruits. Photographier une feuille douteuse dans Santé des plantes.',
+          'Tailler pour aérer le centre de l’arbre ; enlever et détruire bois mort, feuilles et fruits malades (hygiène du verger).',
+          'Arroser au pied (goutte-à-goutte), sans mouiller le feuillage ; ni manque ni excès d’eau : un arbre stressé tombe plus vite malade.',
+          'Nourrir le sol : paillage et matière organique, fumure équilibrée, sans excès d’azote qui attire pucerons et maladies.',
+          'Favoriser les auxiliaires : haies et bandes fleuries (inspiration satoyama), pièges de surveillance plutôt que traitements systématiques (lutte intégrée).'],
+        ar: ['راقب كل أسبوع في الربيع وبعد الأمطار: وجه الأوراق وظهرها، الأغصان، الثمار. صوّر أي ورقة مشكوك فيها في صفحة صحة النباتات.',
+          'قلّم لتهوية وسط الشجرة؛ أزل وأتلف الخشب الميت والأوراق والثمار المصابة (نظافة البستان).',
+          'اسقِ عند الجذع (بالتقطير) دون ترطيب الأوراق؛ لا عطش ولا إفراط: الشجرة المجهدة تمرض أسرع.',
+          'غذِّ التربة: تغطية ومادة عضوية وتسميد متوازن دون إفراط في الآزوت الذي يجذب المنّ والأمراض.',
+          'شجّع الحشرات النافعة: سياجات وأشرطة مزهرة، ومصائد للمراقبة بدل المعالجة المنهجية (المكافحة المتكاملة).'],
+        en: ['Inspect every week in spring and after rain: both sides of the leaves, shoots, fruit. Photograph a doubtful leaf in Plant health.',
+          'Prune to open the centre of the tree; remove and destroy dead wood, diseased leaves and fruit (orchard hygiene).',
+          'Water at the foot (drip), without wetting the foliage; neither too little nor too much: a stressed tree gets sick faster.',
+          'Feed the soil: mulch and organic matter, balanced fertiliser, no excess nitrogen (it attracts aphids and disease).',
+          'Encourage natural enemies: hedges and flower strips (satoyama-inspired), monitoring traps rather than routine spraying (integrated pest management).'],
+        ja: ['春と雨の後は毎週観察する：葉の表と裏、新梢、果実。気になる葉は「植物の健康」で撮影する。',
+          '剪定して樹冠の中心に風を通す。枯れ枝や病気の葉・果実は取り除いて処分する（園地の衛生）。',
+          '株元に点滴で水やりし、葉をぬらさない。水不足も過剰も避ける：ストレスを受けた木は病気になりやすい。',
+          '土を養う：マルチングと有機物、バランスのよい施肥。窒素のやりすぎはアブラムシや病気を招く。',
+          '天敵を増やす：生け垣や花の帯（里山の考え方）、定期散布ではなく監視用トラップ（総合的病害虫管理）。']
+      }).slice();
+      var tmx = D.value(dna, 'climate.tmax_hot'), soc = D.value(dna, 'soil.soc');
+      if (tmx !== null && tmx >= 35) a.expl.push(W(L, { fr: 'Sur cette parcelle, l’été est chaud (' + fmt(tmx, 1) + ' °C de max. moyen) : le stress thermique et hydrique affaiblit les arbres en juillet–août.', ar: 'في هذه القطعة الصيف حار (' + fmt(tmx, 1) + ' °م كمعدل أقصى): الإجهاد الحراري والمائي يضعف الأشجار في جويلية وأوت.', en: 'On this plot summers are hot (' + fmt(tmx, 1) + ' °C mean max.): heat and water stress weaken trees in July–August.', ja: 'この区画の夏は暑く（平均最高' + fmt(tmx, 1) + ' °C）、7〜8月の高温と水ストレスが木を弱らせます。' }));
+      if (soc !== null && soc < 15) a.expl.push(W(L, { fr: 'Carbone organique du sol faible (' + fmt(soc) + ' g/kg, valeur régionale) : le paillage et le compost aident le sol et les racines.', ar: 'الكربون العضوي في التربة ضعيف (' + fmt(soc) + ' غ/كغ، قيمة جهوية): التغطية والسماد العضوي يساعدان التربة والجذور.', en: 'Low soil organic carbon (' + fmt(soc) + ' g/kg, regional value): mulch and compost help the soil and roots.', ja: '土壌有機炭素が少ない（' + fmt(soc) + ' g/kg、地域の値）：マルチングと堆肥が土と根を助けます。' }));
+      if (hc) {
+        if (known && known.length) a.expl.push(W(L, { fr: 'Pour ' + cn + ', le modèle de Santé des plantes reconnaît : ', ar: 'بالنسبة لـ' + cn + '، يتعرف نموذج صحة النباتات على: ', en: 'For ' + cn + ', the Plant health model recognises: ', ja: cn + 'について「植物の健康」のモデルが認識できるのは：' }) + known.map(function (c) { return c.replace(/_/g, ' '); }).join(', ') + dt);
+        else a.expl.push(W(L, { fr: 'Culture « ' + cn + ' » : pas encore dans le modèle de Santé des plantes ; la page propose alors l’identification Pl@ntNet, et un technicien doit confirmer.', ar: cn + ' ليس بعد في نموذج صحة النباتات: تقترح الصفحة حينها التعرف عبر Pl@ntNet، ويجب أن يؤكد تقني النتيجة.', en: 'Crop “' + cn + '”: not in the Plant health model yet; the page then offers Pl@ntNet identification, and a technician must confirm.', ja: cn + 'はまだ「植物の健康」のモデルに含まれていません。ページではPl@ntNetによる同定を提案します。結果は技術者に確認してもらってください。' }));
+      }
+      if (/spot|tache|بقع|斑点/i.test(intent.q || '') && ['peach', 'almond', 'apricot', 'cherry', 'plum'].indexOf(hc) !== -1) a.expl.unshift(W(L, {
+        fr: 'Connaissance générale (pas une fiche GAIA) : sur pêcher et amandier, des petites taches sombres qui se dessèchent et laissent des trous évoquent la criblure (Wilsonomyces) ou la bactériose (Xanthomonas arboricola pv. pruni), favorisées par les pluies d’automne et de printemps. À confirmer par un technicien.',
+        ar: 'معرفة عامة (ليست بطاقة غايا): على الخوخ واللوز، البقع الداكنة الصغيرة التي تجف وتترك ثقوباً تشير إلى مرض التثقب (Wilsonomyces) أو التبقع البكتيري (Xanthomonas arboricola pv. pruni)، وتشجعهما أمطار الخريف والربيع. يجب أن يؤكدها تقني.',
+        en: 'General knowledge (not a GAIA record): on peach and almond, small dark spots that dry out and leave holes point to shot-hole disease (Wilsonomyces) or bacterial spot (Xanthomonas arboricola pv. pruni), both favoured by autumn and spring rain. Have a technician confirm.',
+        ja: '一般知識（GAIAの記録ではありません）：モモやアーモンドで、小さな黒い斑点が乾いて穴になる場合は、せん孔病（Wilsonomyces）や細菌性せん孔病（Xanthomonas arboricola pv. pruni）が疑われ、秋と春の雨で広がります。技術者に確認してください。' }));
+      if (intent.followUp) a.expl.unshift(W(L, { fr: 'Réponse reprise pour : ', ar: 'الإجابة معدّلة لـ: ', en: 'Answer adjusted for: ', ja: '次の作物について回答：' }) + cn + dt);
+      a.expl.push(W(L, { fr: 'GAIA ne prescrit aucun produit chimique : pour un traitement, voir le CRDA ou un technicien en protection des végétaux.', ar: 'لا تصف غايا أي مبيد كيميائي: للمعالجة، اتصل بالمندوبية الجهوية للفلاحة أو بتقني في وقاية النباتات.', en: 'GAIA prescribes no chemical product: for a treatment, ask the CRDA or a plant-protection technician.', ja: 'GAIAは化学薬剤を処方しません。処置は地域の農業局（CRDA）や植物防疫の技術者に相談してください。' }));
+      a.actions = W(L, {
+        fr: ['Photographier une feuille suspecte dans Santé des plantes.', 'Tailler et nettoyer le verger avant la saison des pluies.', 'Pailler au pied des arbres (voir la fiche Paillage).'],
+        ar: ['صوّر ورقة مشكوكاً فيها في صفحة صحة النباتات.', 'قلّم ونظّف البستان قبل موسم الأمطار.', 'غطِّ التربة عند جذوع الأشجار (انظر بطاقة التغطية).'],
+        en: ['Photograph a suspicious leaf in Plant health.', 'Prune and clean the orchard before the rainy season.', 'Mulch at the foot of the trees (see the Mulching record).'],
+        ja: ['気になる葉を「植物の健康」で撮影する。', '雨季の前に剪定し、園地をきれいにする。', '木の株元をマルチングする（マルチングの記録を参照）。']
+      });
+      var mrec = get('x-mulch'), srec = get('jp-satoyama-layers');
+      a.records = [mrec, srec].filter(Boolean).map(function (r) { return r.record; });
+      a.results = [mrec, srec].filter(Boolean);
+      a.data = dataUsed(dna, ['climate.tmax_hot', 'soil.soc', 'crop']);
+    }
+
+    else if (intent.kind === 'goal' || intent.kind === 'overview') {
+      var mm = W(L, { fr: ' mm/an', ar: ' mm/سنة', en: ' mm/yr', ja: ' mm/年' }), dot = L === 'ja' ? '。' : '.';
+      var ok = all.filter(function (r) { return r.verdict === 'feasible' || r.verdict === 'adapt'; });
+      var byFam = function (f) { return ok.filter(function (r) { return r.record.families.indexOf(f) !== -1; })[0] || null; };
+      var lbl = function (r) { return nameOf(r.record, L) + ' (' + verdictText(r.verdict, L) + (r.score !== null ? ', ' + fmt(r.score * 100) + ' %' : '') + ')'; };
+      var wb = waterBalance(dna, intent.crop);
+      var crop = intent.crop || D.value(dna, 'crop'), src2 = D.value(dna, 'water.source'), pump = D.value(dna, 'energy.pump'), ghi2 = D.value(dna, 'solar.ghi_kwh'), area = D.value(dna, 'area_ha');
+      var waterRec = ok.filter(function (r) { return r.record.families.indexOf('water') !== -1 && r.verdict === 'feasible'; })[0] || byFam('water');
+      var mulch = ok.filter(function (r) { return r.record.id === 'x-mulch'; })[0] || null;
+      var layers = ok.filter(function (r) { return r.record.id === 'jp-satoyama-layers'; })[0] || null;
+      var solarR = all.filter(function (r) { return r.record.id === 'jp-solar-sharing'; })[0];
+
+      if (intent.kind === 'goal') {
+        a.title = W(L, { fr: 'Comment tirer plus de cette parcelle', ar: 'كيف تحصل على مردود أكبر من هذه القطعة', en: 'How to get more from this plot', ja: 'この区画からもっと収益を上げるには' }) + (intent.crop ? ' — ' + ((CROP_NAME[L] || CROP_NAME.fr)[intent.crop] || intent.crop) : '');
+        var levers = [];
+        if (waterRec) levers.push(W(L, { fr: 'capter plus d’eau de pluie avec ', ar: 'جمع مزيد من مياه الأمطار بـ', en: 'capture more rainwater with ', ja: '雨水をより多く集める（' }) + nameOf(waterRec.record, L) + (L === 'ja' ? '）' : ''));
+        if (mulch) levers.push(W(L, { fr: 'réduire l’évaporation par le paillage', ar: 'تقليل التبخر بالتغطية', en: 'cut evaporation with mulch', ja: 'マルチングで蒸発を減らす' }));
+        if (pump && pump !== 'solar' && ghi2 !== null && ghi2 >= 4.5) levers.push(W(L, { fr: 'remplacer le diesel par le solaire, dans un quota d’eau', ar: 'استبدال الديزل بالطاقة الشمسية ضمن حصة ماء', en: 'replace diesel with solar, within a water quota', ja: '水の割当量の範囲でディーゼルを太陽光に置き換える' }));
+        if (layers) levers.push(W(L, { fr: 'diversifier avec des cultures en étages', ar: 'التنويع بزراعات متعددة الطبقات', en: 'diversify with layered crops', ja: '多層の作付けで多角化する' }));
+        a.reco = levers.length
+          ? W(L, { fr: 'Sur cette parcelle, les leviers appuyés par les données sont : ', ar: 'في هذه القطعة، الروافع المدعومة بالبيانات هي: ', en: 'On this plot, the levers backed by the data are: ', ja: 'この区画でデータに裏付けられた手段は：' }) + levers.join(L === 'ja' ? '、' : L === 'ar' ? '، ' : ', ') + dot
+          : W(L, { fr: 'Aucune technique de la bibliothèque ne remplit ses conditions ici : commencez par compléter le profil de la parcelle.', ar: 'لا توجد تقنية في المكتبة تستوفي شروطها هنا: ابدأ بإكمال ملف القطعة.', en: 'No practice in the library meets its conditions here: start by completing the plot profile.', ja: 'ライブラリのどの技術もここでは条件を満たしません。まず区画プロファイルを補ってください。' });
+        // 1. water: the first limit on yield in a dry climate
+        if (wb) {
+          a.expl.push(W(L, { fr: 'Eau, premier facteur limitant : ', ar: 'الماء، العامل المحدِّد الأول: ', en: 'Water is the first limit: ', ja: '最大の制約は水：' }) +
+            W(L, { fr: 'pluie ', ar: 'الأمطار ', en: 'rainfall ', ja: '降水量 ' }) + fmt(wb.rain) + mm + ', ET0 ' + fmt(wb.et0) + mm +
+            (wb.irn !== null ? W(L, { fr: ' ; besoin net non couvert par la pluie pour ', ar: '؛ الحاجة الصافية غير المغطاة بالمطر لـ', en: '; net need not covered by rain for ', ja: '。雨で賄えない正味の必要水量（' }) + ((CROP_NAME[L] || CROP_NAME.fr)[crop] || E.valueLabel(crop)) + (L === 'ja' ? '）：' : S) + fmt(wb.irn) + ' mm ' + W(L, { fr: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ar: '(≈ ' + fmt(wb.irn * 10) + ' م³/هكتار، FAO-56)', en: '(≈ ' + fmt(wb.irn * 10) + ' m³/ha, FAO-56)', ja: '（約' + fmt(wb.irn * 10) + ' m³/ha、FAO-56）' }) : '') + dot);
+          a.expl.push(W(L, { fr: 'Chaque millimètre capté compte : 1 mm sur 1 ha = 10 m³. La pluie qui tombe sur 1 ha ici représente ' + fmt(wb.rain * 10) + ' m³/an.', ar: 'كل مليمتر يُجمع مهم: 1 مم على هكتار واحد = 10 م³. الأمطار على هكتار واحد هنا تعادل ' + fmt(wb.rain * 10) + ' م³ في السنة.', en: 'Every millimetre captured counts: 1 mm on 1 ha = 10 m³. The rain falling on 1 ha here is ' + fmt(wb.rain * 10) + ' m³/yr.', ja: '集めた1 mmが大切です。1 haで1 mm = 10 m³。ここで1 haに降る雨は年' + fmt(wb.rain * 10) + ' m³です。' }));
+        }
+        if (waterRec) a.expl.push(W(L, { fr: 'Collecte de l’eau : ', ar: 'جمع الماء: ', en: 'Water harvesting: ', ja: '集水：' }) + ok.filter(function (r) { return r.record.families.indexOf('water') !== -1; }).slice(0, 3).map(lbl).join(L === 'ja' ? '、' : ', ') + dot);
+        if (mulch) a.expl.push(W(L, { fr: 'Moins de pertes : ', ar: 'خسائر أقل: ', en: 'Fewer losses: ', ja: '損失を減らす：' }) + lbl(mulch) + W(L, { fr: ' — le paillage réduit l’évaporation du sol nu (FAO-56, chap. 11).', ar: ' — التغطية تقلل تبخر التربة العارية (FAO-56، الفصل 11).', en: ' — mulch reduces bare-soil evaporation (FAO-56, ch. 11).', ja: ' — マルチングは裸地からの蒸発を減らします（FAO-56 第11章）。' }));
+        // 2. energy: the cost line a solar pump can remove
+        if (pump === 'diesel' || pump === 'grid') {
+          a.expl.push(W(L, { fr: 'Énergie : pompage déclaré ', ar: 'الطاقة: الضخ المصرّح به ', en: 'Energy: declared pumping ', ja: 'エネルギー：申告された揚水 ' }) + E.valueLabel(pump) + (ghi2 !== null ? W(L, { fr: ', soleil ' + fmt(ghi2, 1) + ' kWh/m²/j', ar: '، الإشعاع ' + fmt(ghi2, 1) + ' kWh/m²/يوم', en: ', sun ' + fmt(ghi2, 1) + ' kWh/m²/day', ja: '、日射 ' + fmt(ghi2, 1) + ' kWh/m²/日' }) : '') +
+            W(L, { fr: '. Une pompe solaire dimensionnée sur le quota d’eau de la culture supprime la facture de carburant sans pousser au surpompage (page Eau & énergie).', ar: '. مضخة شمسية محسوبة على حصة ماء الزراعة تلغي فاتورة الوقود دون تشجيع الإفراط في الضخ (صفحة الماء والطاقة).', en: '. A solar pump sized to the crop’s water quota removes the fuel bill without encouraging over-pumping (Water & energy page).', ja: '。作物の水割当量に合わせた太陽光ポンプなら、過剰揚水を招かずに燃料費をなくせます（「水とエネルギー」ページ）。' }));
+          if (src2 === 'rainfed') a.expl.push(W(L, { fr: 'Attention : la parcelle est déclarée pluviale ; sans puits ni réseau, une pompe n’a pas d’eau à pomper. Vérifiez ces deux champs.', ar: 'تنبيه: القطعة مصرّح بها بعلية؛ بلا بئر ولا شبكة لا تجد المضخة ماءً. تحقق من هذين الحقلين.', en: 'Note: the plot is declared rainfed; without a well or network a pump has no water to lift. Check these two fields.', ja: '注意：区画は天水と申告されています。井戸も灌漑網もなければポンプでくみ上げる水がありません。この2項目を確認してください。' }));
+        }
+        if (solarR && solarR.verdict !== 'rejected') a.expl.push(W(L, { fr: 'Revenu en plus : ', ar: 'دخل إضافي: ', en: 'Extra income: ', ja: '追加の収入：' }) + lbl(solarR) + W(L, { fr: ' — l’électricité des panneaux au-dessus de la culture, voir Agrivoltaïsme.', ar: ' — كهرباء الألواح فوق الزراعة، انظر صفحة الزراعة الضوئية.', en: ' — electricity from panels above the crop, see Agrivoltaics.', ja: ' — 作物の上のパネルによる電力。「営農型太陽光」を参照。' }));
+        if (layers) a.expl.push(W(L, { fr: 'Diversifier : ', ar: 'التنويع: ', en: 'Diversify: ', ja: '多角化：' }) + lbl(layers) + W(L, { fr: ' — plusieurs productions sur la même surface répartissent le risque d’une mauvaise année.', ar: ' — عدة منتوجات على نفس المساحة توزّع خطر السنة السيئة.', en: ' — several products on the same area spread the risk of a bad year.', ja: ' — 同じ面積で複数の生産を行うと、不作の年のリスクが分散されます。' }));
+        // 3. business model: no price is invented
+        a.expl.push(W(L, { fr: 'Argent : la page Modèle économique calcule si un kit solaire payé à l’usage (PAYG) se rembourse par les économies de carburant, avec vos prix ; GAIA n’invente aucun prix ni rendement.', ar: 'المال: صفحة النموذج الاقتصادي تحسب إن كان طقم شمسي بالدفع حسب الاستعمال يسدَّد من توفير الوقود، بأسعارك أنت؛ غايا لا تخترع أي سعر أو مردود.', en: 'Money: the Business model page calculates whether a pay-as-you-go solar kit pays for itself from fuel savings, with your prices; GAIA does not invent any price or yield.', ja: 'お金：「ビジネスモデル」ページでは、従量課金（PAYG）の太陽光キットが燃料費の節約で回収できるかを、あなたの価格で計算します。GAIAは価格や収量を推測しません。' }));
+        var demo = ['crop', 'area_ha', 'water.source', 'energy.pump'].filter(function (p) { var f = D.fieldAt(dna, p); return f && f.source === 'Valeur de démonstration'; });
+        if (demo.length) a.expl.push(W(L, { fr: 'Valeurs de démonstration à remplacer : ', ar: 'قيم تجريبية يجب تعويضها: ', en: 'Demo values to replace: ', ja: '置き換えるべきデモ値：' }) + demo.map(G.fieldLabel).join(', ') + dot);
+        a.actions = [];
+        if (waterRec && waterRec.record.actions[0]) a.actions.push(nameOf(waterRec.record, L) + S + waterRec.record.actions[0]);
+        a.actions = a.actions.concat(W(L, {
+          fr: ['Calculer le besoin en eau mensuel et le quota dans Eau & énergie.', 'Saisir votre facture de carburant et le prix d’un kit dans Modèle économique.'],
+          ar: ['احسب الحاجة الشهرية للماء والحصة في صفحة الماء والطاقة.', 'أدخل فاتورة الوقود وسعر الطقم في صفحة النموذج الاقتصادي.'],
+          en: ['Calculate the monthly water need and quota in Water & energy.', 'Enter your fuel bill and a kit price in Business model.'],
+          ja: ['「水とエネルギー」で月ごとの必要水量と割当量を計算する。', '「ビジネスモデル」に燃料費とキット価格を入力する。']
+        }));
+        a.records = [waterRec, mulch, solarR && solarR.verdict !== 'rejected' ? solarR : null, layers].filter(Boolean).map(function (r) { return r.record; });
+        a.results = [waterRec, mulch, layers].filter(Boolean);
+        a.data = dataUsed(dna, ['climate.rain_mm', 'climate.et0_mm', 'terrain.slope_pct', 'solar.ghi_kwh', 'crop', 'water.source', 'energy.pump']);
+      } else {
+        var count = function (v) { return all.filter(function (r) { return r.verdict === v; }).length; };
+        a.title = W(L, { fr: 'Votre parcelle en bref', ar: 'قطعتك باختصار', en: 'Your plot at a glance', ja: '区画の概要' });
+        a.reco = ok.length ? W(L, { fr: 'Technique la mieux adaptée : ', ar: 'أنسب تقنية: ', en: 'Best-suited practice: ', ja: '最も適した技術：' }) + lbl(ok[0]) + dot
+          : W(L, { fr: 'Aucune technique retenue pour l’instant.', ar: 'لا توجد تقنية مناسبة حالياً.', en: 'No practice retained for now.', ja: '現時点で該当する技術はありません。' });
+        a.expl.push(W(L, { fr: count('feasible') + ' faisables, ' + count('adapt') + ' avec adaptation, ' + count('rejected') + ' non recommandées.', ar: count('feasible') + ' ممكنة، ' + count('adapt') + ' مع التكييف، ' + count('rejected') + ' غير موصى بها.', en: count('feasible') + ' feasible, ' + count('adapt') + ' with adaptation, ' + count('rejected') + ' not recommended.', ja: '実施可能 ' + count('feasible') + '、調整すれば可能 ' + count('adapt') + '、推奨しない ' + count('rejected') + '。' }));
+        if (wb) a.expl.push(W(L, { fr: 'Pluie ', ar: 'الأمطار ', en: 'Rainfall ', ja: '降水量 ' }) + fmt(wb.rain) + mm + ', ET0 ' + fmt(wb.et0) + mm + (wb.irn !== null ? W(L, { fr: ', besoin net non couvert ', ar: '، حاجة صافية غير مغطاة ', en: ', net need not covered ', ja: '、雨で賄えない正味の必要水量 ' }) + fmt(wb.irn) + ' mm' : '') + dot);
+        a.expl.push(W(L, { fr: 'Vous pouvez demander par exemple : « Comment gagner plus avec cette parcelle ? », « Quelles sont les contraintes en eau ? », « Combien coûtent les jessour ? », « Quelles informations manquent ? »', ar: 'يمكنك أن تسأل مثلاً: «كيف أربح أكثر من هذه القطعة؟»، «ما هي قيود الماء؟»، «كم تكلف الجسور؟»، «ما المعلومات الناقصة؟»', en: 'You can ask, for example: “How can I earn more from this plot?”, “What are the water constraints?”, “How much do jessour cost?”, “What information is missing?”', ja: '例えば次のように質問できます：「この区画でもっと稼ぐには？」「水の制約は？」「ジェスールの費用は？」「足りない情報は？」' }));
+        a.records = ok.slice(0, 3).map(function (r) { return r.record; });
+        a.results = ok.slice(0, 3);
+        a.actions = ok.length ? ok[0].record.actions.slice() : [];
+        a.data = dataUsed(dna, ['climate.rain_mm', 'climate.et0_mm', 'terrain.slope_pct', 'water.source', 'crop']);
+      }
+    }
+
     else return insufficient(L);
 
     var res = a.results || [];
@@ -346,10 +565,10 @@
       title: W(L, { fr: 'Preuves insuffisantes', ar: 'أدلة غير كافية', en: 'Not enough evidence', ja: '根拠不足' }),
       reco: W(L, { fr: 'GAIA ne peut pas répondre sans inventer.', ar: 'لا أستطيع الإجابة دون اختلاق.', en: 'GAIA cannot answer without inventing.', ja: 'GAIAは推測で答えることはしません。' }),
       expl: [W(L, {
-        fr: "Aucune fiche ni donnée de la parcelle ne couvre cette question. GAIA sait répondre sur : le sol, la pluie, la pente, le soleil, le pompage, la surface, et le coût, les risques, les acteurs ou les étapes d'une technique (jessour, tabia, meskat, oasis, citerne, paillage, tanada, solar sharing…).",
-        ar: 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. يمكنك السؤال عن: التربة، الأمطار، الانحدار، الشمس، الضخ، تكلفة أو مخاطر تقنية (الجسور، الطابية، المسقاة، الواحة…).',
-        en: 'No record and no plot data cover this question. GAIA can answer about: soil, rainfall, slope, sun, pumping, area, and the cost, risks, actors or steps of a practice (jessour, tabia, meskat, oasis, cistern, mulching, tanada, solar sharing…).',
-        ja: 'この質問に対応する記録も区画データもありません。GAIAが答えられるのは、土壌・降水量・傾斜・日射・揚水・面積と、各技術（ジェスール、タビア、メスカット、オアシス、貯水槽、マルチング、棚田、ソーラーシェアリングなど）のコスト・リスク・関係者・手順です。'
+        fr: "Aucune fiche ni donnée de la parcelle ne couvre cette question. GAIA sait répondre sur : comment gagner plus ou quoi faire sur la parcelle, le sol, la pluie, la pente, le soleil, le pompage, la surface, et le coût, les risques, les acteurs ou les étapes d'une technique (jessour, tabia, meskat, oasis, citerne, paillage, tanada, solar sharing…).",
+        ar: 'لا توجد بطاقة ولا بيانات تخص هذا السؤال. يمكنك السؤال عن: كيف تربح أكثر أو ماذا تفعل في القطعة، التربة، الأمطار، الانحدار، الشمس، الضخ، تكلفة أو مخاطر تقنية (الجسور، الطابية، المسقاة، الواحة…).',
+        en: 'No record and no plot data cover this question. GAIA can answer about: how to earn more or what to do on the plot, soil, rainfall, slope, sun, pumping, area, and the cost, risks, actors or steps of a practice (jessour, tabia, meskat, oasis, cistern, mulching, tanada, solar sharing…).',
+        ja: 'この質問に対応する記録も区画データもありません。GAIAが答えられるのは、収益を上げる方法や区画でやるべきこと、土壌・降水量・傾斜・日射・揚水・面積と、各技術（ジェスール、タビア、メスカット、オアシス、貯水槽、マルチング、棚田、ソーラーシェアリングなど）のコスト・リスク・関係者・手順です。'
       })],
       records: [], data: [], actions: [], missing: [], conf: { level: 'low', why: W(L, { fr: 'aucune preuve', ar: 'لا توجد أدلة', en: 'no evidence', ja: '根拠なし' }) }, lang: L, insufficient: true };
   }
@@ -380,28 +599,62 @@
     return box;
   }
 
-  /* ---------------------------------------------------------- optional LLM */
-  function withLLM(q, a, dna, holder) {
-    var ep = G.CONFIG.assistantEndpoint; if (!ep) return;
+  /* ---------------------------------------------------------- language model (js/lab-llm.js) */
+  var LLM = window.GAIA_LLM, history = [];
+  function llmOn() { var m = LLM && LLM.state().mode; return m === 'server' || m === 'browser'; }
+  function withLLM(q, a, dna, card, details) {
     var prof = {};
     D.walk(dna).forEach(function (x) { if (x.f && x.f.status === 'ok' && x.f.value !== null && typeof x.f.value !== 'object') prof[x.path] = { value: x.f.value, unit: x.f.unit || null, source: x.f.source || null, confidence: x.f.confidence || null }; });
     var recs = a.records.length ? a.records : KB.records; // nothing retrieved: let the model look at every record, and say so if none applies
     var verdicts = E.evaluateAll(dna).map(function (r) { return { id: r.record.id, verdict: r.verdict, score: r.score }; });
-    var payload = { question: q, lang: R.lang(q) === 'en' ? 'en' : a.lang, answer: { title: a.title, reco: a.reco, expl: a.expl, actions: a.actions, missing: a.missing, insufficient: !!a.insufficient }, profile: prof, verdicts: verdicts, records: recs };
-    var wait = el('p', { class: 'small muted', style: 'margin-top:10px' }, [el('span', { class: 'gp-spin' }), ' …']);
-    holder.appendChild(wait);
-    fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    var lang = R.lang(q) === 'en' ? 'en' : a.lang;
+    var payload = { question: q, lang: lang, answer: { title: a.title, reco: a.reco, expl: a.expl, actions: a.actions, missing: a.missing, insufficient: !!a.insufficient }, profile: prof, verdicts: verdicts, records: recs, history: history.slice(-4) };
+    var turn = { q: q, a: a.reco + ' ' + a.expl.slice(0, 3).join(' ') };
+    history.push(turn);
+    var box = el('div', { class: 'llm' }, [el('p', { class: 'small muted' }, [el('span', { class: 'gp-spin' }), ' ', t('thinking')])]);
+    card.insertBefore(box, card.firstChild);
+    var evidence = JSON.stringify(Object.assign({}, payload, { history: [] })); // a figure the model said earlier is not evidence
+    function show(text, final, who) {
+      G.clear(box);
+      var bad = final ? LLM.unverified(text, evidence) : [];
+      box.appendChild(LLM.render(text, bad));
+      if (final) {
+        box.appendChild(el('p', { class: 'small muted', style: 'margin-top:6px' }, [G.pill('live', 'LLM'), ' ', who]));
+        if (bad.length) box.appendChild(G.note('info', t('unv_note')));
+      }
+    }
+    LLM.ask(payload, function (partial) { show(partial, false); })
       .then(function (res) {
-        wait.remove();
-        var text = String(res.text || '');
-        if (!text) { holder.appendChild(G.note('info', t('llm_err'))); return; }
-        var evidence = JSON.stringify(payload);
-        var nums = text.match(/\d+(?:[.,]\d+)?/g) || [];
-        var bad = nums.filter(function (n) { return evidence.indexOf(n.replace(',', '.')) === -1 && evidence.indexOf(n) === -1; });
-        holder.appendChild(bad.length ? G.note('err', t('llm_block')) : el('div', { class: 'sec' }, [el('h4', null, [t('s_llm')]), el('p', null, [text])]));
+        var text = String(res.text || '').trim();
+        if (!text) throw new Error('empty');
+        show(text, true, res.provider === 'browser' ? 'Qwen2.5 1.5B · WebGPU' : (res.provider || '') + (res.model ? ' · ' + res.model : ''));
+        turn.a = text;
       })
-      .catch(function () { wait.remove(); holder.appendChild(G.note('info', t('llm_err'))); });
+      .catch(function () { G.clear(box); box.appendChild(G.note('info', t('llm_err'))); details.open = true; });
+  }
+
+  function modeLine() {
+    var st = LLM ? LLM.state() : { mode: 'none' }, kids;
+    var fill = function (k) { return t(k).replace('{m}', LLM.label()); };
+    if (st.mode === 'server') kids = [G.pill('live', 'LLM · ' + LLM.label()), fill('mode_srv')];
+    else if (st.mode === 'browser') kids = [G.pill('live', 'LLM · ' + LLM.label()), fill('mode_br')];
+    else if (st.loading) {
+      var bar = el('progress', { max: '1', value: String(st.loading.p || 0), style: 'width:140px' });
+      kids = [G.pill('plan', 'LLM'), t('loading') + ' ' + fmt((st.loading.p || 0) * 100) + ' %', bar];
+    } else if (st.checking) kids = [el('span', { class: 'gp-spin' }), t('checking')];
+    else {
+      kids = [G.pill('plan', 'LLM · off'), t('mode_none')];
+      if (st.error === 'no_webgpu') kids.push(el('span', null, [t('no_webgpu')]));
+      else if (st.error === 'load_failed') kids.push(el('span', null, [t('load_fail')]));
+      if (LLM && LLM.webgpu() && st.error !== 'load_failed') kids.push(el('button', { type: 'button', class: 'gp-btn', onclick: function () { LLM.loadBrowser(); } }, [t('btn_load')]));
+      else if (LLM && !LLM.webgpu() && st.error !== 'no_webgpu') kids.push(el('span', null, [t('no_webgpu')]));
+      if (LLM) kids.push(el('button', { type: 'button', class: 'gp-btn ghost', onclick: function () { LLM.recheck(); } }, [t('recheck')]));
+    }
+    return el('div', { class: 'mode', id: 'llm-mode' }, kids);
+  }
+  if (LLM) {
+    LLM.on(function () { var m = document.getElementById('llm-mode'); if (m) m.replaceWith(modeLine()); });
+    LLM.start();
   }
 
   /* ---------------------------------------------------------- page */
@@ -414,8 +667,17 @@
     var threadBox = document.getElementById('thread');
     threadBox.appendChild(el('div', { class: 'q' }, [q]));
     var card = renderAnswer(a);
-    threadBox.appendChild(card);
-    withLLM(q, a, p.dna, card);
+    if (llmOn()) {
+      // the model's answer goes first; the rule-based sections stay one click away
+      var details = el('details', { class: 'rules' }, [el('summary', null, [t('details')])]);
+      while (card.firstChild) details.appendChild(card.firstChild);
+      card.appendChild(details);
+      threadBox.appendChild(card);
+      withLLM(q, a, p.dna, card, details);
+    } else {
+      threadBox.appendChild(card);
+      history.push({ q: q, a: a.reco });
+    }
     card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -438,7 +700,7 @@
         el('a', { class: 'small', href: 'land.html', style: 'display:inline-block;margin-top:10px' }, [t('nav_land') + ' →'])
       ]),
       el('div', { class: 'gp-card' }, [el('p', { class: 'eyebrow' }, [t('ask')]),
-        el('div', { class: 'qs', style: 'margin-top:8px' }, ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'].map(function (k) {
+        el('div', { class: 'qs', style: 'margin-top:8px' }, ['q0', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'].map(function (k) {
           return el('button', { type: 'button', onclick: function () { ask(t(k)); } }, [t(k)]);
         }))])
     ]);
@@ -450,7 +712,7 @@
           el('input', { id: 'qin', type: 'text', placeholder: t('ph'), autocomplete: 'off' }),
           el('button', { class: 'gp-btn primary', type: 'submit' }, [t('send')])
         ]),
-        el('p', { class: 'mode' }, [G.pill(G.CONFIG.assistantEndpoint ? 'live' : 'plan', G.CONFIG.assistantEndpoint ? 'LLM' : 'LLM —'), G.CONFIG.assistantEndpoint ? t('mode_llm') : t('mode_rules')])
+        modeLine()
       ])
     ]);
     app.appendChild(el('div', { class: 'lab' }, [ctx, main]));

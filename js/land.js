@@ -13,13 +13,13 @@
       w_rainfed: 'Pluie seulement', w_well: 'Puits ou forage', w_network: "Réseau d'irrigation", w_shared: 'Source partagée (GDA)',
       l_more: 'Votre exploitation', l_more_hint: 'Ces informations affinent le profil. Sans elles, GAIA les marque « manquantes ».',
       l_demo: 'Pré-remplir avec des valeurs de démonstration', l_demo_done: 'Valeurs de démonstration ajoutées dans les champs vides (marquées « démo » dans le profil). Remplacez-les par les vôtres.',
-      st_none: 'Aucun', k_fill: 'Renseigner', st_approx: 'valeur régionale approximative', na: 'sans objet', l_area: 'Surface (ha)', l_well: 'Profondeur du puits (m)', l_pump: 'Pompage actuel',
+      st_none: 'Aucun', k_fill: 'Renseigner', st_approx: 'source de secours', na: 'sans objet', l_area: 'Surface (ha)', l_well: 'Profondeur du puits (m)', l_pump: 'Pompage actuel',
       p_none: 'Aucun', p_diesel: 'Pompe diesel', p_grid: 'Pompe sur réseau', p_solar: 'Pompe solaire',
       l_soil: 'Sol (si connu)', s_unknown: 'Je ne sais pas', s_sandy: 'Sableux', s_loamy: 'Limoneux', s_clayey: 'Argileux',
       l_struct: 'Ouvrages déjà présents', st_terr: 'Terrasses',
       l_build: 'Construire le profil LAND DNA', l_build_hint: "Placez d'abord un point sur la carte.", l_ready: 'Point placé. Vous pouvez construire le profil.',
       l_plan: 'Plan', l_sat: 'Satellite',
-      st_climate: 'Climat — Open-Meteo', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Soleil — NASA POWER', st_soil: 'Sol — SoilGrids / référence régionale',
+      st_climate: 'Climat — Open-Meteo / NASA POWER', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Soleil — NASA POWER', st_soil: 'Sol — SoilGrids / référence régionale',
       d_empty_t: 'Aucun profil pour l’instant', d_empty_p: 'Le profil LAND DNA apparaîtra ici : chaque valeur avec sa source, sa résolution et sa confiance, et la liste de ce qui manque.',
       d_title: 'LAND DNA', d_conf: 'Confiance globale', d_missing: 'Informations manquantes', d_none_missing: 'Aucune information essentielle ne manque.',
       g_climate: 'Climat', g_terrain: 'Relief', g_solar: 'Soleil', g_soil: 'Sol', g_farm: 'Exploitation',
@@ -41,13 +41,13 @@
       w_rainfed: 'أمطار فقط', w_well: 'بئر', w_network: 'شبكة ري', w_shared: 'مصدر مشترك (مجمع تنمية فلاحية)',
       l_more: 'ضيعتك', l_more_hint: 'هذه المعلومات تدقّق الملف. بدونها تعتبرها غايا «ناقصة».',
       l_demo: 'ملء بقيم تجريبية', l_demo_done: 'أُضيفت قيم تجريبية في الحقول الفارغة (معلّمة «تجريبية» في الملف). عوّضها بقيمك.',
-      st_none: 'لا يوجد', k_fill: 'أدخل', st_approx: 'قيمة جهوية تقريبية', na: 'لا ينطبق', l_area: 'المساحة (هك)', l_well: 'عمق البئر (م)', l_pump: 'الضخ الحالي',
+      st_none: 'لا يوجد', k_fill: 'أدخل', st_approx: 'مصدر احتياطي', na: 'لا ينطبق', l_area: 'المساحة (هك)', l_well: 'عمق البئر (م)', l_pump: 'الضخ الحالي',
       p_none: 'لا يوجد', p_diesel: 'مضخة ديزل', p_grid: 'مضخة على الشبكة', p_solar: 'مضخة شمسية',
       l_soil: 'التربة (إن كانت معروفة)', s_unknown: 'لا أعرف', s_sandy: 'رملية', s_loamy: 'طميية', s_clayey: 'طينية',
       l_struct: 'المنشآت الموجودة', st_terr: 'مدرجات',
       l_build: 'بناء ملف لاند دي إن إي', l_build_hint: 'ضع نقطة على الخريطة أولاً.', l_ready: 'تم وضع النقطة. يمكنك بناء الملف.',
       l_plan: 'خريطة', l_sat: 'قمر صناعي',
-      st_climate: 'المناخ — أوبن ميتيو', st_terrain: 'التضاريس — كوبرنيكوس', st_solar: 'الشمس — ناسا باور', st_soil: 'التربة — سويل غريدز / مرجع جهوي',
+      st_climate: 'المناخ — أوبن ميتيو / NASA POWER', st_terrain: 'التضاريس — كوبرنيكوس', st_solar: 'الشمس — ناسا باور', st_soil: 'التربة — سويل غريدز / مرجع جهوي',
       d_empty_t: 'لا يوجد ملف بعد', d_empty_p: 'سيظهر ملف لاند دي إن إي هنا: كل قيمة مع مصدرها ودقتها ودرجة الثقة، وقائمة بما ينقص.',
       d_title: 'لاند دي إن إي', d_conf: 'الثقة العامة', d_missing: 'معلومات ناقصة', d_none_missing: 'لا تنقص أي معلومة أساسية.',
       g_climate: 'المناخ', g_terrain: 'التضاريس', g_solar: 'الشمس', g_soil: 'التربة', g_farm: 'الضيعة',
@@ -69,13 +69,13 @@
       w_rainfed: 'Rain only', w_well: 'Well or borehole', w_network: 'Irrigation network', w_shared: 'Shared source (GDA)',
       l_more: 'Your farm', l_more_hint: 'This information refines the profile. Without it, GAIA marks it “missing”.',
       l_demo: 'Pre-fill with demo values', l_demo_done: 'Demo values added to the empty fields (marked “demo” in the profile). Replace them with your own.',
-      st_none: 'None', k_fill: 'Fill in', st_approx: 'approximate regional value', na: 'not applicable', l_area: 'Area (ha)', l_well: 'Well depth (m)', l_pump: 'Current pumping',
+      st_none: 'None', k_fill: 'Fill in', st_approx: 'backup source', na: 'not applicable', l_area: 'Area (ha)', l_well: 'Well depth (m)', l_pump: 'Current pumping',
       p_none: 'None', p_diesel: 'Diesel pump', p_grid: 'Grid pump', p_solar: 'Solar pump',
       l_soil: 'Soil (if known)', s_unknown: 'I don’t know', s_sandy: 'Sandy', s_loamy: 'Loamy', s_clayey: 'Clayey',
       l_struct: 'Existing structures', st_terr: 'Terraces',
       l_build: 'Build the LAND DNA profile', l_build_hint: 'Place a point on the map first.', l_ready: 'Point placed. You can build the profile.',
       l_plan: 'Map', l_sat: 'Satellite',
-      st_climate: 'Climate — Open-Meteo', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Sun — NASA POWER', st_soil: 'Soil — SoilGrids / regional reference',
+      st_climate: 'Climate — Open-Meteo / NASA POWER', st_terrain: 'Relief — Copernicus DEM', st_solar: 'Sun — NASA POWER', st_soil: 'Soil — SoilGrids / regional reference',
       d_empty_t: 'No profile yet', d_empty_p: 'The LAND DNA profile will appear here: each value with its source, resolution and confidence, and the list of what is missing.',
       d_title: 'LAND DNA', d_conf: 'Overall confidence', d_missing: 'Missing information', d_none_missing: 'No essential information is missing.',
       g_climate: 'Climate', g_terrain: 'Relief', g_solar: 'Sun', g_soil: 'Soil', g_farm: 'Farm',
@@ -97,13 +97,13 @@
       w_rainfed: '雨水のみ', w_well: '井戸・ボーリング井', w_network: '灌漑網', w_shared: '共同水源（GDA）',
       l_more: 'あなたの農場', l_more_hint: 'これらの情報でプロファイルの精度が上がります。未入力の場合、GAIAは「欠測」と表示します。',
       l_demo: 'デモ値で入力する', l_demo_done: '空欄にデモ値を入れました（プロファイルでは「デモ」と表示）。ご自身の値に置き換えてください。',
-      st_none: 'なし', k_fill: '入力する', st_approx: 'おおよその地域値', na: '該当なし', l_area: '面積（ha）', l_well: '井戸の深さ（m）', l_pump: '現在の揚水方法',
+      st_none: 'なし', k_fill: '入力する', st_approx: '予備のデータ源', na: '該当なし', l_area: '面積（ha）', l_well: '井戸の深さ（m）', l_pump: '現在の揚水方法',
       p_none: 'なし', p_diesel: 'ディーゼルポンプ', p_grid: '系統電力ポンプ', p_solar: '太陽光ポンプ',
       l_soil: '土壌（わかれば）', s_unknown: 'わからない', s_sandy: '砂質', s_loamy: 'ローム質', s_clayey: '粘土質',
       l_struct: '既存の構造物', st_terr: '段々畑',
       l_build: 'LAND DNAプロファイルを作成', l_build_hint: 'まず地図上に地点を置いてください。', l_ready: '地点を置きました。プロファイルを作成できます。',
       l_plan: '地図', l_sat: '衛星写真',
-      st_climate: '気候 — Open-Meteo', st_terrain: '地形 — Copernicus DEM', st_solar: '日射 — NASA POWER', st_soil: '土壌 — SoilGrids／地域参照値',
+      st_climate: '気候 — Open-Meteo／NASA POWER', st_terrain: '地形 — Copernicus DEM', st_solar: '日射 — NASA POWER', st_soil: '土壌 — SoilGrids／地域参照値',
       d_empty_t: 'まだプロファイルがありません', d_empty_p: 'ここにLAND DNAプロファイルが表示されます。各値の出典・解像度・信頼度と、欠けている情報の一覧です。',
       d_title: 'LAND DNA', d_conf: '総合信頼度', d_missing: '欠けている情報', d_none_missing: '欠けている重要な情報はありません。',
       g_climate: '気候', g_terrain: '地形', g_solar: '日射', g_soil: '土壌', g_farm: '農場',
@@ -357,6 +357,9 @@
       dnaBox.appendChild(el('div', { class: 'dna-group' }, [el('h3', null, [t(g[0])])].concat(g[1])));
     });
 
+    // vegetation from space (Sentinel-2 NDVI, js/ndvi.js)
+    if (window.GAIA_NDVI) dnaBox.appendChild(ndviGroup(dna));
+
     // missing info
     var miss = dna.quality.missing;
     dnaBox.appendChild(el('div', { class: 'dna-group' }, [
@@ -370,8 +373,60 @@
     dnaBox.appendChild(el('div', { class: 'next-actions' }, [
       el('a', { class: 'gp-btn primary', href: 'engine.html' }, [t('a_engine')]),
       el('a', { class: 'gp-btn ghost', href: 'lab.html' }, [t('a_lab')]),
-      el('a', { class: 'gp-btn ghost', href: 'nexus.html' }, [t('a_nexus')])
+      el('a', { class: 'gp-btn ghost', href: 'nexus.html' }, [t('a_nexus')]),
+      el('a', { class: 'gp-btn ghost', href: 'agent.html' }, [NV_T().agent])
     ]));
+  }
+
+  /* ---------------------------------------------------------- Sentinel-2 NDVI */
+  function NV_T() {
+    return ({
+      fr: { h: 'Végétation vue du ciel (Sentinel-2)', load: 'Lecture des images Sentinel-2 des 12 derniers mois…', none: 'Aucune image claire de la parcelle sur 12 mois.', err: 'Images satellite indisponibles : ',
+        last: 'NDVI le {d} : {v}', med: 'médiane 12 mois {m} · min {a} · max {b} · {n} images claires', st: { stable: 'végétation stable', greening: 'végétation en hausse', declining: 'végétation en baisse', drop: 'chute récente : à vérifier sur place' },
+        read: 'Sol nu ≈ 0,1 · oliveraie peu dense 0,2–0,4 · culture irriguée dense 0,6–0,85', src: 'ESA Copernicus Sentinel-2 L2A, 10 m, nuages masqués (AWS Open Data, Element 84 Earth Search)', agent: 'Agent agricole' },
+      ar: { h: 'الغطاء النباتي من السماء (Sentinel-2)', load: 'قراءة صور Sentinel-2 لآخر 12 شهراً…', none: 'لا صورة واضحة للقطعة خلال 12 شهراً.', err: 'صور القمر الصناعي غير متاحة: ',
+        last: 'NDVI في {d}: {v}', med: 'الوسيط {m} · الأدنى {a} · الأعلى {b} · {n} صور واضحة', st: { stable: 'غطاء نباتي مستقر', greening: 'غطاء نباتي في تحسن', declining: 'غطاء نباتي في تراجع', drop: 'تراجع حديث: تحقّق في الحقل' },
+        read: 'تربة عارية ≈ 0.1 · زيتون متباعد 0.2–0.4 · زراعة مروية كثيفة 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A، 10 م، دون سحب', agent: 'الوكيل الفلاحي' },
+      en: { h: 'Vegetation from space (Sentinel-2)', load: 'Reading the Sentinel-2 images of the last 12 months…', none: 'No clear image of the plot in 12 months.', err: 'Satellite images unavailable: ',
+        last: 'NDVI on {d}: {v}', med: '12-month median {m} · min {a} · max {b} · {n} clear images', st: { stable: 'vegetation stable', greening: 'vegetation greening', declining: 'vegetation declining', drop: 'recent drop: check on the ground' },
+        read: 'Bare soil ≈ 0.1 · sparse olive grove 0.2–0.4 · dense irrigated crop 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A, 10 m, clouds masked (AWS Open Data, Element 84 Earth Search)', agent: 'Farm Agent' },
+      ja: { h: '宇宙から見た植生（Sentinel-2）', load: '過去12か月のSentinel-2画像を読み込み中…', none: '12か月間に区画の晴天画像がありません。', err: '衛星画像を利用できません：',
+        last: '{d}のNDVI：{v}', med: '12か月中央値 {m} · 最小 {a} · 最大 {b} · 晴天画像 {n}枚', st: { stable: '植生は安定', greening: '植生は増加', declining: '植生は減少', drop: '最近の急低下：現地で確認' },
+        read: '裸地 ≈ 0.1 · 疎なオリーブ園 0.2–0.4 · 密な灌漑作物 0.6–0.85', src: 'ESA Copernicus Sentinel-2 L2A、10 m、雲をマスク（AWS Open Data、Element 84 Earth Search）', agent: '農場エージェント' }
+    })[G.lang()] || null;
+  }
+  var ndviCache = {};
+  function ndviGroup(dna) {
+    var T = NV_T() || {}, box = el('div', { 'aria-live': 'polite' }, [el('p', { class: 'small muted' }, [el('span', { class: 'gp-spin' }), ' ' + T.load])]);
+    var lat = dna.location.lat, lon = dna.location.lon, area = GAIA_DNA.value(dna, 'area_ha'), key = lat + ',' + lon;
+    var r = area > 0 ? Math.max(15, Math.min(100, Math.sqrt(area * 10000) / 2)) : 25;
+    function draw(x) {
+      G.clear(box);
+      if (x.error) { box.appendChild(el('p', { class: 'small muted' }, [T.err + x.error])); return; }
+      if (!x.latest) { box.appendChild(el('p', { class: 'small muted' }, [T.none])); return; }
+      var col = x.status === 'drop' || x.status === 'declining' ? 'warn' : 'ok';
+      box.appendChild(el('p', { style: 'margin-top:6px' }, [el('b', null, [T.last.replace('{d}', x.latest.date).replace('{v}', fmt(x.latest.ndvi, 2))]), ' ', G.pill(col, T.st[x.status])]));
+      box.appendChild(el('p', { class: 'small muted' }, [T.med.replace('{m}', fmt(x.median12, 2)).replace('{a}', fmt(x.min12, 2)).replace('{b}', fmt(x.max12, 2)).replace('{n}', x.scenes.length)]));
+      box.appendChild(spark(x.scenes));
+      box.appendChild(el('p', { class: 'small muted', style: 'margin-top:4px' }, [T.read]));
+      box.appendChild(el('p', { class: 'small muted' }, [T.src]));
+    }
+    if (ndviCache[key]) setTimeout(function () { draw(ndviCache[key]); }, 0);
+    else window.GAIA_NDVI.series(lat, lon, { radius_m: r }).then(function (x) { ndviCache[key] = x; draw(x); }, function (e) { draw({ error: e.message || String(e) }); });
+    return el('div', { class: 'dna-group' }, [el('h3', null, [T.h]), box]);
+  }
+  function spark(sc) {
+    var NS = 'http://www.w3.org/2000/svg', W = 320, H = 70, svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', '100%'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'NDVI');
+    svg.style.maxWidth = '420px'; svg.style.display = 'block'; svg.style.marginTop = '6px';
+    var t0 = Date.parse(sc[0].date), t1 = Date.parse(sc[sc.length - 1].date) || t0 + 1, lo = 0, hi = Math.max(0.5, Math.max.apply(null, sc.map(function (s) { return s.ndvi; })) + 0.05);
+    var X = function (d) { return 8 + (W - 16) * (Date.parse(d) - t0) / Math.max(1, t1 - t0); }, Y = function (v) { return H - 6 - (H - 12) * (Math.max(lo, v) - lo) / (hi - lo); };
+    var pts = sc.map(function (s) { return X(s.date).toFixed(1) + ',' + Y(s.ndvi).toFixed(1); }).join(' ');
+    function add(tag, a) { var n = document.createElementNS(NS, tag); Object.keys(a).forEach(function (k) { n.setAttribute(k, a[k]); }); svg.appendChild(n); return n; }
+    add('line', { x1: 8, x2: W - 8, y1: Y(0.2), y2: Y(0.2), stroke: '#D8D2C2', 'stroke-dasharray': '3 3' });
+    add('polyline', { points: pts, fill: 'none', stroke: '#5E7B3A', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+    sc.forEach(function (s) { var c = add('circle', { cx: X(s.date), cy: Y(s.ndvi), r: 2.6, fill: '#5E7B3A' }); var tt = document.createElementNS(NS, 'title'); tt.textContent = s.date + ' · NDVI ' + s.ndvi.toFixed(2); c.appendChild(tt); });
+    return svg;
   }
 
   /* ---------------------------------------------------------- restore */

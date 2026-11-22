@@ -6,13 +6,14 @@ The website works on its own in the browser. This backend exposes the same logic
 cd backend
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn gaia.main:app --reload                   # http://127.0.0.1:8000/docs
+uvicorn gaia.main:app --reload                   # http://127.0.0.1:8000/docs (the Plant health page finds it on 8000 or 8765)
 pytest -q                                        # needs node for the JS parity tests
 ```
 
 | Endpoint | What it does | Status |
 |---|---|---|
-| `GET /health` | records loaded, whether a vision model is installed | implemented |
+| `GET /health` | records loaded, whether a vision model is installed, which assistant LLM providers are available (`assistant_providers`) and whether a Pl@ntNet key is set | implemented |
+| `POST /plantnet` | optional Pl@ntNet species + anomaly check, only after the user consents in the Plant health page; key in `PLANTNET_API_KEY` (environment or `backend/.env`). The page checks `/health` first and says why the check is unavailable (server not running, no key) | implemented |
 | `GET /knowledge/techniques?origin=tn\|jp\|x` | the 11 knowledge records (exported from `js/kb.js` by `tools/export_kb.js`) | implemented |
 | `GET /parcel/profile?lat=&lon=` | GAIA LAND DNA from Open-Meteo (ERA5), Copernicus DEM, NASA POWER; soil from a local SoilGrids raster (`GAIA_SOIL_RASTER`), otherwise the regional reference `data/soil_tn.json` (confidence low) | implemented, needs internet; not tested from the build sandbox |
 | `POST /analyze` | compatibility rules, verdicts feasible / adapt / insufficient / rejected | implemented, parity-tested against the browser engine |
@@ -26,7 +27,7 @@ pytest -q                                        # needs node for the JS parity 
 | `POST /agent` | Smart irrigation agent: a language model reads the question, calls server-side tools (soil forecast, optimal plan, what-if simulation, solar forecast) and answers from their results in fr/ar/en/ja; each tool call is returned as a step. **Free**: Google Gemini or Groq free tier (`gaia/agent_llm.py`), key in `backend/.env` (copy `.env.example`). It remembers the conversation (the page sends the previous turns). Without a key it returns **503 no_free_key**; when the free quota is reached, **503 free_quota** (try again a minute later). With `ANTHROPIC_API_KEY` (paid), Claude answers | implemented; needs internet |
 | `GET /farm/state` · `POST /farm/action` · `POST /farm/check` | The parcel's record (`gaia/farm_state.py`, files in `data/farm/`, not committed): irrigation calendar the farmer confirmed, irrigations reported (subtracted from the next plans), settings, morning check and alerts. The agent's action tools (`propose_save_plan`, `propose_log_irrigation`, `propose_update_settings`, `propose_monitoring`) only **propose**: `/farm/action` applies one after the farmer presses Confirm. `/farm/check` runs the morning check now; it also runs by itself every day at the chosen hour while the backend is running (`gaia/farm_monitor.py`, `GAIA_MONITOR=0` to turn off) | implemented |
 | `POST /diagnose` | two-stage plant health (tree, then disease) with ONNX models from `models/gaia-vision/manifest.json` (or `GAIA_MODEL_DIR`); abstains when unsure | implemented; returns **503 model_not_loaded** until a validated model is installed (none is shipped yet) |
-| `POST /assistant` | AI Lab wording by Claude (`claude-opus-5-5`, override with `GAIA_LLM_MODEL`), grounded only in the records and profile the page sends; says when the records do not cover the question | implemented; returns **503 no_api_key** until `ANTHROPIC_API_KEY` is set on the server |
+| `POST /assistant` | AI Lab answer by a language model, grounded in the records, profile and conversation the page sends; general knowledge only when labelled as such. Providers tried in order: Claude (`ANTHROPIC_API_KEY`), a free OpenAI-compatible service (`GAIA_LLM_PROVIDER=groq|huggingface|openrouter|ollama|custom` + `GAIA_LLM_API_KEY`), then Ollama on this machine (found automatically) | implemented; **503 no_api_key** when none is configured |
 | `POST /feedback` | Kaizen correction, appended to `data/feedback.jsonl` with `expert_status: pending` | implemented |
 
 To make the website send Kaizen feedback here, set `feedbackEndpoint: 'http://127.0.0.1:8000/feedback'` in `js/gaia-core.js` (`CONFIG`).

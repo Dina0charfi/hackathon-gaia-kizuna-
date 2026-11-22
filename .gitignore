@@ -8,3 +8,6 @@ backend/data/feedback.jsonl
 !.env.example
 backend/data/cache/
 backend/data/farm/
+backend/data/users.db
+.claude/
+ml/agv-net/data/parts/

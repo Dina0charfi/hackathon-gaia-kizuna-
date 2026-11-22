@@ -24,6 +24,25 @@
   .seg button:disabled { opacity: .5; cursor: not-allowed; }
   .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
   @media (max-width: 860px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .pay-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .pay-sim { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: var(--s-demo-bg); color: var(--s-demo); }
+  .pay-prog { margin-top: 12px; display: grid; gap: 8px; }
+  .pay-bar { height: 12px; border-radius: 999px; background: var(--g-sand-soft); overflow: hidden; }
+  .pay-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #24432F, #D9B86A); transition: width .5s; }
+  .pay-nums { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--g-ink-2); }
+  .pay-next { margin-top: 14px; display: grid; gap: 12px; }
+  .pay-next .lab { font-size: 12.5px; font-weight: 700; color: var(--g-ink-3); }
+  .pay-next .v { font-family: var(--g-display); font-size: 30px; font-weight: 800; color: var(--g-forest); }
+  .pay-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 8px; }
+  .pay-m { display: grid; gap: 2px; text-align: start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--g-line-2); background: #fff; cursor: pointer; font: inherit; color: var(--g-ink-2); }
+  .pay-m b { font-size: 15px; color: var(--g-ink); display: inline-flex; align-items: center; gap: 6px; min-height: 22px; }
+  .pay-m b svg { color: var(--g-gold-ink); }
+  .pay-m span { font-size: 12.5px; }
+  .pay-m[aria-checked="true"] { border-color: var(--g-gold); box-shadow: 0 0 0 3px rgba(217, 184, 106, .25); background: #FFFBEF; }
+  .pay-next > .gp-btn { justify-self: start; }
+  .pay-confirm { margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--g-sand-soft); display: grid; gap: 10px; }
+  .pay-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pay-receipt { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--s-ok-bg); color: var(--s-ok); display: grid; gap: 2px; font-size: 14px; }
   .kpi { background: var(--g-paper); border: 1px solid var(--g-line); border-radius: 12px; padding: 12px 14px; }
   .kpi b { display: block; font-size: 12px; color: var(--g-ink-3); font-weight: 600; }
   .kpi .v { font-family: var(--g-display); font-size: 23px; font-weight: 600; color: var(--g-forest); margin-top: 2px; }

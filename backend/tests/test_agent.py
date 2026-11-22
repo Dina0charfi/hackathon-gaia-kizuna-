@@ -3,7 +3,7 @@ import asyncio
 import json
 from types import SimpleNamespace as NS
 
-from gaia import agent
+from gaia import irrigation_agent as agent
 
 
 class FakeMessages:

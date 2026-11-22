@@ -7,3 +7,6 @@ raw_hf/
 hf/
 data/*.npy
 *.pth
+models_out/*.onnx
+models_out/*.npz
+models_out/report.json

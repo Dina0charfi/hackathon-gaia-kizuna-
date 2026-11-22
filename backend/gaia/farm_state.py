@@ -6,7 +6,7 @@
   monitoring      the morning check: on/off, hour, last run
   alerts          what the morning check found (shown on the page, read / unread)
 
-The agent never writes here by itself: its action tools only PROPOSE (gaia.agent), and an action is
+The agent never writes here by itself: its action tools only PROPOSE (gaia.irrigation_agent), and an action is
 applied when the farmer presses "Confirm" on the page (POST /farm/action).
 """
 from __future__ import annotations

@@ -12,18 +12,40 @@
   /* ---------------------------------------------------------- config */
   // Integration boundaries. Leave an endpoint null and the page says so
   // instead of inventing a result.
+  // Where the GAIA server (backend/) runs. Tried in order:
+  //  1. ?server=http://192.168.1.20:8000 in any page URL (remembered on this browser; ?server=off forgets it),
+  //  2. this computer (127.0.0.1:8000, then :8765) when the site is opened on localhost or as a file,
+  //  3. the computer that serves the site (same host, :8000 then :8765), so friends on the same Wi-Fi
+  //     use the server of the person who runs it (start it with --host 0.0.0.0).
+  var SERVER_BASES = (function () {
+    var loc = global.location || {}, saved = null, h = loc.hostname || '';
+    try {
+      var q = new URLSearchParams(loc.search || '').get('server');
+      if (q) { if (q === 'off') global.localStorage.removeItem('gaia.server'); else global.localStorage.setItem('gaia.server', q.replace(/\/+$/, '')); }
+      saved = global.localStorage.getItem('gaia.server');
+    } catch (e) { /* no storage */ }
+    if (saved) return [saved];
+    if (loc.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(h)) return ['http://127.0.0.1:8000', 'http://127.0.0.1:8765'];
+    if (loc.protocol === 'http:' && h) return ['http://' + h + ':8000', 'http://' + h + ':8765'];
+    return [];
+  }());
+
+  // irrigation forecast, planner, farm record and irrigation agent: the first server found above
+  var GAIA_API = SERVER_BASES[0] || 'http://127.0.0.1:8000';
+
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
     plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
-    irrigationEndpoint: 'http://127.0.0.1:8000/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
-    planEndpoint: 'http://127.0.0.1:8000/irrigation/plan',   // optimal irrigation planner + solar pumping (backend/gaia/planner.py); null = off
-    farmEndpoint: 'http://127.0.0.1:8000/farm',              // farm record: confirmed plan, reported irrigations, morning check, alerts; null = off
-    replayEndpoint: 'http://127.0.0.1:8000/irrigation/replay', // season replay on real past data; null = off
-    agentEndpoint: 'http://127.0.0.1:8000/agent',            // irrigation agent (Claude + tools; needs ANTHROPIC_API_KEY on the server); null = off
+    irrigationEndpoint: GAIA_API + '/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
+    planEndpoint: GAIA_API + '/irrigation/plan',   // optimal irrigation planner + solar pumping (backend/gaia/planner.py); null = off
+    farmEndpoint: GAIA_API + '/farm',              // farm record: confirmed plan, reported irrigations, morning check, alerts; null = off
+    replayEndpoint: GAIA_API + '/irrigation/replay', // season replay on real past data; null = off
+    agentEndpoint: GAIA_API + '/agent',            // irrigation agent (free Gemini / Groq key in backend/.env); null = off
     effectiveRainTable: 'ml/models/pluie_efficace_meta.json', // learned effective rain per month and site (ml/, section 11); null = USDA-SCS only
+    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/auth' : null, // accounts (backend /auth/*). null = guest only
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
 
@@ -41,10 +63,10 @@
   var DICT = {
     fr: {
       tagline: "L'intelligence qui comprend la terre",
-      nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab',
+      nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
-      skip: 'Aller au contenu',
+      skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte',
       foot_line: "GAIA n'impose pas la technologie à la terre. GAIA adapte la technologie à la terre.",
       foot_honest: "Données ouvertes citées à chaque valeur. Les modules non connectés le disent.",
       verdict_ok: 'Faisable', verdict_adapt: 'Faisable avec adaptation', verdict_no: 'Non recommandé', verdict_unk: 'Preuves insuffisantes',
@@ -61,10 +83,10 @@
     },
     ar: {
       tagline: 'ذكاء يفهم الأرض',
-      nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء',
+      nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء', nav_agent: 'الوكيل',
       nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
-      skip: 'انتقل إلى المحتوى',
+      skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي',
       foot_line: 'غايا لا تفرض التكنولوجيا على الأرض، بل تكيّف التكنولوجيا مع الأرض.',
       foot_honest: 'كل قيمة مصحوبة بمصدرها. والوحدات غير المتصلة تصرّح بذلك.',
       verdict_ok: 'ممكن', verdict_adapt: 'ممكن مع التكييف', verdict_no: 'غير موصى به', verdict_unk: 'أدلة غير كافية',
@@ -81,10 +103,10 @@
     },
     en: {
       tagline: 'Intelligence that understands the land',
-      nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab',
+      nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
-      skip: 'Skip to content',
+      skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account',
       foot_line: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
       foot_honest: 'Open data, cited for every value. Modules that are not connected say so.',
       verdict_ok: 'Feasible', verdict_adapt: 'Feasible with adaptation', verdict_no: 'Not recommended', verdict_unk: 'Not enough evidence',
@@ -101,10 +123,10 @@
     },
     ja: {
       tagline: '土地を理解するインテリジェンス',
-      nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ',
+      nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ', nav_agent: 'エージェント',
       nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
-      skip: '本文へ移動',
+      skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント',
       foot_line: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
       foot_honest: 'すべての値にオープンデータの出典を表示。未接続のモジュールはそう明示します。',
       verdict_ok: '実施可能', verdict_adapt: '調整すれば実施可能', verdict_no: '推奨しない', verdict_unk: '根拠不足',
@@ -179,12 +201,93 @@
     document.querySelectorAll('.gp-lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-l') === l)); });
     applyI18n();
     renderParcelBadge();
+    renderAccount();
     langListeners.forEach(function (fn) { try { fn(l); } catch (e) { console.error(e); } });
   }
 
   /* ---------------------------------------------------------- parcel */
-  function getParcel() { return load('gaia.parcel', null); }
+  function getParcel() {
+    var p = load('gaia.parcel', null);
+    // plots saved before the unit fix kept NASA POWER radiation in MJ/m²/day: convert to kWh/m²/day
+    var SM = p && p.dna && p.dna.solarMonthly, S = p && p.dna && p.dna.solar && p.dna.solar.ghi_kwh;
+    if (SM && /MJ/i.test(SM.unit || '')) {
+      SM.ghi = (SM.ghi || []).map(function (v) { return typeof v === 'number' ? v / 3.6 : v; });
+      SM.unit = 'kWh/m²/jour';
+      if (S && typeof S.value === 'number' && /MJ/i.test(S.unit || '')) { S.value = S.value / 3.6; S.unit = 'kWh/m²/jour'; }
+      save('gaia.parcel', p);
+    }
+    return p;
+  }
   function setParcel(p) { save('gaia.parcel', p); renderParcelBadge(); }
+
+  /* ---------------------------------------------------------- accounts */
+  // The backend keeps the account (hashed password, sessions). The browser keeps only the
+  // session token and the public profile, under 'gaia.session'.
+  var authListeners = [];
+  function session() { return load('gaia.session', null); }
+  function currentUser() { var s = session(); return s && s.user ? s.user : null; }
+  function setSession(s) {
+    if (s) save('gaia.session', s); else { try { global.localStorage.removeItem('gaia.session'); } catch (e) {} }
+    renderAccount();
+    authListeners.forEach(function (fn) { try { fn(currentUser()); } catch (e) { console.error(e); } });
+  }
+  function authCall(path, opts) {   // path relative to /auth; '../share/x' style paths go to the API root
+    if (!CONFIG.authEndpoint) return Promise.reject({ code: 'no_server' });
+    var s = session(), h = { 'Content-Type': 'application/json' };
+    if (s && s.token) h.Authorization = 'Bearer ' + s.token;
+    var url = path.indexOf('/share/') === 0 ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
+    return fetch(url, Object.assign({ headers: h }, opts || {})).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        if (!r.ok) throw Object.assign({ status: r.status }, (b && b.detail) || {});
+        return b;
+      });
+    }, function () { throw { code: 'no_server' }; });
+  }
+  var auth = {
+    enabled: function () { return !!CONFIG.authEndpoint; },
+    user: currentUser,
+    onChange: function (fn) { authListeners.push(fn); },
+    signup: function (body) { return authCall('/signup', { method: 'POST', body: JSON.stringify(body) }).then(function (r) { setSession(r); return r.user; }); },
+    login: function (identifier, password) {
+      return authCall('/login', { method: 'POST', body: JSON.stringify({ identifier: identifier, password: password }) }).then(function (r) { setSession(r); return r.user; });
+    },
+    logout: function () {
+      var done = function () { setSession(null); };
+      return authCall('/logout', { method: 'POST' }).then(done, done);   // always forget the session on this device
+    },
+    forgot: function (identifier) { return authCall('/forgot', { method: 'POST', body: JSON.stringify({ identifier: identifier }) }); },
+    reset: function (identifier, code, password) {
+      return authCall('/reset', { method: 'POST', body: JSON.stringify({ identifier: identifier, code: code, password: password }) }).then(function (r) { setSession(r); return r.user; });
+    },
+    setFarm: function (farm) {
+      return authCall('/farm', { method: 'PUT', body: farm ? JSON.stringify(farm) : null }).then(function (r) { var s = session(); s.user = r.user; setSession(s); return r.user; });
+    },
+    neighbours: function (radiusKm) { return authCall('/share/neighbours?radius_km=' + encodeURIComponent(radiusKm || 5)); },
+    requestShare: function (id) { return authCall('/share/request', { method: 'POST', body: JSON.stringify({ to: id }) }); },
+    respondShare: function (id, accept) { return authCall('/share/respond', { method: 'POST', body: JSON.stringify({ from_id: id, accept: !!accept }) }); },
+    refresh: function () {   // drop a session the server no longer knows (expired, signed out elsewhere)
+      if (!session()) return Promise.resolve(null);
+      return authCall('/me').then(function (r) { var s = session(); s.user = r.user; save('gaia.session', s); renderAccount(); return r.user; },
+        function (e) { if (e && e.status === 401) setSession(null); return currentUser(); });
+    }
+  };
+  function initials(name) { return String(name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }
+  function renderAccount() {
+    var box = document.getElementById('gp-account');
+    if (!box) return;
+    clear(box);
+    var u = currentUser();
+    if (u) {
+      box.appendChild(el('a', { class: 'gp-acc', href: 'account.html', title: t('acc_menu') }, [
+        el('span', { class: 'gp-acc-av', 'aria-hidden': 'true' }, [initials(u.name)]),
+        el('span', { class: 'gp-acc-name' }, [u.name.split(/\s+/)[0]])
+      ]));
+      box.appendChild(el('button', { type: 'button', class: 'gp-acc-out', title: t('acc_signout'), 'aria-label': t('acc_signout'),
+        onclick: function () { auth.logout().then(function () { if (/account\.html$/.test(global.location.pathname)) global.location.reload(); }); } }, [icon('logout', 16)]));
+    } else {
+      box.appendChild(el('a', { class: 'gp-acc in', href: 'account.html' }, [icon('user', 16), el('span', null, [t('acc_signin')])]));
+    }
+  }
 
   /* ---------------------------------------------------------- dom utils */
   function el(tag, attrs, children) {
@@ -215,7 +318,13 @@
     info: '<circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/>',
     warn: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
     leaf: '<path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19l7-7"/>',
-    pin: '<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'
+    pin: '<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4"/><path d="M6 12h10"/>',
+    card: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>',
+    cash: '<rect x="3" y="7" width="18" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
+    phone: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    network: '<circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M7 7.8l3.2 3M7 16.2l3.2-3M13.8 11l3.4-3.2M13.8 13l3.4 3.2"/>'
   };
   function icon(name, size) {
     var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -241,7 +350,7 @@
   /* ---------------------------------------------------------- shell */
   var NAV = [
     ['home', 'home.html', 'nav_home'], ['land', 'land.html', 'nav_land'], ['engine', 'engine.html', 'nav_engine'],
-    ['lab', 'lab.html', 'nav_lab'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
+    ['lab', 'lab.html', 'nav_lab'], ['agent', 'agent.html', 'nav_agent'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
     ['biz', 'business.html', 'nav_biz'], ['agv', 'agrivoltaic.html', 'nav_agv'], ['lib', 'library.html', 'nav_lib']
   ];
 
@@ -271,6 +380,7 @@
           return el('a', { href: n[1], 'data-i18n': n[2], 'aria-current': n[0] === current ? 'page' : null });
         })),
         el('div', { class: 'gp-tools' }, [
+          el('div', { id: 'gp-account', class: 'gp-account' }),
           el('a', { id: 'gp-parcel', class: 'gp-parcel', href: 'land.html' }),
           el('div', { class: 'gp-lang', role: 'group', 'aria-label': 'Langue / اللغة / Language / 言語' }, [
             el('button', { type: 'button', 'data-l': 'fr', lang: 'fr', onclick: function () { setLang('fr'); } }, ['FR']),
@@ -295,6 +405,7 @@
     ]);
     document.body.appendChild(foot);
     setLang(lang);
+    auth.refresh();
   }
 
   /* ---------------------------------------------------------- tooltips */
@@ -428,9 +539,9 @@
   }
 
   global.GAIA = {
-    CONFIG: CONFIG, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
+    CONFIG: CONFIG, serverBases: SERVER_BASES, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
     lang: function () { return lang; }, onLang: function (fn) { langListeners.push(fn); },
-    getParcel: getParcel, setParcel: setParcel, load: load, save: save,
+    getParcel: getParcel, setParcel: setParcel, load: load, save: save, auth: auth,
     el: el, clear: clear, fmt: fmt, icon: icon, pill: pill, note: note, confBadge: confBadge,
     mountShell: mountShell, barChart: barChart, bindTip: bindTip, needParcel: needParcel,
     kaizenButton: kaizenButton, recordFeedback: recordFeedback

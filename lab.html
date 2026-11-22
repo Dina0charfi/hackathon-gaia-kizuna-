@@ -40,6 +40,14 @@
   .composer input:focus { outline: none; }
   .mode { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--g-ink-3); margin-top: 8px; }
   @media (max-width: 900px) { .lab { grid-template-columns: 1fr; } .ctx { position: static; } }
+  .ans .llm { margin-top: 10px; font-size: 15px; color: var(--g-ink); }
+  .ans .llm p, .ans .llm li { font-size: 15px; line-height: 1.55; color: var(--g-ink); margin: 0 0 6px; }
+  .ans .llm ul { margin: 0 0 6px; padding-inline-start: 20px; }
+  .ans mark.unv { background: #fde7b0; border-radius: 3px; padding: 0 2px; }
+  .ans details.rules { margin-top: 12px; border-top: 1px solid var(--g-line-2); padding-top: 8px; }
+  .ans details.rules > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--g-ink-3); }
+  .mode { flex-wrap: wrap; }
+  .mode .gp-btn { min-height: 32px; padding: 4px 12px; font-size: 13px; }
 </style>
 </head>
 <body class="gp">
@@ -57,7 +65,9 @@
 <script src="js/kb-i18n.js"></script>
 <script src="js/landdna.js"></script>
 <script src="js/engine-core.js"></script>
+<script src="js/nexus-core.js"></script>
 <script src="js/lab-retrieval.js"></script>
+<script src="js/lab-llm.js"></script>
 <script src="js/lab.js"></script>
 </body>
 </html>

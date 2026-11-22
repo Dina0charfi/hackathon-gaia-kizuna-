@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -28,7 +28,8 @@ def _load_env_file() -> None:
 
 _load_env_file()
 
-from . import agent, assistant, business, engine, farm_monitor, farm_state, guard, irrigation, nexus, planner, plantnet, solar, vision
+from . import (agent, assistant, auth, business, engine, farm_monitor, farm_state, guard, irrigation, irrigation_agent, leaf,
+               nexus, planner, plantnet, solar, vision)
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -42,9 +43,124 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/health")
 def health() -> dict:
-    llm = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_PROFILE"))
+    llms = assistant.available()
     return {"status": "ok", "records": len(KB["records"]), "vision_model": (MODEL_DIR / "manifest.json").exists(),
-            "assistant_llm": llm, "plantnet": bool(plantnet.api_key()), "irrigation_model": irrigation.available()}
+            "assistant_llm": bool(llms), "assistant_providers": llms, "plantnet": bool(plantnet.api_key()),
+            "irrigation_model": irrigation.available(), "irrigation_agent": bool(os.environ.get("GAIA_LLM_API_KEY") or irrigation_agent.has_claude_key())}
+
+
+class FarmIn(BaseModel):
+    lat: float
+    lon: float
+    crop: Optional[str] = None
+    water: Optional[str] = None
+    share: bool = False
+
+
+class SignupIn(BaseModel):
+    name: str = Field(..., max_length=80)
+    identifier: str = Field(..., max_length=120, description="email or phone number")
+    password: str = Field(..., max_length=200)
+    role: str = "farmer"
+    region: Optional[str] = Field(None, max_length=80)
+    farm: Optional[FarmIn] = None
+
+
+class LoginIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+    password: str = Field(..., max_length=200)
+
+
+def _bearer(authorization: Optional[str]) -> Optional[str]:
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization[7:].strip() or None
+    return None
+
+
+def _auth_call(fn, *a, **k):
+    try:
+        return fn(*a, **k)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, detail={"code": e.code, "message": e.message}) from e
+
+
+@app.post("/auth/signup", status_code=201)
+def auth_signup(body: SignupIn) -> dict:
+    return _auth_call(auth.signup, **body.model_dump())
+
+
+@app.post("/auth/login")
+def auth_login(body: LoginIn) -> dict:
+    return _auth_call(auth.login, body.identifier, body.password)
+
+
+@app.get("/auth/me")
+def auth_me(authorization: Optional[str] = Header(None)) -> dict:
+    user = auth.user_for(_bearer(authorization))
+    if not user:
+        raise HTTPException(401, detail={"code": "no_session", "message": "Not signed in."})
+    return {"user": user}
+
+
+@app.post("/auth/logout")
+def auth_logout(authorization: Optional[str] = Header(None)) -> dict:
+    auth.logout(_bearer(authorization))
+    return {"signed_out": True}
+
+
+class ForgotIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+
+
+class ResetIn(BaseModel):
+    identifier: str = Field(..., max_length=120)
+    code: str = Field(..., max_length=12)
+    password: str = Field(..., max_length=200)
+
+
+@app.post("/auth/forgot")
+def auth_forgot(body: ForgotIn, request: Request) -> dict:
+    """Send a 6-digit reset code (email via SMTP, or the server console). Same answer for unknown accounts.
+    Local demo only (request from this computer, no SMTP): the code is also returned for the page to show."""
+    host = request.client.host if request.client else ""
+    return _auth_call(auth.request_reset, body.identifier, host in ("127.0.0.1", "::1", "localhost"))
+
+
+@app.post("/auth/reset")
+def auth_reset(body: ResetIn) -> dict:
+    """Code + new password: sets the password, closes every other session, signs in."""
+    return _auth_call(auth.confirm_reset, body.identifier, body.code, body.password)
+
+
+@app.put("/auth/farm")
+def auth_farm(body: Optional[FarmIn] = None, authorization: Optional[str] = Header(None)) -> dict:
+    """Link, update or (empty body) unlink the plot of the signed-in account."""
+    return {"user": _auth_call(auth.set_farm, _bearer(authorization), body.model_dump() if body else None)}
+
+
+@app.get("/share/neighbours")
+def share_neighbours(radius_km: float = 5.0, authorization: Optional[str] = Header(None)) -> dict:
+    """Neighbours who agreed to be visible: first name, crop, water source, distance rounded to 0.5 km."""
+    return _auth_call(auth.neighbours, _bearer(authorization), radius_km)
+
+
+class ShareRequestIn(BaseModel):
+    to: int
+
+
+class ShareRespondIn(BaseModel):
+    from_id: int
+    accept: bool
+
+
+@app.post("/share/request")
+def share_request(body: ShareRequestIn, authorization: Optional[str] = Header(None)) -> dict:
+    return _auth_call(auth.request_share, _bearer(authorization), body.to)
+
+
+@app.post("/share/respond")
+def share_respond(body: ShareRespondIn, authorization: Optional[str] = Header(None)) -> dict:
+    return _auth_call(auth.respond_share, _bearer(authorization), body.from_id, body.accept)
 
 
 @app.get("/knowledge/techniques")
@@ -326,7 +442,7 @@ async def farm_check(lat: float, lon: float) -> dict:
         raise HTTPException(502, detail=_source_error(e))
 
 
-class AgentParcel(BaseModel):
+class IrrigationParcel(BaseModel):
     lat: float
     lon: float
     crop: str = "olive"
@@ -342,26 +458,26 @@ class AgentParcel(BaseModel):
     quota_m3_month: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12, description="authorised volume per month (m³, whole parcel), e.g. from the CRDA allocation")
 
 
-class AgentTurn(BaseModel):
+class IrrigationTurn(BaseModel):
     role: Literal["user", "assistant"]
     content: str = Field(..., max_length=6000)
 
 
-class AgentIn(BaseModel):
+class IrrigationAgentIn(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     lang: str = "fr"
-    parcel: AgentParcel
-    history: list[AgentTurn] = Field(default_factory=list, max_length=24, description="previous turns, oldest first")
+    parcel: IrrigationParcel
+    history: list[IrrigationTurn] = Field(default_factory=list, max_length=24, description="previous turns, oldest first")
 
 
 @app.post("/agent")
-async def agent_answer(body: AgentIn) -> dict:
+async def agent_answer(body: IrrigationAgentIn) -> dict:
     """Smart irrigation agent (free Gemini / Groq model, or Claude): calls the soil forecast, optimal planner, what-if simulator and solar forecast. 503 without a key."""
     if not (30 <= body.parcel.lat <= 38 and 7 <= body.parcel.lon <= 12):
         raise HTTPException(422, "Point outside the Tunisia bounding box.")
     try:
-        return await agent.answer(body.model_dump())
-    except agent.AgentUnavailable as e:
+        return await irrigation_agent.answer(body.model_dump())
+    except irrigation_agent.AgentUnavailable as e:
         raise HTTPException(503, detail=e.detail) from e
 
 
@@ -412,20 +528,49 @@ def feedback(body: FeedbackIn) -> dict:
 
 class AssistantIn(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
-    lang: Literal["fr", "ar", "en"] = "fr"
+    lang: Literal["fr", "ar", "en", "ja"] = "fr"
     answer: dict[str, Any] = {}
     profile: dict[str, Any] = {}
     verdicts: list[dict[str, Any]] = []
     records: list[dict[str, Any]] = Field([], description="records the page retrieved; empty = the whole knowledge base")
+    history: list[dict[str, Any]] = Field([], description="last turns of the conversation: [{q, a}]")
 
 
 @app.post("/assistant")
 def assistant_answer(body: AssistantIn) -> dict:
-    """AI Lab wording by Claude, grounded only in the evidence sent. 503 when no API key is configured."""
+    """AI Lab answer by a language model (Claude, a free OpenAI-compatible service, or local Ollama), grounded in the evidence sent. 503 when none is configured."""
     d = body.model_dump()
     if not d["records"]:
         d["records"] = KB["records"]
     try:
         return assistant.answer(d)
+    except assistant.AssistantUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
+
+
+class LeafIn(BaseModel):
+    evidence: dict[str, Any]
+    lang: Literal["fr", "ar", "en", "ja"] = "fr"
+
+
+@app.post("/leaf/explain")
+def leaf_explain(body: LeafIn) -> dict:
+    """Plant health: a language model explains the leaf result and gives safe first steps. The photo is not sent. 503 when no model is configured."""
+    try:
+        return leaf.explain(body.evidence, body.lang)
+    except assistant.AssistantUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
+
+
+class AgentIn(BaseModel):
+    messages: list[dict[str, Any]] = Field(..., min_length=1, max_length=60)
+    tools: list[dict[str, Any]] = Field(..., min_length=1, max_length=30)
+
+
+@app.post("/agent/step")
+def agent_step(body: AgentIn) -> dict:
+    """One step of the GAIA Farm Agent: the model's next tool calls, or its final plan. The page runs the tools. 503 when no model is configured."""
+    try:
+        return agent.step(body.messages, body.tools)
     except assistant.AssistantUnavailable as e:
         raise HTTPException(503, detail=e.detail) from e

@@ -57,8 +57,8 @@
   };
   function zone(l, z) { return (ZONES[l] && ZONES[l][z]) || z; }
 
-  function errEN(e) { return e === 'délai dépassé' ? 'timed out' : e === 'réponse vide' ? 'empty response' : e === 'réponse incomplète' ? 'incomplete response' : e === 'paramètre absent' ? 'parameter missing' : e === 'aucune valeur (zone non cartographiée)' ? 'no value (area not mapped)' : e; }
-  function errJA(e) { return e === 'délai dépassé' ? 'タイムアウト' : e === 'réponse vide' ? '空の応答' : e === 'réponse incomplète' ? '不完全な応答' : e === 'paramètre absent' ? 'パラメーターなし' : e === 'aucune valeur (zone non cartographiée)' ? '値なし（未地図化の地域）' : e; }
+  function errEN(e) { if (/, quota journalier atteint$/.test(e)) return errEN(e.replace(/, quota journalier atteint$/, '')) + ', daily quota reached'; return e === 'délai dépassé' ? 'timed out' : e === 'réponse vide' ? 'empty response' : e === 'réponse incomplète' ? 'incomplete response' : e === 'paramètre absent' ? 'parameter missing' : e === 'aucune valeur (zone non cartographiée)' ? 'no value (area not mapped)' : e; }
+  function errJA(e) { if (/, quota journalier atteint$/.test(e)) return errJA(e.replace(/, quota journalier atteint$/, '')) + '、1日の上限に到達'; return e === 'délai dépassé' ? 'タイムアウト' : e === 'réponse vide' ? '空の応答' : e === 'réponse incomplète' ? '不完全な応答' : e === 'paramètre absent' ? 'パラメーターなし' : e === 'aucune valeur (zone non cartographiée)' ? '値なし（未地図化の地域）' : e; }
 
   G.addPhrases({
     en: {
@@ -77,9 +77,23 @@
         'Classe déduite de la teneur en argile et en sable (0–30 cm)': 'Class derived from clay and sand content (0–30 cm)', 'Carbone organique, 0–30 cm': 'Organic carbon, 0–30 cm',
         'Rasters SoilGrids servis localement': 'SoilGrids rasters served locally',
         'Valeur type pré-remplie pour la démo : remplacez-la par la vôtre.': 'Typical value pre-filled for the demo: replace it with your own.',
-        'Sans objet : pas de puits déclaré': 'Not applicable: no well declared'
+        'Sans objet : pas de puits déclaré': 'Not applicable: no well declared',
+        'NASA POWER — climatologie 2001–2025 (MERRA-2)': 'NASA POWER — 2001–2025 climatology (MERRA-2)', '≈ 50 km (0,5° × 0,625°)': '≈ 50 km (0.5° × 0.625°)',
+        'Table GAIA intégrée : normales NASA POWER 2001–2025 (MERRA-2)': 'GAIA bundled table: NASA POWER 2001–2025 normals (MERRA-2)', 'Table GAIA intégrée': 'GAIA bundled table',
+        'grille 0,5° interpolée': 'interpolated 0.5° grid', 'Grille d’environ 50 km : la pluie locale peut s’en écarter nettement.': 'Grid of about 50 km: local rainfall can differ markedly.',
+        'ET0 FAO-56 Penman–Monteith calculée par GAIA à partir des moyennes mensuelles NASA POWER': 'FAO-56 Penman–Monteith ET0 computed by GAIA from NASA POWER monthly means',
+        'SoilGrids 2.0 (ISRIC), grille GAIA 5 km pré-calculée': 'SoilGrids 2.0 (ISRIC), GAIA precomputed 5 km grid', 'maille ≈ 5 km (16 points à 250 m)': '≈ 5 km cell (16 points at 250 m)',
+        'Moyenne SoilGrids de la maille de 5 km qui contient la parcelle, pas une mesure de la parcelle.': 'SoilGrids mean of the 5 km cell containing the plot, not a measurement of the plot.',
+        'SoilGrids injoignable : API REST en pause.': 'SoilGrids unreachable: REST API paused.'
       },
       patterns: [
+        [/^(.+?) · (.+)$/, function (m, tr) { return tr(m[1]) + ' · ' + tr(m[2]); }],
+        [/^Open-Meteo indisponible \((.*)\) : repli sur NASA POWER\.$/, function (m) { return 'Open-Meteo unavailable (' + errEN(m[1]) + '): using NASA POWER instead.'; }],
+        [/^Open-Meteo indisponible \((.*?)\) ; NASA POWER indisponible \((.*?)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
+          return 'Open-Meteo unavailable (' + errEN(m[1]) + '); NASA POWER unavailable (' + errEN(m[2]) + ').' + (m[3] ? ' Values interpolated from the bundled table (nearest point ≈ ' + m[3] + ' km).' : '');
+        }],
+        [/^Moyenne SoilGrids de la maille voisine \(≈ (\d+) km, côte ou zone non cartographiée\), pas une mesure de la parcelle\.$/, 'SoilGrids mean of the neighbouring cell (≈ $1 km, coast or unmapped area), not a measurement of the plot.'],
+        [/^Carbone organique, 0–30 cm\. (.*)$/, function (m, tr) { return 'Organic carbon, 0–30 cm. ' + tr(m[1]); }],
         [/^Pente moyenne calculée sur ≈ (.+) m à partir de 5 points d’altitude$/, 'Mean slope computed over ≈ $1 m from 5 elevation points'],
         [/^(Open-Meteo|Altitude|NASA POWER) indisponible \((.*)\)$/, function (m) { return (m[1] === 'Altitude' ? 'Elevation' : m[1]) + ' unavailable (' + errEN(m[2]) + ')'; }],
         [/^SoilGrids injoignable \((.*)\) : API REST en pause\.(.*)$/, function (m, tr) { return 'SoilGrids unreachable (' + errEN(m[1]) + '): REST API paused.' + (m[2] ? ' ' + tr(m[2].trim()) : ''); }],
@@ -109,9 +123,23 @@
         'Classe déduite de la teneur en argile et en sable (0–30 cm)': '粘土と砂の含有率から推定した区分（0–30 cm）', 'Carbone organique, 0–30 cm': '有機炭素、0–30 cm',
         'Rasters SoilGrids servis localement': 'ローカル配信のSoilGridsラスター',
         'Valeur type pré-remplie pour la démo : remplacez-la par la vôtre.': 'デモ用に入れた代表値です。ご自身の値に置き換えてください。',
-        'Sans objet : pas de puits déclaré': '該当なし：井戸の申告なし'
+        'Sans objet : pas de puits déclaré': '該当なし：井戸の申告なし',
+        'NASA POWER — climatologie 2001–2025 (MERRA-2)': 'NASA POWER — 2001–2025年の気候値（MERRA-2）', '≈ 50 km (0,5° × 0,625°)': '約50 km（0.5° × 0.625°）',
+        'Table GAIA intégrée : normales NASA POWER 2001–2025 (MERRA-2)': 'GAIA内蔵テーブル：NASA POWER 2001–2025年の平年値（MERRA-2）', 'Table GAIA intégrée': 'GAIA内蔵テーブル',
+        'grille 0,5° interpolée': '0.5°グリッドから補間', 'Grille d’environ 50 km : la pluie locale peut s’en écarter nettement.': '約50 kmのグリッド値のため、現地の降水量とは大きく異なる場合があります。',
+        'ET0 FAO-56 Penman–Monteith calculée par GAIA à partir des moyennes mensuelles NASA POWER': 'NASA POWERの月平均値からGAIAが算出したFAO-56 Penman–MonteithのET0',
+        'SoilGrids 2.0 (ISRIC), grille GAIA 5 km pré-calculée': 'SoilGrids 2.0（ISRIC）、GAIA事前計算の5 kmグリッド', 'maille ≈ 5 km (16 points à 250 m)': '約5 kmのセル（250 m間隔の16地点）',
+        'Moyenne SoilGrids de la maille de 5 km qui contient la parcelle, pas une mesure de la parcelle.': '区画を含む5 kmセルのSoilGrids平均値で、区画の実測値ではありません。',
+        'SoilGrids injoignable : API REST en pause.': 'SoilGridsに接続できません：REST APIは停止中です。'
       },
       patterns: [
+        [/^(.+?) · (.+)$/, function (m, tr) { return tr(m[1]) + ' · ' + tr(m[2]); }],
+        [/^Open-Meteo indisponible \((.*)\) : repli sur NASA POWER\.$/, function (m) { return 'Open-Meteoを取得できません（' + errJA(m[1]) + '）。NASA POWERで代替しています。'; }],
+        [/^Open-Meteo indisponible \((.*?)\) ; NASA POWER indisponible \((.*?)\)\.(?: Valeurs interpolées de la table intégrée \(point le plus proche ≈ (\d+) km\)\.)?$/, function (m) {
+          return 'Open-Meteo（' + errJA(m[1]) + '）とNASA POWER（' + errJA(m[2]) + '）を取得できません。' + (m[3] ? '内蔵テーブルから補間した値です（最寄りの格子点まで約' + m[3] + ' km）。' : '');
+        }],
+        [/^Moyenne SoilGrids de la maille voisine \(≈ (\d+) km, côte ou zone non cartographiée\), pas une mesure de la parcelle\.$/, '隣接セル（約$1 km、海岸または未地図化の地域）のSoilGrids平均値で、区画の実測値ではありません。'],
+        [/^Carbone organique, 0–30 cm\. (.*)$/, function (m, tr) { return '有機炭素、0–30 cm。' + tr(m[1]); }],
         [/^Pente moyenne calculée sur ≈ (.+) m à partir de 5 points d’altitude$/, '標高5点から約$1 mの範囲で算出した平均傾斜'],
         [/^(Open-Meteo|Altitude|NASA POWER) indisponible \((.*)\)$/, function (m) { return (m[1] === 'Altitude' ? '標高データ' : m[1]) + 'を取得できません（' + errJA(m[2]) + '）'; }],
         [/^SoilGrids injoignable \((.*)\) : API REST en pause\.(.*)$/, function (m, tr) { return 'SoilGridsに接続できません（' + errJA(m[1]) + '）：REST APIは停止中です。' + (m[2] ? tr(m[2].trim()) : ''); }],

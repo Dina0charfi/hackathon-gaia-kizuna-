@@ -6,7 +6,8 @@ from datetime import date, timedelta
 import pytest
 from fastapi.testclient import TestClient
 
-from gaia import agent, farm_monitor, farm_state, planner
+from gaia import farm_monitor, farm_state, planner
+from gaia import irrigation_agent as agent
 from gaia.main import app
 
 LAT, LON = 34.017, 10.011

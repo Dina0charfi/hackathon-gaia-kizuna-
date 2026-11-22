@@ -34,6 +34,11 @@
       f_need: 'Besoin de la culture', f_rain: 'Pluie efficace', f_irr: "Irrigation nécessaire", f_energy: 'Énergie de pompage', f_quota: 'Quota annuel',
       per_ha: 'par ha', per_year: 'par an',
       c_water_t: "Eau : besoin, pluie utile et irrigation, par mois", c_energy_t: 'Énergie de pompage par mois',
+      sat_t: 'Vérification par satellite : l’eau réellement utilisée (FAO WaPOR)', sat_p: 'WaPOR mesure chaque mois, par satellite, l’eau que le sol et les plantes rendent à l’air (évapotranspiration réelle, pixel de 100 m autour de la parcelle). On la compare au besoin calculé (FAO-56).',
+      sat_load: 'Lecture des cartes WaPOR (12 mois)…', sat_err: 'Données WaPOR indisponibles ici ({e}). Le calcul FAO-56 reste valable.',
+      sat_etc: 'Besoin calculé (Kc × ET0)', sat_aeti: 'Eau réellement évaporée (satellite)', sat_kc: 'Coefficient cultural mesuré : {k} (calculé : {kc}).',
+      sat_year: 'Sur les 12 derniers mois : {a} mm évaporés (satellite), contre {b} mm de besoin calculé.', sat_rsm: 'Humidité relative du sol ({d}) : {v} % de la capacité.',
+      sat_bare: 'Coefficient mesuré : {k} (calculé : {kc}). C’est presque l’évaporation d’un sol nu : le pixel de 100 m ne voit pas de culture irriguée (sol nu, jeune plantation, ou mauvais point sur la carte). GAIA ne l’utilise pas comme coefficient de culture ; vérifiez la position de la parcelle.', sat_use: 'Utiliser le coefficient mesuré', sat_note: 'Le pixel inclut le sol nu entre les arbres : sur un verger clairsemé, le coefficient mesuré est normalement plus bas que celui des tables. Un écart très supérieur au calcul signale une irrigation plus forte que le besoin.',
       s_etc: 'Besoin ETc', s_pe: 'Pluie efficace', s_irg: 'Irrigation brute',
       solar_t: 'Champ solaire nécessaire', solar_p: 'Dimensionné sur le mois le plus exigeant', solar_none: 'Pas de dimensionnement : il manque la surface, la hauteur de pompage ou le rayonnement.',
       cost_t: 'Coût annuel comparé', cost_none: 'Saisissez au moins un prix pour comparer.',
@@ -78,6 +83,11 @@
       f_need: 'حاجة الزراعة', f_rain: 'المطر الفعّال', f_irr: 'الري اللازم', f_energy: 'طاقة الضخ', f_quota: 'الحصة السنوية',
       per_ha: 'للهكتار', per_year: 'في السنة',
       c_water_t: 'الماء: الحاجة، المطر المفيد والري، حسب الشهر', c_energy_t: 'طاقة الضخ حسب الشهر',
+      sat_t: 'التحقق بالأقمار الصناعية: الماء المستعمل فعلاً (FAO WaPOR)', sat_p: 'يقيس WaPOR شهرياً بالأقمار الصناعية الماء الذي تعيده التربة والنباتات إلى الهواء (التبخر-النتح الفعلي، بكسل 100 م حول القطعة). نقارنه بالحاجة المحسوبة (FAO-56).',
+      sat_load: 'قراءة خرائط WaPOR (12 شهراً)…', sat_err: 'بيانات WaPOR غير متاحة هنا ({e}). حساب FAO-56 يبقى صالحاً.',
+      sat_etc: 'الحاجة المحسوبة (Kc × ET0)', sat_aeti: 'الماء المتبخر فعلاً (قمر صناعي)', sat_kc: 'المعامل الزراعي المقيس: {k} (المحسوب: {kc}).',
+      sat_year: 'خلال آخر 12 شهراً: {a} مم متبخرة (قمر صناعي) مقابل {b} مم حاجة محسوبة.', sat_rsm: 'الرطوبة النسبية للتربة ({d}): {v} % من السعة.',
+      sat_bare: 'المعامل المقاس: {k} (المحسوب: {kc}). هذا يكاد يكون تبخر تربة عارية: لا يرى البكسل (100 م) زراعة مروية (تربة عارية، غراسة فتية، أو نقطة خاطئة على الخريطة). لا تستعمله غايا كمعامل زراعة؛ تحقق من موقع القطعة.', sat_use: 'استعمال المعامل المقيس', sat_note: 'يشمل البكسل التربة العارية بين الأشجار: في بستان متباعد يكون المعامل المقيس عادة أقل من الجداول. فرق أعلى بكثير من الحساب يدل على ري أكثر من الحاجة.',
       s_etc: 'الحاجة ETc', s_pe: 'المطر الفعّال', s_irg: 'الري الإجمالي',
       solar_t: 'الحقل الشمسي اللازم', solar_p: 'محسوب على الشهر الأكثر طلباً', solar_none: 'لا يمكن الحساب: تنقص المساحة أو ارتفاع الضخ أو الإشعاع.',
       cost_t: 'مقارنة الكلفة السنوية', cost_none: 'أدخل سعراً واحداً على الأقل للمقارنة.',
@@ -122,6 +132,11 @@
       f_need: 'Crop need', f_rain: 'Effective rainfall', f_irr: 'Irrigation needed', f_energy: 'Pumping energy', f_quota: 'Annual quota',
       per_ha: 'per ha', per_year: 'per year',
       c_water_t: 'Water: need, useful rain and irrigation, by month', c_energy_t: 'Pumping energy by month',
+      sat_t: 'Satellite check: water actually used (FAO WaPOR)', sat_p: 'Every month WaPOR measures from satellites the water that soil and plants give back to the air (actual evapotranspiration, 100 m pixel around the plot). It is compared with the computed need (FAO-56).',
+      sat_load: 'Reading WaPOR maps (12 months)…', sat_err: 'WaPOR data unavailable here ({e}). The FAO-56 calculation still stands.',
+      sat_etc: 'Computed need (Kc × ET0)', sat_aeti: 'Water actually evaporated (satellite)', sat_kc: 'Measured crop coefficient: {k} (computed: {kc}).',
+      sat_year: 'Over the last 12 months: {a} mm evaporated (satellite), against {b} mm of computed need.', sat_rsm: 'Relative soil moisture ({d}): {v} % of capacity.',
+      sat_bare: "Measured coefficient: {k} (computed: {kc}). That is close to bare-soil evaporation: the 100 m pixel sees no irrigated crop (bare soil, young planting, or the wrong point on the map). GAIA does not use it as a crop coefficient; check the plot's position.", sat_use: 'Use the measured coefficient', sat_note: 'The pixel includes bare soil between trees: in a sparse orchard the measured coefficient is normally lower than the tables. A value far above the computation points to more irrigation than the crop needs.',
       s_etc: 'Need ETc', s_pe: 'Effective rainfall', s_irg: 'Gross irrigation',
       solar_t: 'Solar array needed', solar_p: 'Sized for the most demanding month', solar_none: 'No sizing: the area, pumping head or radiation is missing.',
       cost_t: 'Annual cost compared', cost_none: 'Enter at least one price to compare.',
@@ -166,6 +181,11 @@
       f_need: '作物の必要量', f_rain: '有効雨量', f_irr: '必要な灌漑量', f_energy: '揚水エネルギー', f_quota: '年間割当量',
       per_ha: 'haあたり', per_year: '年あたり',
       c_water_t: '水：必要量・有効雨量・灌漑量（月別）', c_energy_t: '月別の揚水エネルギー',
+      sat_t: '衛星による確認：実際に使われた水（FAO WaPOR）', sat_p: 'WaPORは毎月、衛星で土壌と植物が大気に返す水（実蒸発散量、区画周辺100 mの画素）を測ります。計算した必要量（FAO-56）と比べます。',
+      sat_load: 'WaPORの地図を読み込み中（12か月）…', sat_err: 'この地点のWaPORデータは利用できません（{e}）。FAO-56の計算はそのまま有効です。',
+      sat_etc: '計算した必要量（Kc × ET0）', sat_aeti: '実際に蒸発した水（衛星）', sat_kc: '実測の作物係数：{k}（計算値：{kc}）。',
+      sat_year: '過去12か月：衛星で{a} mmの蒸発、計算上の必要量は{b} mm。', sat_rsm: '土壌の相対水分（{d}）：容量の{v} %。',
+      sat_bare: '実測係数：{k}（計算値：{kc}）。これは裸地の蒸発に近い値です。100 mの画素には灌漑された作物が見えていません（裸地、若い植栽、または地図上の位置違い）。GAIAは作物係数として使いません。区画の位置を確認してください。', sat_use: '実測の係数を使う', sat_note: '画素には樹間の裸地も含まれるため、まばらな果樹園では実測係数は通常、表の値より低くなります。計算よりずっと高い場合は必要以上の灌漑を示します。',
       s_etc: '必要量ETc', s_pe: '有効雨量', s_irg: '総灌漑量',
       solar_t: '必要な太陽光アレイ', solar_p: '最も需要の大きい月に合わせて設計', solar_none: '設計できません：面積、揚程、または日射量が不足しています。',
       cost_t: '年間コストの比較', cost_none: '比較するには価格を1つ以上入力してください。',
@@ -323,6 +343,39 @@
     return card;
   }
 
+  /* satellite check (js/wapor.js): measured actual ET vs the FAO-56 estimate, same calendar months */
+  var SAT = null, satErr = null, satAsked = false;
+  function fillS(str, m) { return String(str).replace(/\{(\w+)\}/g, function (_, k) { return m[k] !== undefined ? m[k] : ''; }); }
+  function satCard(r, months) {
+    var W = window.GAIA_WAPOR, card = el('div', { class: 'gp-card', style: 'margin-top:16px' }, [el('h2', null, [t('sat_t')]), el('p', { class: 'small muted', style: 'margin-top:4px' }, [t('sat_p')])]);
+    if (!W) return card;
+    if (!SAT && !satErr) {
+      card.appendChild(el('p', { class: 'small muted', style: 'margin-top:8px' }, [el('span', { class: 'gp-spin' }), ' ', t('sat_load')]));
+      if (!satAsked) { satAsked = true; W.monthly(p.lat, p.lon).then(function (x) { SAT = x; draw(); }, function (e) { satErr = String(e && e.message || e); draw(); }); }
+      return card;
+    }
+    if (satErr) { card.appendChild(G.note('info', fillS(t('sat_err'), { e: satErr }))); return card; }
+    var byM = {}; SAT.months.forEach(function (m) { byM[m.month] = m; });
+    var etc = r.months.map(function (x) { return x.etc; }), aeti = months.map(function (_, i) { return byM[i] && byM[i].aeti !== null ? byM[i].aeti : null; });
+    var sumA = 0, sumE = 0; aeti.forEach(function (a, i) { if (a !== null && etc[i] !== null) { sumA += a; sumE += etc[i] || 0; } });
+    var chart = el('div');
+    card.appendChild(chart);
+    card.appendChild(el('p', { style: 'margin-top:8px' }, [fillS(t('sat_year'), { a: fmt(sumA), b: fmt(sumE) })]));
+    if (SAT.kcSat !== null && SAT.kcSat < 0.25) card.appendChild(G.note('warn', fillS(t('sat_bare'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) })));
+    else if (SAT.kcSat !== null) card.appendChild(el('p', null, [fillS(t('sat_kc'), { k: fmt(SAT.kcSat, 2), kc: fmt(num(S.kc), 2) }), ' ',
+      el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { S.kc = Math.round(SAT.kcSat * 100) / 100; persist(); renderAll(); } }, [t('sat_use')])]));
+    if (SAT.rsm) card.appendChild(el('p', null, [fillS(t('sat_rsm'), { d: SAT.rsm.start || SAT.rsm.period, v: fmt(SAT.rsm.value * 100, 0) })]));
+    card.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('sat_note')]));
+    card.appendChild(el('p', { class: 'small muted', style: 'margin-top:6px' }, [el('a', { href: SAT.url, target: '_blank', rel: 'noopener' }, [SAT.source]), ' · ' + SAT.months[0].period + ' → ' + SAT.months[SAT.months.length - 1].period]));
+    setTimeout(function () {
+      G.barChart(chart, { labels: months, unit: 'mm', title: t('sat_t'), series: [
+        { name: t('sat_etc'), color: '#7C9455', values: etc },
+        { name: t('sat_aeti'), color: '#C0703A', values: aeti }
+      ] });
+    }, 0);
+    return card;
+  }
+
   function draw() {
     if (!out) return;
     G.clear(out);
@@ -371,6 +424,7 @@
       { name: t('s_pe'), color: '#9CB7C9', values: r.months.map(function (x) { return x.pe; }) },
       { name: t('s_irg'), color: '#2F5A75', values: r.months.map(function (x) { return x.irg; }) }
     ] });
+    out.appendChild(satCard(r, months));
     if (T.kwh > 0) {
       out.appendChild(el('div', { class: 'gp-card', style: 'margin-top:16px' }, [el('h2', null, [t('c_energy_t')]), c2]));
       G.barChart(c2, { labels: months, unit: 'kWh' + ha, title: t('c_energy_t'), series: [{ name: t('f_energy'), color: '#A88746', values: r.months.map(function (x) { return x.kwh || 0; }) }] });
@@ -428,6 +482,7 @@
     persist();
     out = el('div', { 'aria-live': 'polite' });
     app.appendChild(el('div', { class: 'nx' }, [inputs(), out]));
+    app.appendChild(neighbourCard());
     draw();
   }
 
@@ -1458,6 +1513,78 @@
     card.appendChild(el('div', { class: 'ss-choice', style: 'margin-top:6px' }, buttons));
     return card;
   }
+
+
+  /* ---------------------------------------------------------- two neighbours: compare and share one source (light) */
+  var NB = Object.assign({ crop: 'cereal', area: '' }, G.load('gaia.nexus.neighbour', null) || {});
+  function monthlyVol(crop, area, kc, months) {
+    var r = N.compute({ et0: CM ? CM.et0 : null, rain: CM ? CM.rain : null, ghi: null, kc: kc, months: months, area_ha: area, ea: num(S.ea), head_m: null, pump_eff: num(S.pump_eff), pr: num(S.pr), prices: {} });
+    return r.missing.indexOf('climate') !== -1 || r.missing.indexOf('area') !== -1 || r.missing.indexOf('kc') !== -1 ? null : r;
+  }
+  function neighbourCard() {
+    var res = el('div', { 'aria-live': 'polite' });
+    function drawNb() {
+      G.clear(res);
+      var mine = monthlyVol(S.crop, num(S.area), num(S.kc), S.months);
+      var C = N.CROPS[NB.crop], his = C ? monthlyVol(NB.crop, num(NB.area), C.kc, C.months) : null;
+      if (!mine || !his) { res.appendChild(G.note('info', t('nb_need'))); return; }
+      var a = mine.totals.vol, b = his.totals.vol, tot = a + b, months = G.t('months');
+      res.appendChild(el('div', { class: 'flow', style: 'margin-top:12px' }, [
+        el('div', { class: 'fbox quota' }, [el('b', null, [t('nb_me')]), el('div', { class: 'v' }, [fmt(a) + ' m³']), el('span', { class: 'u' }, [t('per_year')])]),
+        el('div', { class: 'fbox quota' }, [el('b', null, [t('nb_him')]), el('div', { class: 'v' }, [fmt(b) + ' m³']), el('span', { class: 'u' }, [t('per_year')])]),
+        el('div', { class: 'fbox water' }, [el('b', null, [t('nb_total')]), el('div', { class: 'v' }, [fmt(tot) + ' m³']), el('span', { class: 'u' }, [tot > 0 ? t('nb_split') + ' ' + fmt(a / tot * 100) + ' % / ' + fmt(b / tot * 100) + ' %' : ''])])
+      ]));
+      var both = 0;
+      var rows = mine.months.map(function (m, i) { var x = m.vol || 0, y = his.months[i].vol || 0; if (x > 0 && y > 0) both++; return [months[i], x, y]; });
+      var peakOf = function (k) { var best = -1, bi = -1; rows.forEach(function (r, i) { if (r[k] > best) { best = r[k]; bi = i; } }); return best > 0 ? months[bi] : '—'; };
+      res.appendChild(el('p', { style: 'margin-top:10px' }, [t('nb_peaks') + ' ' + peakOf(1) + ' · ' + peakOf(2) + '. ' + (both ? t('nb_overlap').replace('{n}', both) : t('nb_nooverlap'))]));
+      res.appendChild(el('div', { class: 'gp-table-wrap', style: 'margin-top:8px' }, [el('table', { class: 'gp-table' }, [
+        el('thead', null, [el('tr', null, [t('th_month'), t('nb_me'), t('nb_him'), t('nb_total')].map(function (h, i) { return el('th', { class: i ? 'num' : null }, [h]); }))]),
+        el('tbody', null, rows.map(function (r) { return el('tr', null, [el('td', null, [r[0]]), el('td', { class: 'num' }, [fmt(r[1])]), el('td', { class: 'num' }, [fmt(r[2])]), el('td', { class: 'num' }, [fmt(r[1] + r[2])])]); }))
+      ])]));
+      res.appendChild(G.note('ok', t('nb_one')));
+      res.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('nb_assump')]));
+    }
+    var sel = el('select', { id: 'nb-crop', onchange: function (e) { NB.crop = e.target.value; G.save('gaia.nexus.neighbour', NB); drawNb(); } },
+      ['olive', 'palm', 'citrus', 'cereal', 'veg'].map(function (k) { return el('option', { value: k, selected: NB.crop === k }, [t('c_' + k)]); }));
+    drawNb();
+    return el('details', { class: 'gp-card gp-more', style: 'margin-top:18px' }, [
+      el('summary', null, [t('nb_t')]),
+      el('p', { class: 'small', style: 'margin-top:8px;color:var(--g-ink-2);max-width:80ch' }, [t('nb_p')]),
+      el('div', { class: 'gp-grid gp-cols-3', style: 'margin-top:10px' }, [
+        el('div', { class: 'gp-field' }, [el('label', { for: 'nb-crop' }, [t('nb_crop')]), sel]),
+        el('div', { class: 'gp-field' }, [el('label', { for: 'nb-area' }, [t('nb_area')]),
+          el('input', { id: 'nb-area', type: 'number', step: 'any', min: 0, inputmode: 'decimal', value: NB.area, oninput: function (e) { NB.area = e.target.value; G.save('gaia.nexus.neighbour', NB); drawNb(); } })])
+      ]),
+      res]);
+  }
+
+  G.addStrings({
+    fr: { nb_t: 'Partager la source avec un voisin', nb_p: 'Deux parcelles, une seule source : comparez vos besoins en eau mois par mois et voyez ce qu’une source commune permet d’éviter de gaspiller.',
+      nb_crop: 'Culture du voisin', nb_area: 'Surface du voisin (ha)', nb_me: 'Moi', nb_him: 'Voisin', nb_total: 'Ensemble', nb_split: 'Part :',
+      nb_need: 'Renseignez ma culture et ma surface ci-dessus, puis la surface du voisin, pour comparer.', nb_peaks: 'Mois de plus grand besoin (moi · voisin) :',
+      nb_overlap: 'Vos besoins se chevauchent sur {n} mois : le tour d’eau compte.', nb_nooverlap: 'Vos besoins ne se chevauchent pas : le partage est facile.',
+      nb_one: 'Une seule source : on pompe une fois, la limite commune est la somme des deux quotas, jamais plus. Si l’un n’a pas besoin de son tour, il le cède à l’autre : l’eau n’est pas perdue.',
+      nb_assump: 'Hypothèse : le voisin a le même climat que votre parcelle ; sa culture et sa surface sont saisies par vous.' },
+    ar: { nb_t: 'تقاسم المصدر مع جار', nb_p: 'قطعتان ومصدر واحد: قارنوا حاجتكم من الماء شهراً بشهر وانظروا ما يمكن أن يوفّره مصدر مشترك من الهدر.',
+      nb_crop: 'محصول الجار', nb_area: 'مساحة الجار (هك)', nb_me: 'أنا', nb_him: 'الجار', nb_total: 'معاً', nb_split: 'الحصة:',
+      nb_need: 'أدخل محصولي ومساحتي أعلاه ثم مساحة الجار للمقارنة.', nb_peaks: 'أشهر الذروة (أنا · الجار):',
+      nb_overlap: 'تتقاطع حاجتكما في {n} أشهر: دور السقي مهم.', nb_nooverlap: 'لا تتقاطع حاجتكما: التقاسم سهل.',
+      nb_one: 'مصدر واحد: نضخّ مرة واحدة، والحد المشترك هو مجموع الحصتين لا أكثر. إن لم يحتج أحدكما إلى دوره يتنازل عنه للآخر فلا يضيع الماء.',
+      nb_assump: 'فرضية: للجار نفس مناخ قطعتك؛ محصوله ومساحته من إدخالك.' },
+    en: { nb_t: 'Share the source with a neighbour', nb_p: 'Two plots, one source: compare your water needs month by month and see what a shared source can stop from being wasted.',
+      nb_crop: 'Neighbour’s crop', nb_area: 'Neighbour’s area (ha)', nb_me: 'Me', nb_him: 'Neighbour', nb_total: 'Together', nb_split: 'Share:',
+      nb_need: 'Fill in my crop and area above, then the neighbour’s area, to compare.', nb_peaks: 'Peak need month (me · neighbour):',
+      nb_overlap: 'Your needs overlap over {n} months: the irrigation turn matters.', nb_nooverlap: 'Your needs do not overlap: sharing is easy.',
+      nb_one: 'One source: pump once, the shared limit is the sum of the two quotas, never more. If one of you does not need a turn, hand it to the other: the water is not lost.',
+      nb_assump: 'Assumption: the neighbour has the same climate as your plot; their crop and area are entered by you.' },
+    ja: { nb_t: '隣の農家と水源を共有する', nb_p: '2つの区画で1つの水源。月ごとの水の必要量を比べ、共同の水源でどれだけ無駄を防げるかを見ましょう。',
+      nb_crop: '隣の作物', nb_area: '隣の面積（ha）', nb_me: '自分', nb_him: '隣', nb_total: '合計', nb_split: '割合：',
+      nb_need: '比べるには、上で自分の作物と面積を入れ、続けて隣の面積を入れてください。', nb_peaks: '必要量が最大の月（自分・隣）：',
+      nb_overlap: '必要な時期が{n}か月重なります。水の順番が大切です。', nb_nooverlap: '必要な時期が重ならないので、共有しやすいです。',
+      nb_one: '水源は1つ。くみ上げるのは1回で、共同の上限は2人の割当の合計を超えません。順番が不要な方は相手に譲れば、水は無駄になりません。',
+      nb_assump: '前提：隣はあなたの区画と同じ気候です。隣の作物と面積はあなたが入力します。' }
+  });
 
   // crop labels live in land.js; provide them here too
   G.addStrings({

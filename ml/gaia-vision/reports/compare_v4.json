@@ -1,0 +1,277 @@
+{
+  "effb0": {
+    "grape": {
+      "field": {
+        "n": 442,
+        "accuracy": 0.9276,
+        "macro_f1": 0.8468,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9276,
+        "ece": 0.0221
+      },
+      "lab": {
+        "n": 252,
+        "accuracy": 0.9841,
+        "macro_f1": 0.9853,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9841,
+        "ece": 0.0133
+      },
+      "classes": [
+        "bacterial_leaf_spot",
+        "black_rot",
+        "downy_mildew",
+        "esca",
+        "healthy",
+        "isariopsis_leaf_spot",
+        "powdery_mildew"
+      ]
+    },
+    "pepper": {
+      "field": {
+        "n": 19,
+        "accuracy": 0.7368,
+        "macro_f1": 0.7339,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.7368,
+        "ece": 0.1804
+      },
+      "lab": {
+        "n": 135,
+        "accuracy": 0.9333,
+        "macro_f1": 0.9331,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9333,
+        "ece": 0.0433
+      },
+      "classes": [
+        "bacterial_spot",
+        "healthy"
+      ]
+    },
+    "potato": {
+      "field": {
+        "n": 485,
+        "accuracy": 0.6804,
+        "macro_f1": 0.6635,
+        "coverage_at_threshold": 0.4371,
+        "accuracy_when_answering": 0.9245,
+        "ece": 0.0457
+      },
+      "lab": {
+        "n": 166,
+        "accuracy": 0.9398,
+        "macro_f1": 0.9393,
+        "coverage_at_threshold": 0.6386,
+        "accuracy_when_answering": 0.9906,
+        "ece": 0.1392
+      },
+      "classes": [
+        "bacterial",
+        "fungal_leaf_spot",
+        "healthy",
+        "late_blight",
+        "nematode",
+        "pest_damage",
+        "virus"
+      ]
+    },
+    "tomato": {
+      "field": {
+        "n": 106,
+        "accuracy": 0.4717,
+        "macro_f1": 0.4657,
+        "coverage_at_threshold": 0.0189,
+        "accuracy_when_answering": 1.0,
+        "ece": 0.209
+      },
+      "lab": {
+        "n": 669,
+        "accuracy": 0.9043,
+        "macro_f1": 0.9065,
+        "coverage_at_threshold": 0.1883,
+        "accuracy_when_answering": 1.0,
+        "ece": 0.0605
+      },
+      "classes": [
+        "bacterial_spot",
+        "early_blight",
+        "healthy",
+        "late_blight",
+        "leaf_mold",
+        "mosaic_virus",
+        "septoria_leaf_spot",
+        "spider_mites",
+        "target_spot",
+        "yellow_leaf_curl_virus"
+      ]
+    }
+  },
+  "plantnet": {
+    "grape": {
+      "field": {
+        "n": 442,
+        "accuracy": 0.9434,
+        "macro_f1": 0.8546,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9434,
+        "ece": 0.0191
+      },
+      "lab": {
+        "n": 252,
+        "accuracy": 0.9881,
+        "macro_f1": 0.9911,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9881,
+        "ece": 0.0161
+      },
+      "classes": [
+        "bacterial_leaf_spot",
+        "black_rot",
+        "downy_mildew",
+        "esca",
+        "healthy",
+        "isariopsis_leaf_spot",
+        "powdery_mildew"
+      ]
+    },
+    "pepper": {
+      "field": {
+        "n": 19,
+        "accuracy": 0.7368,
+        "macro_f1": 0.7339,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.7368,
+        "ece": 0.1889
+      },
+      "lab": {
+        "n": 135,
+        "accuracy": 0.9852,
+        "macro_f1": 0.9852,
+        "coverage_at_threshold": 1.0,
+        "accuracy_when_answering": 0.9852,
+        "ece": 0.0366
+      },
+      "classes": [
+        "bacterial_spot",
+        "healthy"
+      ]
+    },
+    "potato": {
+      "field": {
+        "n": 485,
+        "accuracy": 0.732,
+        "macro_f1": 0.7181,
+        "coverage_at_threshold": 0.6041,
+        "accuracy_when_answering": 0.8942,
+        "ece": 0.0255
+      },
+      "lab": {
+        "n": 166,
+        "accuracy": 0.9157,
+        "macro_f1": 0.8903,
+        "coverage_at_threshold": 0.753,
+        "accuracy_when_answering": 0.984,
+        "ece": 0.106
+      },
+      "classes": [
+        "bacterial",
+        "fungal_leaf_spot",
+        "healthy",
+        "late_blight",
+        "nematode",
+        "pest_damage",
+        "virus"
+      ]
+    },
+    "tomato": {
+      "field": {
+        "n": 106,
+        "accuracy": 0.5283,
+        "macro_f1": 0.5435,
+        "coverage_at_threshold": 0.1038,
+        "accuracy_when_answering": 0.8182,
+        "ece": 0.1973
+      },
+      "lab": {
+        "n": 669,
+        "accuracy": 0.9253,
+        "macro_f1": 0.9267,
+        "coverage_at_threshold": 0.2033,
+        "accuracy_when_answering": 1.0,
+        "ece": 0.061
+      },
+      "classes": [
+        "bacterial_spot",
+        "early_blight",
+        "healthy",
+        "late_blight",
+        "leaf_mold",
+        "mosaic_virus",
+        "septoria_leaf_spot",
+        "spider_mites",
+        "target_spot",
+        "yellow_leaf_curl_virus"
+      ]
+    }
+  },
+  "effb0+plantnet": {
+    "tomato": {
+      "field": {
+        "n": 106,
+        "accuracy": 0.5472,
+        "macro_f1": 0.5523,
+        "coverage_at_threshold": 0.0755,
+        "accuracy_when_answering": 0.75,
+        "ece": 0.2263
+      },
+      "lab": {
+        "n": 669,
+        "accuracy": 0.9372,
+        "macro_f1": 0.9384,
+        "coverage_at_threshold": 0.2182,
+        "accuracy_when_answering": 1.0,
+        "ece": 0.0438
+      },
+      "classes": [
+        "bacterial_spot",
+        "early_blight",
+        "healthy",
+        "late_blight",
+        "leaf_mold",
+        "mosaic_virus",
+        "septoria_leaf_spot",
+        "spider_mites",
+        "target_spot",
+        "yellow_leaf_curl_virus"
+      ]
+    },
+    "potato": {
+      "field": {
+        "n": 485,
+        "accuracy": 0.7402,
+        "macro_f1": 0.7097,
+        "coverage_at_threshold": 0.6124,
+        "accuracy_when_answering": 0.8822,
+        "ece": 0.0366
+      },
+      "lab": {
+        "n": 166,
+        "accuracy": 0.9096,
+        "macro_f1": 0.9159,
+        "coverage_at_threshold": 0.759,
+        "accuracy_when_answering": 0.9762,
+        "ece": 0.1012
+      },
+      "classes": [
+        "bacterial",
+        "fungal_leaf_spot",
+        "healthy",
+        "late_blight",
+        "nematode",
+        "pest_damage",
+        "virus"
+      ]
+    }
+  }
+}
