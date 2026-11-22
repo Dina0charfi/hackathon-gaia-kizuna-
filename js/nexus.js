@@ -376,7 +376,21 @@
     return card;
   }
 
-  function draw() {
+  function jumpTo(y) { try { window.scrollTo({ top: y, behavior: 'instant' }); } catch (e) { window.scrollTo(0, y); } }
+  // redraw without moving the page: keep the area's height while it is rebuilt, then put the scroll back
+  function keepPlace(node, fn) {
+    var se = document.scrollingElement || document.documentElement, y = se.scrollTop;
+    if (node) { node.style.minHeight = node.offsetHeight + 'px'; node.style.overflowAnchor = 'none'; }
+    fn();
+    jumpTo(y);
+    setTimeout(function () {                                 // charts are drawn a moment later
+      if (node) node.style.minHeight = '';
+      if (Math.abs(se.scrollTop - y) > 2) jumpTo(y);
+    }, 80);
+  }
+  function draw() { if (out) keepPlace(out, drawNow); }
+
+  function drawNow() {
     if (!out) return;
     G.clear(out);
     var base = {
@@ -475,7 +489,8 @@
     ]));
   }
 
-  function renderAll() {
+  function renderAll() { keepPlace(app, renderAllNow); }
+  function renderAllNow() {
     G.clear(app);
     app.appendChild(el('div', { class: 'gp-principle', style: 'margin-bottom:8px' }, [t('principle')]));
     app.appendChild(el('p', { class: 'small', style: 'margin:0 0 18px;color:var(--g-ink-2);max-width:80ch' }, [t('principle_p')]));

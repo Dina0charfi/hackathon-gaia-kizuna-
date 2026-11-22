@@ -467,6 +467,15 @@
 
   draw();
   fetchWeather().then(function (w) { WX = w; draw(); });
-  if (window.GAIA_FARMREC) GAIA_FARMREC.onChange(function () { if (WX) draw(); });
+  function jumpTo(y) { try { window.scrollTo({ top: y, behavior: 'instant' }); } catch (e) { window.scrollTo(0, y); } }
+  // calendar changes redraw the dashboard without moving the page
+  if (window.GAIA_FARMREC) GAIA_FARMREC.onChange(function () {
+    if (!WX) return;
+    var se = document.scrollingElement || document.documentElement, y = se.scrollTop;
+    app.style.minHeight = app.offsetHeight + 'px';
+    draw();
+    jumpTo(y);
+    setTimeout(function () { app.style.minHeight = ''; if (Math.abs(se.scrollTop - y) > 2) jumpTo(y); }, 80);
+  });
   G.onLang(function () { drawTabs(); draw(); });
 }());
