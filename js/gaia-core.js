@@ -82,7 +82,7 @@
     fr: {
       tagline: "L'intelligence qui comprend la terre",
       nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab', nav_agent: 'Agent',
-      nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
+      nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_market: 'Vendre ma récolte', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
       skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte',
       foot_line: "GAIA n'impose pas la technologie à la terre. GAIA adapte la technologie à la terre.",
@@ -102,7 +102,7 @@
     ar: {
       tagline: 'ذكاء يفهم الأرض',
       nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء', nav_agent: 'الوكيل',
-      nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
+      nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_market: 'بيع محصولي', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
       skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي',
       foot_line: 'غايا لا تفرض التكنولوجيا على الأرض، بل تكيّف التكنولوجيا مع الأرض.',
@@ -122,7 +122,7 @@
     en: {
       tagline: 'Intelligence that understands the land',
       nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab', nav_agent: 'Agent',
-      nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
+      nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_market: 'Sell my crop', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
       skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account',
       foot_line: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
@@ -142,7 +142,7 @@
     ja: {
       tagline: '土地を理解するインテリジェンス',
       nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ', nav_agent: 'エージェント',
-      nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
+      nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_market: '作物を売る', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
       skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント',
       foot_line: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
@@ -385,7 +385,7 @@
   /* ---------------------------------------------------------- shell */
   var NAV = [
     ['home', 'home.html', 'nav_home'], ['land', 'land.html', 'nav_land'], ['engine', 'engine.html', 'nav_engine'],
-    ['lab', 'lab.html', 'nav_lab'], ['agent', 'agent.html', 'nav_agent'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'],
+    ['lab', 'lab.html', 'nav_lab'], ['agent', 'agent.html', 'nav_agent'], ['health', 'health.html', 'nav_health'], ['nexus', 'nexus.html', 'nav_nexus'], ['farm', 'farm.html', 'nav_farm'], ['market', 'market.html', 'nav_market'],
     ['biz', 'business.html', 'nav_biz'], ['agv', 'agrivoltaic.html', 'nav_agv'], ['lib', 'library.html', 'nav_lib']
   ];
 
