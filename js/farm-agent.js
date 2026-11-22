@@ -21,7 +21,7 @@
       fr_last: 'dernière vérification : {d}', fr_notif: 'Recevoir les alertes en notification', fr_notif_on: 'Notifications activées',
       fr_mon_note: 'La vérification tourne dans le service GAIA : il doit être lancé à l’heure choisie.',
       fr_hours: '{a} h–{b} h',
-      act_t: 'Action proposée par l’agent', act_confirm: 'Confirmer', act_cancel: 'Annuler', act_done: 'Appliqué ✓', act_cancelled: 'Annulé',
+      act_t: 'Action proposée par l’agent', act_confirm: 'Confirmer', act_cancel: 'Annuler', act_done: 'Appliqué', act_cancelled: 'Annulé',
       act_log_irrigation: 'Noter un arrosage : {mm} mm nets le {d}', act_update_settings: 'Modifier les réglages : {s}',
       act_set_monitoring_on: 'Activer la vérification automatique chaque matin à {h} h', act_set_monitoring_off: 'Désactiver la vérification automatique',
       act_save_plan: 'Enregistrer le plan ({m}) : {n} jour(s) d’irrigation, {mm} mm, {m3} m³', act_save_plan_none: 'Enregistrer le plan ({m}) : aucune irrigation nécessaire',
@@ -43,7 +43,7 @@
       fr_last: 'آخر تحقق: {d}', fr_notif: 'تلقي التنبيهات كإشعارات', fr_notif_on: 'الإشعارات مفعّلة',
       fr_mon_note: 'يعمل التحقق داخل خدمة GAIA: يجب أن تكون مشغّلة في الساعة المختارة.',
       fr_hours: '{a}–{b}',
-      act_t: 'إجراء يقترحه الوكيل', act_confirm: 'تأكيد', act_cancel: 'إلغاء', act_done: 'تم التطبيق ✓', act_cancelled: 'أُلغي',
+      act_t: 'إجراء يقترحه الوكيل', act_confirm: 'تأكيد', act_cancel: 'إلغاء', act_done: 'تم التطبيق', act_cancelled: 'أُلغي',
       act_log_irrigation: 'تسجيل سقي: {mm} مم صافية يوم {d}', act_update_settings: 'تعديل الإعدادات: {s}',
       act_set_monitoring_on: 'تفعيل التحقق الآلي كل صباح على الساعة {h}', act_set_monitoring_off: 'إيقاف التحقق الآلي',
       act_save_plan: 'حفظ الخطة ({m}): {n} يوم ري، {mm} مم، {m3} م³', act_save_plan_none: 'حفظ الخطة ({m}): لا حاجة للري',
@@ -65,7 +65,7 @@
       fr_last: 'last check: {d}', fr_notif: 'Get alerts as notifications', fr_notif_on: 'Notifications on',
       fr_mon_note: 'The check runs inside the GAIA service: it must be running at the chosen hour.',
       fr_hours: '{a}:00–{b}:00',
-      act_t: 'Action proposed by the agent', act_confirm: 'Confirm', act_cancel: 'Cancel', act_done: 'Applied ✓', act_cancelled: 'Cancelled',
+      act_t: 'Action proposed by the agent', act_confirm: 'Confirm', act_cancel: 'Cancel', act_done: 'Applied', act_cancelled: 'Cancelled',
       act_log_irrigation: 'Record an irrigation: {mm} net mm on {d}', act_update_settings: 'Change settings: {s}',
       act_set_monitoring_on: 'Turn on the automatic check every morning at {h}:00', act_set_monitoring_off: 'Turn off the automatic check',
       act_save_plan: 'Save the plan ({m}): {n} irrigation day(s), {mm} mm, {m3} m³', act_save_plan_none: 'Save the plan ({m}): no irrigation needed',
@@ -87,7 +87,7 @@
       fr_last: '最終チェック：{d}', fr_notif: 'アラートを通知で受け取る', fr_notif_on: '通知オン',
       fr_mon_note: 'チェックはGAIAサービス内で動きます：指定時刻に起動している必要があります。',
       fr_hours: '{a}時〜{b}時',
-      act_t: 'エージェントが提案する操作', act_confirm: '確認', act_cancel: '取り消す', act_done: '適用済み ✓', act_cancelled: '取り消し',
+      act_t: 'エージェントが提案する操作', act_confirm: '確認', act_cancel: '取り消す', act_done: '適用済み', act_cancelled: '取り消し',
       act_log_irrigation: '灌漑を記録：{d}に正味{mm} mm', act_update_settings: '設定を変更：{s}',
       act_set_monitoring_on: '毎朝{h}時の自動チェックをオンにする', act_set_monitoring_off: '自動チェックをオフにする',
       act_save_plan: '計画を保存（{m}）：灌漑{n}日、{mm} mm、{m3} m³', act_save_plan_none: '計画を保存（{m}）：灌漑不要',
@@ -239,8 +239,8 @@
     });
     var alBtns = [];
     if (unread.length) alBtns.push(btn(t('fr_read'), 'ghost', function () { act({ type: 'mark_alerts_read' }); }));
-    if (window.Notification) alBtns.push(Notification.permission === 'granted' ? btn('🔔 ' + t('fr_notif_on'), 'ghost', null, 'disabled')
-      : btn('🔔 ' + t('fr_notif'), 'ghost', function () { Notification.requestPermission().then(emit); }));
+    if (window.Notification) alBtns.push(Notification.permission === 'granted' ? btn(G.iconText('bell', t('fr_notif_on')), 'ghost', null, 'disabled')
+      : btn(G.iconText('bell', t('fr_notif')), 'ghost', function () { Notification.requestPermission().then(emit); }));
     if (alBtns.length) alKids.push(row(alBtns));
     c.appendChild(box(t('fr_alerts') + (unread.length ? ' (' + unread.length + ')' : ''), null, alKids));
 
@@ -280,10 +280,10 @@
     else plKids.push(el('div', { class: 'gp-table-wrap', style: 'margin-top:8px' }, [el('table', { class: 'gp-table' }, [el('tbody', null, upcoming.map(function (d) {
       return el('tr', null, [el('td', null, [el('b', null, [day(d.date)])]), el('td', { class: 'num' }, [fmt(d.mm, 1) + ' mm · ' + fmt(d.m3) + ' m³']),
         el('td', null, [hoursText(d.hours)]),
-        el('td', { style: 'text-align:end' }, [d.done ? el('b', { style: 'color:var(--g-forest)' }, ['✓ ' + t('fr_done')])
+        el('td', { style: 'text-align:end' }, [d.done ? el('b', { style: 'color:var(--g-forest)' }, [G.iconText('ok', t('fr_done'))])
           : btn(t('fr_mark_done'), 'ghost', function () { act({ type: 'log_irrigation', params: { mm: d.mm, date: d.date } }); })])]);
     }))])]));
-    plKids.push(row([btn(R.saving ? t('fr_saving') : (s.plan_saved_at ? '↻ ' + t('fr_resave') : '📅 ' + t('fr_save')),
+    plKids.push(row([btn(R.saving ? t('fr_saving') : (s.plan_saved_at ? G.iconText('refresh', t('fr_resave')) : G.iconText('calendar', t('fr_save'))),
       s.plan_saved_at ? 'ghost' : 'primary', function () { savePlan(opts); })]));
     c.appendChild(box(t('fr_plan'), s.plan_saved_at ? fill('fr_saved_at', { d: day(s.plan_saved_at) }) : null, plKids));
 
@@ -294,7 +294,7 @@
     c.appendChild(box(t('fr_log'), null, [
       lg.length ? el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-top:8px' }, lg.map(function (e) {
         return el('span', { style: 'padding:4px 10px;border-radius:999px;background:#e8f0f5;color:#24506b;font-size:13px;font-weight:600' },
-          ['💧 ' + day(e.date) + ' · ' + fmt(e.mm, 1) + ' mm']);
+          [G.iconText('drop', day(e.date) + ' · ' + fmt(e.mm, 1) + ' mm', 14)]);
       })) : empty(t('fr_no_log')),
       el('div', { style: 'display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:12px' }, [
         el('div', { class: 'gp-field', style: 'width:160px' }, [el('label', { for: 'fr-log-mm' }, [t('fr_log_mm')]), mmIn]),
@@ -315,5 +315,5 @@
   // keep the record fresh while the page is open (new morning alerts → notification)
   setInterval(function () { if (R.status === 'ok') refresh(); }, 5 * 60 * 1000);
 
-  window.GAIA_FARMREC = { card: card, apply: apply, describe: describe, refresh: refresh, onChange: function (f) { R.listeners.push(f); } };
+  window.GAIA_FARMREC = { card: card, apply: apply, describe: describe, refresh: refresh, state: function () { return R.data; }, onChange: function (f) { R.listeners.push(f); } };
 }());

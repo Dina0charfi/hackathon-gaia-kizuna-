@@ -142,6 +142,7 @@
   }
   // Minimal, safe Markdown: paragraphs, "- " / "1. " lists, **bold**. Unverified numbers wrapped in <mark>.
   function render(text, bad) {
+    text = G.noEmoji(text);
     var el = G.el, badSet = {};
     (bad || []).forEach(function (n) { badSet[n] = 1; });
     function inline(s) {

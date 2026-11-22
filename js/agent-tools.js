@@ -261,7 +261,7 @@
     },
     {
       name: 'water_need',
-      description: 'FAO-56 irrigation need of the crop on this plot: monthly and yearly need (mm and m³), pumping energy and solar pump size; and the irrigation schedule for the next 14 days from the live ET0 forecast (m³ per day, split by irrigation system efficiency).',
+      description: 'Irrigation of this plot: FAO-56 monthly and yearly need (mm and m³), pumping energy and solar pump size; and what to irrigate in the next days. soil_plan (when present) knows the water already in the soil and decides; otherwise next_14_days is a simple daily replacement of the crop use.',
       parameters: { type: 'object', properties: {
         crop: { type: 'string', description: 'olive, palm, citrus, cereal, veg, tomato, potato... (default: the plot crop)' },
         area_ha: { type: 'number', description: 'default: the plot area' },
@@ -275,8 +275,8 @@
         var r = N.compute({ et0: CM ? CM.et0 : null, rain: CM ? CM.rain : null, ghi: ghi, kc: C.kc, months: C.months, area_ha: area, ea: ea, head_m: head, pump_eff: 0.45, pr: 0.75, prices: {} });
         if (r.missing.indexOf('climate') !== -1) return Promise.resolve({ summary: 'climate missing', data: { missing: r.missing } });
         var T = r.totals, mon = r.months.map(function (m, i) { return { month: i + 1, etc_mm: r1(m.etc, 0), irg_mm: r1(m.irg, 0), m3: r1(m.vol, 0), kwh: r1(m.kwh, 0) }; });
-        return forecast(p).then(function (wx) { return wx; }, function () { return null; }).then(function (wx) {
-          var plan = null;
+        return Promise.all([forecast(p).catch(function () { return null; }), global.GAIA_SOILPLAN ? global.GAIA_SOILPLAN.get(p, { crop: nk, kc: C.kc, months: C.months, area_ha: area, ea: ea, head_m: head }) : null]).then(function (two) {
+          var wx = two[0], sp = two[1], plan = null;
           if (wx) {
             var next = split(wx).next.slice(0, 14), cm = new Date().getMonth();
             var on = C.months[cm];
@@ -288,11 +288,13 @@
           var sum14 = plan ? plan.reduce(function (t, d) { return t + (d.m3 || 0); }, 0) : null;
           return {
             summary: 'ETc ' + r1(T.etc, 0) + ' mm/' + W({ fr: 'an', en: 'yr', ar: 'سنة', ja: '年' }) + ' · ' + (area > 0 ? r1(T.vol, 0) + ' m³/' + W({ fr: 'an', en: 'yr', ar: 'سنة', ja: '年' }) : r1(T.volHa, 0) + ' m³/ha') +
-              (sum14 !== null && area > 0 ? ' · ' + W({ fr: '14 j : ', en: '14 d: ', ar: '14 يوم: ', ja: '14日：' }) + r1(sum14, 0) + ' m³' : '') + (r.solar ? ' · ' + r1(r.solar.kwp, 1) + ' kWp' : ''),
+              (sp ? ' · ' + W({ fr: 'réserve du sol ', en: 'soil reserve ', ar: 'مخزون التربة ', ja: '土壌の水 ' }) + sp.soil_reserve_pct + ' % · ' + W({ fr: 'cette semaine ', en: 'this week ', ar: 'هذا الأسبوع ', ja: '今週 ' }) + sp.total_m3 + (sp.per_ha ? ' m³/ha' : ' m³')
+              : sum14 !== null && area > 0 ? ' · ' + W({ fr: '14 j : ', en: '14 d: ', ar: '14 يوم: ', ja: '14日：' }) + r1(sum14, 0) + ' m³' : '') + (r.solar ? ' · ' + r1(r.solar.kwp, 1) + ' kWp' : ''),
             data: { crop: ck, kc: C.kc, kc_ref: C.ref, irrigation: sys, efficiency: ea, area_ha: area || null, head_m: head,
               year: { etc_mm: r1(T.etc, 0), eff_rain_mm: r1(T.pe, 0), irrigation_mm: r1(T.irg, 0), m3: area > 0 ? r1(T.vol, 0) : null, m3_per_ha: r1(T.volHa, 0), pump_kwh: T.kwh > 0 ? r1(T.kwh, 0) : null },
               solar_pump_kwp: r.solar ? r1(r.solar.kwp, 1) : null, sun_data: GH.approx ? 'approximate' : 'NASA POWER', peak_month: r.solar ? r.solar.peakMonth + 1 : null, months: mon,
-              next_14_days: plan, next_14_days_m3: sum14 !== null ? r1(sum14, 0) : null, missing: r.missing,
+              soil_plan: sp, soil_plan_reading: sp ? 'Follow soil_plan for this week: it counts the water already in the soil. ' + (sp.total_m3 > 0 ? 'Irrigate only on the days it lists.' : 'No irrigation is needed from ' + sp.from + ' to ' + sp.to + '.') + ' Never write field names. Do not schedule any other irrigation.' : undefined,
+              next_14_days: sp ? undefined : plan, next_14_days_m3: !sp && sum14 !== null ? r1(sum14, 0) : undefined, missing: r.missing,
               method: 'FAO-56 Kc × ET0, USDA-SCS effective rain (monthly); daily plan: Kc × forecast ET0 − 0.8 × rain > 5 mm' }
           };
         });

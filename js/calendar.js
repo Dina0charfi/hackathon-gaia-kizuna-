@@ -98,9 +98,9 @@
       g.appendChild(el('div', { class: 'nm' }, [t('cl_flags')]));
       for (var k = 0; k < 12; k++) {
         var f = [];
-        if (cm.tmax && cm.tmax[k] !== null && cm.tmax[k] >= 35) f.push('☀');
-        if (cm.tmin && cm.tmin[k] !== null && cm.tmin[k] <= 2) f.push('❄');
-        g.appendChild(el('div', { class: 'clim', style: 'font-size:14px' }, [f.join(' ')]));
+        if (cm.tmax && cm.tmax[k] !== null && cm.tmax[k] >= 35) f.push(G.icon('sun', 15));
+        if (cm.tmin && cm.tmin[k] !== null && cm.tmin[k] <= 2) f.push(G.icon('frost', 15));
+        g.appendChild(el('div', { class: 'clim', style: 'grid-auto-flow:column;justify-content:center;gap:3px' }, f));
       }
     }
     return g;
@@ -110,7 +110,7 @@
     var it = function (bg, k) { var i = el('i'); i.style.background = bg; return el('span', null, [i, t(k)]); };
     return el('div', { class: 'ss-legend' }, [it('var(--g-sage)', 'lg_stage'), it('#7FA3BC', 'lg_water'),
       el('span', null, [el('i', { style: 'outline:2px solid var(--g-gold);outline-offset:-2px;background:var(--g-ivory)' }), t('lg_now')]),
-      el('span', null, ['☀ ' + t('lg_heat')]), el('span', null, ['❄ ' + t('lg_frost')])]);
+      G.iconText('sun', t('lg_heat'), 15), G.iconText('frost', t('lg_frost'), 15)]);
   }
 
   function details() {
