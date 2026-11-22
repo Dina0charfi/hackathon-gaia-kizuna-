@@ -342,7 +342,7 @@
       ]),
       c.cut > 0 ? el('div', { style: 'margin-top:10px' }, [G.note('ok', t('co_cut').replace('{p}', fmt(c.cut * 100)))]) : null,
       el('div', { class: 'gp-table-wrap', style: 'margin-top:12px' }, [el('table', { class: 'gp-table' }, [
-        el('thead', null, [el('tr', null, [el('th', null, [t('co_src')]), el('th', { class: 'num' }, [t('co_today')]), el('th', { class: 'num' }, [t('co_gaia')]), el('th', null, [''])])]),
+        el('thead', null, [el('tr', null, [el('th', null, [t('co_src')]), el('th', { class: 'num' }, [t('co_today')]), el('th', { class: 'num' }, [t('co_gaia')]), el('td', { 'aria-hidden': 'true' })])]),
         el('tbody', null, rows.map(function (k) {
           return el('tr', null, [el('td', null, [t('co_' + k)]), el('td', { class: 'num' }, [fmt(c.today[k] / 1000, 2) + ' t']),
             el('td', { class: 'num' }, [el('b', null, [fmt(c.gaia[k] / 1000, 2) + ' t'])]),
@@ -360,7 +360,7 @@
     var data = W.daily(M.inp, M.r);
     SIM.data = data;
     var months = G.t('months');
-    var gauge = el('div', { class: 'wa-gauge' }, [el('i')]);
+    var gauge = el('div', { class: 'wa-gauge', role: 'img' }, [el('i')]);
     var dayLab = el('div', { class: 'wa-day' });
     var prog = el('div', { class: 'wa-prog' }, [el('i')]);
     var cells = {};
