@@ -101,12 +101,12 @@
       var cls = 'mk-m' + (x.harvest ? ' h' : x.keep ? ' k' : '') + (x.sign ? ' s' : '') + (cal.late.indexOf(x.m) !== -1 ? ' l' : '') + (x.m === now ? ' now' : '');
       var what = [x.harvest ? t('cal_h') : null, x.keep ? t('cal_k') : null, x.sign ? t('cal_s') : null, cal.late.indexOf(x.m) !== -1 ? t('cal_late') : null, x.m === now ? t('cal_now') : null].filter(Boolean).join(' · ');
       return el('div', { class: cls, role: 'listitem', title: what, 'aria-label': months[x.m] + (what ? ' : ' + what : '') }, [
-        el('span', { class: 'mn' }, [months[x.m]]), el('i', { 'aria-hidden': 'true' }), x.sign ? el('span', { class: 'sg', 'aria-hidden': 'true' }, ['✎']) : null
+        el('span', { class: 'mn' }, [months[x.m]]), el('i', { 'aria-hidden': 'true' }), x.sign ? el('span', { class: 'sg', 'aria-hidden': 'true' }, [G.icon('pen', 14)]) : null
       ]);
     })));
     calOut.appendChild(el('div', { class: 'gp-legend mk-leg' }, [
       el('span', null, [el('i', { class: 'h' }), t('cal_h')]), el('span', null, [el('i', { class: 'k' }), t('cal_k')]),
-      el('span', null, [el('i', { class: 'l' }), t('cal_late')]), el('span', null, ['✎ ', t('cal_s')])
+      el('span', null, [el('i', { class: 'l' }), t('cal_late')]), G.iconText('pen', t('cal_s'), 14)
     ]));
     calOut.appendChild(el('p', { class: 'assump', style: 'margin-top:6px' }, [t('cal_note')]));
   }
@@ -208,7 +208,7 @@
     if (!r.total_t) { poolOut.appendChild(G.note('info', t('r_no_volume'))); return; }
     poolOut.appendChild(el('div', { class: 'kpis' }, [
       kpi(t('jp_total'), fmt(r.total_t, 1) + ' ' + t('u_t'), r.members + ' · ' + t('jp_name').toLowerCase(), true),
-      kpi(r.reached ? t('jp_reached') : t('jp_missing'), r.min_t === null ? '—' : r.reached ? '✓' : fmt(r.missing_t, 1) + ' ' + t('u_t'), r.min_t ? '≥ ' + fmt(r.min_t, 1) + ' ' + t('u_t') : ''),
+      kpi(r.reached ? t('jp_reached') : t('jp_missing'), r.min_t === null ? '—' : r.reached ? G.icon('ok', 22) : fmt(r.missing_t, 1) + ' ' + t('u_t'), r.min_t ? '≥ ' + fmt(r.min_t, 1) + ' ' + t('u_t') : ''),
       kpi(t('mk_pooled_to'), target ? t('ch_' + target.id) : '—', '')
     ]));
     poolOut.appendChild(el('div', { class: 'gp-table-wrap', style: 'margin-top:10px' }, [el('table', { class: 'gp-table' }, [
