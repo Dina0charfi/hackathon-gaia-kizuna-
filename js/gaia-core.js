@@ -246,6 +246,10 @@
       var done = function () { setSession(null); };
       return authCall('/logout', { method: 'POST' }).then(done, done);   // always forget the session on this device
     },
+    forgot: function (identifier) { return authCall('/forgot', { method: 'POST', body: JSON.stringify({ identifier: identifier }) }); },
+    reset: function (identifier, code, password) {
+      return authCall('/reset', { method: 'POST', body: JSON.stringify({ identifier: identifier, code: code, password: password }) }).then(function (r) { setSession(r); return r.user; });
+    },
     setFarm: function (farm) {
       return authCall('/farm', { method: 'PUT', body: farm ? JSON.stringify(farm) : null }).then(function (r) { var s = session(); s.user = r.user; setSession(s); return r.user; });
     },

@@ -7,3 +7,5 @@ backend/data/feedback.jsonl
 *.env
 !.env.example
 backend/data/users.db
+.claude/
+ml/agv-net/data/parts/

@@ -120,6 +120,24 @@
       nb_ask: '共有を提案', nb_sent: '依頼を送りました', nb_accept: '承認', nb_decline: '断る', nb_declined: '依頼は断られました',
       nb_recv: 'があなたと水を共有したいと言っています', nb_match: '共有が成立', nb_contact: '連絡先：', nb_compare: '水の必要量を比べる', nb_err: '近くの農家を読み込めませんでした。' }
   });
+  G.addStrings({
+    fr: { fg_link: 'Mot de passe oublié ?', fg_t: 'Mot de passe oublié', fg_p: 'Entrez l’e-mail ou le numéro de votre compte. Nous vous envoyons un code à 6 chiffres, valable 15 minutes.',
+      fg_send: 'Recevoir un code', fg_sent: 'Si un compte existe pour {id}, un code à 6 chiffres vient d’être envoyé (par e-mail ; en démonstration, il s’affiche dans la console du serveur GAIA).',
+      fg_code: 'Code à 6 chiffres', fg_new: 'Nouveau mot de passe', fg_save: 'Changer le mot de passe', fg_again: 'Renvoyer un code', fg_back: '← Retour à la connexion',
+      e_bad_code: 'Code incorrect ou expiré. Demandez-en un nouveau.', fg_sent_mail: 'Si un compte existe pour {id}, un code à 6 chiffres vient d’être envoyé par e-mail. Regardez aussi dans les courriers indésirables.', fg_sent_wa: 'Si un compte existe pour {id}, un code à 6 chiffres vient d’être envoyé sur WhatsApp.', fg_demo: 'Mode démo', fg_demo_p: 'Aucun service d’e-mail n’est branché : en démonstration locale, votre code s’affiche ici. Il est déjà rempli ci-dessous.' },
+    ar: { fg_link: 'نسيت كلمة السر؟', fg_t: 'نسيت كلمة السر', fg_p: 'أدخل البريد أو الرقم المرتبط بحسابك. نرسل لك رمزاً من 6 أرقام صالحاً 15 دقيقة.',
+      fg_send: 'استلام رمز', fg_sent: 'إن وُجد حساب لـ {id}، فقد أُرسل رمز من 6 أرقام (بالبريد؛ في العرض التجريبي يظهر في وحدة تحكم خادم GAIA).',
+      fg_code: 'رمز من 6 أرقام', fg_new: 'كلمة سر جديدة', fg_save: 'تغيير كلمة السر', fg_again: 'إعادة إرسال رمز', fg_back: '→ الرجوع إلى تسجيل الدخول',
+      e_bad_code: 'الرمز غير صحيح أو منتهي الصلاحية. اطلب رمزاً جديداً.', fg_sent_mail: 'إن وُجد حساب لـ {id}، فقد أُرسل رمز من 6 أرقام بالبريد الإلكتروني. تحقق أيضاً من البريد غير المرغوب فيه.', fg_sent_wa: 'إن وُجد حساب لـ {id}، فقد أُرسل رمز من 6 أرقام على واتساب.', fg_demo: 'وضع العرض', fg_demo_p: 'لا توجد خدمة بريد موصولة: في العرض المحلي يظهر رمزك هنا، وقد مُلئ أدناه.' },
+    en: { fg_link: 'Forgot your password?', fg_t: 'Forgot your password', fg_p: 'Enter the email or phone number of your account. We send you a 6-digit code, valid for 15 minutes.',
+      fg_send: 'Get a code', fg_sent: 'If an account exists for {id}, a 6-digit code has just been sent (by email; in the demo it appears in the GAIA server console).',
+      fg_code: '6-digit code', fg_new: 'New password', fg_save: 'Change the password', fg_again: 'Send a new code', fg_back: '← Back to sign in',
+      e_bad_code: 'Wrong or expired code. Ask for a new one.', fg_sent_mail: 'If an account exists for {id}, a 6-digit code has just been sent by email. Check your spam folder too.', fg_sent_wa: 'If an account exists for {id}, a 6-digit code has just been sent on WhatsApp.', fg_demo: 'Demo mode', fg_demo_p: 'No email service is connected: in the local demo your code is shown here. It is already filled in below.' },
+    ja: { fg_link: 'パスワードをお忘れですか？', fg_t: 'パスワードの再設定', fg_p: 'アカウントのメールアドレスまたは電話番号を入力してください。15分間有効な6桁のコードを送ります。',
+      fg_send: 'コードを受け取る', fg_sent: '{id} のアカウントがあれば、6桁のコードを送りました（メールで送信。デモではGAIAサーバーのコンソールに表示されます）。',
+      fg_code: '6桁のコード', fg_new: '新しいパスワード', fg_save: 'パスワードを変更', fg_again: 'コードを再送する', fg_back: '← ログインに戻る',
+      e_bad_code: 'コードが違うか期限切れです。新しいコードを請求してください。', fg_sent_mail: '{id} のアカウントがあれば、6桁のコードをメールで送りました。迷惑メールフォルダも確認してください。', fg_sent_wa: '{id} のアカウントがあれば、6桁のコードをWhatsAppで送りました。', fg_demo: 'デモモード', fg_demo_p: 'メール送信サービスが未接続のため、ローカルのデモではコードをここに表示します。下の欄にすでに入力済みです。' }
+  });
   var CROPS = ['olive', 'palm', 'citrus', 'cereal', 'veg', 'other'], WATERS = ['rainfed', 'well', 'network', 'shared'];
   var N = window.GAIA_NEXUS;
   // the plot chosen on this device (Land Intelligence), and what its LAND DNA already knows
@@ -163,7 +181,50 @@
     return el('div', { class: 'gp-field' }, [el('label', { for: id }, [label]), input, hint ? el('span', { class: 'hint' }, [hint]) : null]);
   }
 
+  function forgotCard() {
+    var f = S.form;
+    var go = function (p, next) {
+      if (S.busy) return;
+      S.busy = true; S.msg = null; render();
+      p().then(function () { S.busy = false; next(); render(); }, function (err) { S.busy = false; S.msg = errText(err); S.msgKind = 'err'; render(); });
+    };
+    var body;
+    if (S.fstep !== 2) {
+      body = el('form', { class: 'acc-form', novalidate: true, onsubmit: function (e) {
+        e.preventDefault();
+        go(function () { return G.auth.forgot(f.id).then(function (r) { S.fdemo = r && r.demo_code ? r.demo_code : null; S.fchannel = r && r.channel; }); },
+          function () { S.fstep = 2; if (S.fdemo) f.code = S.fdemo; });
+      } }, [
+        el('p', { class: 'small', style: 'color:var(--g-ink-2)' }, [t('fg_p')]),
+        field('ac-id', t('ac_id'), el('input', { id: 'ac-id', type: 'text', autocomplete: 'username', value: f.id, oninput: function (e) { f.id = e.target.value; } }), t('ac_id_h')),
+        S.msg ? G.note(S.msgKind, S.msg) : null,
+        el('button', { type: 'submit', class: 'gp-btn primary', disabled: S.busy ? true : null }, [S.busy ? t('ac_wait') : t('fg_send')])
+      ]);
+    } else {
+      body = el('form', { class: 'acc-form', novalidate: true, onsubmit: function (e) {
+        e.preventDefault();
+        go(function () { return G.auth.reset(f.id, f.code || '', f.pw); }, function () { f.pw = ''; f.code = ''; S.mode = 'in'; S.fstep = 1; });
+      } }, [
+        S.fdemo ? el('div', { class: 'acc-demo-code', role: 'status' }, [el('span', { class: 'pay-sim' }, [t('fg_demo')]), el('span', null, [t('fg_demo_p')]), el('b', null, [S.fdemo])])
+          : G.note('info', t(S.fchannel === 'email' ? 'fg_sent_mail' : S.fchannel === 'whatsapp' ? 'fg_sent_wa' : 'fg_sent').replace('{id}', f.id)),
+        field('ac-code', t('fg_code'), el('input', { id: 'ac-code', type: 'text', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: 6, value: f.code || '',
+          oninput: function (e) { f.code = e.target.value.replace(/\D/g, ''); } })),
+        field('ac-pw', t('fg_new'), el('input', { id: 'ac-pw', type: S.show ? 'text' : 'password', autocomplete: 'new-password', minlength: 8, value: f.pw,
+          oninput: function (e) { f.pw = e.target.value; } }), t('ac_pw_h')),
+        S.msg ? G.note(S.msgKind, S.msg) : null,
+        el('button', { type: 'submit', class: 'gp-btn primary', disabled: S.busy ? true : null }, [S.busy ? t('ac_wait') : t('fg_save')]),
+        el('button', { type: 'button', class: 'gp-btn ghost', onclick: function () { S.fstep = 1; S.msg = null; render(); } }, [t('fg_again')])
+      ]);
+    }
+    return el('section', { class: 'gp-card' }, [
+      el('h2', null, [t('fg_t')]),
+      el('div', { style: 'margin-top:10px' }, [body]),
+      el('button', { type: 'button', class: 'acc-link', onclick: function () { S.mode = 'in'; S.fstep = 1; S.msg = null; render(); } }, [t('fg_back')])
+    ]);
+  }
+
   function formCard() {
+    if (S.mode === 'forgot') return forgotCard();
     var up = S.mode === 'up', f = S.form;
     var inp = function (id, key, type, auto) {
       return el('input', { id: id, type: type, autocomplete: auto, value: f[key], required: true,
@@ -184,6 +245,7 @@
       field('ac-pw', t('ac_pw'), el('div', { class: 'acc-pw' }, [pw,
         el('button', { type: 'button', 'aria-controls': 'ac-pw', onclick: function () { S.show = !S.show; render(); document.getElementById('ac-pw').focus(); } }, [S.show ? t('ac_hide') : t('ac_show')])]),
         up ? t('ac_pw_h') : null),
+      up ? null : el('button', { type: 'button', class: 'acc-link', style: 'justify-self:start', onclick: function () { S.mode = 'forgot'; S.fstep = 1; S.msg = null; render(); } }, [t('fg_link')]),
       up ? el('div', { class: 'gp-field' }, [el('span', { class: 'lab' }, [t('ac_role')]),
         el('div', { class: 'acc-roles', role: 'group', 'aria-label': t('ac_role') }, ROLES.map(function (r) {
           return el('button', { type: 'button', 'aria-pressed': String(S.role === r), onclick: function () { S.role = r; render(); } }, [t('r_' + r)]);

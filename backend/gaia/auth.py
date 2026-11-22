@@ -10,11 +10,14 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import math
 import os
 import re
 import secrets
+import smtplib
 import sqlite3
+from email.message import EmailMessage
 import threading
 import time
 from pathlib import Path
@@ -27,6 +30,23 @@ ROLES = {"farmer", "cooperative", "agronomist", "partner"}
 
 _lock = threading.Lock()
 _fails: dict[str, list[float]] = {}
+
+
+def _env(name: str, default: Optional[str] = None) -> Optional[str]:
+    """Environment variable, else backend/.env (git-ignored), else default."""
+    v = os.environ.get(name, "").strip()
+    if v:
+        return v
+    f = Path(__file__).resolve().parent.parent / ".env"
+    try:
+        for line in f.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith(name + "="):
+                v = line.split("=", 1)[1].strip().strip('"').strip("'")
+                return v or default
+    except OSError:
+        pass
+    return default
 
 
 class AuthError(Exception):
@@ -55,6 +75,8 @@ def _conn() -> sqlite3.Connection:
     for col, typ in (("lat", "REAL"), ("lon", "REAL"), ("crop", "TEXT"), ("water", "TEXT"), ("share", "INTEGER DEFAULT 0")):
         if col not in have:
             c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
+    c.execute("""CREATE TABLE IF NOT EXISTS reset_codes (
+        user_id INTEGER PRIMARY KEY, code_hash TEXT NOT NULL, expires_at REAL NOT NULL, attempts INTEGER NOT NULL DEFAULT 0)""")
     c.execute("""CREATE TABLE IF NOT EXISTS share_requests (
         from_id INTEGER NOT NULL, to_id INTEGER NOT NULL, status TEXT NOT NULL, created_at REAL NOT NULL,
         PRIMARY KEY (from_id, to_id))""")
@@ -261,6 +283,112 @@ def respond_share(token: Optional[str], from_id: int, accept: bool) -> dict:
             raise AuthError(404, "no_request", "No pending request from this neighbour.")
         c.execute("UPDATE share_requests SET status = ? WHERE from_id = ? AND to_id = ?", ("accepted" if accept else "declined", from_id, me["id"]))
         return {"status": _status(c, me["id"], from_id)}
+
+
+RESET_MIN, RESET_TRIES = 15, 5
+log = logging.getLogger("gaia.auth")
+
+
+def _wa_number(identifier: str) -> str:
+    """WhatsApp wants the full international number without '+': a Tunisian 8-digit number gets 216."""
+    d = identifier.lstrip("+")
+    return "216" + d if len(d) == 8 else d
+
+
+def _channel(identifier: str) -> Optional[str]:
+    if "@" in identifier:
+        return "email" if _env("GAIA_SMTP_HOST") else None
+    return "whatsapp" if _env("GAIA_WA_TOKEN") and _env("GAIA_WA_PHONE_ID") else None
+
+
+def _send_whatsapp(identifier: str, code: str) -> None:
+    """WhatsApp Business Cloud API (Meta). Needs an approved 'authentication' template that takes
+    the code as its single parameter (and, by default, a copy-code button)."""
+    import httpx
+    comps = [{"type": "body", "parameters": [{"type": "text", "text": code}]}]
+    if _env("GAIA_WA_OTP_BUTTON", "1") != "0":
+        comps.append({"type": "button", "sub_type": "url", "index": "0", "parameters": [{"type": "text", "text": code}]})
+    r = httpx.post(
+        f"https://graph.facebook.com/{_env('GAIA_WA_API_VERSION', 'v21.0')}/{_env('GAIA_WA_PHONE_ID')}/messages",
+        headers={"Authorization": "Bearer " + _env("GAIA_WA_TOKEN")},
+        json={"messaging_product": "whatsapp", "to": _wa_number(identifier), "type": "template",
+              "template": {"name": _env("GAIA_WA_TEMPLATE", "gaia_code"),
+                           "language": {"code": _env("GAIA_WA_LANG", "fr")}, "components": comps}},
+        timeout=15)
+    if r.status_code >= 300:
+        raise RuntimeError(f"WhatsApp API {r.status_code}: {r.text[:200]}")
+
+
+def _deliver(identifier: str, name: str, code: str) -> str:
+    """Send the reset code: email through SMTP (GAIA_SMTP_HOST) for an email, WhatsApp through the
+    Meta Cloud API (GAIA_WA_TOKEN + GAIA_WA_PHONE_ID) for a phone number. Without them, the code
+    is written to the server console (and shown on the page in the local demo)."""
+    host = _env("GAIA_SMTP_HOST")
+    if _channel(identifier) == "whatsapp":
+        _send_whatsapp(identifier, code)
+        return "whatsapp"
+    if host and "@" in identifier:
+        msg = EmailMessage()
+        msg["Subject"] = "GAIA : code de réinitialisation / reset code"
+        msg["From"] = _env("GAIA_SMTP_FROM", _env("GAIA_SMTP_USER", "gaia@localhost"))
+        msg["To"] = identifier
+        msg.set_content(f"Bonjour {name},\n\nVotre code GAIA : {code}\nIl est valable {RESET_MIN} minutes.\n\n"
+                        f"Your GAIA code: {code} (valid {RESET_MIN} minutes).\n\nSi vous n'avez rien demandé, ignorez ce message.")
+        with smtplib.SMTP(host, int(_env("GAIA_SMTP_PORT", "587")), timeout=15) as s:
+            s.starttls()
+            if _env("GAIA_SMTP_USER"):
+                s.login(_env("GAIA_SMTP_USER"), _env("GAIA_SMTP_PASSWORD", ""))
+            s.send_message(msg)
+        return "email"
+    print(f"[GAIA] password reset code for {identifier}: {code} (valid {RESET_MIN} min)", flush=True)
+    return "console"
+
+
+def request_reset(identifier: str, local_demo: bool = False) -> dict:
+    """Always the same answer, whether the account exists or not (no account discovery).
+
+    local_demo: the request comes from this computer and no email service is configured. The
+    code is then also returned so the demo page can show it (it would otherwise only be in the
+    server console). Never on a request from another machine, never once SMTP is configured."""
+    ident = normalize_identifier(identifier)
+    real = _channel(ident)   # 'email', 'whatsapp' or None
+    demo = local_demo and not real and _env("GAIA_RESET_DEMO", "1") != "0"
+    out = {"sent": True, "minutes": RESET_MIN, "channel": real or ("demo" if demo else "console")}
+    with _lock, _conn() as c:
+        row = c.execute("SELECT id, name FROM users WHERE identifier = ?", (ident,)).fetchone()
+        if row:
+            code = f"{secrets.randbelow(1_000_000):06d}"
+            c.execute("INSERT OR REPLACE INTO reset_codes VALUES (?, ?, ?, 0)",
+                      (row["id"], hashlib.sha256(code.encode()).hexdigest(), time.time() + RESET_MIN * 60))
+            try:
+                _deliver(ident, row["name"], code)
+            except Exception as e:   # never reveal through an error that the account exists
+                log.warning("reset code delivery failed: %s", e)
+                print(f"[GAIA] could not send the reset code ({e}); code for {ident}: {code} (valid {RESET_MIN} min)", flush=True)
+            if demo:
+                out["demo_code"] = code
+    return out
+
+
+def confirm_reset(identifier: str, code: str, password: str) -> dict:
+    if len(password or "") < 8 or len(password) > 200:
+        raise AuthError(422, "weak_password", "The password needs at least 8 characters.")
+    ident = normalize_identifier(identifier)
+    bad = AuthError(400, "bad_code", "Wrong or expired code.")
+    with _lock, _conn() as c:
+        row = c.execute("SELECT * FROM users WHERE identifier = ?", (ident,)).fetchone()
+        rc = c.execute("SELECT * FROM reset_codes WHERE user_id = ?", (row["id"],)).fetchone() if row else None
+        if not rc or rc["expires_at"] < time.time() or rc["attempts"] >= RESET_TRIES:
+            raise bad
+        if not hmac.compare_digest(hashlib.sha256((code or "").strip().encode()).hexdigest(), rc["code_hash"]):
+            c.execute("UPDATE reset_codes SET attempts = attempts + 1 WHERE user_id = ?", (row["id"],))
+            raise bad
+        salt = secrets.token_bytes(16)
+        c.execute("UPDATE users SET salt = ?, pw_hash = ? WHERE id = ?", (salt, _hash(password, salt), row["id"]))
+        c.execute("DELETE FROM reset_codes WHERE user_id = ?", (row["id"],))
+        c.execute("DELETE FROM sessions WHERE user_id = ?", (row["id"],))   # sign out everywhere
+        _fails.pop(ident, None)
+        return {"token": _new_session(c, row["id"]), "user": _public(row)}
 
 
 def logout(token: Optional[str]) -> None:
