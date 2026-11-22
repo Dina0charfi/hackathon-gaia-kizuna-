@@ -51,6 +51,12 @@ class ModelMissing(RuntimeError):
     pass
 
 
+def _model_text(f: Path) -> str:
+    """Model file with Unix line ends: LightGBM reads the trees by byte count and aborts the whole process when Git on
+    Windows has rewritten the file with CRLF."""
+    return f.read_bytes().replace(b"\r\n", b"\n").decode("utf-8")
+
+
 def load() -> dict[str, Any]:
     """Load the 7 boosters and meta.json once."""
     global _models
@@ -60,7 +66,7 @@ def load() -> dict[str, Any]:
             raise ModelMissing(f"{meta_file} not found: run ml/prevision_humidite_sol.ipynb first")
         import lightgbm as lgb
         meta = json.loads(meta_file.read_text(encoding="utf-8"))
-        boosters = {h: lgb.Booster(model_file=str(MODEL_DIR / f"humidite_sol_J{h}.txt")) for h in meta["horizons"]}
+        boosters = {h: lgb.Booster(model_str=_model_text(MODEL_DIR / f"humidite_sol_J{h}.txt")) for h in meta["horizons"]}
         _models = {"meta": meta, "boosters": boosters}
     return _models
 

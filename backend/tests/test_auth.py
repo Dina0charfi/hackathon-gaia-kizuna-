@@ -12,7 +12,7 @@ def client(tmp_path, monkeypatch):
     # never read the private backend/.env here: with a real Gmail in it, the tests would send emails
     monkeypatch.setenv("GAIA_ENV_FILE", str(tmp_path / "no.env"))
     for k in ("GAIA_SMTP_HOST", "GAIA_SMTP_USER", "GAIA_SMTP_PASSWORD", "GAIA_SMTP_FROM", "GAIA_WA_TOKEN", "GAIA_WA_PHONE_ID"):
-        monkeypatch.delenv(k, raising=False)
+        monkeypatch.setenv(k, "")      # "" and not deleted: gaia.main would reload the private value
     from gaia import auth, main
     importlib.reload(auth)
     importlib.reload(main)

@@ -256,6 +256,41 @@
     });
   }
 
+  /* ------------------------------------------------ irrigation planner (the water already in the soil) */
+  G.addStrings({
+    fr: { sp_load: 'Lecture de l’eau du sol…', sp_none_t: 'Pas d’irrigation aujourd’hui', sp_none_p: 'Le sol garde assez d’eau : réserve estimée à {r} %, il faut rester au-dessus de {k} %.', sp_next: 'Prochaine irrigation prévue : {d}, {v}.', sp_no_next: 'Aucune irrigation prévue jusqu’au {d}.',
+      sp_spared: 'Arroser par habitude aurait utilisé {v} sur la période.', sp_do_p: 'Le sol est estimé à {r} % de sa réserve.', sp_hours: 'Pomper de {a} h à {b} h, quand le soleil est fort.', sp_season: 'C’est hors saison pour cette culture.', sp_quota: 'Le quota d’eau du mois est atteint.',
+      sp_off: 'Calcul simple, sans l’eau déjà dans le sol : le planificateur n’est pas connecté.', sp_fc_p: 'Irrigation prévue par le planificateur GAIA, qui tient compte de l’eau du sol, et ce que le soleil peut pomper.', sp_need: 'Irrigation prévue' },
+    ar: { sp_load: 'قراءة ماء التربة…', sp_none_t: 'لا ري اليوم', sp_none_p: 'في التربة ماء كافٍ: المخزون المقدّر {r} %، يجب البقاء فوق {k} %.', sp_next: 'الري القادم المتوقع: {d}، {v}.', sp_no_next: 'لا ري متوقع حتى {d}.',
+      sp_spared: 'السقي المعتاد كان سيستهلك {v} خلال هذه المدة.', sp_do_p: 'مخزون التربة مقدّر بـ {r} %.', sp_hours: 'شغّل المضخة من {a} إلى {b} حين تكون الشمس قوية.', sp_season: 'خارج موسم هذه الزراعة.', sp_quota: 'بلغت حصة الماء لهذا الشهر.',
+      sp_off: 'حساب بسيط دون احتساب ماء التربة: المخطط غير متصل.', sp_fc_p: 'الري الذي يتوقعه مخطط GAIA مع احتساب ماء التربة، وما تستطيع الشمس ضخه.', sp_need: 'الري المتوقع' },
+    en: { sp_load: 'Reading the soil water…', sp_none_t: 'No irrigation today', sp_none_p: 'The soil holds enough water: estimated reserve {r} %, keep it above {k} %.', sp_next: 'Next irrigation planned: {d}, {v}.', sp_no_next: 'No irrigation planned until {d}.',
+      sp_spared: 'Watering by habit would have used {v} over the period.', sp_do_p: 'The soil is estimated at {r} % of its reserve.', sp_hours: 'Pump from {a} h to {b} h, when the sun is strong.', sp_season: 'It is off season for this crop.', sp_quota: 'This month’s water quota is reached.',
+      sp_off: 'Simple calculation, without the water already in the soil: the planner is not connected.', sp_fc_p: 'Irrigation planned by the GAIA planner, which counts the soil water, and what the sun can pump.', sp_need: 'Planned irrigation' },
+    ja: { sp_load: '土の水分を読み込み中…', sp_none_t: '今日は灌水不要', sp_none_p: '土に十分な水があります：推定貯水{r}%、{k}%を下回らないこと。', sp_next: '次の灌水予定：{d}、{v}。', sp_no_next: '{d}まで灌水の予定はありません。',
+      sp_spared: '習慣で灌水すると、この期間に{v}使っていました。', sp_do_p: '土壌の貯水は推定{r}%です。', sp_hours: '日射の強い{a}時から{b}時に揚水します。', sp_season: 'この作物の時期外です。', sp_quota: '今月の水の割当に達しました。',
+      sp_off: '簡易計算です（土の水分は含みません）：プランナーに接続していません。', sp_fc_p: '土の水分を考慮したGAIAプランナーの灌水予定と、太陽光で揚水できる量。', sp_need: '灌水予定' }
+  });
+  var SP = { key: null, status: 'off', data: null };
+  function cropKey() {
+    var CR = (window.GAIA_NEXUS && GAIA_NEXUS.CROPS) || {}, k = nxv.crop || V('crop');
+    if (['tomato', 'potato', 'pepper'].indexOf(k) !== -1) k = 'veg';
+    return CR[k] ? k : 'other';
+  }
+  function loadPlan(s) {
+    if (!hasParcel || !wxLive || !window.GAIA_SOILPLAN) { SP.status = 'off'; return; }
+    var k = cropKey(), CR = (window.GAIA_NEXUS && GAIA_NEXUS.CROPS) || {};
+    var o = { crop: k, kc: s.kc, months: CR[k] ? CR[k].months : null, area_ha: s.area_ha, ea: s.ea, head_m: s.head_m, pump_eff: s.pump_eff, pr: s.pr, pv_kwp: S.kwp > 0 ? s.kwp : null, own: true };
+    var key = JSON.stringify(o);
+    if (SP.key === key) return;
+    SP.key = key; SP.status = 'loading'; SP.data = null;
+    GAIA_SOILPLAN.get(p, o).then(function (d) {
+      if (SP.key !== key) return;
+      SP.data = d; SP.status = d ? 'ok' : 'off'; redraw();
+    });
+  }
+  function planOf(date) { return SP.data ? SP.data.irrigate.filter(function (x) { return x.date === date; })[0] || null : null; }
+
   /* ------------------------------------------------ helpers */
   function fill(str, map) { return String(str).replace(/\{(\w+)\}/g, function (_, k) { return map[k] !== undefined ? map[k] : ''; }); }
   function dayName(date) { return t('days')[new Date(date + 'T12:00:00Z').getUTCDay()]; }
@@ -320,7 +355,14 @@
     REAL = real && real.some(function (h) { return h.measured; }) ? real.filter(function (h) { return h.measured; }).length : 0;
     var hist = REAL ? real : F.simulateMeter(WX.past, s, farm.lat, farm.lon);
     G.clear(app); app.appendChild(header());
+    loadPlan(s);
     var fc = F.forecast(WX.next, s);
+    // the planner answered: its volumes replace the simple daily need, in the cards, the chart and the alerts
+    if (SP.status === 'ok') fc = fc.map(function (f) {
+      if (f.date < SP.data.from || f.date > SP.data.to) return f;
+      var x = planOf(f.date), m3 = x ? x.m3 * (SP.data.per_ha ? s.area_ha : 1) : 0;
+      return Object.assign({}, f, { need: m3, skip: m3 < 0.5, kwh: F.pumpKwh(m3, s), enoughSun: f.capacity >= m3 });
+    });
     var sum = F.summary(hist, s, WX.today);
     var al = F.alerts(hist, fc, sum);
     var today = hist[hist.length - 1];
@@ -328,12 +370,32 @@
     var tfc = F.forecast([WX.past[WX.past.length - 1]], s)[0];
 
     /* today */
-    var skip = tq.vol < 0.5;
+    var skip = tq.vol < 0.5, title, lines = [], sunWarn = false, vol = function (v) { return fmt(v, 0) + ' m³'; };
+    if (SP.status === 'loading') { title = t('sp_load'); }
+    else if (SP.status === 'ok') {
+      var D = SP.data, k = D.per_ha ? s.area_ha : 1, now = planOf(today.date), next = D.irrigate.filter(function (x) { return x.date > today.date; })[0];
+      var dl = function (d) { return dayName(d) + ' ' + shortDate(d); };
+      if (now) {
+        title = fill(t('fd_today_irr'), { v: fmt(now.m3 * k, 0) });
+        lines.push(fill(t('sp_do_p'), { r: D.soil_reserve_pct }));
+        if (now.from_h !== null) lines.push(fill(t('sp_hours'), { a: now.from_h, b: now.to_h }));
+      } else {
+        title = t('sp_none_t');
+        lines.push(D.out_of_season ? t('sp_season') : D.quota_reached ? t('sp_quota') : fill(t('sp_none_p'), { r: D.soil_reserve_pct, k: D.keep_above_pct }));
+        lines.push(next ? fill(t('sp_next'), { d: dl(next.date), v: vol(next.m3 * k) }) : fill(t('sp_no_next'), { d: dl(D.to) }));
+        if (!D.out_of_season && D.spared_m3 > 0) lines.push(fill(t('sp_spared'), { v: vol(D.spared_m3 * k) }));
+      }
+    } else {
+      title = skip ? t('fd_today_skip') : fill(t('fd_today_irr'), { v: fmt(tq.vol, 0) });
+      lines.push(skip ? fill(t('fd_today_skip_p'), { r: fmt(tq.pe, 0) }) : fill(t('fd_today_irr_p'), { h: fmt(tfc.hours, 1) }));
+      if (hasParcel) lines.push(t('sp_off'));
+      sunWarn = !skip && !tfc.enoughSun;
+    }
     app.appendChild(el('section', { class: 'fd-today', 'aria-labelledby': 'fd-h-today' }, [
       el('p', { class: 'eyebrow', id: 'fd-h-today' }, [t('fd_today') + ' · ' + dayName(today.date) + ' ' + shortDate(today.date)]),
-      el('h2', null, [skip ? t('fd_today_skip') : fill(t('fd_today_irr'), { v: fmt(tq.vol, 0) })]),
-      el('p', null, [skip ? fill(t('fd_today_skip_p'), { r: fmt(tq.pe, 0) }) : fill(t('fd_today_irr_p'), { h: fmt(tfc.hours, 1) })]),
-      !skip && !tfc.enoughSun ? el('p', { class: 'warn' }, [G.icon('warn', 16), ' ', t('fd_today_sun')]) : null
+      el('h2', null, SP.status === 'loading' ? [el('span', { class: 'gp-spin', 'aria-hidden': 'true' }), ' ', title] : [title]),
+      lines.length ? el('p', null, [lines.join(' ')]) : null,
+      sunWarn ? el('p', { class: 'warn' }, [G.icon('warn', 16), ' ', t('fd_today_sun')]) : null
     ]));
 
     /* KPIs */
@@ -362,7 +424,7 @@
     var fcChart = el('div', { class: 'fd-chart' });
     app.appendChild(el('section', { class: 'gp-card', 'aria-labelledby': 'fd-h-fc', style: 'margin-top:16px' }, [
       el('h2', { id: 'fd-h-fc' }, [t('fc_t')]),
-      el('p', { class: 'small muted', style: 'margin-top:4px' }, [t('fc_p')]),
+      el('p', { class: 'small muted', style: 'margin-top:4px' }, [t(SP.status === 'ok' ? 'sp_fc_p' : 'fc_p')]),
       el('div', { class: 'fd-days' }, fc.map(function (f) {
         return el('div', { class: 'fd-day' + (f.skip ? ' skip' : '') }, [
           el('b', null, [dayName(f.date)]), el('span', { class: 'dt' }, [shortDate(f.date)]),
@@ -376,7 +438,7 @@
       fcChart
     ]));
     G.barChart(fcChart, { labels: fc.map(function (f) { return dayName(f.date); }), unit: 'm³', title: t('fc_chart_t'), digits: 0, series: [
-      { name: t('s_need'), color: '#2F5A75', values: fc.map(function (f) { return f.need; }) },
+      { name: t(SP.status === 'ok' ? 'sp_need' : 's_need'), color: '#2F5A75', values: fc.map(function (f) { return f.need; }) },
       { name: t('s_cap'), color: '#A88746', values: fc.map(function (f) { return f.capacity; }) }
     ] });
 
@@ -468,14 +530,22 @@
   draw();
   fetchWeather().then(function (w) { WX = w; draw(); });
   function jumpTo(y) { try { window.scrollTo({ top: y, behavior: 'instant' }); } catch (e) { window.scrollTo(0, y); } }
-  // calendar changes redraw the dashboard without moving the page
-  if (window.GAIA_FARMREC) GAIA_FARMREC.onChange(function () {
+  // redraw without moving the page
+  function redraw() {
     if (!WX) return;
     var se = document.scrollingElement || document.documentElement, y = se.scrollTop;
     app.style.minHeight = app.offsetHeight + 'px';
     draw();
     jumpTo(y);
     setTimeout(function () { app.style.minHeight = ''; if (Math.abs(se.scrollTop - y) > 2) jumpTo(y); }, 80);
+  }
+  // a reported irrigation or a saved calendar changes the plan: ask the planner again
+  var seen = null;
+  if (window.GAIA_FARMREC) GAIA_FARMREC.onChange(function () {
+    var st = GAIA_FARMREC.state ? GAIA_FARMREC.state() : null, mark = st ? JSON.stringify([st.irrigation_log, st.settings]) : null;
+    if (seen !== null && mark !== seen && window.GAIA_SOILPLAN) { GAIA_SOILPLAN.clear(); SP.key = null; }
+    if (mark !== null) seen = mark;
+    redraw();
   });
   G.onLang(function () { drawTabs(); draw(); });
 }());

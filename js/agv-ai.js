@@ -44,7 +44,7 @@
       r_c: 'Culture', r_cls: 'Ombre', r_y: 'Rendement', r_w: 'Eau économisée / an', r_jp: 'Règle 80 %', r_ok: 'oui', r_no: 'non',
       r_star: 'Surprise : à l’ombre des panneaux, une laitue d’été devient possible en Tunisie, alors qu’en plein soleil la chaleur la fait monter en graine.',
       ai_hon: 'Modèles simplifiés et paramètres indicatifs (classes de tolérance à l’ombre d’après Laub et al. 2022 ; Kc FAO-56 à vérifier ; refroidissement sous panneaux et baisse d’évaporation d’après Marrou et al. 2013). Ce sont des estimations à valider sur une parcelle d’essai.',
-      play: '▶ Animer la journée', pause: '❚❚ Pause'
+      play: 'Animer la journée', pause: 'Pause'
     },
     ar: {
       ai_eyebrow: 'GAIA SOLAR BRAIN · ذكاء اصطناعي', ai_t: 'ذكاء يقسم الشمس بين الزراعة والألواح',
@@ -86,7 +86,7 @@
       r_c: 'الزراعة', r_cls: 'الظل', r_y: 'المردود', r_w: 'الماء المقتصد / سنة', r_jp: 'قاعدة 80 %', r_ok: 'نعم', r_no: 'لا',
       r_star: 'مفاجأة: تحت ظل الألواح يصبح الخس الصيفي ممكناً في تونس، بينما تجعله الحرارة في الشمس المباشرة يزهر قبل أوانه.',
       ai_hon: 'نماذج مبسطة ومعاملات تقريبية (فئات تحمّل الظل حسب Laub وآخرون 2022؛ Kc من FAO-56 للتحقق؛ التبريد تحت الألواح وانخفاض التبخر حسب Marrou وآخرون 2013). هذه تقديرات يجب التحقق منها في قطعة تجريبية.',
-      play: '▶ تحريك اليوم', pause: '❚❚ إيقاف'
+      play: 'تحريك اليوم', pause: 'إيقاف'
     },
     en: {
       ai_eyebrow: 'GAIA SOLAR BRAIN · AI', ai_t: 'The AI that shares the sun between the crop and the panels',
@@ -128,7 +128,7 @@
       r_c: 'Crop', r_cls: 'Shade', r_y: 'Yield', r_w: 'Water saved / yr', r_jp: '80 % rule', r_ok: 'yes', r_no: 'no',
       r_star: 'Surprise: in the panels’ shade, summer lettuce becomes possible in Tunisia, while in full sun the heat makes it bolt.',
       ai_hon: 'Simplified models and indicative parameters (shade-tolerance classes after Laub et al. 2022; FAO-56 Kc to check; cooling and lower evaporation under panels after Marrou et al. 2013). These are estimates to validate on a trial plot.',
-      play: '▶ Animate the day', pause: '❚❚ Pause'
+      play: 'Animate the day', pause: 'Pause'
     },
     ja: {
       ai_eyebrow: 'GAIA SOLAR BRAIN · AI', ai_t: '太陽を作物とパネルで分け合うAI',
@@ -170,7 +170,7 @@
       r_c: '作物', r_cls: '日陰', r_y: '収量', r_w: '年間の節水量', r_jp: '8割ルール', r_ok: 'はい', r_no: 'いいえ',
       r_star: '発見：パネルの日陰なら、チュニジアでも夏レタスが作れます。直射日光の下では暑さでとう立ちしてしまいます。',
       ai_hon: '簡略化したモデルと目安のパラメータです（日陰への強さの分類はLaubら2022、作物係数はFAO-56で要確認、パネル下の冷却と蒸発の減少はMarrouら2013による）。試験区画で検証すべき推定値です。',
-      play: '▶ 一日を再生', pause: '❚❚ 一時停止'
+      play: '一日を再生', pause: '一時停止'
     }
   });
 
@@ -280,7 +280,7 @@
       s.appendChild(svg('text', { x: L - 8, y: Y(gy * 1000) + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#66706A' }, fmt(gy, step < 1 ? 1 : 0)));
     }
     s.appendChild(svg('line', { x1: X(A.JAPAN_RULE), x2: X(A.JAPAN_RULE), y1: T, y2: H - B, stroke: '#2F6B45', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' }));
-    s.appendChild(svg('text', { x: X(A.JAPAN_RULE) + 6, y: T + 14, 'font-size': 11.5, fill: '#2F6B45', 'font-weight': 600 }, t('o_rule') + ' · MAFF 🇯🇵'));
+    s.appendChild(svg('text', { x: X(A.JAPAN_RULE) + 6, y: T + 14, 'font-size': 11.5, fill: '#2F6B45', 'font-weight': 600 }, t('o_rule') + ' · MAFF'));
     s.appendChild(svg('text', { x: (L + W - R) / 2, y: H - 6, 'text-anchor': 'middle', 'font-size': 12, fill: '#4B5650' }, t('o_x')));
     var yl = svg('text', { x: 14, y: (T + H - B) / 2, 'text-anchor': 'middle', 'font-size': 12, fill: '#4B5650', transform: 'rotate(-90 14 ' + (T + H - B) / 2 + ')' }, t('o_y')); s.appendChild(yl);
     pts.forEach(function (p) {
@@ -480,7 +480,7 @@
       }))
     ])]));
     var lt = list.filter(function (e) { return e.key === 'lettuce_s'; })[0];
-    if (lt && lt.yrel > 1) b.appendChild(el('p', { class: 'insight', style: 'margin-top:12px' }, ['✦ ' + t('r_star')]));
+    if (lt && lt.yrel > 1) b.appendChild(el('p', { class: 'insight', style: 'margin-top:12px' }, [G.iconText('star', t('r_star'))]));
     b.appendChild(netCard(list));
   }
 

@@ -1,0 +1,2 @@
+# LightGBM reads these files by byte count: never convert their line ends (Windows)
+ml/models/*.txt -text

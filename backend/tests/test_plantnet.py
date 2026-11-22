@@ -25,7 +25,9 @@ def post(**form):
 
 
 def test_no_key(monkeypatch):
+    from gaia import plantnet
     monkeypatch.delenv("PLANTNET_API_KEY", raising=False)
+    monkeypatch.setattr(plantnet, "_dotenv_key", lambda: "")   # never use the private key: it would spend the daily quota
     r = post()
     assert r.status_code == 503 and r.json()["detail"]["status"] == "no_api_key"
 

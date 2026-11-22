@@ -342,7 +342,7 @@ def test_assistant_free_provider_groq(monkeypatch, tmp_path):
     http = _Http(text="<think>hmm</think>D'après la fiche Jessour…")
     out = a.answer({"question": "Et les jessour ?", "lang": "fr", "records": [],
                     "history": [{"q": "Quelle pluie ici ?", "a": "180 mm par an."}]}, http=http)
-    assert out == {"text": "D'après la fiche Jessour…", "status": "ok", "model": "llama-3.3-70b-versatile", "provider": "groq"}
+    assert out == {"text": "D'après la fiche Jessour…", "status": "ok", "model": "openai/gpt-oss-120b", "provider": "groq"}
     call = http.calls[0]
     assert call["url"] == "https://api.groq.com/openai/v1/chat/completions"
     assert call["headers"]["Authorization"] == "Bearer gsk_test"

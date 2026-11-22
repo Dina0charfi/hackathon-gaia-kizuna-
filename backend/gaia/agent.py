@@ -40,7 +40,7 @@ and Japanese practices). The farmer gives you a goal for their plot. Work like a
 Every number about the plot must come from a tool result. Say when a tool reported low confidence or a simulation. \
 Do not invent prices, subsidies or laws. For money questions (pay-as-you-go kit, installments, cooperative, \
 profitability) call business_model with the prices the farmer gave; if it returns needs_prices, put its ask_farmer \
-questions in the plan instead of guessing. At most 8 tool rounds, then answer with what you have."""
+questions in the plan instead of guessing. Call every tool you need together in one or two rounds (at most 8), then answer with what you have."""
 
 MAX_TOKENS = 1500
 
@@ -98,6 +98,31 @@ def _claude(messages: list[dict[str, Any]], tools: list[dict[str, Any]], client:
 
 
 # ---------------------------------------------------------------- OpenAI-compatible (Groq, OpenRouter, Ollama...)
+# Free services count every token: long monthly tables, methods and series are left out of what the model reads.
+DROP_KEYS = {"months", "series", "first_12_months", "method", "kc_ref", "assumption", "source", "window_m"}
+
+
+def _slim(x: Any) -> Any:
+    if isinstance(x, dict):
+        return {k: _slim(v) for k, v in x.items() if k not in DROP_KEYS and v not in (None, [], {})}
+    if isinstance(x, list):
+        return [_slim(v) for v in x[:8]]
+    return x
+
+
+def _slim_text(content: Any) -> str:
+    try:
+        data = json.loads(content) if isinstance(content, str) else content
+    except ValueError:
+        return _clip(content, 2000)
+    return _clip(json.dumps(_slim(data), ensure_ascii=False), 2000)
+
+
+def _tool_spec(t: dict[str, Any]) -> dict[str, Any]:
+    return {"type": "function", "function": {"name": t["name"], "description": _clip(t.get("description", ""), 260),
+                                             "parameters": t.get("parameters") or {"type": "object", "properties": {}}}}
+
+
 def _to_openai(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = [{"role": "system", "content": SYSTEM}]
     for m in messages:
@@ -112,7 +137,7 @@ def _to_openai(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
                                    for c in m["tool_calls"]]
             out.append(o)
         elif role == "tool":
-            out.append({"role": "tool", "tool_call_id": m["tool_call_id"], "content": _clip(m.get("content", ""))})
+            out.append({"role": "tool", "tool_call_id": m["tool_call_id"], "content": _slim_text(m.get("content", ""))})
     return out
 
 
@@ -130,9 +155,8 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
     headers = {"Content-Type": "application/json"}
     if cfg.get("key"):
         headers["Authorization"] = "Bearer " + cfg["key"]
-    payload = {"model": cfg["model"], **A.model_options(cfg["model"]), "temperature": 0.2, "max_tokens": MAX_TOKENS, "messages": _to_openai(messages),
-               "tools": [{"type": "function", "function": {"name": t["name"], "description": t.get("description", ""),
-                                                           "parameters": t.get("parameters") or {"type": "object", "properties": {}}}} for t in tools],
+    payload = {"model": cfg["model"], **A.model_options(cfg["model"]), "temperature": 0.2, "max_tokens": 1100 if cfg["provider"] == "groq" else MAX_TOKENS, "messages": _to_openai(messages),
+               "tools": [_tool_spec(t) for t in tools],
                "tool_choice": "auto"}
     http = http or httpx
     try:
@@ -140,7 +164,7 @@ def _openai(messages: list[dict[str, Any]], tools: list[dict[str, Any]], cfg: di
     except httpx.HTTPError as e:
         raise AssistantUnavailable({"status": "api_unreachable", "message": f"{cfg['provider']} unreachable"}) from e
     if r.status_code != 200:
-        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code})
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code, "retry_after": A.retry_after(r)})
     try:
         msg = r.json()["choices"][0]["message"]
     except (ValueError, KeyError, IndexError, TypeError) as e:

@@ -625,7 +625,7 @@
   var loc = dna.location || {}, fLat = p.lat != null ? p.lat : loc.lat, fLon = p.lon != null ? p.lon : loc.lon;
   if (G.CONFIG.irrigationEndpoint && fLat != null && fLon != null) {
     FC.status = 'loading';
-    fetch(G.CONFIG.irrigationEndpoint.replace('{lat}', fLat).replace('{lon}', fLon))
+    G.apiReady.then(function () { return fetch(G.CONFIG.irrigationEndpoint.replace('{lat}', fLat).replace('{lon}', fLon)); })
       .then(function (r) {
         return r.json().then(function (j) {
           if (!r.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || r.status);
@@ -897,9 +897,9 @@
       pl_lim_quota: "Volume autorisé (Garde-nappe) respecté : au plus {q} m³ sur ces 8 jours.",
       pl_lim_quota_hit: "Volume autorisé (Garde-nappe) atteint : le plan s'arrête à {q} m³ sur ces 8 jours, même si la culture manque d'eau.",
       pl_mode: "Que voulez-vous économiser ?",
-      pl_m_water: "💧 L'eau",
+      pl_m_water: "L'eau",
       pl_m_water_d: "GAIA donne le minimum d'eau possible, au jour le plus tardif sans stress. Idéal si l'eau ou le quota sont limités.",
-      pl_m_solar: "☀️ L'électricité (pomper au soleil)",
+      pl_m_solar: "L'électricité (pomper au soleil)",
       pl_m_solar_d: "GAIA fait pomper aux heures de plein soleil (panneaux solaires, énergie gratuite) et arrose un peu en avance les jours ensoleillés : le sol garde l'eau pour les jours nuageux. Idéal si vous avez des panneaux solaires.",
       pl_irr: "Irrigué depuis hier (mm nets, si vous avez arrosé)",
       pl_off: "Le service de planification n'est pas lancé. Dans le dossier du projet : python -m uvicorn gaia.main:app --app-dir backend --port 8000",
@@ -960,9 +960,9 @@
       pl_lim_quota: "الحجم المسموح به (حارس المائدة) محترم: {q} م³ على الأكثر خلال هذه الأيام الثمانية.",
       pl_lim_quota_hit: "بلغ الحجم المسموح به (حارس المائدة): تتوقف الخطة عند {q} م³ خلال هذه الأيام الثمانية، حتى لو نقص الماء للزراعة.",
       pl_mode: "ماذا تريد أن توفّر؟",
-      pl_m_water: "💧 الماء",
+      pl_m_water: "الماء",
       pl_m_water_d: "يعطي GAIA أقل كمية ماء ممكنة، في آخر يوم ممكن دون إجهاد. مناسب إذا كان الماء أو الحصة محدودة.",
-      pl_m_solar: "☀️ الكهرباء (الضخ تحت الشمس)",
+      pl_m_solar: "الكهرباء (الضخ تحت الشمس)",
       pl_m_solar_d: "يضخّ GAIA في ساعات الشمس القوية (ألواح شمسية، طاقة مجانية) ويسقي قليلًا مسبقًا في الأيام المشمسة: تحتفظ التربة بالماء للأيام الغائمة. مناسب إذا كانت لديك ألواح شمسية.",
       pl_irr: "ما سُقي منذ الأمس (مم صافية، إن سقيت)",
       pl_off: "خدمة التخطيط غير مشغّلة. من مجلد المشروع: python -m uvicorn gaia.main:app --app-dir backend --port 8000",
@@ -1023,9 +1023,9 @@
       pl_lim_quota: "Authorised volume (Groundwater guard) respected: at most {q} m³ over these 8 days.",
       pl_lim_quota_hit: "Authorised volume (Groundwater guard) reached: the plan stops at {q} m³ over these 8 days, even if the crop lacks water.",
       pl_mode: "What do you want to save?",
-      pl_m_water: "💧 Water",
+      pl_m_water: "Water",
       pl_m_water_d: "GAIA gives the least water possible, on the latest day without stress. Best when water or the quota is limited.",
-      pl_m_solar: "☀️ Electricity (pump in the sun)",
+      pl_m_solar: "Electricity (pump in the sun)",
       pl_m_solar_d: "GAIA pumps during full-sun hours (solar panels, free energy) and waters a little ahead on sunny days: the soil stores the water for cloudy days. Best if you have solar panels.",
       pl_irr: "Irrigated since yesterday (net mm, if you watered)",
       pl_off: "The planning service is not running. From the project folder, run: python -m uvicorn gaia.main:app --app-dir backend --port 8000",
@@ -1086,9 +1086,9 @@
       pl_lim_quota: "許可水量（地下水ガード）を順守：この8日間で最大{q} m³。",
       pl_lim_quota_hit: "許可水量（地下水ガード）に達しました：作物が水不足でも、この8日間は{q} m³で止まります。",
       pl_mode: "何を節約しますか？",
-      pl_m_water: "💧 水",
+      pl_m_water: "水",
       pl_m_water_d: "ストレスのない最も遅い日に、できるだけ少ない水を与えます。水や割当量が限られている場合に最適。",
-      pl_m_solar: "☀️ 電気（日中にポンプ）",
+      pl_m_solar: "電気（日中にポンプ）",
       pl_m_solar_d: "日差しの強い時間（太陽光パネル、無料の電力）に汲み上げ、晴れた日に少し前倒しで灌漑します。土壌が曇りの日のために水を蓄えます。太陽光パネルがある場合に最適。",
       pl_irr: "昨日以降に灌漑した量（正味mm、水をまいた場合）",
       pl_off: "計画サービスが起動していません。プロジェクトのフォルダで次を実行：python -m uvicorn gaia.main:app --app-dir backend --port 8000",
@@ -1172,7 +1172,7 @@
     PL.key = key; PL.status = 'loading';
     clearTimeout(PL.timer);
     PL.timer = setTimeout(function () {
-      fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key })
+      G.apiReady.then(function () { return fetch(G.CONFIG.planEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key }); })
         .then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error((j.detail && (j.detail.message || j.detail)) || res.status); return j; }); })
         .then(function (j) { if (PL.key !== key) return; PL.status = 'ok'; PL.data = j; PL.error = null; draw(); })
         .catch(function (e) { if (PL.key !== key) return; PL.status = e instanceof TypeError ? 'off' : 'error'; PL.error = String(e.message || e); draw(); });
@@ -1201,7 +1201,7 @@
     card.appendChild(el('p', { class: 'small', style: 'margin-top:12px;font-weight:600' }, [t('pl_mode')]));
     card.appendChild(el('div', { class: 'ss-choice', role: 'group', 'aria-label': t('pl_mode'), style: 'margin-top:6px' },
       [['solar', 'pl_m_solar'], ['water', 'pl_m_water']].map(function (o) {
-        return el('button', { type: 'button', 'aria-pressed': String((S.plan_mode || 'solar') === o[0]), onclick: function () { S.plan_mode = o[0]; persist(); draw(); } }, [t(o[1])]);
+        return el('button', { type: 'button', 'aria-pressed': String((S.plan_mode || 'solar') === o[0]), onclick: function () { S.plan_mode = o[0]; persist(); draw(); } }, [G.iconText(o[0] === 'solar' ? 'sun' : 'drop', t(o[1]))]);
       })));
     card.appendChild(el('p', { class: 'small', style: 'margin-top:6px;max-width:680px;color:var(--g-ink-2,#555)' }, [t((S.plan_mode || 'solar') === 'water' ? 'pl_m_water_d' : 'pl_m_solar_d')]));
     card.appendChild(el('div', { class: 'gp-field', style: 'margin-top:10px;max-width:340px' }, [
@@ -1449,7 +1449,7 @@
     fetch(G.CONFIG.agentEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q.trim(), lang: G.lang(), parcel: parcel, history: history }) })
       .then(function (res) { return res.json().then(function (j) { if (!res.ok) { var e = new Error((j.detail && (j.detail.message || j.detail)) || res.status); e.code = j.detail && j.detail.status; throw e; } return j; }); })
-      .then(function (j) { AG.turns.push({ role: 'assistant', content: j.text || '', steps: j.steps || [], engine: j.engine, model: j.model, provider: j.provider,
+      .then(function (j) { AG.turns.push({ role: 'assistant', content: G.noEmoji(j.text), steps: j.steps || [], engine: j.engine, model: j.model, provider: j.provider,
         proposals: (j.proposals || []).map(function (p) { return Object.assign({ state: 'pending' }, p); }) }); AG.status = 'ok'; draw(); })
       .catch(function (e) {
         AG.turns.pop();                                   // the question was not answered: give it back to the input

@@ -306,6 +306,8 @@ def solar_simulate(body: SolarIn) -> dict:
 
 
 def _source_error(e: Exception) -> dict:
+    if isinstance(e, ImportError):
+        return {"status": "library_missing", "message": f"{e.name} is not installed on the server: pip install -r backend/requirements.txt"}
     if "429" in str(e):
         return {"status": "rate_limited", "message": "Open-Meteo limits requests for a moment (429): try again in a minute."}
     return {"status": "source_unavailable", "message": f"Open-Meteo: {str(e)[:160]}"}

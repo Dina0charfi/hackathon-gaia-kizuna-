@@ -32,12 +32,13 @@
 
   // irrigation forecast, planner, farm record and irrigation agent: the first server found above
   var GAIA_API = SERVER_BASES[0] || 'http://127.0.0.1:8000';
+  try { var lastBase = global.sessionStorage.getItem('gaia.apiBase'); if (lastBase && SERVER_BASES.indexOf(lastBase) !== -1) GAIA_API = lastBase; } catch (e) { /* no storage */ }
 
   var CONFIG = Object.assign({
     soilEndpoint: null,        // e.g. '/api/soil?lat={lat}&lon={lon}' served from local SoilGrids rasters
     assistantEndpoint: null,   // e.g. '/api/assistant' — FastAPI + LLM, receives retrieved records only
     visionManifest: 'models/gaia-vision/manifest.json', // exported ONNX models (see health.html)
-    plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
+    plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? GAIA_API + '/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
     irrigationEndpoint: GAIA_API + '/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
     planEndpoint: GAIA_API + '/irrigation/plan',   // optimal irrigation planner + solar pumping (backend/gaia/planner.py); null = off
@@ -45,9 +46,26 @@
     replayEndpoint: GAIA_API + '/irrigation/replay', // season replay on real past data; null = off
     agentEndpoint: GAIA_API + '/agent',            // irrigation agent (free Gemini / Groq key in backend/.env); null = off
     effectiveRainTable: 'ml/models/pluie_efficace_meta.json', // learned effective rain per month and site (ml/, section 11); null = USDA-SCS only
-    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/auth' : null, // accounts (backend /auth/*). null = guest only
+    authEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? GAIA_API + '/auth' : null, // accounts (backend /auth/*). null = guest only
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
+
+  // The server may run on :8000 or :8765. Every call to the server goes to the one that answers.
+  var API_READY = (function () {
+    if (SERVER_BASES.length < 2 || !global.fetch) return Promise.resolve(GAIA_API);
+    var order = [GAIA_API].concat(SERVER_BASES.filter(function (b) { return b !== GAIA_API; }));
+    function use(base) {
+      if (base !== GAIA_API) Object.keys(CONFIG).forEach(function (k) {
+        if (/Endpoint$/.test(k) && typeof CONFIG[k] === 'string' && CONFIG[k].indexOf(GAIA_API) === 0) CONFIG[k] = base + CONFIG[k].slice(GAIA_API.length);
+      });
+      GAIA_API = base;
+      try { global.sessionStorage.setItem('gaia.apiBase', base); } catch (e) { /* no storage */ }
+      return base;
+    }
+    return order.reduce(function (p, base) {
+      return p.catch(function () { return global.fetch(base + '/health').then(function (r) { if (!r.ok) throw r.status; return use(base); }); });
+    }, Promise.reject(0)).catch(function () { return GAIA_API; });
+  }());
 
   /* ---------------------------------------------------------- storage */
   function load(key, fallback) {
@@ -233,6 +251,9 @@
   }
   function authCall(path, opts) {   // path relative to /auth; '../share/x' style paths go to the API root
     if (!CONFIG.authEndpoint) return Promise.reject({ code: 'no_server' });
+    return API_READY.then(function () { return authSend(path, opts); });
+  }
+  function authSend(path, opts) {
     var s = session(), h = { 'Content-Type': 'application/json' };
     if (s && s.token) h.Authorization = 'Bearer ' + s.token;
     var url = path.indexOf('/share/') === 0 ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
@@ -324,6 +345,15 @@
     card: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>',
     cash: '<rect x="3" y="7" width="18" height="10" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/>',
     phone: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    frost: '<path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17M9.5 4L12 6.5 14.5 4M9.5 20l2.5-2.5 2.5 2.5"/>',
+    drop: '<path d="M12 3s6.5 7 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10 12 3 12 3z"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    refresh: '<path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/>',
+    play: '<path d="M7 4.5l12 7.5-12 7.5z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    star: '<path d="M12 3l2.7 5.8 6.3.8-4.6 4.3 1.2 6.2-5.6-3.1-5.6 3.1 1.2-6.2L3 9.6l6.3-.8z"/>',
     network: '<circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M7 7.8l3.2 3M7 16.2l3.2-3M13.8 11l3.4-3.2M13.8 13l3.4 3.2"/>'
   };
   function icon(name, size) {
@@ -334,6 +364,11 @@
     if (size) { s.setAttribute('width', size); s.setAttribute('height', size); }
     s.innerHTML = ICONS[name] || '';
     return s;
+  }
+  // answers written by a language model: no emoji on the page
+  function noEmoji(x) { return String(x || '').replace(/(?![©®™])[\p{Extended_Pictographic}\p{Regional_Indicator}\u{1F3FB}-\u{1F3FF}]|[️‍⃣]/gu, ''); }
+  function iconText(name, text, size) {
+    return el('span', { style: 'display:inline-flex;align-items:center;gap:6px' }, [icon(name, size || 16), el('span', null, [text])]);
   }
   function pill(kind, text) {
     var map = { ok: 'ok', feasible: 'ok', adapt: 'adapt', no: 'no', rejected: 'no', unk: 'unk', info: 'unk', demo: 'demo', live: 'live', plan: 'plan' };
@@ -539,10 +574,10 @@
   }
 
   global.GAIA = {
-    CONFIG: CONFIG, serverBases: SERVER_BASES, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
+    CONFIG: CONFIG, serverBases: SERVER_BASES, apiReady: API_READY, t: t, tr: tr, addPhrases: addPhrases, fieldLabel: fieldLabel, addStrings: addStrings, applyI18n: applyI18n, setLang: setLang,
     lang: function () { return lang; }, onLang: function (fn) { langListeners.push(fn); },
     getParcel: getParcel, setParcel: setParcel, load: load, save: save, auth: auth,
-    el: el, clear: clear, fmt: fmt, icon: icon, pill: pill, note: note, confBadge: confBadge,
+    el: el, clear: clear, fmt: fmt, icon: icon, iconText: iconText, noEmoji: noEmoji, pill: pill, note: note, confBadge: confBadge,
     mountShell: mountShell, barChart: barChart, bindTip: bindTip, needParcel: needParcel,
     kaizenButton: kaizenButton, recordFeedback: recordFeedback
   };

@@ -88,11 +88,9 @@
   function parseGoal(g) {
     var f = g.toLowerCase(), o = { text: g };
     o.place = T.placeIn(g);
-    o.crop = T.cropKey(g);
+    o.crop = T.cropKey(g); if (o.crop === 'other') o.crop = null;   // a sentence without a crop: keep the crop of the plot
     var m = f.match(/(\d+(?:[.,]\d+)?)\s*(?:ha\b|hect|هكتار|ヘクタール)/); if (m) o.area = +m[1].replace(',', '.');
     m = f.match(/(?:puits|forage|well|بئر|井戸)[^\d]{0,15}(\d{1,3})\s*(?:m|م)|(\d{1,3})\s*(?:m|م)(?:\s*(?:de\s*)?(?:puits|well|deep|profond)|\s*بئر)/); if (m) o.well = +(m[1] || m[2]);
-    // "rentable", "possible"... contain "ble" (wheat) and any other sentence falls into "other": keep only a real crop word
-    o.bizCrop = T.cropKey(f.replace(/[a-z]+ble[a-z]*/g, ' ').replace(/\bdat(?:e|a)\b/g, ' ')); if (o.bizCrop === 'other') o.bizCrop = null;
     o.solar = /solai|solar|panneau|panel|شمس|ألواح|ソーラー|太陽|agrivolt|photovolt/.test(f);
     o.nappe = /nappe|aquif|groundwater|over.?pump|épuis|المائدة|استنزاف|地下水/.test(f);
     if (o.solar && !o.crop && /tomat|طماطم|トマト/.test(f)) o.crop = 'tomato';
@@ -147,7 +145,6 @@
     step('plot_profile', {}, W({ fr: 'Lire le profil de la parcelle', en: 'Read the plot profile', ar: 'قراءة ملف القطعة', ja: '区画プロファイルを読む' }));
     if (P.biz) {
       // a money question: measure the water and energy first, then price the kit from them
-      P.crop = P.bizCrop;
       var ba = {};
       if (P.crop) ba.crop = P.crop;
       if (P.kit) ba.kit_tnd = P.kit;
@@ -207,8 +204,29 @@
       if (a.kind === 'dry_spell') watch.push(W({ fr: 'Période sèche : ' + n0(a.past30_mm) + ' mm sur 30 jours et presque rien de prévu. Toute l\'eau viendra de l\'irrigation.', en: 'Dry spell: ' + n0(a.past30_mm) + ' mm in 30 days and almost nothing forecast. All water will come from irrigation.', ar: 'فترة جفاف: ' + n0(a.past30_mm) + ' مم في 30 يوماً ولا أمطار متوقعة.', ja: '乾燥期：30日で' + n0(a.past30_mm) + ' mm、予報もほぼ雨なし。水はすべて灌漑から。' }));
     });
 
-    // water schedule
-    if (wn && wn.next_14_days) {
+    // water schedule: the soil planner decides when it answered, otherwise the simple daily replacement below
+    var sp = wn && wn.soil_plan;
+    if (sp) {
+      var u = sp.per_ha ? ' m³/ha' : ' m³', thisWeek = W({ fr: 'cette semaine', en: 'this week', ar: 'هذا الأسبوع', ja: '今週' });
+      if (!sp.irrigate.length) add(thisWeek, sp.from, sp.out_of_season ? W({
+        fr: 'Pas d\'irrigation : c\'est hors saison pour cette culture', en: 'No irrigation: off season for this crop', ar: 'لا ري: خارج موسم هذه الزراعة', ja: '灌水なし：この作物の時期外です' }) : sp.quota_reached ? W({
+        fr: 'Pas d\'irrigation possible : le quota d\'eau du mois est atteint', en: 'No irrigation possible: this month\'s water quota is reached', ar: 'لا ري ممكن: بلغت حصة الماء لهذا الشهر', ja: '灌水不可：今月の水の割当に達しました' }) : W({
+        fr: 'Ne pas irriguer : le sol garde assez d\'eau (réserve estimée à ' + sp.soil_reserve_pct + ' %, il faut rester au-dessus de ' + sp.keep_above_pct + ' %) jusqu\'au ' + day(sp.to) + (sp.spared_m3 > 0 ? '. Arroser par habitude aurait utilisé ' + n0(sp.spared_m3) + u : ''),
+        en: 'Do not irrigate: the soil holds enough water (estimated reserve ' + sp.soil_reserve_pct + ' %, keep it above ' + sp.keep_above_pct + ' %) until ' + day(sp.to) + (sp.spared_m3 > 0 ? '. Watering by habit would have used ' + n0(sp.spared_m3) + u : ''),
+        ar: 'لا تسقِ: في التربة ماء كافٍ (المخزون المقدّر ' + sp.soil_reserve_pct + ' %، يجب البقاء فوق ' + sp.keep_above_pct + ' %) حتى ' + day(sp.to) + (sp.spared_m3 > 0 ? '. السقي المعتاد كان سيستهلك ' + n0(sp.spared_m3) + u : ''),
+        ja: '灌水しない：土に十分な水があります（推定貯水' + sp.soil_reserve_pct + '%、' + sp.keep_above_pct + '%を下回らないこと）。' + day(sp.to) + 'まで' + (sp.spared_m3 > 0 ? '。習慣で灌水すると' + n0(sp.spared_m3) + u + '使っていました' : '') }), 'water_need', 3);
+      else {
+        var list = sp.irrigate.map(function (x) { return day(x.date) + ' ' + n0(x.m3) + u + (x.from_h !== null ? ' (' + x.from_h + ' h–' + x.to_h + ' h)' : ''); }).join(', ');
+        add(thisWeek, sp.irrigate[0].date, W({
+          fr: 'Irriguer ' + n0(sp.total_m3) + u + ' au total : ' + list + '. Le sol est estimé à ' + sp.soil_reserve_pct + ' % de sa réserve',
+          en: 'Irrigate ' + n0(sp.total_m3) + u + ' in total: ' + list + '. The soil is estimated at ' + sp.soil_reserve_pct + ' % of its reserve',
+          ar: 'اسقِ ' + n0(sp.total_m3) + u + ' في المجموع: ' + list + '. مخزون التربة مقدّر بـ ' + sp.soil_reserve_pct + ' %',
+          ja: '合計' + n0(sp.total_m3) + u + 'を灌水：' + list + '。土壌の貯水は推定' + sp.soil_reserve_pct + '%' }), 'water_need', 3);
+      }
+      watch.push(W({ fr: 'Le plan d\'irrigation change chaque jour avec la météo. Si vous avez arrosé, notez-le dans Eau & énergie pour qu\'il en tienne compte.', en: 'The irrigation plan changes every day with the weather. If you watered, note it in Water & energy so that it is counted.', ar: 'تتغير خطة الري كل يوم مع الطقس. إذا سقيت، سجّل ذلك في الماء والطاقة.', ja: '灌水計画は天気により毎日変わります。灌水したら「水とエネルギー」に記録してください。' }));
+      if (!wn.area_ha) watch.push(W({ fr: 'Surface inconnue : les volumes sont donnés par hectare.', en: 'Area unknown: volumes are per hectare.', ar: 'المساحة غير معروفة: الأحجام لكل هكتار.', ja: '面積不明：量はヘクタール当たり。' }));
+    }
+    if (wn && !sp && wn.next_14_days) {
       var d14 = wn.next_14_days, w1 = d14.slice(0, 7), w2 = d14.slice(7, 14);
       var s1 = w1.reduce(function (s, d) { return s + (d.m3 || 0); }, 0), s2 = w2.reduce(function (s, d) { return s + (d.m3 || 0); }, 0),
         mm1 = w1.reduce(function (s, d) { return s + (d.irrigate_mm || 0); }, 0);
@@ -272,7 +290,7 @@
       var ok = cp.results.filter(function (r) { return r.verdict === 'feasible'; }), ad = cp.results.filter(function (r) { return r.verdict === 'adapt'; });
       var pick = ok.slice(0, 2).concat(ok.length < 2 ? ad.slice(0, 2 - ok.length) : []);
       pick.forEach(function (r) {
-        add(W({ fr: 'cette saison', en: 'this season', ar: 'هذا الموسم', ja: '今シーズン' }), null, W({ fr: 'Mettre en place : ', en: 'Set up: ', ar: 'طبّق: ', ja: '導入：' }) + r.name + (r.origin === 'jp' ? ' 🇯🇵' : r.origin === 'tn' ? ' 🇹🇳' : '') +
+        add(W({ fr: 'cette saison', en: 'this season', ar: 'هذا الموسم', ja: '今シーズン' }), null, W({ fr: 'Mettre en place : ', en: 'Set up: ', ar: 'طبّق: ', ja: '導入：' }) + r.name + (r.origin === 'jp' ? W({ fr: ' (Japon)', en: ' (Japan)', ar: ' (اليابان)', ja: '（日本）' }) : r.origin === 'tn' ? W({ fr: ' (Tunisie)', en: ' (Tunisia)', ar: ' (تونس)', ja: '（チュニジア）' }) : '') +
           (r.verdict === 'adapt' && r.adaptation ? ' — ' + r.adaptation : (r.why && r.why[0] ? ' — ' + r.why[0] : '')), 'check_practices', 7);
       });
     }
@@ -361,10 +379,23 @@
   /* ------------------------------------------------------------------ 2. language model with tool calling (server) */
   var LANG_NAME = { fr: 'French', ar: 'Arabic', en: 'English', ja: 'Japanese' };
   function serverUrl() { var s = LLM && LLM.state(); return s && s.server ? s.server.replace(/\/assistant$/, '/agent/step') : null; }
+  // A number the model gives to a tool must come from the farmer's words, the plot or an earlier result: an invented one
+  // would come back as if it had been measured.
+  function groundedArgs(args, goal) {
+    var have = G.getParcel(), known = [goal, have ? JSON.stringify(T.profileData(have)) : ''].concat(S.steps.filter(function (x) { return x.result && x.result.data; }).map(function (x) { return JSON.stringify(x.result.data); })).join(' ');
+    var nums = (known.replace(/(\d)[\s  ](?=\d{3}\b)/g, '$1').replace(/(\d),(?=\d{3}\b)/g, '$1').match(/-?\d+(?:[.,]\d+)?/g) || []).map(function (x) { return parseFloat(x.replace(',', '.')); });
+    var out = {};
+    Object.keys(args || {}).forEach(function (k) {
+      var v = args[k];
+      if (typeof v === 'number' && k !== 'days' && !nums.some(function (n) { return Math.abs(n - v) < 1e-6 || Math.abs(Math.abs(n) - Math.abs(v)) < 5e-4 * Math.abs(v); })) return;
+      out[k] = v;
+    });
+    return out;
+  }
   function llmAgent(goal) {
     var url = serverUrl(), have = G.getParcel();
     var ctxLine = have ? 'A plot is saved: ' + JSON.stringify(T.profileData(have)).slice(0, 900) : 'No plot is saved yet: use find_place and build_land_dna (ask nothing, use the place in the goal, or Sidi Bouzid olives 2 ha well 50 m as a labelled demo).';
-    var msgs = [{ role: 'user', content: 'GOAL: ' + goal + '\nLANG: ' + LANG_NAME[L()] + '\nTODAY: ' + new Date().toISOString().slice(0, 10) + '\n' + ctxLine }];
+    var msgs = [{ role: 'user', content: 'GOAL: ' + goal + '\nRULES: every date must be today or later; leave a numeric tool argument out unless the farmer or a tool gave it; no limit, quota or equipment size of your own; write only in LANG.\nLANG: ' + LANG_NAME[L()] + '\nTODAY: ' + new Date().toISOString().slice(0, 10) + '\n' + ctxLine }];
     var tools = T.schemas(), rounds = 0;
     function post() {
       return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs, tools: tools }) })
@@ -381,7 +412,7 @@
           thought(j.text);
           msgs.push({ role: 'assistant', content: j.text || '', tool_calls: j.calls });
           return Promise.all(j.calls.map(function (c) {
-            return call(c.name, c.args).then(function (r) { return { role: 'tool', tool_call_id: c.id, name: c.name, content: JSON.stringify(r.error ? { error: r.error, hint: r.hint } : r.data) }; });
+            return call(c.name, groundedArgs(c.args, goal)).then(function (r) { return { role: 'tool', tool_call_id: c.id, name: c.name, content: JSON.stringify(r.error ? { error: r.error, hint: r.hint } : r.data) }; });
           })).then(function (outs) { outs.forEach(function (o) { msgs.push(o); }); return loop(); });
         }
         return { text: j.text, source: 'llm' };
@@ -476,7 +507,7 @@
     ja: { moderate: '中', high: '高', low: '低', feasible: '件可能', adapt: '件要調整', insufficient: '件データ不足', rejected: '件不可', no: '高すぎる', ok: '支払い可能' }
   };
   var PICTO = /[\p{Extended_Pictographic}\p{Regional_Indicator}️]/gu;
-  function plain(x) { return String(x || '').replace(PICTO, '').replace(/\s{2,}/g, ' ').trim(); }
+  function plain(x) { return String(x || '').replace(PICTO, '').replace(/([^.])[.]{2}(?![.])/g, '$1.').replace(/\s{2,}/g, ' ').trim(); }
   var EASY = {
     fr: [[/\s*\(quota FAO-56 du mois\)/g, ''], [/(\d) mm, FAO-56\)/g, '$1 mm)'], [/,\s*FAO-56\b/g, ''], [/≈\s*/g, 'environ '], [/ ; /g, '. '], [/\bNDVI\s+(-?\d)/g, 'indice de végétation $1'], [/ bloqués pour la nappe/g, ' restent dans la nappe'],
       [/Les panneaux pourraient remonter/gi, 'sans ce réglage, les panneaux pourraient pomper'], [/(\d)×/g, '$1 fois'], [/\bLER\b/g, 'rendement total du sol'], [/risque modéré/g, 'risque moyen'], [/C'est le besoin agronomique, ne pas pomper plus/g, 'C\'est tout ce dont la culture a besoin : ne pompez pas plus']],
@@ -493,7 +524,7 @@
       .replace(new RegExp('\\s*[\\(（]\\s*(?:outils?|tools?|module)?\\s*[*_`]*(?:' + names + ')[*_`]*(?:\\s*[,;+&/]\\s*[*_`]*(?:' + names + ')[*_`]*)*\\s*[\\)）]', 'gi'), '')
       .replace(new RegExp('\\s*[–—-]\\s*[*_`]+(?:' + names + ')[*_`]+(?:\\s*\\([^)]*\\))?', 'gi'), '')
       .replace(new RegExp('[*_`]*\\b(' + names + ')\\b[*_`]*', 'gi'), function (m, n) { return cat(n.toLowerCase()).toLowerCase(); })
-      .replace(/^#+\s*actions?\s*$/gim, '**' + t('ag_do') + '**').replace(/^#+\s*watch\s*$/gim, '**' + t('ag_watch') + '**').replace(/^(\s*[-*•]\s*)\[([^\]]+)\]/gm, '$1**$2** :');
+      .replace(/^#+\s*actions?\s*$/gim, '**' + t('ag_do') + '**').replace(/^#+\s*watch\s*$/gim, '**' + t('ag_watch') + '**').replace(/^(\s*[-*•]\s*)\[([^\]]+)\]/gm, '$1**$2** :').replace(/(^|[^*])\*(?!\*)/g, '$1');
   }
   function plainLines(x) { return String(x || '').replace(PICTO, ''); }
   // one short title, then the explanation: easier to read than one long sentence
@@ -606,5 +637,10 @@
   mount();
   // ?goal=... runs the agent at once (used by the demo link on the home page)
   var q = new URLSearchParams(location.search).get('goal');
-  if (q) { input.value = q; run(q); }
+  if (q) {
+    input.value = q;
+    // wait for the search of an online model (a few seconds at most), or the link would always start without it
+    var started = false, start = function () { if (!started) { started = true; run(q); } };
+    if (LLM && LLM.state().checking) { LLM.on(function () { if (!LLM.state().checking) start(); }); setTimeout(start, 5000); } else start();
+  }
 }());

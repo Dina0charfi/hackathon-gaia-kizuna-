@@ -35,11 +35,11 @@
   body.gp[dir="rtl"] .ans .reco { font-family: var(--g-ar); }
   .composer { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--g-ivory) 30%); padding: 20px 0 16px; margin-top: 10px; }
   .composer form { display: flex; gap: 8px; background: #fff; border: 1px solid var(--g-line-2); border-radius: 14px; padding: 6px; box-shadow: var(--g-shadow); }
-  .composer input { flex: 1; border: 0; font: 15.5px var(--g-sans); padding: 0 10px; min-height: 44px; background: transparent; }
+  .composer input { flex: 1; min-width: 0; border: 0; font: 15.5px var(--g-sans); padding: 0 10px; min-height: 44px; background: transparent; }
   body.gp[dir="rtl"] .composer input { font-family: var(--g-ar); }
   .composer input:focus { outline: none; }
   .mode { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--g-ink-3); margin-top: 8px; }
-  @media (max-width: 900px) { .lab { grid-template-columns: 1fr; } .ctx { position: static; } }
+  @media (max-width: 900px) { .lab { grid-template-columns: minmax(0, 1fr); } .ctx { position: static; } }
   .ans .llm { margin-top: 10px; font-size: 15px; color: var(--g-ink); }
   .ans .llm p, .ans .llm li { font-size: 15px; line-height: 1.55; color: var(--g-ink); margin: 0 0 6px; }
   .ans .llm ul { margin: 0 0 6px; padding-inline-start: 20px; }

@@ -37,9 +37,9 @@ def config() -> dict[str, Any] | None:
     key = os.environ.get("GAIA_LLM_API_KEY")
     if not key:
         return None
-    p = PROVIDERS.get(os.environ.get("GAIA_LLM_PROVIDER", "gemini").lower(), PROVIDERS["gemini"])
-    return dict(key=key, base_url=os.environ.get("GAIA_LLM_BASE_URL", p["base_url"]).rstrip("/"),
-                model=os.environ.get("GAIA_FREE_MODEL", p["model"]), backup=os.environ.get("GAIA_FREE_BACKUP_MODEL", p["backup"]),
+    p = PROVIDERS.get((os.environ.get("GAIA_LLM_PROVIDER") or "gemini").lower(), PROVIDERS["gemini"])
+    return dict(key=key, base_url=(os.environ.get("GAIA_LLM_BASE_URL") or p["base_url"]).rstrip("/"),
+                model=os.environ.get("GAIA_FREE_MODEL") or p["model"], backup=os.environ.get("GAIA_FREE_BACKUP_MODEL") or p["backup"],
                 name=p["name"])
 
 

@@ -170,14 +170,14 @@ def _openai(prompt: str, cfg: dict[str, str], http: Any = None) -> dict[str, Any
     headers = {"Content-Type": "application/json"}
     if cfg.get("key"):
         headers["Authorization"] = "Bearer " + cfg["key"]
-    payload = {"model": cfg["model"], **A.model_options(cfg["model"]), "temperature": 0.2, "max_tokens": 2000,
+    payload = {"model": cfg["model"], **A.model_options(cfg["model"]), "temperature": 0.2, "max_tokens": 1500,
                "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]}
     try:
         r = (http or httpx).post(cfg["base_url"] + "/chat/completions", json=payload, headers=headers, timeout=120)
     except httpx.HTTPError as e:
         raise AssistantUnavailable({"status": "api_unreachable", "message": f"{cfg['provider']} unreachable"}) from e
     if r.status_code != 200:
-        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code})
+        raise AssistantUnavailable({"status": "api_error", "message": f"{cfg['provider']} error {r.status_code}", "http": r.status_code, "retry_after": A.retry_after(r)})
     try:
         text = (r.json()["choices"][0]["message"]["content"] or "").strip()
     except (ValueError, KeyError, IndexError, TypeError) as e:
