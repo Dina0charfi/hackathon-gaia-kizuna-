@@ -25,7 +25,7 @@
       ag_ex: 'Exemples', ag_trace: 'Raisonnement et outils', ag_plan: 'Plan d\'action', ag_mode: 'Cerveau', ag_running: 'en cours…', ag_done: 'terminé', ag_err: 'erreur',
       ag_m_server: 'modèle de langage avec appel d\'outils', ag_m_browser: 'planificateur GAIA + modèle gratuit dans le navigateur', ag_m_planner: 'planificateur GAIA (hors ligne, sans clé)',
       ag_no_plot: "Aucune parcelle enregistrée : l'agent utilise une parcelle de démonstration (oliviers, Sidi Bouzid, 2 ha, puits de 50 m). Nommez votre ville dans l'objectif pour utiliser la vôtre.",
-      ag_ics: 'Ajouter au calendrier (.ics)', ag_copy: 'Copier le plan', ag_copied: 'Copié', ag_raw: 'résultat brut', ag_think: 'Pensée',
+      ag_demo: 'démo', ag_unsaved: 'Ce plan utilise la parcelle « {p} ». Votre parcelle enregistrée (« {c} ») n’a pas été modifiée.', ag_save: 'Enregistrer comme ma parcelle', ag_saved: 'Enregistrée', ag_ics: 'Ajouter au calendrier (.ics)', ag_copy: 'Copier le plan', ag_copied: 'Copié', ag_raw: 'résultat brut', ag_think: 'Pensée',
       ag_no_server: "Pour l'agent IA complet : lancez le serveur GAIA (backend/) avec une clé Groq gratuite, ou ouvrez cette page avec ?server=http://IP-du-serveur:8000.", ag_fallback: 'Le modèle de langage ne répond pas : le planificateur GAIA prend le relais.', ag_turn_on: 'Activer le modèle gratuit du navigateur',
       ag_honest: 'Chaque chiffre vient d\'un outil. Les règles de risque de maladie sont indicatives : confirmez sur le terrain avant tout traitement.',
       ag_steps: 'étapes', ag_tools: 'appels d\'outils', ag_ms: 'ms'
@@ -36,7 +36,7 @@
       ag_ex: 'أمثلة', ag_trace: 'التفكير والأدوات', ag_plan: 'خطة العمل', ag_mode: 'العقل', ag_running: 'جارٍ…', ag_done: 'تم', ag_err: 'خطأ',
       ag_m_server: 'نموذج لغوي يستدعي الأدوات', ag_m_browser: 'مخطط غايا + نموذج مجاني في المتصفح', ag_m_planner: 'مخطط غايا (دون اتصال، دون مفتاح)',
       ag_no_plot: 'لا توجد قطعة محفوظة: يستعمل الوكيل قطعة تجريبية (زيتون، سيدي بوزيد، 2 هكتار، بئر 50 م). اذكر مدينتك في الهدف لاستعمال قطعتك.',
-      ag_ics: 'أضف إلى الرزنامة (.ics)', ag_copy: 'انسخ الخطة', ag_copied: 'تم النسخ', ag_raw: 'النتيجة الخام', ag_think: 'تفكير',
+      ag_demo: 'تجريبي', ag_unsaved: 'تستعمل هذه الخطة القطعة «{p}». لم تتغير قطعتك المحفوظة («{c}»).', ag_save: 'احفظها كقطعتي', ag_saved: 'تم الحفظ', ag_ics: 'أضف إلى الرزنامة (.ics)', ag_copy: 'انسخ الخطة', ag_copied: 'تم النسخ', ag_raw: 'النتيجة الخام', ag_think: 'تفكير',
       ag_no_server: 'للوكيل الذكي الكامل: شغّل خادم غايا (backend/) بمفتاح Groq مجاني، أو افتح هذه الصفحة مع ?server=http://IP-الخادم:8000.', ag_fallback: 'النموذج اللغوي لا يجيب: يتولى مخطط غايا المهمة.', ag_turn_on: 'شغّل النموذج المجاني في المتصفح',
       ag_honest: 'كل رقم يأتي من أداة. قواعد خطر الأمراض تقريبية: تحقّق في الحقل قبل أي معالجة.',
       ag_steps: 'خطوات', ag_tools: 'استدعاءات أدوات', ag_ms: 'مللي ثانية'
@@ -47,7 +47,7 @@
       ag_ex: 'Examples', ag_trace: 'Reasoning and tools', ag_plan: 'Action plan', ag_mode: 'Brain', ag_running: 'running…', ag_done: 'done', ag_err: 'error',
       ag_m_server: 'language model with tool calling', ag_m_browser: 'GAIA planner + free in-browser model', ag_m_planner: 'GAIA planner (offline, no key)',
       ag_no_plot: 'No saved plot: the agent uses a demo plot (olives, Sidi Bouzid, 2 ha, 50 m well). Name your town in the goal to use yours.',
-      ag_ics: 'Add to calendar (.ics)', ag_copy: 'Copy the plan', ag_copied: 'Copied', ag_raw: 'raw result', ag_think: 'Thought',
+      ag_demo: 'demo', ag_unsaved: 'This plan uses the plot “{p}”. Your saved plot (“{c}”) was not changed.', ag_save: 'Save as my plot', ag_saved: 'Saved', ag_ics: 'Add to calendar (.ics)', ag_copy: 'Copy the plan', ag_copied: 'Copied', ag_raw: 'raw result', ag_think: 'Thought',
       ag_no_server: 'For the full AI agent: run the GAIA server (backend/) with a free Groq key, or open this page with ?server=http://server-IP:8000.', ag_fallback: 'The language model does not answer: GAIA\'s planner takes over.', ag_turn_on: 'Turn on the free in-browser model',
       ag_honest: 'Every number comes from a tool. Disease-risk rules are indicative: confirm in the field before any treatment.',
       ag_steps: 'steps', ag_tools: 'tool calls', ag_ms: 'ms'
@@ -58,7 +58,7 @@
       ag_ex: '例', ag_trace: '推論とツール', ag_plan: '行動計画', ag_mode: '頭脳', ag_running: '実行中…', ag_done: '完了', ag_err: 'エラー',
       ag_m_server: 'ツール呼び出し対応の言語モデル', ag_m_browser: 'GAIAプランナー＋ブラウザ内の無料モデル', ag_m_planner: 'GAIAプランナー（オフライン・キー不要）',
       ag_no_plot: '保存された区画がありません。デモ区画（オリーブ、シディ・ブジッド、2ha、井戸50m）を使います。目標に町の名前を書くと、その場所を使います。',
-      ag_ics: 'カレンダーに追加（.ics）', ag_copy: '計画をコピー', ag_copied: 'コピーしました', ag_raw: '生データ', ag_think: '思考',
+      ag_demo: 'デモ', ag_unsaved: 'この計画は区画「{p}」を使っています。保存済みの区画（「{c}」）は変更していません。', ag_save: '自分の区画として保存', ag_saved: '保存しました', ag_ics: 'カレンダーに追加（.ics）', ag_copy: '計画をコピー', ag_copied: 'コピーしました', ag_raw: '生データ', ag_think: '思考',
       ag_no_server: 'AIエージェントを完全に使うには、無料のGroqキーでGAIAサーバー（backend/）を起動するか、このページを ?server=http://サーバーのIP:8000 付きで開いてください。', ag_fallback: '言語モデルが応答しません。GAIAプランナーが引き継ぎます。', ag_turn_on: 'ブラウザ内の無料モデルを有効にする',
       ag_honest: 'すべての数値はツールから得たものです。病害リスクのルールは目安です。処置の前に圃場で確認してください。',
       ag_steps: 'ステップ', ag_tools: 'ツール呼び出し', ag_ms: 'ms'
@@ -109,7 +109,7 @@
   function planner(goal) {
     var P = parseGoal(goal), have = G.getParcel(), res = {};
     var chain = Promise.resolve();
-    var newPlace = P.place && (!have || Math.abs(have.lat - P.place.lat) > 0.05 || Math.abs(have.lon - P.place.lon) > 0.05);
+    var newPlace = P.place && (!have || Math.abs(have.lat - P.place.lat) > 0.15 || Math.abs(have.lon - P.place.lon) > 0.15);
     if (newPlace || !have) {
       var demo = !P.place;
       if (demo) S.note = t('ag_no_plot');
@@ -117,7 +117,8 @@
       chain = chain.then(function () { return call('find_place', { name: place }, W({ fr: 'Localiser la parcelle', en: 'Locate the plot', ar: 'تحديد موقع القطعة', ja: '区画の位置を特定' })); })
         .then(function (r) {
           if (r.error) throw new Error(r.error);
-          var a = { lat: r.data.lat, lon: r.data.lon, name: r.data.name + (demo ? ' (démo)' : ''), crop: P.crop ? (['tomato', 'potato', 'pepper'].indexOf(P.crop) !== -1 ? 'veg' : P.crop) : (demo ? 'olive' : null),
+          T.ctx.demo = demo;
+          var a = { lat: r.data.lat, lon: r.data.lon, name: r.data.name + (demo ? ' (' + t('ag_demo') + ')' : ''), crop: P.crop ? (['tomato', 'potato', 'pepper'].indexOf(P.crop) !== -1 ? 'veg' : P.crop) : (demo ? 'olive' : null),
             area_ha: P.area || (demo ? 2 : undefined), water: P.well || demo ? 'well' : undefined, well_depth_m: P.well || (demo ? 50 : undefined), pump: P.solar ? 'solar' : (demo ? 'diesel' : undefined) };
           return call('build_land_dna', a, W({ fr: 'Construire le Land DNA à partir des données ouvertes', en: 'Build the Land DNA from open data', ar: 'بناء حمض الأرض من البيانات المفتوحة', ja: 'オープンデータからランドDNAを作成' }));
         });
@@ -308,6 +309,7 @@
   /* ------------------------------------------------------------------ run */
   function run(goal) {
     if (S.running || !goal.trim()) return;
+    T.ctx.parcel = null; T.ctx.demo = false; T.ctx.unsaved = false;
     S = { running: true, stop: false, steps: [], plan: null, goal: goal, started: performance.now(), provider: null, note: null, mode: null };
     var ls = LLM && LLM.state(), useServer = !!(ls && ls.mode === 'server' && serverUrl());
     S.mode = useServer ? 'server' : (ls && ls.engine ? 'browser' : 'planner');
@@ -413,6 +415,11 @@
       var txt = P.text || (P.struct.situation + '\n' + P.struct.actions.map(function (a) { return '- [' + a.when + '] ' + a.text; }).join('\n') + '\n' + P.struct.watch.map(function (w) { return '- ' + w; }).join('\n'));
       try { navigator.clipboard.writeText(txt).then(function () { copyBtn.textContent = t('ag_copied'); }); } catch (e) { /* no clipboard */ }
     } }, [t('ag_copy')]);
+    if (T.ctx.unsaved && T.ctx.parcel) {
+      var cur = G.getParcel(), saveBtn = el('button', { type: 'button', class: 'gp-btn sm', onclick: function () { G.setParcel(T.ctx.parcel); T.ctx.unsaved = false; saveBtn.disabled = true; saveBtn.textContent = t('ag_saved'); } }, [t('ag_save')]);
+      body.appendChild(el('div', { class: 'small', style: 'margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, [
+        el('span', { class: 'muted' }, [t('ag_unsaved').replace('{p}', T.ctx.parcel.name || '—').replace('{c}', cur && cur.name ? cur.name : '—')]), saveBtn]));
+    }
     body.appendChild(el('div', { class: 'ag-tools' }, [
       P.actions && P.actions.length ? el('button', { type: 'button', class: 'gp-btn primary sm', onclick: function () { ics(P.actions); } }, [t('ag_ics')]) : null, copyBtn,
       el('a', { class: 'gp-btn ghost sm', href: 'season.html' }, [W({ fr: 'Ma saison', en: 'My season', ar: 'موسمي', ja: 'マイシーズン' })]),

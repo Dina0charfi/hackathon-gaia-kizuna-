@@ -244,19 +244,19 @@
   G.addStrings({
     fr: { pl_t: 'Identification de l\'espèce (modèle Pl@ntNet, sur l\'appareil)', pl_p: 'Le modèle ouvert de Pl@ntNet (7 806 espèces de la flore méditerranéenne, licence Apache-2.0) tourne dans votre navigateur : la photo ne quitte pas l\'appareil, aucune clé n\'est nécessaire.',
           pl_run: 'Identifier l\'espèce', pl_loading: 'Identification en cours (premier usage : 20 Mo à télécharger)…', pl_agree: 'Concorde avec GAIA', pl_disagree: 'Ne concorde pas avec GAIA : reprenez la photo ou montrez la plante à un technicien', pl_err: 'Le modèle Pl@ntNet n\'a pas pu être chargé : ',
-          pl_note: 'Le modèle reconnaît des espèces, pas les maladies. La tomate et le poivron cultivés ne sont pas dans sa liste (flore sauvage) : GAIA utilise alors son propre modèle.', pl_family: 'famille', pl_routed: 'Plante reconnue par le modèle Pl@ntNet ({p} %) ; le premier modèle de GAIA proposait : {s}. Les deux modèles ensemble passent de 59 % à 80 % de plantes bien reconnues sur des photos de terrain.',
+          pl_note: 'Le modèle reconnaît des espèces, pas les maladies. La tomate et le poivron cultivés ne sont pas dans sa liste (flore sauvage) : GAIA utilise alors son propre modèle.', pl_family: 'famille', pl_low: 'Le modèle n’est pas sûr (première espèce à {p} %) : ces noms sont des pistes, pas une identification. Photographiez un rameau entier (feuilles, fleurs ou fruits) plutôt qu’une seule feuille.', pick_t: 'Mauvaise plante ? Choisissez-la :', doubt_t: 'Est-ce vraiment : {p} ?', doubt_p: 'Le modèle Pl@ntNet ne voit presque rien de la famille de la tomate (Solanacées, {s} %) sur cette photo ; il voit d’abord {f}. GAIA préfère vous demander la plante plutôt que de deviner.', manual_p: 'Plante choisie par vous ; le premier modèle de GAIA proposait : {s}.', pl_routed: 'Plante reconnue par le modèle Pl@ntNet ({p} %) ; le premier modèle de GAIA proposait : {s}. Les deux modèles ensemble passent de 59 % à 80 % de plantes bien reconnues sur des photos de terrain.',
           pn_key_how: 'Clé gratuite : créez un compte sur my.plantnet.org, menu « Your API key » (500 identifications par jour gratuites), puis écrivez PLANTNET_API_KEY=votre_clé dans backend/.env et relancez le serveur.' },
     ar: { pl_t: 'التعرف على النوع (نموذج Pl@ntNet على الجهاز)', pl_p: 'يعمل نموذج Pl@ntNet المفتوح (7806 نوعاً من النباتات المتوسطية، رخصة Apache-2.0) داخل متصفحك: لا تغادر الصورة الجهاز ولا حاجة لمفتاح.',
           pl_run: 'تعرّف على النوع', pl_loading: 'جارٍ التعرف (أول استعمال: تنزيل 20 م.ب)…', pl_agree: 'يتفق مع غايا', pl_disagree: 'لا يتفق مع غايا: أعد التصوير أو اعرض النبتة على تقني', pl_err: 'تعذّر تحميل نموذج Pl@ntNet: ',
-          pl_note: 'يتعرف النموذج على الأنواع لا على الأمراض. الطماطم والفلفل المزروعان ليسا في قائمته (نباتات برية)، فتستعمل غايا نموذجها الخاص.', pl_family: 'الفصيلة', pl_routed: 'تعرّف نموذج Pl@ntNet على النبتة ({p} %)؛ النموذج الأول لغايا اقترح: {s}. معاً يرتفع التعرف الصحيح على صور الحقل من 59 % إلى 80 %.',
+          pl_note: 'يتعرف النموذج على الأنواع لا على الأمراض. الطماطم والفلفل المزروعان ليسا في قائمته (نباتات برية)، فتستعمل غايا نموذجها الخاص.', pl_family: 'الفصيلة', pl_low: 'النموذج غير متأكد (النوع الأول بنسبة {p} %): هذه الأسماء احتمالات وليست تعريفاً. صوّر غصناً كاملاً (أوراق أو أزهار أو ثمار) بدل ورقة واحدة.', pick_t: 'نبتة خاطئة؟ اخترها:', doubt_t: 'هل هي حقاً: {p}؟', doubt_p: 'لا يرى نموذج Pl@ntNet تقريباً أي نبتة من فصيلة الطماطم (الباذنجانية، {s} %) في هذه الصورة؛ يرى أولاً {f}. تفضّل غايا أن تسألك عن النبتة بدل التخمين.', manual_p: 'نبتة اخترتها أنت؛ النموذج الأول لغايا اقترح: {s}.', pl_routed: 'تعرّف نموذج Pl@ntNet على النبتة ({p} %)؛ النموذج الأول لغايا اقترح: {s}. معاً يرتفع التعرف الصحيح على صور الحقل من 59 % إلى 80 %.',
           pn_key_how: 'مفتاح مجاني: أنشئ حساباً في my.plantnet.org، ثم «Your API key» (500 تعرف يومياً مجاناً)، واكتب PLANTNET_API_KEY=مفتاحك في backend/.env وأعد تشغيل الخادم.' },
     en: { pl_t: 'Species identification (Pl@ntNet model, on this device)', pl_p: 'Pl@ntNet\'s open model (7,806 species of the Mediterranean flora, Apache-2.0 licence) runs in your browser: the photo never leaves the device and no key is needed.',
           pl_run: 'Identify the species', pl_loading: 'Identifying (first use: 20 MB download)…', pl_agree: 'Agrees with GAIA', pl_disagree: 'Does not agree with GAIA: retake the photo or show the plant to a technician', pl_err: 'The Pl@ntNet model could not be loaded: ',
-          pl_note: 'The model recognises species, not diseases. Cultivated tomato and pepper are not in its list (wild flora): GAIA uses its own model for them.', pl_family: 'family', pl_routed: 'Plant recognised by the Pl@ntNet model ({p} %); GAIA’s first model said: {s}. Together the two models raise correct plant recognition on field photos from 59 % to 80 %.',
+          pl_note: 'The model recognises species, not diseases. Cultivated tomato and pepper are not in its list (wild flora): GAIA uses its own model for them.', pl_family: 'family', pl_low: 'The model is not sure (first species at {p} %): these names are leads, not an identification. Photograph a whole twig (leaves, flowers or fruit) rather than a single leaf.', pick_t: 'Wrong plant? Choose it:', doubt_t: 'Is it really {p}?', doubt_p: 'Pl@ntNet’s model sees almost nothing of the tomato family (Solanaceae, {s} %) in this photo; it sees {f} first. GAIA would rather ask you which plant it is than guess.', manual_p: 'Plant chosen by you; GAIA’s first model said: {s}.', pl_routed: 'Plant recognised by the Pl@ntNet model ({p} %); GAIA’s first model said: {s}. Together the two models raise correct plant recognition on field photos from 59 % to 80 %.',
           pn_key_how: 'Free key: create an account at my.plantnet.org, open “Your API key” (500 identifications a day for free), then write PLANTNET_API_KEY=your_key in backend/.env and restart the server.' },
     ja: { pl_t: '種の同定（Pl@ntNetモデル、端末内）', pl_p: 'Pl@ntNetの公開モデル（地中海植物7,806種、Apache-2.0ライセンス）がブラウザ内で動きます。写真は端末の外に出ず、キーも不要です。',
           pl_run: '種を同定', pl_loading: '同定中（初回は20 MBをダウンロード）…', pl_agree: 'GAIAと一致', pl_disagree: 'GAIAと一致しません。撮り直すか技術者に見てもらってください', pl_err: 'Pl@ntNetモデルを読み込めませんでした：',
-          pl_note: 'このモデルが認識するのは種であり、病気ではありません。栽培トマトとピーマンはリストにないため（野生植物）、GAIA独自のモデルを使います。', pl_family: '科', pl_routed: 'Pl@ntNetモデルが植物を認識（{p}%）。GAIAの第1モデルの答え：{s}。2つのモデルを組み合わせると、圃場写真での植物の正答率は59%から80%に上がります。',
+          pl_note: 'このモデルが認識するのは種であり、病気ではありません。栽培トマトとピーマンはリストにないため（野生植物）、GAIA独自のモデルを使います。', pl_family: '科', pl_low: 'モデルは確信していません（第1候補 {p}%）。これらの名前は手がかりであり、同定ではありません。葉1枚ではなく、枝全体（葉・花・実）を撮影してください。', pick_t: '植物が違いますか？選んでください：', doubt_t: '本当に{p}ですか？', doubt_p: 'Pl@ntNetモデルはこの写真にナス科（トマトの仲間、{s}%）をほとんど認めず、まず{f}と判定しています。GAIAは推測せず、植物をお尋ねします。', manual_p: 'あなたが選んだ植物です。GAIAの第1モデルの答え：{s}。', pl_routed: 'Pl@ntNetモデルが植物を認識（{p}%）。GAIAの第1モデルの答え：{s}。2つのモデルを組み合わせると、圃場写真での植物の正答率は59%から80%に上がります。',
           pn_key_how: '無料キー：my.plantnet.org でアカウントを作成し「Your API key」を開く（1日500回まで無料）。backend/.env に PLANTNET_API_KEY=キー と書き、サーバーを再起動。' }
   });
 
@@ -296,6 +296,7 @@
       PL.top = idx.slice(0, 5).map(function (i) { var sp = PL.labels.species[i]; return { species: sp, family: PL.labels.families[PL.labels.family[i]], p: probs[i], gaia: plGaia(sp) }; });
       // family-level score: the sum over the family's species (more robust than one species on a leaf photo)
       var fam = {}; for (var k = 0; k < probs.length; k++) { var f = PL.labels.families[PL.labels.family[k]]; fam[f] = (fam[f] || 0) + probs[k]; }
+      PL.fam = fam;
       PL.families = Object.keys(fam).sort(function (a, b) { return fam[b] - fam[a]; }).slice(0, 3).map(function (f) { return { family: f, p: fam[f] }; });
       var best = Object.keys(plants).sort(function (a, b) { return plants[b] - plants[a]; })[0];
       PL.plant = best ? { label: best, p: plants[best] } : null;
@@ -322,6 +323,7 @@
     if (PL.status === 'error') kids.push(G.note('err', t('pl_err') + PL.error));
     if (PL.status === 'done' && PL.top) {
       var L = G.lang();
+      if (PL.top[0].p < 0.2) kids.push(G.note('warn', t('pl_low').replace('{p}', fmt(PL.top[0].p * 100))));
       PL.top.slice(0, 3).forEach(function (s, i) {
         var cn = PL_COMMON[s.species] ? PL_COMMON[s.species][L] || PL_COMMON[s.species].en : null;
         kids.push(el('p', { style: i ? 'margin-top:4px' : 'margin-top:8px' }, [
@@ -481,6 +483,13 @@
           if (pp && pp.label !== s1lab && (pp.p >= 0.5 || (pp.p >= 0.15 && ['tomato', 'pepper'].indexOf(s1lab) === -1))) {
             res.tree = pp.label; res.routed = { by: 'plantnet', p: pp.p, stage1: s1lab };
           }
+          // Stage 1 says tomato / pepper / potato but Pl@ntNet sees almost no Solanaceae (< 1 %) and another family
+          // (≥ 10 %): ask the farmer for the plant instead of showing a tomato disease. On the test photos this catches
+          // the non-Solanaceae leaves (grape: 98 %) and asks on 20 % of real tomato photos, 3 % of pepper, 1 % of potato.
+          if (!res.routed && pl && pl.fam && ['tomato', 'pepper', 'potato'].indexOf(s1lab) !== -1) {
+            var sol = pl.fam.Solanaceae || 0, other = Object.keys(pl.fam).filter(function (f) { return f !== 'Solanaceae'; }).sort(function (a, b) { return pl.fam[b] - pl.fam[a]; })[0];
+            if (sol < 0.01 && other && pl.fam[other] >= 0.1) res.doubt = { sol: sol, family: other, p: pl.fam[other] };
+          }
           if ((s1.abstain && !res.routed) || res.tree === 'other' || !m.stage2 || !m.stage2[res.tree]) return res;
           return stage2(res);
         });
@@ -495,13 +504,34 @@
       // the Farm Agent reads the last check (plant_health_last tool); kept on this device only
       try {
         var s2 = res.stage2;
-        G.save('gaia.health.last', { at: new Date().toISOString(), plant: res.stage1.abstain && !res.routed ? null : res.tree, routed_by_plantnet: !!res.routed, species: PL.top ? PL.top[0].species : null,
+        G.save('gaia.health.last', { at: new Date().toISOString(), plant: (res.stage1.abstain && !res.routed) || res.doubt ? null : res.tree, plant_doubt: res.doubt ? 'GAIA said ' + res.tree + ', Pl@ntNet sees no Solanaceae' : undefined, routed_by_plantnet: !!res.routed, species: PL.top ? PL.top[0].species : null,
           plant_confidence: res.stage1.top.p, disease: s2 && !s2.abstain ? s2.top.label : null, confidence: s2 ? s2.top.p : null,
-          unsure: !!(res.stage1.abstain || (s2 && s2.abstain)), model: m.version || null });
+          unsure: !!(res.stage1.abstain || res.doubt || (s2 && s2.abstain)), model: m.version || null });
       } catch (e) { /* storage full or private mode */ }
     }).catch(function (e) {
       state.result = { error: e.message };
     }).then(function () { state.running = false; render(); if (PL.status !== 'done' && PL.status !== 'loading') plRun(); });
+  }
+
+  // the farmer names the plant: run that plant's disease model on the same photo
+  function chooseTree(lab) {
+    var r = state.result, m = state.model && state.model.manifest;
+    if (!r || !m || !m.stage2 || !m.stage2[lab] || state.running) return;
+    state.running = true; render();
+    var spec2 = m.stage2[lab];
+    loadOrt().then(function () { return runModel(spec2, tensorFrom(state.img, spec2.input || m.input || {})); })
+      .then(function (s2) { r.tree = lab; r.manual = true; r.stage2 = s2; }, function (e) { r.error = e.message; })
+      .then(function () {
+        state.running = false; render();
+        try { var last = G.load('gaia.health.last', null); if (last) { last.plant = lab; last.plant_chosen_by_farmer = true; last.routed_by_plantnet = false; last.plant_confidence = null; last.disease = r.stage2 && !r.stage2.abstain ? r.stage2.top.label : null; last.confidence = r.stage2 ? r.stage2.top.p : null; last.unsure = !!(r.stage2 && r.stage2.abstain); G.save('gaia.health.last', last); } } catch (e) { /* storage */ }
+      });
+  }
+  function pickPlant(current) {
+    var m = state.model.manifest, keys = Object.keys(m.stage2 || {}).filter(function (k) { return k !== current; });
+    if (!keys.length) return null;
+    return el('div', { class: 'small', style: 'margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center' }, [el('span', { class: 'muted' }, [t('pick_t')])].concat(keys.map(function (k) {
+      return el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { chooseTree(k); } }, [label(k, true)]);
+    })));
   }
 
   /* ---------------------------------------------------------- feedback (Kaizen) */
@@ -634,18 +664,37 @@
     if (!r) return null;
     if (r.error) return G.note('err', r.error);
     var s1 = r.stage1, out = [];
-    if (r.routed) {   // Pl@ntNet's species model overrode stage 1: show the plant it found, and what stage 1 said
+    if (r.manual) {   // the farmer chose the plant
+      s1 = { top: { label: r.tree, p: 1 }, ranked: s1.ranked, abstain: false };
+      out.push(el('div', { class: 'gp-card' }, [
+        el('p', { class: 'eyebrow' }, [t('tree')]),
+        el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(r.tree, true)]),
+        el('p', { class: 'small', style: 'margin-top:4px;color:var(--g-ink-2)' }, [t('manual_p').replace('{s}', r.stage1.abstain ? t('unsure_t') : label(r.stage1.top.label) + ' (' + fmt(r.stage1.top.p * 100) + ' %)')]),
+        pickPlant(r.tree)
+      ]));
+    } else if (r.doubt) {   // stage 1 and Pl@ntNet disagree on the plant: ask
+      out.push(el('div', { class: 'gp-card' }, [
+        el('p', { class: 'eyebrow' }, [t('tree')]),
+        probs(r.stage1.ranked)
+      ]));
+      out.push(el('div', { class: 'unsure', role: 'status' }, [
+        el('h3', null, [t('doubt_t').replace('{p}', label(r.tree))]),
+        el('p', { style: 'margin-top:6px' }, [t('doubt_p').replace('{s}', fmt(r.doubt.sol * 100, 1)).replace('{f}', r.doubt.family + ' (' + fmt(r.doubt.p * 100) + ' %)')]),
+        pickPlant(null)
+      ]));
+      return out;
+    } else if (r.routed) {   // Pl@ntNet's species model overrode stage 1: show the plant it found, and what stage 1 said
       s1 = { top: { label: r.tree, p: r.routed.p }, ranked: s1.ranked, abstain: false };
       out.push(el('div', { class: 'gp-card' }, [
         el('p', { class: 'eyebrow' }, [t('tree')]),
         el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(r.tree, true)]),
         el('p', { class: 'small', style: 'margin-top:4px;color:var(--g-ink-2)' }, [t('pl_routed').replace('{p}', fmt(r.routed.p * 100)).replace('{s}', r.routed.stage1 ? label(r.routed.stage1) : t('unsure_t'))]),
-        probs(r.stage1.ranked)
+        probs(r.stage1.ranked), pickPlant(r.tree)
       ]));
     } else out.push(el('div', { class: 'gp-card' }, [
       el('p', { class: 'eyebrow' }, [t('tree')]),
       el('p', { style: 'font-family:var(--g-display);font-size:24px;font-weight:600;margin-top:4px' }, [label(s1.top.label, true)]),
-      probs(s1.ranked)
+      probs(s1.ranked), pickPlant(s1.top.label)
     ]));
     if (s1.abstain) { out.push(el('div', { class: 'unsure', role: 'status' }, [el('h3', null, [t('unsure_t')]), el('p', { style: 'margin-top:6px' }, [t('unsure_p')])])); return out; }
     if (s1.top.label === 'other') {
