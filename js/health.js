@@ -680,10 +680,9 @@
   // On localhost the backend may run on :8765 (documented) or uvicorn's default :8000: try both.
   var PN_DEFAULT = G.CONFIG.plantnetEndpoint;
   function checkPlantnet() {
-    var ep = G.CONFIG.plantnetEndpoint;
-    if (!ep) { state.pnAvail = 'off'; return; }
-    var local = /^https?:\/\/(127\.0\.0\.1|localhost):\d+\/plantnet$/.test(ep);
-    var cands = local ? [ep.replace(/:\d+\/plantnet$/, ':8000/plantnet'), ep.replace(/:\d+\/plantnet$/, ':8765/plantnet')] : [ep];
+    var set = window.GAIA_CONFIG && window.GAIA_CONFIG.plantnetEndpoint;
+    var cands = set ? [set] : (G.serverBases || []).map(function (b) { return b + '/plantnet'; });
+    if (!cands.length) { state.pnAvail = 'off'; return; }
     (function next(i) {
       if (i >= cands.length) { state.pnAvail = 'no_server'; render(); return; }
       var ctl = window.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;

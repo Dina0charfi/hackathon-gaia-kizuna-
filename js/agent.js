@@ -26,7 +26,7 @@
       ag_m_server: 'modèle de langage avec appel d\'outils', ag_m_browser: 'planificateur GAIA + modèle gratuit dans le navigateur', ag_m_planner: 'planificateur GAIA (hors ligne, sans clé)',
       ag_no_plot: "Aucune parcelle enregistrée : l'agent utilise une parcelle de démonstration (oliviers, Sidi Bouzid, 2 ha, puits de 50 m). Nommez votre ville dans l'objectif pour utiliser la vôtre.",
       ag_ics: 'Ajouter au calendrier (.ics)', ag_copy: 'Copier le plan', ag_copied: 'Copié', ag_raw: 'résultat brut', ag_think: 'Pensée',
-      ag_fallback: 'Le modèle de langage ne répond pas : le planificateur GAIA prend le relais.', ag_turn_on: 'Activer le modèle gratuit du navigateur',
+      ag_no_server: "Pour l'agent IA complet : lancez le serveur GAIA (backend/) avec une clé Groq gratuite, ou ouvrez cette page avec ?server=http://IP-du-serveur:8000.", ag_fallback: 'Le modèle de langage ne répond pas : le planificateur GAIA prend le relais.', ag_turn_on: 'Activer le modèle gratuit du navigateur',
       ag_honest: 'Chaque chiffre vient d\'un outil. Les règles de risque de maladie sont indicatives : confirmez sur le terrain avant tout traitement.',
       ag_steps: 'étapes', ag_tools: 'appels d\'outils', ag_ms: 'ms'
     },
@@ -37,7 +37,7 @@
       ag_m_server: 'نموذج لغوي يستدعي الأدوات', ag_m_browser: 'مخطط غايا + نموذج مجاني في المتصفح', ag_m_planner: 'مخطط غايا (دون اتصال، دون مفتاح)',
       ag_no_plot: 'لا توجد قطعة محفوظة: يستعمل الوكيل قطعة تجريبية (زيتون، سيدي بوزيد، 2 هكتار، بئر 50 م). اذكر مدينتك في الهدف لاستعمال قطعتك.',
       ag_ics: 'أضف إلى الرزنامة (.ics)', ag_copy: 'انسخ الخطة', ag_copied: 'تم النسخ', ag_raw: 'النتيجة الخام', ag_think: 'تفكير',
-      ag_fallback: 'النموذج اللغوي لا يجيب: يتولى مخطط غايا المهمة.', ag_turn_on: 'شغّل النموذج المجاني في المتصفح',
+      ag_no_server: 'للوكيل الذكي الكامل: شغّل خادم غايا (backend/) بمفتاح Groq مجاني، أو افتح هذه الصفحة مع ?server=http://IP-الخادم:8000.', ag_fallback: 'النموذج اللغوي لا يجيب: يتولى مخطط غايا المهمة.', ag_turn_on: 'شغّل النموذج المجاني في المتصفح',
       ag_honest: 'كل رقم يأتي من أداة. قواعد خطر الأمراض تقريبية: تحقّق في الحقل قبل أي معالجة.',
       ag_steps: 'خطوات', ag_tools: 'استدعاءات أدوات', ag_ms: 'مللي ثانية'
     },
@@ -48,7 +48,7 @@
       ag_m_server: 'language model with tool calling', ag_m_browser: 'GAIA planner + free in-browser model', ag_m_planner: 'GAIA planner (offline, no key)',
       ag_no_plot: 'No saved plot: the agent uses a demo plot (olives, Sidi Bouzid, 2 ha, 50 m well). Name your town in the goal to use yours.',
       ag_ics: 'Add to calendar (.ics)', ag_copy: 'Copy the plan', ag_copied: 'Copied', ag_raw: 'raw result', ag_think: 'Thought',
-      ag_fallback: 'The language model does not answer: GAIA\'s planner takes over.', ag_turn_on: 'Turn on the free in-browser model',
+      ag_no_server: 'For the full AI agent: run the GAIA server (backend/) with a free Groq key, or open this page with ?server=http://server-IP:8000.', ag_fallback: 'The language model does not answer: GAIA\'s planner takes over.', ag_turn_on: 'Turn on the free in-browser model',
       ag_honest: 'Every number comes from a tool. Disease-risk rules are indicative: confirm in the field before any treatment.',
       ag_steps: 'steps', ag_tools: 'tool calls', ag_ms: 'ms'
     },
@@ -59,7 +59,7 @@
       ag_m_server: 'ツール呼び出し対応の言語モデル', ag_m_browser: 'GAIAプランナー＋ブラウザ内の無料モデル', ag_m_planner: 'GAIAプランナー（オフライン・キー不要）',
       ag_no_plot: '保存された区画がありません。デモ区画（オリーブ、シディ・ブジッド、2ha、井戸50m）を使います。目標に町の名前を書くと、その場所を使います。',
       ag_ics: 'カレンダーに追加（.ics）', ag_copy: '計画をコピー', ag_copied: 'コピーしました', ag_raw: '生データ', ag_think: '思考',
-      ag_fallback: '言語モデルが応答しません。GAIAプランナーが引き継ぎます。', ag_turn_on: 'ブラウザ内の無料モデルを有効にする',
+      ag_no_server: 'AIエージェントを完全に使うには、無料のGroqキーでGAIAサーバー（backend/）を起動するか、このページを ?server=http://サーバーのIP:8000 付きで開いてください。', ag_fallback: '言語モデルが応答しません。GAIAプランナーが引き継ぎます。', ag_turn_on: 'ブラウザ内の無料モデルを有効にする',
       ag_honest: 'すべての数値はツールから得たものです。病害リスクのルールは目安です。処置の前に圃場で確認してください。',
       ag_steps: 'ステップ', ag_tools: 'ツール呼び出し', ag_ms: 'ms'
     }
@@ -362,6 +362,7 @@
     var ls = LLM && LLM.state(), m = S.running || S.plan ? S.mode : (ls && ls.mode === 'server' ? 'server' : ls && ls.engine ? 'browser' : 'planner');
     modeBox.appendChild(el('span', { class: 'ag-chip ' + m }, [t('ag_mode') + ' : ' + t('ag_m_' + m) + (m === 'server' && LLM ? ' (' + (S.provider || LLM.label()) + ')' : '')]));
     if (m === 'planner' && LLM && LLM.webgpu() && !(ls && ls.loading)) modeBox.appendChild(el('button', { type: 'button', class: 'gp-btn ghost sm', onclick: function () { LLM.loadBrowser(); } }, [t('ag_turn_on')]));
+    if (m === 'planner' && !(ls && ls.checking)) modeBox.appendChild(el('div', { class: 'small muted', style: 'flex-basis:100%;margin-top:4px' }, [t('ag_no_server')]));
     if (ls && ls.loading) modeBox.appendChild(el('span', { class: 'small muted' }, ['Qwen2.5 · ' + Math.round(100 * (ls.loading.p || 0)) + ' %']));
   }
 
