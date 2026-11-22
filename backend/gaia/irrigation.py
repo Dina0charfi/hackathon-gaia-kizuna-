@@ -40,6 +40,8 @@ RENAME = {"et0_fao_evapotranspiration": "et0", "precipitation_sum": "pluie",
           "soil_moisture_0_to_7cm": "sm_0_7", "soil_moisture_7_to_28cm": "sm_7_28",
           "soil_moisture_28_to_100cm": "sm_28_100"}
 
+DISK_CACHE = Path(os.environ.get("GAIA_FORECAST_CACHE", ROOT / "backend" / "data" / "cache"))
+
 _models: dict[str, Any] | None = None
 _cache: dict[tuple, tuple[float, dict]] = {}
 CACHE_S = 3600
@@ -124,16 +126,37 @@ def _soil_table(j: dict) -> pd.DataFrame:
     return h.groupby("date").mean().reset_index()
 
 
+async def get_json(params: dict[str, Any], tag: str) -> dict[str, Any]:
+    """GET the Open-Meteo forecast API with a disk cache valid for today, so a server restart does not
+    query it again (it limits requests per minute and per day). On 429 or a network error, today's cached copy is used."""
+    import hashlib
+    import httpx
+    DISK_CACHE.mkdir(parents=True, exist_ok=True)
+    key = hashlib.sha1(json.dumps(params, sort_keys=True).encode()).hexdigest()[:16]
+    f = DISK_CACHE / f"{tag}_{date.today()}_{key}.json"
+    if f.exists() and time.time() - f.stat().st_mtime < CACHE_S:
+        return json.loads(f.read_text(encoding="utf-8"))
+    try:
+        async with httpx.AsyncClient(timeout=60) as c:
+            r = await c.get(FORECAST, params=params)
+            r.raise_for_status()
+    except Exception:
+        if f.exists():                                         # stale but from today: better than nothing
+            return json.loads(f.read_text(encoding="utf-8"))
+        raise
+    j = r.json()
+    f.write_text(json.dumps(j), encoding="utf-8")
+    for old in DISK_CACHE.glob(f"{tag}_*.json"):              # keep only today's files
+        if str(date.today()) not in old.name:
+            old.unlink(missing_ok=True)
+    return j
+
+
 async def _fetch(lat: float, lon: float) -> tuple[pd.DataFrame, pd.DataFrame, float]:
     """Last 60 days and next 10 days from the Open-Meteo forecast API, ECMWF IFS model:
     the same source as the training data (the archive serves ECMWF IFS since 2017), with no publication delay."""
-    import httpx
-    async with httpx.AsyncClient(timeout=60) as c:
-        r = await c.get(FORECAST, params=dict(latitude=lat, longitude=lon, timezone="Africa/Tunis", models="ecmwf_ifs",
-                                              past_days=60, forecast_days=10,
-                                              daily=",".join(DAILY), hourly=",".join(HOURLY)))
-        r.raise_for_status()
-    j = r.json()
+    j = await get_json(dict(latitude=lat, longitude=lon, timezone="Africa/Tunis", models="ecmwf_ifs",
+                            past_days=60, forecast_days=10, daily=",".join(DAILY), hourly=",".join(HOURLY)), "soil")
     t = _weather_table(j).merge(_soil_table(j), on="date", how="left")
     yesterday = pd.Timestamp(date.today()) - pd.Timedelta(days=1)       # last complete day
     return t[t.date <= yesterday], t[t.date > yesterday], float(j["elevation"])
@@ -183,7 +206,9 @@ async def forecast(lat: float, lon: float) -> dict[str, Any]:
     state_theta = float(complete[complete.date == state_day][TARGET].iloc[0])
     out = dict(
         method="trained model (LightGBM), one model per horizon",
-        model=dict(trained_on=f"{len(meta['sites'])} sites, 24 Tunisian governorates", period=meta["periode"],
+        model=dict(trained_on=f"{len(meta['sites'])} sites, 24 Tunisian governorates"
+                   + (f", final models trained on {meta['modele_final']['entraine_sur']}" if meta.get("modele_final") else ""),
+                   period=meta["periode"], final=meta.get("modele_final"),
                    split=meta.get("decoupage"), source=meta["source"], target="soil moisture 7–28 cm (m³/m³)",
                    error_unseen_sites_m3m3={h: round(v, 4) for h, v in rmse.items()}),
         location=dict(lat=lat, lon=lon, elevation_m=elevation),

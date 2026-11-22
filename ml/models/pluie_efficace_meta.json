@@ -1,0 +1,613 @@
+{
+ "cible": "pluie efficace d'un épisode (mm) = gain d'eau du sol 0–100 cm + séchage attendu, bornée à la pluie",
+ "source": "Open-Meteo, ECMWF IFS",
+ "periode": "2020-01-01 → 2026-11-20",
+ "variables": [
+  "pluie_evt",
+  "jours",
+  "pluie_max",
+  "et0_evt",
+  "tmax",
+  "sm_0_7",
+  "sm_7_28",
+  "sm_28_100",
+  "reserve_avant",
+  "pluie_7j",
+  "pluie_30j",
+  "et0_7j",
+  "saison_sin",
+  "saison_cos",
+  "altitude",
+  "sm_0_7_sec",
+  "sm_0_7_humide",
+  "sm_7_28_sec",
+  "sm_7_28_humide",
+  "sm_28_100_sec",
+  "sm_28_100_humide"
+ ],
+ "decoupage": {
+  "entrainement": "2020–2023",
+  "validation": "2024",
+  "test": "2025 → 2026-11-20",
+  "lieux_jamais_vus": [
+   "bousalem",
+   "sbeitla",
+   "msaken",
+   "kebili"
+  ]
+ },
+ "modele_final": {
+  "entraine_sur": "2020-02-05 → 2026-11-15",
+  "episodes": 3415,
+  "sites": 26,
+  "note": "scores mesurés avant, sur un modèle qui n'avait vu ni 2024–2026 ni les sites de test"
+ },
+ "resultats": {
+  "années jamais vues": {
+   "mae_episode_gaia": 3.67,
+   "mae_episode_usda": 4.53,
+   "mae_episode_fraction_fixe": 4.08,
+   "mae_mois_gaia": 6.3,
+   "mae_mois_usda": 12.0,
+   "part_mesuree": 0.6,
+   "part_usda": 0.902
+  },
+  "lieux jamais vus": {
+   "mae_episode_gaia": 3.06,
+   "mae_episode_usda": 3.15,
+   "mae_episode_fraction_fixe": 3.21,
+   "mae_mois_gaia": 5.2,
+   "mae_mois_usda": 9.9,
+   "part_mesuree": 0.666,
+   "part_usda": 0.926
+  }
+ },
+ "sites": {
+  "beja": {
+   "nom": "Béja",
+   "lat": 36.73,
+   "lon": 9.18,
+   "part_mensuelle": [
+    0.665,
+    0.621,
+    0.829,
+    0.694,
+    0.728,
+    0.398,
+    0.69,
+    0.482,
+    0.576,
+    0.652,
+    0.74,
+    0.739
+   ],
+   "part_annuelle": 0.69,
+   "pluie_mm_par_an": 422
+  },
+  "jendouba": {
+   "nom": "Jendouba",
+   "lat": 36.5,
+   "lon": 8.78,
+   "part_mensuelle": [
+    0.748,
+    0.685,
+    0.91,
+    0.751,
+    0.743,
+    0.41,
+    0.732,
+    0.732,
+    0.602,
+    0.56,
+    0.736,
+    0.793
+   ],
+   "part_annuelle": 0.732,
+   "pluie_mm_par_an": 398
+  },
+  "bousalem": {
+   "nom": "Bou Salem",
+   "lat": 36.61,
+   "lon": 8.97,
+   "part_mensuelle": [
+    0.742,
+    0.675,
+    0.867,
+    0.751,
+    0.75,
+    0.497,
+    0.741,
+    0.741,
+    0.639,
+    0.569,
+    0.771,
+    0.825
+   ],
+   "part_annuelle": 0.741,
+   "pluie_mm_par_an": 353
+  },
+  "kef": {
+   "nom": "Le Kef",
+   "lat": 36.17,
+   "lon": 8.7,
+   "part_mensuelle": [
+    0.764,
+    0.764,
+    0.838,
+    0.723,
+    0.781,
+    0.616,
+    0.756,
+    0.571,
+    0.683,
+    0.638,
+    0.746,
+    0.842
+   ],
+   "part_annuelle": 0.756,
+   "pluie_mm_par_an": 340
+  },
+  "siliana": {
+   "nom": "Siliana",
+   "lat": 36.08,
+   "lon": 9.37,
+   "part_mensuelle": [
+    0.69,
+    0.762,
+    0.928,
+    0.689,
+    0.743,
+    0.52,
+    0.734,
+    0.652,
+    0.627,
+    0.648,
+    0.727,
+    0.83
+   ],
+   "part_annuelle": 0.734,
+   "pluie_mm_par_an": 377
+  },
+  "zaghouan": {
+   "nom": "Zaghouan",
+   "lat": 36.4,
+   "lon": 10.14,
+   "part_mensuelle": [
+    0.656,
+    0.803,
+    0.762,
+    0.737,
+    0.826,
+    0.422,
+    0.577,
+    0.627,
+    0.599,
+    0.588,
+    0.763,
+    0.818
+   ],
+   "part_annuelle": 0.711,
+   "pluie_mm_par_an": 374
+  },
+  "mateur": {
+   "nom": "Mateur",
+   "lat": 37.04,
+   "lon": 9.66,
+   "part_mensuelle": [
+    0.648,
+    0.717,
+    0.922,
+    0.725,
+    0.81,
+    0.441,
+    0.723,
+    0.68,
+    0.612,
+    0.644,
+    0.712,
+    0.757
+   ],
+   "part_annuelle": 0.723,
+   "pluie_mm_par_an": 453
+  },
+  "capbon": {
+   "nom": "Menzel Bouzelfa (Cap Bon)",
+   "lat": 36.68,
+   "lon": 10.58,
+   "part_mensuelle": [
+    0.448,
+    0.648,
+    0.863,
+    0.638,
+    0.764,
+    0.425,
+    0.633,
+    0.586,
+    0.579,
+    0.513,
+    0.63,
+    0.698
+   ],
+   "part_annuelle": 0.633,
+   "pluie_mm_par_an": 418
+  },
+  "kairouan": {
+   "nom": "Kairouan",
+   "lat": 35.68,
+   "lon": 10.1,
+   "part_mensuelle": [
+    0.71,
+    0.722,
+    0.721,
+    0.734,
+    0.708,
+    0.419,
+    0.684,
+    0.535,
+    0.603,
+    0.596,
+    0.696,
+    0.766
+   ],
+   "part_annuelle": 0.684,
+   "pluie_mm_par_an": 263
+  },
+  "sbeitla": {
+   "nom": "Sbeitla",
+   "lat": 35.23,
+   "lon": 9.13,
+   "part_mensuelle": [
+    0.659,
+    0.769,
+    0.758,
+    0.758,
+    0.681,
+    0.44,
+    0.721,
+    0.583,
+    0.614,
+    0.682,
+    0.669,
+    0.764
+   ],
+   "part_annuelle": 0.696,
+   "pluie_mm_par_an": 248
+  },
+  "sidibouzid": {
+   "nom": "Sidi Bouzid",
+   "lat": 35.04,
+   "lon": 9.48,
+   "part_mensuelle": [
+    0.683,
+    0.788,
+    0.712,
+    0.737,
+    0.678,
+    0.405,
+    0.667,
+    0.541,
+    0.568,
+    0.571,
+    0.645,
+    0.759
+   ],
+   "part_annuelle": 0.667,
+   "pluie_mm_par_an": 221
+  },
+  "kasserine": {
+   "nom": "Kasserine",
+   "lat": 35.17,
+   "lon": 8.83,
+   "part_mensuelle": [
+    0.644,
+    0.851,
+    0.778,
+    0.787,
+    0.666,
+    0.573,
+    0.638,
+    0.672,
+    0.715,
+    0.691,
+    0.586,
+    0.8
+   ],
+   "part_annuelle": 0.72,
+   "pluie_mm_par_an": 274
+  },
+  "sfax": {
+   "nom": "Agareb (Sfax)",
+   "lat": 34.74,
+   "lon": 10.52,
+   "part_mensuelle": [
+    0.667,
+    0.777,
+    0.664,
+    0.645,
+    0.597,
+    0.436,
+    0.627,
+    0.512,
+    0.522,
+    0.569,
+    0.65,
+    0.752
+   ],
+   "part_annuelle": 0.627,
+   "pluie_mm_par_an": 195
+  },
+  "msaken": {
+   "nom": "Msaken (Sahel)",
+   "lat": 35.73,
+   "lon": 10.58,
+   "part_mensuelle": [
+    0.686,
+    0.712,
+    0.704,
+    0.701,
+    0.741,
+    0.426,
+    0.678,
+    0.595,
+    0.581,
+    0.616,
+    0.715,
+    0.781
+   ],
+   "part_annuelle": 0.678,
+   "pluie_mm_par_an": 299
+  },
+  "gafsa": {
+   "nom": "Gafsa",
+   "lat": 34.42,
+   "lon": 8.78,
+   "part_mensuelle": [
+    0.566,
+    0.677,
+    0.562,
+    0.585,
+    0.469,
+    0.314,
+    0.548,
+    0.548,
+    0.449,
+    0.418,
+    0.64,
+    0.659
+   ],
+   "part_annuelle": 0.548,
+   "pluie_mm_par_an": 136
+  },
+  "medenine": {
+   "nom": "Médenine",
+   "lat": 33.35,
+   "lon": 10.5,
+   "part_mensuelle": [
+    0.533,
+    0.776,
+    0.674,
+    0.666,
+    0.619,
+    0.646,
+    0.646,
+    0.484,
+    0.575,
+    0.512,
+    0.644,
+    0.803
+   ],
+   "part_annuelle": 0.646,
+   "pluie_mm_par_an": 125
+  },
+  "kebili": {
+   "nom": "Kébili",
+   "lat": 33.7,
+   "lon": 8.97,
+   "part_mensuelle": [
+    0.511,
+    0.705,
+    0.548,
+    0.658,
+    0.506,
+    0.6,
+    0.6,
+    0.6,
+    0.487,
+    0.488,
+    0.673,
+    0.704
+   ],
+   "part_annuelle": 0.6,
+   "pluie_mm_par_an": 89
+  },
+  "tozeur": {
+   "nom": "Tozeur",
+   "lat": 33.92,
+   "lon": 8.13,
+   "part_mensuelle": [
+    0.55,
+    0.619,
+    0.599,
+    0.551,
+    0.447,
+    0.559,
+    0.559,
+    0.559,
+    0.468,
+    0.484,
+    0.664,
+    0.63
+   ],
+   "part_annuelle": 0.559,
+   "pluie_mm_par_an": 83
+  },
+  "tunis": {
+   "nom": "Tunis (Sijoumi)",
+   "lat": 36.78,
+   "lon": 10.08,
+   "part_mensuelle": [
+    0.523,
+    0.67,
+    0.842,
+    0.773,
+    0.763,
+    0.402,
+    0.632,
+    0.577,
+    0.643,
+    0.619,
+    0.766,
+    0.781
+   ],
+   "part_annuelle": 0.696,
+   "pluie_mm_par_an": 388
+  },
+  "ariana": {
+   "nom": "Kalâat el-Andalous (Ariana)",
+   "lat": 37.02,
+   "lon": 10.08,
+   "part_mensuelle": [
+    0.525,
+    0.737,
+    0.906,
+    0.761,
+    0.731,
+    0.469,
+    0.472,
+    0.586,
+    0.587,
+    0.623,
+    0.657,
+    0.769
+   ],
+   "part_annuelle": 0.686,
+   "pluie_mm_par_an": 423
+  },
+  "benarous": {
+   "nom": "Mornag (Ben Arous)",
+   "lat": 36.68,
+   "lon": 10.29,
+   "part_mensuelle": [
+    0.479,
+    0.658,
+    0.816,
+    0.736,
+    0.791,
+    0.344,
+    0.63,
+    0.487,
+    0.603,
+    0.581,
+    0.707,
+    0.741
+   ],
+   "part_annuelle": 0.666,
+   "pluie_mm_par_an": 457
+  },
+  "manouba": {
+   "nom": "Tebourba (Manouba)",
+   "lat": 36.83,
+   "lon": 9.84,
+   "part_mensuelle": [
+    0.634,
+    0.671,
+    0.839,
+    0.763,
+    0.745,
+    0.578,
+    0.556,
+    0.602,
+    0.578,
+    0.67,
+    0.675,
+    0.799
+   ],
+   "part_annuelle": 0.711,
+   "pluie_mm_par_an": 379
+  },
+  "monastir": {
+   "nom": "Jemmal (Monastir)",
+   "lat": 35.62,
+   "lon": 10.76,
+   "part_mensuelle": [
+    0.512,
+    0.676,
+    0.77,
+    0.705,
+    0.72,
+    0.375,
+    0.662,
+    0.674,
+    0.578,
+    0.606,
+    0.738,
+    0.733
+   ],
+   "part_annuelle": 0.662,
+   "pluie_mm_par_an": 335
+  },
+  "mahdia": {
+   "nom": "El Jem (Mahdia)",
+   "lat": 35.3,
+   "lon": 10.71,
+   "part_mensuelle": [
+    0.587,
+    0.662,
+    0.69,
+    0.725,
+    0.752,
+    0.314,
+    0.659,
+    0.655,
+    0.564,
+    0.658,
+    0.64,
+    0.834
+   ],
+   "part_annuelle": 0.659,
+   "pluie_mm_par_an": 275
+  },
+  "gabes": {
+   "nom": "Chenini (oasis de Gabès)",
+   "lat": 33.87,
+   "lon": 10.06,
+   "part_mensuelle": [
+    0.553,
+    0.74,
+    0.598,
+    0.597,
+    0.531,
+    0.588,
+    0.588,
+    0.588,
+    0.479,
+    0.529,
+    0.595,
+    0.781
+   ],
+   "part_annuelle": 0.588,
+   "pluie_mm_par_an": 158
+  },
+  "tataouine": {
+   "nom": "Tataouine (jessour)",
+   "lat": 32.93,
+   "lon": 10.45,
+   "part_mensuelle": [
+    0.522,
+    0.767,
+    0.654,
+    0.838,
+    0.482,
+    0.658,
+    0.658,
+    0.623,
+    0.569,
+    0.46,
+    0.719,
+    0.782
+   ],
+   "part_annuelle": 0.658,
+   "pluie_mm_par_an": 119
+  }
+ }
+}

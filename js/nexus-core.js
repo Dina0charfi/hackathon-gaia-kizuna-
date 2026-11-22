@@ -39,7 +39,7 @@
   /**
    * inp: {
    *   et0[12] mm, rain[12] mm, ghi[12] kWh/m²/day (optional),
-   *   kc, months[12] 0/1, area_ha (optional), ea, head_m (optional), pump_eff, pr,
+   *   kc, months[12] 0/1, pe_factor[12] (optional, replaces USDA-SCS), area_ha (optional), ea, head_m (optional), pump_eff, pr,
    *   prices: { diesel_tnd_l, diesel_kwh_l, grid_tnd_kwh, pv_tnd_kwp, pv_life_y } (all optional)
    * }
    */
@@ -58,7 +58,9 @@
       var on = inp.months ? !!inp.months[m] : true;
       var et0 = inp.et0[m], P = inp.rain[m];
       var etc = on && inp.kc > 0 && et0 !== null ? inp.kc * et0 : 0;
-      var pe = effectiveRain(P);
+      // pe_factor[12]: share of the rain that stays in the soil (trained model, ml/); otherwise USDA-SCS
+      var pe = inp.pe_factor && inp.pe_factor[m] !== null && inp.pe_factor[m] !== undefined && P !== null && P !== undefined
+        ? P * inp.pe_factor[m] : effectiveRain(P);
       var irn = on && pe !== null ? Math.max(0, etc - pe) : 0;
       var irg = inp.ea > 0 ? irn / inp.ea : null;
       var vol = hasArea && irg !== null ? 10 * irg * inp.area_ha : null;          // m³

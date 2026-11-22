@@ -16,7 +16,19 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from . import assistant, business, engine, guard, irrigation, nexus, plantnet, solar, vision
+def _load_env_file() -> None:
+    """backend/.env (never committed): KEY=value lines, for the free model key. Real environment variables win."""
+    f = Path(__file__).resolve().parent.parent / ".env"
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.lstrip().startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+_load_env_file()
+
+from . import agent, assistant, business, engine, farm_monitor, farm_state, guard, irrigation, nexus, planner, plantnet, solar, vision
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 KB = json.loads((DATA / "knowledge.json").read_text(encoding="utf-8"))
@@ -77,6 +89,8 @@ class NexusIn(BaseModel):
     pr: float = 0.75
     ghi: Optional[list[Optional[float]]] = None
     prices: Optional[dict[str, float]] = None
+    pe_factor: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12,
+        description="share of each month's rain that stays in the soil (ml/models/pluie_efficace_meta.json); default USDA-SCS")
 
 
 @app.post("/nexus/calculate")
@@ -175,6 +189,12 @@ def solar_simulate(body: SolarIn) -> dict:
     return solar.simulate(**body.model_dump())
 
 
+def _source_error(e: Exception) -> dict:
+    if "429" in str(e):
+        return {"status": "rate_limited", "message": "Open-Meteo limits requests for a moment (429): try again in a minute."}
+    return {"status": "source_unavailable", "message": f"Open-Meteo: {str(e)[:160]}"}
+
+
 @app.get("/irrigation/forecast")
 async def irrigation_forecast(lat: float, lon: float) -> dict:
     """7-day soil moisture and irrigation plan from the trained LightGBM models (ml/)."""
@@ -187,7 +207,162 @@ async def irrigation_forecast(lat: float, lon: float) -> dict:
     except ValueError as e:
         raise HTTPException(422, detail={"status": "no_data", "message": str(e)})
     except Exception as e:  # Open-Meteo unreachable or refusing
-        raise HTTPException(502, detail={"status": "source_unavailable", "message": f"Open-Meteo: {e}"})
+        raise HTTPException(502, detail=_source_error(e))
+
+
+class PlanIn(BaseModel):
+    lat: float
+    lon: float
+    crop: str = Field("olive", description="olive | palm | citrus | cereal | veg | other (FAO-56 rooting depth and depletion fraction)")
+    kc: float = Field(0.65, gt=0, le=2)
+    area_ha: Optional[float] = Field(None, gt=0)
+    ea: float = Field(0.9, gt=0, le=1, description="irrigation efficiency")
+    head_m: Optional[float] = Field(None, gt=0)
+    pump_eff: float = Field(0.45, gt=0, le=1)
+    flow_m3h: Optional[float] = Field(None, gt=0, description="pump flow; limits the water per day and sets the pumping hours")
+    pv_kwp: Optional[float] = Field(None, gt=0, description="solar array driving the pump")
+    pr: float = Field(0.75, gt=0, le=1)
+    mode: str = Field("solar", pattern="^(water|solar)$", description="water = least water; solar = least non-solar energy")
+    irrigated_mm: float = Field(0.0, ge=0, le=200, description="net mm irrigated since yesterday (the soil model does not know it)")
+    plan_mm: Optional[list[float]] = Field(None, max_length=8, description="simulate this irrigation (net mm per day) instead of optimising")
+    months: Optional[list[int]] = Field(None, min_length=12, max_length=12, description="irrigated months, 12 flags (1 = irrigated); no irrigation planned in the others")
+    quota_m3_month: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12, description="authorised volume per month (m³, whole parcel), e.g. from the CRDA allocation")
+
+
+@app.post("/irrigation/plan")
+async def irrigation_plan(body: PlanIn) -> dict:
+    """Optimal 8-day irrigation plan (model predictive control) and solar pumping hours."""
+    if not (30 <= body.lat <= 38 and 7 <= body.lon <= 12):
+        raise HTTPException(422, "Point outside the Tunisia bounding box.")
+    try:
+        d = body.model_dump()
+        d["plan_override"] = d.pop("plan_mm")
+        return await planner.plan(**d)
+    except irrigation.ModelMissing as e:
+        raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
+    except ValueError as e:
+        raise HTTPException(422, detail={"status": "no_data", "message": str(e)})
+    except Exception as e:  # Open-Meteo unreachable or refusing
+        raise HTTPException(502, detail=_source_error(e))
+
+
+class ReplayIn(BaseModel):
+    lat: float
+    lon: float
+    start: str = Field("2025-05-01", pattern=r"^\d{4}-\d{2}-\d{2}$")
+    end: str = Field("2025-09-30", pattern=r"^\d{4}-\d{2}-\d{2}$")
+    crop: str = "olive"
+    kc: float = Field(0.65, gt=0, le=2)
+    area_ha: Optional[float] = Field(None, gt=0)
+    ea: float = Field(0.9, gt=0, le=1)
+    head_m: Optional[float] = Field(None, gt=0)
+    pump_eff: float = Field(0.45, gt=0, le=1)
+    flow_m3h: Optional[float] = Field(None, gt=0)
+    pv_kwp: Optional[float] = Field(None, gt=0)
+    pr: float = Field(0.75, gt=0, le=1)
+    months: Optional[list[int]] = Field(None, min_length=12, max_length=12, description="irrigated months, 12 flags (1 = irrigated); no irrigation planned in the others")
+    quota_m3_month: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12, description="authorised volume per month (m³, whole parcel), e.g. from the CRDA allocation")
+
+
+@app.post("/irrigation/replay")
+def irrigation_replay(body: ReplayIn) -> dict:
+    """Replay a past season on the nearest site's real data: quota method vs classic FAO-56 vs the GAIA planner."""
+    if not (30 <= body.lat <= 38 and 7 <= body.lon <= 12):
+        raise HTTPException(422, "Point outside the Tunisia bounding box.")
+    try:
+        return planner.replay_season(**body.model_dump())
+    except irrigation.ModelMissing as e:
+        raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
+    except ValueError as e:
+        raise HTTPException(422, detail={"status": "no_data", "message": str(e)})
+
+
+def _tunisia(lat: float, lon: float) -> None:
+    if not (30 <= lat <= 38 and 7 <= lon <= 12):
+        raise HTTPException(422, "Point outside the Tunisia bounding box.")
+
+
+@app.on_event("startup")
+async def _start_morning_check() -> None:
+    """Morning check of monitored parcels (gaia/farm_monitor.py), inside the backend process."""
+    import asyncio
+    if os.environ.get("GAIA_MONITOR", "1") != "0":
+        asyncio.get_event_loop().create_task(farm_monitor.loop())
+
+
+@app.get("/farm/state")
+def farm_get(lat: float, lon: float) -> dict:
+    """Saved irrigation calendar, reported irrigations, settings, morning check and alerts of a parcel."""
+    _tunisia(lat, lon)
+    return farm_state.load(lat, lon)
+
+
+class FarmActionIn(BaseModel):
+    lat: float
+    lon: float
+    action: dict[str, Any] = Field(..., description="{type: save_plan | log_irrigation | update_settings | set_monitoring | mark_alerts_read, params: {...}}")
+
+
+@app.post("/farm/action")
+def farm_action(body: FarmActionIn) -> dict:
+    """Apply ONE action the farmer confirmed on the page (the agent only proposes them)."""
+    _tunisia(body.lat, body.lon)
+    try:
+        return farm_state.apply(body.lat, body.lon, body.action)
+    except (ValueError, KeyError, TypeError) as e:
+        raise HTTPException(422, detail={"status": "bad_action", "message": str(e)})
+
+
+@app.post("/farm/check")
+async def farm_check(lat: float, lon: float) -> dict:
+    """Run the morning check now for this parcel: re-plan and record an alert."""
+    _tunisia(lat, lon)
+    try:
+        await farm_monitor.check(lat, lon)
+        return farm_state.load(lat, lon)
+    except irrigation.ModelMissing as e:
+        raise HTTPException(503, detail={"status": "model_not_loaded", "message": str(e)})
+    except Exception as e:
+        raise HTTPException(502, detail=_source_error(e))
+
+
+class AgentParcel(BaseModel):
+    lat: float
+    lon: float
+    crop: str = "olive"
+    kc: float = Field(0.65, gt=0, le=2)
+    area_ha: Optional[float] = Field(None, gt=0)
+    ea: float = Field(0.9, gt=0, le=1)
+    head_m: Optional[float] = Field(None, gt=0)
+    pump_eff: float = Field(0.45, gt=0, le=1)
+    flow_m3h: Optional[float] = Field(None, gt=0)
+    pv_kwp: Optional[float] = Field(None, gt=0)
+    pr: float = Field(0.75, gt=0, le=1)
+    months: Optional[list[int]] = Field(None, min_length=12, max_length=12, description="irrigated months, 12 flags (1 = irrigated); no irrigation planned in the others")
+    quota_m3_month: Optional[list[Optional[float]]] = Field(None, min_length=12, max_length=12, description="authorised volume per month (m³, whole parcel), e.g. from the CRDA allocation")
+
+
+class AgentTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., max_length=6000)
+
+
+class AgentIn(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2000)
+    lang: str = "fr"
+    parcel: AgentParcel
+    history: list[AgentTurn] = Field(default_factory=list, max_length=24, description="previous turns, oldest first")
+
+
+@app.post("/agent")
+async def agent_answer(body: AgentIn) -> dict:
+    """Smart irrigation agent (free Gemini / Groq model, or Claude): calls the soil forecast, optimal planner, what-if simulator and solar forecast. 503 without a key."""
+    if not (30 <= body.parcel.lat <= 38 and 7 <= body.parcel.lon <= 12):
+        raise HTTPException(422, "Point outside the Tunisia bounding box.")
+    try:
+        return await agent.answer(body.model_dump())
+    except agent.AgentUnavailable as e:
+        raise HTTPException(503, detail=e.detail) from e
 
 
 @app.post("/diagnose")

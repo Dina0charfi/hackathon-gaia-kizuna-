@@ -1,6 +1,6 @@
 """GAIA WATER–ENERGY NEXUS (M4). Python port of js/nexus-core.js.
 
-ETc = Kc × ET0 (FAO-56) · Pe = USDA-SCS monthly (as in FAO CROPWAT)
+ETc = Kc × ET0 (FAO-56) · Pe = USDA-SCS monthly (as in FAO CROPWAT), or P × pe_factor[m] from the trained model
 IRn = max(0, ETc − Pe) · IRg = IRn / Ea · V[m³] = 10 × IRg[mm] × A[ha]
 E[kWh] = V × H / (367 × ηp) · kWp = E / (days × GHI × PR) on the peak month
 The monthly quota is V: the agronomic need, never the pump's capacity.
@@ -23,7 +23,8 @@ def effective_rain(p: Optional[float]) -> Optional[float]:
 def compute(et0: Sequence[Optional[float]], rain: Sequence[Optional[float]], kc: Optional[float],
             months: Sequence[int] | None = None, area_ha: Optional[float] = None, ea: Optional[float] = 0.9,
             head_m: Optional[float] = None, pump_eff: Optional[float] = 0.45, pr: Optional[float] = 0.75,
-            ghi: Sequence[Optional[float]] | None = None, prices: dict | None = None) -> dict:
+            ghi: Sequence[Optional[float]] | None = None, prices: dict | None = None,
+            pe_factor: Sequence[Optional[float]] | None = None) -> dict:
     months = list(months) if months is not None else [1] * 12
     missing = []
     if not (kc and kc > 0):
@@ -41,7 +42,8 @@ def compute(et0: Sequence[Optional[float]], rain: Sequence[Optional[float]], kc:
         on = bool(months[m])
         e0, p = et0[m], rain[m]
         etc = kc * e0 if (on and kc and e0 is not None) else 0.0
-        pe = effective_rain(p)
+        # pe_factor: share of the rain that stays in the soil (trained model, ml/); otherwise USDA-SCS
+        pe = p * pe_factor[m] if (pe_factor and pe_factor[m] is not None and p is not None) else effective_rain(p)
         irn = max(0.0, etc - pe) if (on and pe is not None) else 0.0
         irg = irn / ea if ea and ea > 0 else None
         vol = 10 * irg * area_ha if (irg is not None and area_ha and area_ha > 0) else None

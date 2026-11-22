@@ -327,6 +327,8 @@
       }))
     ]));
 
+    if (window.GAIA_FARMREC && hasParcel) app.appendChild(GAIA_FARMREC.card());
+
     /* forecast */
     var fcChart = el('div', { class: 'fd-chart' });
     app.appendChild(el('section', { class: 'gp-card', 'aria-labelledby': 'fd-h-fc', style: 'margin-top:16px' }, [
@@ -415,5 +417,6 @@
 
   draw();
   fetchWeather().then(function (w) { WX = w; draw(); });
+  if (window.GAIA_FARMREC) GAIA_FARMREC.onChange(function () { if (WX) draw(); });
   G.onLang(function () { drawTabs(); draw(); });
 }());

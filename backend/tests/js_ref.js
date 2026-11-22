@@ -8,6 +8,7 @@ const w = ctx.window, inp = JSON.parse(fs.readFileSync(0, 'utf8'));
 const out = {};
 out.engine = inp.profiles.map(p => w.GAIA_ENGINE.evaluateAll(p).map(r => ({ id: r.record.id, verdict: r.verdict, score: r.score })));
 out.nexus = w.GAIA_NEXUS.compute(inp.nexus);
+if (inp.nexus_pe) out.nexus_pe = w.GAIA_NEXUS.compute(inp.nexus_pe);
 out.guard = (inp.guard || []).map(g => w.GAIA_GUARD.guard(g));
 
 if (inp.business) {

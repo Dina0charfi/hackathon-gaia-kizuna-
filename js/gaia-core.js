@@ -19,6 +19,11 @@
     plantnetEndpoint: /^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname) ? 'http://127.0.0.1:8765/plantnet' : null,    // local dev: backend on :8765. e.g. '/api/plantnet' — backend POST /plantnet (Pl@ntNet, key on the server). null = off. Only used after the user consents.
     feedbackEndpoint: null,    // e.g. '/api/feedback' — Kaizen corrections; null = kept on the device only
     irrigationEndpoint: 'http://127.0.0.1:8000/irrigation/forecast?lat={lat}&lon={lon}', // trained 7-day model (backend/, ml/); null = off
+    planEndpoint: 'http://127.0.0.1:8000/irrigation/plan',   // optimal irrigation planner + solar pumping (backend/gaia/planner.py); null = off
+    farmEndpoint: 'http://127.0.0.1:8000/farm',              // farm record: confirmed plan, reported irrigations, morning check, alerts; null = off
+    replayEndpoint: 'http://127.0.0.1:8000/irrigation/replay', // season replay on real past data; null = off
+    agentEndpoint: 'http://127.0.0.1:8000/agent',            // irrigation agent (Claude + tools; needs ANTHROPIC_API_KEY on the server); null = off
+    effectiveRainTable: 'ml/models/pluie_efficace_meta.json', // learned effective rain per month and site (ml/, section 11); null = USDA-SCS only
     climatePeriod: { start: '2015-01-01', end: '2024-12-31' }
   }, global.GAIA_CONFIG || {});
 

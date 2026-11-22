@@ -19,6 +19,7 @@ NEXUS = dict(et0=[60, 70, 100, 130, 170, 200, 220, 200, 150, 110, 70, 55],
              rain=[35, 30, 30, 20, 12, 4, 1, 4, 20, 35, 35, 40], kc=0.7, area_ha=2, ea=0.9, head_m=40,
              pump_eff=0.45, pr=0.75, ghi=[3.2, 4.1, 5.3, 6.4, 7.2, 7.9, 7.9, 7.1, 5.8, 4.5, 3.4, 2.9],
              months=[1] * 12, prices={"grid_tnd_kwh": 0.2})
+NEXUS_PE = dict(NEXUS, pe_factor=[0.6, 0.62, 0.65, 0.7, 0.7, 0.6, None, 0.55, 0.6, 0.65, 0.66, 0.6])
 
 KWH = [100, 150, 300, 500, 800, 1000, 1200, 1100, 700, 300, 120, 80]
 PAYG = [
@@ -42,7 +43,7 @@ ADOPTION = [
 def js():
     if not shutil.which("node"):
         pytest.skip("node not installed")
-    p = subprocess.run(["node", str(Path(__file__).with_name("js_ref.js"))], input=json.dumps({"profiles": PROFILES, "nexus": NEXUS, "business": {"payg": PAYG, "coop": COOP, "adoption": ADOPTION}}),
+    p = subprocess.run(["node", str(Path(__file__).with_name("js_ref.js"))], input=json.dumps({"profiles": PROFILES, "nexus": NEXUS, "nexus_pe": NEXUS_PE, "business": {"payg": PAYG, "coop": COOP, "adoption": ADOPTION}}),
                        capture_output=True, text=True, check=True)
     return json.loads(p.stdout)
 
@@ -63,6 +64,16 @@ def test_nexus_matches_js(js):
     assert py["totals"]["kwh"] == pytest.approx(ref["totals"]["kwh"])
     assert py["solar"]["kwp"] == pytest.approx(ref["solar"]["kwp"])
     assert py["costs"]["grid_tnd_year"] == pytest.approx(ref["costs"]["grid"])
+
+
+
+def test_nexus_learned_effective_rain_matches_js(js):
+    py, ref = nexus.compute(**NEXUS_PE), js["nexus_pe"]
+    assert [m["pe"] for m in py["months"]] == pytest.approx([m["pe"] for m in ref["months"]])
+    assert py["months"][0]["pe"] == pytest.approx(35 * 0.6)
+    assert py["months"][6]["pe"] == pytest.approx(nexus.effective_rain(1))   # missing factor → USDA-SCS
+    assert py["totals"]["vol"] == pytest.approx(ref["totals"]["vol"])
+    assert py["totals"]["vol"] > nexus.compute(**NEXUS)["totals"]["vol"]     # less rain counted → more irrigation
 
 
 def test_empty_profile_is_never_feasible():
