@@ -884,19 +884,6 @@
       ] });
     }, 0);
 
-    // 4. how it learned, with the test numbers
-    var res = PE.meta.resultats, a = res['années jamais vues'], b = res['lieux jamais vus'];
-    var pc = function (v) { return fmt(v * 100) + ' %'; };
-    card.appendChild(el('details', { class: 'gp-more', style: 'margin-top:10px' }, [
-      el('summary', null, [t('pe_how_t')]),
-      el('ul', { style: 'margin:6px 0 0;padding-inline-start:18px;display:grid;gap:4px', class: 'small' }, [
-        el('li', null, [t('pe_how_1')]), el('li', null, [t('pe_how_2')]),
-        el('li', null, [fill('pe_how_3', { g: fmt(a.mae_mois_gaia, 1) + ' / ' + fmt(b.mae_mois_gaia, 1), u: fmt(a.mae_mois_usda, 1) + ' / ' + fmt(b.mae_mois_usda, 1),
-          m: pc(a.part_mesuree) + ' / ' + pc(b.part_mesuree), f: pc(a.part_usda) + ' / ' + pc(b.part_usda) })]),
-        el('li', null, [t('pe_how_4')])
-      ]),
-      el('p', { class: 'assump', style: 'margin-top:6px' }, [fill('pe_ref', { n: PE.site.nom, d: fmt(PE.km) }) + ' · ' + PE.meta.source + ' · ' + (PE.meta.modele_final ? PE.meta.modele_final.entraine_sur : PE.meta.periode)])
-    ]));
     return card;
   }
 
