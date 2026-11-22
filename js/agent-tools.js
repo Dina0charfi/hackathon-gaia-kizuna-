@@ -416,6 +416,95 @@
       }
     },
     {
+      name: 'business_model',
+      description: "GAIA business model for this plot: pay-as-you-go solar pump kit paid out of the diesel it replaces (deposit, monthly installments, seasonal schedule, share of savings, break-even, gain over the kit life), the cooperative shared pump if members are saved, and the four adoption tests. The pump energy, solar size and water quota come from the plot (FAO-56). Prices are never invented: they come from the arguments (ask the farmer), the Business model page or the Water & energy page; what is missing is listed in data.missing with the question to ask.",
+      parameters: { type: 'object', properties: {
+        crop: { type: 'string', description: 'default: the plot crop' },
+        kit_tnd: { type: 'number', description: 'installed price of the solar pump kit (TND), if the farmer gave it' },
+        diesel_tnd_year: { type: 'number', description: 'what the farmer spends on pumping diesel per year (TND)' },
+        diesel_tnd_l: { type: 'number', description: 'diesel price per litre (TND/L), to estimate the yearly spending from the pump energy' },
+        pv_tnd_kwp: { type: 'number', description: 'installed solar price per kWp (TND/kWp), to estimate the kit price from its size' },
+        deposit_pct: { type: 'number', description: 'down payment, % (default 10)' },
+        term_months: { type: 'number', description: 'number of monthly installments (default 36)' },
+        seasonal: { type: 'boolean', description: 'installments follow the pumping season (default true)' } } },
+      run: function (a) {
+        var B = global.GAIA_BUSINESS;
+        if (!B) return Promise.resolve({ error: 'business core not loaded' });
+        var p = needPlot(), dna = p.dna, ck = plotCrop(p, a.crop), nk = ck ? nexusCrop(ck) : null, C = nk && N.CROPS[nk];
+        var CM = dna.climateMonthly, GH = ghiOf(dna), ghi = GH.ghi, area = V(dna, 'area_ha'), depth = V(dna, 'water.well_depth_m');
+        var biz = G.load('gaia.business.inputs', null) || {}, nx = (G.load('gaia.nexus.inputs', null) || {}).values || {};
+        function n(v) { var x = typeof v === 'number' ? v : parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')); return isNaN(x) || x <= 0 ? null : x; }
+        // a percentage may legitimately be 0 (no fee, no deposit)
+        function pct(v, d) { var x = parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')); return (isNaN(x) || x < 0 ? d : x) / 100; }
+
+        // physics of the plot: pumping energy, solar size, water quota
+        var phys = null;
+        if (C && C.kc > 0 && CM) {
+          var r = N.compute({ et0: CM.et0, rain: CM.rain, ghi: ghi, kc: C.kc, months: C.months, area_ha: area, ea: 0.9, head_m: depth ? depth + 10 : null, pump_eff: 0.45, pr: 0.75, prices: {} });
+          if (r.totals) phys = { kwh: r.totals.kwh > 0 ? r.totals.kwh : null, m3: r.totals.vol > 0 ? r.totals.vol : null, kwp: r.solar ? r.solar.kwp : null,
+            monthly_kwh: r.totals.kwh > 0 ? r.months.map(function (m) { return m.kwh || 0; }) : null };
+        }
+        var KWH_PER_L = 3;     // electricity a diesel pump-set delivers per litre (technical assumption, not a price)
+
+        // prices: farmer's words first, then the Business page, then the Water & energy page
+        var src = {}, diesel = null, kit = null;
+        if (n(a.diesel_tnd_year)) { diesel = n(a.diesel_tnd_year); src.diesel = 'farmer'; }
+        else if (n(biz.diesel)) { diesel = n(biz.diesel); src.diesel = 'business page'; }
+        else {
+          var dl = n(a.diesel_tnd_l) || n(nx.diesel_tnd_l), kl = n(nx.diesel_kwh_l) || KWH_PER_L;
+          if (dl && phys && phys.kwh) { diesel = phys.kwh / kl * dl; src.diesel = 'pump energy ' + Math.round(phys.kwh) + ' kWh/yr ÷ ' + kl + ' kWh/L × ' + dl + ' TND/L'; }
+        }
+        if (n(a.kit_tnd)) { kit = n(a.kit_tnd); src.kit = 'farmer'; }
+        else if (n(biz.kit)) { kit = n(biz.kit); src.kit = 'business page'; }
+        else {
+          var pv = n(a.pv_tnd_kwp) || n(nx.pv_tnd_kwp);
+          if (pv && phys && phys.kwp) { kit = phys.kwp * pv; src.kit = r1(phys.kwp, 1) + ' kWp × ' + pv + ' TND/kWp'; }
+        }
+        var inp = { kit_tnd: kit, diesel_tnd_year: diesel, deposit_pct: pct(a.deposit_pct !== undefined ? a.deposit_pct : biz.dep, 10),
+          term_months: n(a.term_months) || n(biz.term) || 36, fee_rate: pct(biz.fee, 8), share_cap: pct(biz.cap, 70), maint_tnd_year: n(biz.maint) || 0,
+          monthly_kwh: phys && phys.monthly_kwh, seasonal: a.seasonal !== undefined ? !!a.seasonal : (biz.seasonal !== undefined ? !!biz.seasonal : true),
+          start_month: biz.start !== undefined ? +biz.start : new Date().getMonth(), life_y: n(biz.life) || 20 };
+        var pg = B.payg(inp);
+        var ask = { kit: W({ fr: 'Quel est le prix installé du kit solaire (TND) ? (ou le prix du kWc)', en: 'What is the installed price of the solar kit (TND)? (or the price per kWp)', ar: 'ما سعر المنظومة الشمسية مركّبة (د.ت)؟', ja: '太陽光キットの設置価格（TND）は？（またはkWpあたりの価格）' }),
+          diesel: W({ fr: 'Combien dépensez-vous en gazole de pompage par an (TND) ? (ou le prix du litre)', en: 'How much do you spend on pumping diesel per year (TND)? (or the price per litre)', ar: 'كم تنفق على غازوال الضخ سنوياً (د.ت)؟', ja: '揚水用の軽油に年間いくら使っていますか（TND）？（またはリットル単価）' }) };
+        var physData = phys ? { pump_kwh_year: r1(phys.kwh, 0), solar_kwp: r1(phys.kwp, 1), quota_m3_year: r1(phys.m3, 0), diesel_litres_year: phys.kwh ? r1(phys.kwh / KWH_PER_L, 0) : null,
+          sun_data: GH.approx ? 'approximate' : 'NASA POWER', assumption: 'FAO-56 need, drip 90 %, head = well depth + 10 m, pump 0.45, PR 0.75, ' + KWH_PER_L + ' kWh per litre of diesel' } : null;
+
+        var ad = B.adoption({ ghi_mean: GH.approx ? null : ghi.reduce(function (s, v) { return s + v; }, 0) / 12, water_source: V(dna, 'water.source'), has_quota: !!(phys && phys.m3),
+          payg: pg.missing.length ? null : pg, ease: biz.ease || {}, partners: biz.partners || {} });
+        var adoption = { overall: ad.overall, tests: ad.tests.map(function (x) { return { test: x.key, verdict: x.verdict, why: x.why }; }) };
+
+        var coop = null;
+        var members = (biz.members || []).map(function (m) { return { name: m.name, quota_m3: n(m.quota), diesel_tnd_year: n(m.diesel) }; });
+        if (n(biz.co_kit) && members.filter(function (m) { return m.quota_m3; }).length >= 2) {
+          var co = B.coop({ kit_tnd: n(biz.co_kit), individual_kit_tnd: n(biz.co_ind), deposit_pct: inp.deposit_pct, term_months: inp.term_months, fee_rate: inp.fee_rate, reserve_pct: pct(biz.co_res, 5), members: members });
+          if (!co.missing.length) coop = { members: co.members.map(function (m) { return { name: m.name || null, share_pct: r1(100 * m.share, 0), monthly_tnd: r1(m.monthly, 0), net_month_tnd: r1(m.net_month, 0) }; }),
+            reserve_at_term_tnd: r1(co.reserve_at_term, 0), capex_saved_tnd: r1(co.capex_saved, 0) };
+        }
+
+        if (pg.missing.length) {
+          return Promise.resolve({
+            summary: W({ fr: 'à chiffrer : ', en: 'to price: ', ar: 'للتسعير: ', ja: '要入力：' }) + pg.missing.map(function (k) { return k === 'kit' ? W({ fr: 'prix du kit', en: 'kit price', ar: 'سعر المنظومة', ja: 'キット価格' }) : W({ fr: 'dépense gazole', en: 'diesel spending', ar: 'نفقة الغازوال', ja: '軽油代' }); }).join(', ') +
+              (phys && phys.kwp ? ' · ' + W({ fr: 'kit de ', en: 'kit of ', ar: 'منظومة ', ja: 'キット ' }) + r1(phys.kwp, 1) + ' kWp' : ''),
+            data: { status: 'needs_prices', missing: pg.missing, ask_farmer: pg.missing.map(function (k) { return ask[k]; }), plot: physData, adoption: adoption, coop: coop,
+              hint: 'Ask the farmer these questions, or have them fill the Business model page (business.html). Never invent a price.' }
+          });
+        }
+        var first12 = pg.schedule.slice(0, 12).map(function (x) { return { n: x.i, month: x.month + 1, saving: r1(x.saving, 0), installment: r1(x.installment, 0), net: r1(x.net, 0) }; });
+        return Promise.resolve({
+          summary: W({ fr: 'apport ', en: 'deposit ', ar: 'دفعة أولى ', ja: '頭金 ' }) + r1(pg.deposit, 0) + ' TND · ' + r1(pg.avg_installment, 0) + ' TND/' + W({ fr: 'mois', en: 'month', ar: 'شهر', ja: '月' }) + ' × ' + pg.term +
+            ' · ' + r1(100 * pg.ratio, 0) + ' % ' + W({ fr: 'des économies', en: 'of savings', ar: 'من الوفر', ja: '（節約額比）' }) + ' · ' + pg.verdict,
+          data: { status: 'ok', verdict: pg.verdict, kit_tnd: r1(kit, 0), diesel_tnd_year: r1(diesel, 0), maintenance_tnd_year: r1(inp.maint_tnd_year, 0), fee_rate_pct: r1(100 * inp.fee_rate, 1), kit_life_years: inp.life_y, sources: src,
+            deposit_tnd: r1(pg.deposit, 0), financed_tnd: r1(pg.financed, 0), fee_tnd: r1(pg.fee, 0), total_tnd: r1(pg.total, 0), term_months: pg.term, seasonal: pg.seasonal,
+            avg_installment_tnd: r1(pg.avg_installment, 0), max_installment_tnd: r1(pg.max_installment, 0), installments_over_savings_pct: r1(100 * pg.ratio, 0), share_cap_pct: r1(100 * pg.share_cap, 0),
+            months_paying_more_than_saved: pg.negative_months, break_even_month: pg.break_even_month, suggested_term_months: pg.suggested_term,
+            yearly_gain_after_tnd: r1(pg.yearly_after, 0), gain_over_life_tnd: r1(pg.life_gain, 0), simple_payback_years: r1(pg.simple_payback_y, 1),
+            first_12_months: first12, plot: physData, adoption: adoption, coop: coop,
+            rule: 'the controller only releases the FAO-56 quota: the kit is paid by the diesel saved, never by pumping more water' }
+        });
+      }
+    },
+    {
       name: 'search_knowledge',
       description: "Search GAIA's 11 sourced knowledge records (Tunisian and Japanese practices: description, conditions, cost, risks, adaptations, actions, sources).",
       parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },

@@ -712,6 +712,8 @@
     G.clear(app);
     app.appendChild(el('div', { class: 'gp-principle', style: 'margin-bottom:8px' }, [t('principle')]));
     app.appendChild(el('p', { class: 'small', style: 'margin:0 0 14px;color:var(--g-ink-2);max-width:80ch' }, [t('principle_p')]));
+    app.appendChild(el('div', { class: 'gp-note', style: 'margin-bottom:14px;align-items:center' }, [G.icon('network'), el('div', null, [t('bz_agent_p') + ' ',
+      el('a', { class: 'gp-btn gold sm', style: 'margin-inline-start:6px', href: 'agent.html?goal=' + encodeURIComponent(t('bz_agent_goal')) }, [t('bz_agent_btn')])])]));
     if (NX && (NX.diesel_tnd_year || NX.kit_tnd || NX.quota_m3)) {
       var bits = [];
       if (NX.diesel_tnd_year) bits.push(t('in_diesel').split(' (')[0] + ' ' + fmt(NX.diesel_tnd_year) + ' TND');
@@ -746,6 +748,16 @@
     draw();
   }
 
+  G.addStrings({
+    fr: { bz_agent_p: "L'agent GAIA mesure l'eau et l'énergie de votre parcelle, chiffre le kit et vous dit quoi négocier.", bz_agent_btn: "Demander à l'agent",
+      bz_agent_goal: 'Mon kit solaire pay-as-you-go est-il rentable ?' },
+    ar: { bz_agent_p: 'يقيس وكيل GAIA ماء قطعتك وطاقتها، ويسعّر المنظومة، ويقول لك ما يجب التفاوض عليه.', bz_agent_btn: 'اسأل الوكيل',
+      bz_agent_goal: 'هل منظومتي الشمسية بالأقساط مربحة؟' },
+    en: { bz_agent_p: 'The GAIA agent measures the water and energy of your plot, prices the kit and tells you what to negotiate.', bz_agent_btn: 'Ask the agent',
+      bz_agent_goal: 'Is my pay-as-you-go solar kit profitable?' },
+    ja: { bz_agent_p: 'GAIAエージェントが区画の水とエネルギーを測り、キットを試算し、交渉すべき点を伝えます。', bz_agent_btn: 'エージェントに聞く',
+      bz_agent_goal: '従量課金の太陽光キットは採算が合う？' }
+  });
   renderAll();
   G.onLang(renderAll);
 }());

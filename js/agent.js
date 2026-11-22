@@ -69,10 +69,10 @@
   function W(o) { var l = L(); return o[l] !== undefined ? o[l] : o.en; }
 
   var EXAMPLES = {
-    fr: ["Préparer mes oliviers pour l'été : eau, chaleur, maladies", "J'ai 3 ha d'oliviers près de Kairouan, puits de 60 m. Plan pour les 2 prochaines semaines", "Je veux installer des panneaux solaires au-dessus de tomates à Gabès sans perdre ma récolte", "Mon pompage solaire épuise-t-il la nappe ?"],
-    ar: ['جهّز زيتوني للصيف: الماء، الحرارة، الأمراض', 'عندي 3 هكتارات زيتون قرب القيروان، بئر 60 م. خطة للأسبوعين القادمين', 'أريد تركيب ألواح شمسية فوق الطماطم في قابس دون خسارة المحصول', 'هل يستنزف الضخ الشمسي المائدة المائية؟'],
-    en: ['Get my olives ready for summer: water, heat, diseases', 'I have 3 ha of olives near Kairouan, 60 m well. Plan for the next 2 weeks', 'I want solar panels over tomatoes in Gabes without losing my harvest', 'Is my solar pumping draining the aquifer?'],
-    ja: ['オリーブを夏に備えたい：水・暑さ・病気', 'カイルアン近くにオリーブ3ha、井戸60m。今後2週間の計画', 'ガベスでトマトの上に太陽光パネルを設置したいが収穫は減らしたくない', '太陽光ポンプで地下水を使いすぎていない？']
+    fr: ["Préparer mes oliviers pour l'été : eau, chaleur, maladies", "J'ai 3 ha d'oliviers près de Kairouan, puits de 60 m. Plan pour les 2 prochaines semaines", "Je veux installer des panneaux solaires au-dessus de tomates à Gabès sans perdre ma récolte", "Mon pompage solaire épuise-t-il la nappe ?", "Un kit solaire pay-as-you-go est-il rentable ? Kit 30 000 TND, gazole 7 000 TND/an"],
+    ar: ['جهّز زيتوني للصيف: الماء، الحرارة، الأمراض', 'عندي 3 هكتارات زيتون قرب القيروان، بئر 60 م. خطة للأسبوعين القادمين', 'أريد تركيب ألواح شمسية فوق الطماطم في قابس دون خسارة المحصول', 'هل يستنزف الضخ الشمسي المائدة المائية؟', 'هل منظومة شمسية بالأقساط مربحة؟ منظومة 30000 د.ت، غازوال 7000 د.ت في السنة'],
+    en: ['Get my olives ready for summer: water, heat, diseases', 'I have 3 ha of olives near Kairouan, 60 m well. Plan for the next 2 weeks', 'I want solar panels over tomatoes in Gabes without losing my harvest', 'Is my solar pumping draining the aquifer?', 'Is a pay-as-you-go solar kit profitable? Kit 30,000 TND, diesel 7,000 TND/year'],
+    ja: ['オリーブを夏に備えたい：水・暑さ・病気', 'カイルアン近くにオリーブ3ha、井戸60m。今後2週間の計画', 'ガベスでトマトの上に太陽光パネルを設置したいが収穫は減らしたくない', '太陽光ポンプで地下水を使いすぎていない？', '従量課金の太陽光キットは採算が合う？キット 30000 TND、軽油 7000 TND/年']
   };
 
   /* ------------------------------------------------------------------ state */
@@ -85,9 +85,23 @@
     o.crop = T.cropKey(g);
     var m = f.match(/(\d+(?:[.,]\d+)?)\s*(?:ha\b|hect|هكتار|ヘクタール)/); if (m) o.area = +m[1].replace(',', '.');
     m = f.match(/(?:puits|forage|well|بئر|井戸)[^\d]{0,15}(\d{1,3})\s*(?:m|م)|(\d{1,3})\s*(?:m|م)(?:\s*(?:de\s*)?(?:puits|well|deep|profond)|\s*بئر)/); if (m) o.well = +(m[1] || m[2]);
+    // "rentable", "possible"... contain "ble" (wheat) and any other sentence falls into "other": keep only a real crop word
+    o.bizCrop = T.cropKey(f.replace(/[a-z]+ble[a-z]*/g, ' ').replace(/\bdat(?:e|a)\b/g, ' ')); if (o.bizCrop === 'other') o.bizCrop = null;
     o.solar = /solai|solar|panneau|panel|شمس|ألواح|ソーラー|太陽|agrivolt|photovolt/.test(f);
     o.nappe = /nappe|aquif|groundwater|over.?pump|épuis|المائدة|استنزاف|地下水/.test(f);
     if (o.solar && !o.crop && /tomat|طماطم|トマト/.test(f)) o.crop = 'tomato';
+    // money questions: pay-as-you-go kit, installments, cooperative, profitability
+    o.biz = /pay.?as|payg|mensualit|paiement|payer|financ|cr[ée]dit|rentab|mod[eè]le [ée]conom|business|co[uû]t|\bcosts?\b|\bprices?\b|prix|tnd|dinar|\bdt\b|investi|coop|amorti|retour sur|roi\b|budget|argent|money|install?ment|loan|profit|قسط|أقساط|تمويل|ربح|كلفة|سعر|دينار|تعاونية|コスト|分割|ビジネス|費用|価格|採算|組合/.test(f);
+    function amt(re) {
+      var x = f.match(re); if (!x) return null;
+      var s = x[1], v = /^\d{1,3}(?:[\s.,]\d{3})+$/.test(s) ? +s.replace(/\D/g, '') : +s.replace(/\s/g, '').replace(',', '.');
+      return v > 0 ? v : null;
+    }
+    var NUM = '(\\d{1,3}(?:[\\s.,]\\d{3})+|\\d+(?:[.,]\\d+)?)';
+    o.kit = amt(new RegExp('(?:kit|منظومة|キット)[^\\d]{0,20}' + NUM + '\\s*(?:tnd|dt|dinar|د)'));
+    o.diesel_year = amt(new RegExp('(?:gazole|gasoil|diesel|غازوال|軽油)[^\\d]{0,25}' + NUM + '\\s*(?:tnd|dt|dinar|د)[^\\d]{0,12}?(?:an\\b|year|yr|سن|年)'));
+    o.diesel_l = amt(new RegExp(NUM + '\\s*(?:tnd|dt|dinar|د)[^\\d]{0,6}(?:/|le|per|par|للتر)\\s*(?:l\\b|litre|liter|لتر|ℓ)'));
+    m = f.match(/(\d{1,2})\s*(?:mois|months?|شهر|か月|ヶ月)/); if (m) o.term = +m[1];
     return o;
   }
 
@@ -124,6 +138,27 @@
     }
     function step(name, args, why) { chain = chain.then(function () { if (S.stop) return; return call(name, args, why).then(function (r) { res[name] = r; }); }); }
     step('plot_profile', {}, W({ fr: 'Lire le profil de la parcelle', en: 'Read the plot profile', ar: 'قراءة ملف القطعة', ja: '区画プロファイルを読む' }));
+    if (P.biz) {
+      // a money question: measure the water and energy first, then price the kit from them
+      P.crop = P.bizCrop;
+      var ba = {};
+      if (P.crop) ba.crop = P.crop;
+      if (P.kit) ba.kit_tnd = P.kit;
+      if (P.diesel_year) ba.diesel_tnd_year = P.diesel_year;
+      if (P.diesel_l) ba.diesel_tnd_l = P.diesel_l;
+      if (P.term) ba.term_months = P.term;
+      step('water_need', P.crop ? { crop: P.crop } : {}, W({ fr: 'Besoin en eau FAO-56 : le quota que le kit aura le droit de pomper', en: 'FAO-56 water need: the quota the kit will be allowed to pump', ar: 'حاجة الماء حسب الفاو: الحصة المسموح بضخها', ja: 'FAO-56の水需要：キットが汲める割当量' }));
+      step('groundwater_guard', {}, W({ fr: 'Vérifier que le kit ne pompera pas plus que la nappe ne le permet', en: 'Check the kit will not pump more than the aquifer allows', ar: 'التحقق من أن المنظومة لن تضخ أكثر مما تسمح به المائدة', ja: 'キットが帯水層の許容量を超えて汲まないか確認' }));
+      step('business_model', ba, W({ fr: 'Chiffrer le kit pay-as-you-go : apport, mensualités, part des économies de gazole', en: 'Price the pay-as-you-go kit: deposit, installments, share of the diesel savings', ar: 'تسعير المنظومة بالدفع حسب الاستعمال: الدفعة الأولى، الأقساط، نسبة الوفر', ja: '従量課金キットの試算：頭金・割賦・軽油節約に占める割合' }));
+      if (/agrivolt|au.dessus|above|\bover\b|sharing|sous les panneaux|فوق|ソーラーシェアリング|営農/.test(P.text.toLowerCase())) {
+        chain = chain.then(function () {
+          if (S.stop) return;
+          var map = { tomato: 'tomato', potato: 'potato', pepper: 'pepper', cereal: 'wheat', veg: 'tomato' };
+          return call('solar_brain', { crop: map[P.crop] || 'tomato', goal: 'ler' }, W({ fr: 'Revenu de l\'électricité en plus de la récolte (agrivoltaïsme)', en: 'Electricity income on top of the harvest (agrivoltaics)', ar: 'دخل الكهرباء إضافة إلى المحصول', ja: '収穫に加えた発電収入（営農型太陽光）' })).then(function (r) { res.solar_brain = r; });
+        });
+      }
+      return chain.then(function () { return res; });
+    }
     step('weather_forecast', { days: 14 }, W({ fr: 'Météo des 14 prochains jours', en: 'Weather for the next 14 days', ar: 'طقس الأيام الأربعة عشر القادمة', ja: '今後14日間の天気' }));
     step('water_need', P.crop ? { crop: P.crop } : {}, W({ fr: 'Besoin en eau FAO-56 et calendrier d\'irrigation', en: 'FAO-56 water need and irrigation schedule', ar: 'حاجة الماء حسب الفاو وجدول الري', ja: 'FAO-56の水需要と灌漑スケジュール' }));
     step('groundwater_guard', {}, W({ fr: 'Vérifier le risque de surpompage', en: 'Check the over-pumping risk', ar: 'التحقق من خطر الضخ المفرط', ja: '過剰揚水のリスクを確認' }));
@@ -241,13 +276,66 @@
       ar: 'التقاسم الشمسي: صفوف كل ' + sb.layout.row_pitch_m + ' م، ألواح ' + sb.layout.panel_width_m + ' م بميل ' + sb.layout.tilt_deg + '° ← تحتفظ الزراعة بـ ' + sb.crop_yield_pct + ' % من مردودها، ' + n0(sb.kwh_year / 1000) + ' م.و.س/سنة، LER ' + G.fmt(sb.ler, 2) + '. جرّب أولاً على قطعة صغيرة',
       ja: 'ソーラーシェアリング：列間' + sb.layout.row_pitch_m + ' m、幅' + sb.layout.panel_width_m + ' mのパネルを' + sb.layout.tilt_deg + '°傾斜 → 作物は収量の' + sb.crop_yield_pct + '%を維持（日本の80%ルール' + (sb.japan_rule_ok ? '適合' : '不適合') + '）、年' + n0(sb.kwh_year / 1000) + ' MWh、LER ' + G.fmt(sb.ler, 2) + '。まず試験区で確認' }), 'solar_brain', 6);
 
+    // business model: pay-as-you-go kit
+    var bm = res.business_model && res.business_model.data;
+    if (bm) {
+      var tnd = function (x) { return n0(x) + ' TND'; };
+      var VERD = { ok: { fr: 'abordable', en: 'affordable', ar: 'في المتناول', ja: '支払い可能' }, adapt: { fr: 'possible mais serré', en: 'possible but tight', ar: 'ممكن لكن ضيق', ja: '可能だが厳しい' },
+        no: { fr: 'trop cher sous cette forme', en: 'too expensive in this form', ar: 'مكلف جداً بهذه الصيغة', ja: 'この条件では高すぎる' }, unk: { fr: 'à vérifier', en: 'to check', ar: 'للتحقق', ja: '要確認' } };
+      if (bm.status === 'ok') {
+        add(W({ fr: 'avant de signer', en: 'before signing', ar: 'قبل التوقيع', ja: '契約の前に' }), null, W({
+          fr: 'Kit solaire pay-as-you-go (' + tnd(bm.kit_tnd) + ') : apport ' + tnd(bm.deposit_tnd) + ', puis ' + tnd(bm.avg_installment_tnd) + '/mois pendant ' + bm.term_months + ' mois' + (bm.seasonal ? ' (calé sur la saison de pompage, max ' + tnd(bm.max_installment_tnd) + ')' : '') + '. Les mensualités = ' + bm.installments_over_savings_pct + ' % des économies (' + tnd(bm.diesel_tnd_year) + '/an de gazole' + (bm.maintenance_tnd_year ? ' − ' + tnd(bm.maintenance_tnd_year) + ' d\'entretien' : '') + ') : ' + W(VERD[bm.verdict]),
+          en: 'Pay-as-you-go solar kit (' + tnd(bm.kit_tnd) + '): deposit ' + tnd(bm.deposit_tnd) + ', then ' + tnd(bm.avg_installment_tnd) + '/month for ' + bm.term_months + ' months' + (bm.seasonal ? ' (following the pumping season, max ' + tnd(bm.max_installment_tnd) + ')' : '') + '. Installments = ' + bm.installments_over_savings_pct + ' % of the savings (' + tnd(bm.diesel_tnd_year) + '/yr of diesel' + (bm.maintenance_tnd_year ? ' − ' + tnd(bm.maintenance_tnd_year) + ' maintenance' : '') + '): ' + W(VERD[bm.verdict]),
+          ar: 'منظومة شمسية بالدفع حسب الاستعمال (' + tnd(bm.kit_tnd) + '): دفعة أولى ' + tnd(bm.deposit_tnd) + '، ثم ' + tnd(bm.avg_installment_tnd) + ' شهرياً لمدة ' + bm.term_months + ' شهراً. الأقساط = ' + bm.installments_over_savings_pct + ' % من الوفر (' + tnd(bm.diesel_tnd_year) + ' غازوال سنوياً' + (bm.maintenance_tnd_year ? ' − ' + tnd(bm.maintenance_tnd_year) + ' صيانة' : '') + '): ' + W(VERD[bm.verdict]),
+          ja: '従量課金の太陽光キット（' + tnd(bm.kit_tnd) + '）：頭金' + tnd(bm.deposit_tnd) + '、その後' + bm.term_months + 'か月間 月' + tnd(bm.avg_installment_tnd) + (bm.seasonal ? '（揚水の季節に合わせ、最大' + tnd(bm.max_installment_tnd) + '）' : '') + '。割賦は節約額（軽油 年' + tnd(bm.diesel_tnd_year) + (bm.maintenance_tnd_year ? ' − 保守' + tnd(bm.maintenance_tnd_year) : '') + '）の' + bm.installments_over_savings_pct + '%：' + W(VERD[bm.verdict]) }), 'business_model', 1);
+        if (bm.verdict !== 'ok') add(W({ fr: 'avant de signer', en: 'before signing', ar: 'قبل التوقيع', ja: '契約の前に' }), null, bm.suggested_term_months ? W({
+          fr: 'Demander ' + bm.suggested_term_months + ' mensualités au lieu de ' + bm.term_months + ' : les paiements restent sous ' + bm.share_cap_pct + ' % des économies',
+          en: 'Ask for ' + bm.suggested_term_months + ' installments instead of ' + bm.term_months + ': payments stay under ' + bm.share_cap_pct + ' % of the savings',
+          ar: 'اطلب ' + bm.suggested_term_months + ' قسطاً بدل ' + bm.term_months + ': تبقى الأقساط تحت ' + bm.share_cap_pct + ' % من الوفر',
+          ja: '割賦を' + bm.term_months + '回ではなく' + bm.suggested_term_months + '回にする：支払いは節約額の' + bm.share_cap_pct + '%以下に収まる' }) : W({
+          fr: 'Aucune durée jusqu\'à 7 ans ne garde les paiements sous ' + bm.share_cap_pct + ' % des économies : négocier le prix du kit, chercher une subvention ou partager le kit en coopérative avec des voisins',
+          en: 'No term up to 7 years keeps payments under ' + bm.share_cap_pct + ' % of the savings: negotiate the kit price, look for a grant or share the kit in a cooperative with neighbours',
+          ar: 'لا مدة حتى 7 سنوات تُبقي الأقساط تحت ' + bm.share_cap_pct + ' % من الوفر: فاوض على السعر، ابحث عن منحة أو تقاسم المنظومة مع الجيران في تعاونية',
+          ja: '7年までのどの期間でも支払いが節約額の' + bm.share_cap_pct + '%以下にならない：価格交渉、補助金、または近隣と協同組合でキットを共有' }), 'business_model', 2);
+        add(W({ fr: 'après le dernier paiement', en: 'after the last payment', ar: 'بعد آخر قسط', ja: '最終支払いの後' }), null, W({
+          fr: 'Le kit vous appartient : +' + tnd(bm.yearly_gain_after_tnd) + '/an d\'économie nette' + (bm.break_even_month ? ', trésorerie positive dès le mois ' + bm.break_even_month : '') + ', gain total ≈ ' + tnd(bm.gain_over_life_tnd) + ' sur la durée de vie du kit (retour simple ' + G.fmt(bm.simple_payback_years, 1) + ' ans)',
+          en: 'The kit is yours: +' + tnd(bm.yearly_gain_after_tnd) + '/yr net saving' + (bm.break_even_month ? ', cash positive from month ' + bm.break_even_month : '') + ', total gain ≈ ' + tnd(bm.gain_over_life_tnd) + ' over the kit life (simple payback ' + G.fmt(bm.simple_payback_years, 1) + ' yr)',
+          ar: 'المنظومة ملكك: +' + tnd(bm.yearly_gain_after_tnd) + ' سنوياً وفر صافٍ، ربح إجمالي ≈ ' + tnd(bm.gain_over_life_tnd) + ' على عمر المنظومة',
+          ja: 'キットはあなたのもの：年' + tnd(bm.yearly_gain_after_tnd) + 'の純節約' + (bm.break_even_month ? '、' + bm.break_even_month + 'か月目から資金収支がプラス' : '') + '、キットの寿命で約' + tnd(bm.gain_over_life_tnd) + 'の利益（単純回収' + G.fmt(bm.simple_payback_years, 1) + '年）' }), 'business_model', 4);
+      } else if (bm.ask_farmer) {
+        add(W({ fr: 'maintenant', en: 'now', ar: 'الآن', ja: '今すぐ' }), null, W({ fr: 'Pour chiffrer le kit, répondez : ', en: 'To price the kit, answer: ', ar: 'لتسعير المنظومة، أجب: ', ja: 'キットを試算するため回答してください：' }) + bm.ask_farmer.join(' ') +
+          W({ fr: ' (dans votre question, ex. « kit 30 000 TND, gazole 7 000 TND/an », ou dans la page Modèle économique)', en: ' (in your question, e.g. "kit 30,000 TND, diesel 7,000 TND/yr", or in the Business model page)', ar: ' (في سؤالك، مثلاً «منظومة 30000 د.ت، غازوال 7000 د.ت في السنة»، أو في صفحة النموذج الاقتصادي)', ja: '（質問の中で、例「キット 30000 TND、軽油 7000 TND/年」、またはビジネスモデルのページで）' }), 'business_model', 1);
+      }
+      if (bm.plot && bm.plot.solar_kwp) add(W({ fr: 'avant de demander un devis', en: 'before asking for a quote', ar: 'قبل طلب عرض سعر', ja: '見積もりを依頼する前に' }), null, W({
+        fr: 'Taille du kit pour cette parcelle : ' + G.fmt(bm.plot.solar_kwp, 1) + ' kWc, ' + n0(bm.plot.pump_kwh_year) + ' kWh/an de pompage (≈ ' + n0(bm.plot.diesel_litres_year) + ' L de gazole remplacés), quota ' + n0(bm.plot.quota_m3_year) + ' m³/an inscrit dans le contrat',
+        en: 'Kit size for this plot: ' + G.fmt(bm.plot.solar_kwp, 1) + ' kWp, ' + n0(bm.plot.pump_kwh_year) + ' kWh/yr of pumping (≈ ' + n0(bm.plot.diesel_litres_year) + ' L of diesel replaced), quota ' + n0(bm.plot.quota_m3_year) + ' m³/yr written into the contract',
+        ar: 'حجم المنظومة لهذه القطعة: ' + G.fmt(bm.plot.solar_kwp, 1) + ' ك.و ذروة، ' + n0(bm.plot.pump_kwh_year) + ' ك.و.س سنوياً للضخ (≈ ' + n0(bm.plot.diesel_litres_year) + ' لتر غازوال)، حصة ' + n0(bm.plot.quota_m3_year) + ' م³ سنوياً في العقد',
+        ja: 'この区画のキット容量：' + G.fmt(bm.plot.solar_kwp, 1) + ' kWp、揚水' + n0(bm.plot.pump_kwh_year) + ' kWh/年（軽油約' + n0(bm.plot.diesel_litres_year) + ' L分）、契約に年' + n0(bm.plot.quota_m3_year) + ' m³の割当を明記' }), 'business_model', 3);
+      if (bm.status === 'ok') watch.push(W({
+        fr: 'Hypothèses à vérifier (modifiables dans Modèle économique) : frais ' + G.fmt(bm.fee_rate_pct, 1) + ' %/an, limite ' + bm.share_cap_pct + ' % des économies, kit de ' + bm.kit_life_years + ' ans, entretien ' + tnd(bm.maintenance_tnd_year) + '/an' + (bm.plot ? ', 3 kWh par litre de gazole' : '') + '.',
+        en: 'Assumptions to check (editable in Business model): fee ' + G.fmt(bm.fee_rate_pct, 1) + ' %/yr, limit ' + bm.share_cap_pct + ' % of the savings, ' + bm.kit_life_years + '-year kit, maintenance ' + tnd(bm.maintenance_tnd_year) + '/yr' + (bm.plot ? ', 3 kWh per litre of diesel' : '') + '.',
+        ar: 'فرضيات للتحقق (قابلة للتعديل في النموذج الاقتصادي): كلفة ' + G.fmt(bm.fee_rate_pct, 1) + ' % سنوياً، سقف ' + bm.share_cap_pct + ' % من الوفر، عمر المنظومة ' + bm.kit_life_years + ' سنة، صيانة ' + tnd(bm.maintenance_tnd_year) + ' سنوياً' + (bm.plot ? '، 3 ك.و.س للتر' : '') + '.',
+        ja: '要確認の前提（ビジネスモデルで変更可）：手数料 年' + G.fmt(bm.fee_rate_pct, 1) + '%、上限は節約額の' + bm.share_cap_pct + '%、寿命' + bm.kit_life_years + '年、保守 年' + tnd(bm.maintenance_tnd_year) + (bm.plot ? '、軽油1Lあたり3 kWh' : '') + '。' }));
+      if (bm.coop) watch.push(W({ fr: 'Coopérative : ' + bm.coop.members.length + ' fermes partagent le kit, fonds de réserve ' + tnd(bm.coop.reserve_at_term_tnd) + ' à la fin' + (bm.coop.capex_saved_tnd ? ', ' + tnd(bm.coop.capex_saved_tnd) + ' économisés par rapport à des kits individuels' : '') + '.',
+        en: 'Cooperative: ' + bm.coop.members.length + ' farms share the kit, reserve fund ' + tnd(bm.coop.reserve_at_term_tnd) + ' at the end' + (bm.coop.capex_saved_tnd ? ', ' + tnd(bm.coop.capex_saved_tnd) + ' saved vs individual kits' : '') + '.',
+        ar: 'تعاونية: ' + bm.coop.members.length + ' مزارع تتقاسم المنظومة، صندوق احتياط ' + tnd(bm.coop.reserve_at_term_tnd) + ' في النهاية.',
+        ja: '協同組合：' + bm.coop.members.length + '農場でキットを共有、最終的な積立金' + tnd(bm.coop.reserve_at_term_tnd) + '。' }));
+      else watch.push(W({ fr: 'Partager le kit avec des voisins réduit l\'apport de chacun : voir les voisins dans Mon compte, puis la pompe partagée dans Modèle économique.', en: 'Sharing the kit with neighbours lowers each deposit: find neighbours in My account, then the shared pump in Business model.', ar: 'تقاسم المنظومة مع الجيران يخفض دفعة كل واحد: ابحث عن الجيران في حسابي.', ja: '近隣とキットを共有すれば各自の頭金が下がる：「マイアカウント」で近隣を探し、ビジネスモデルで共同ポンプを試算。' }));
+      var weak = bm.adoption && bm.adoption.tests.filter(function (x) { return x.verdict === 'unk'; }).map(function (x) { return x.test; });
+      var TEST = { climate: { fr: 'climat', en: 'climate', ar: 'المناخ', ja: '気候' }, economic: { fr: 'économie', en: 'economics', ar: 'الاقتصاد', ja: '経済性' },
+        ease: { fr: 'facilité d\'usage', en: 'ease of use', ar: 'سهولة الاستعمال', ja: '使いやすさ' }, partners: { fr: 'partenaires', en: 'partners', ar: 'الشركاء', ja: 'パートナー' } };
+      if (weak && weak.length) watch.push(W({ fr: 'Tests d\'adoption à compléter : ', en: 'Adoption tests to complete: ', ar: 'اختبارات التبني الواجب إكمالها: ', ja: '未完了の普及テスト：' }) + weak.map(function (k) { return TEST[k] ? W(TEST[k]) : k; }).join(', ') + W({ fr: ' (page Modèle économique).', en: ' (Business model page).', ar: ' (صفحة النموذج الاقتصادي).', ja: '（ビジネスモデルのページ）。' }));
+      // a money question: keep the irrigation calendar out of the plan, keep the quota
+      acts = acts.filter(function (a) { return a.tool !== 'water_need' || a.prio === 7; });
+    }
+
     // watch: data quality
     if (pr) {
       if (pr.missing && pr.missing.length) watch.push(W({ fr: 'Données manquantes : ', en: 'Missing data: ', ar: 'بيانات ناقصة: ', ja: '不足データ：' }) + pr.missing.slice(0, 5).map(G.fieldLabel).join(', '));
       if (pr.soil && pr.soil.confidence === 'low') watch.push(W({ fr: 'Sol estimé à l\'échelle régionale (confiance faible) : une analyse de sol rendrait le plan plus précis.', en: 'Soil is a regional estimate (low confidence): a soil test would sharpen the plan.', ar: 'التربة تقدير إقليمي (ثقة ضعيفة): تحليل التربة يجعل الخطة أدق.', ja: '土壌は地域推定（信頼度低）：土壌分析で計画が精密になる。' }));
       if (pr.demo_values && pr.demo_values.length) watch.push(W({ fr: 'Valeurs de démonstration utilisées : ', en: 'Demonstration values used: ', ar: 'قيم تجريبية مستعملة: ', ja: 'デモ値を使用：' }) + pr.demo_values.join(', '));
     }
-    if (!ph || ph.status === 'none') watch.push(W({ fr: 'Aucune photo de feuille : une photo dans Santé des plantes confirmerait les risques de maladie.', en: 'No leaf photo yet: a photo in Plant health would confirm the disease risks.', ar: 'لا صورة ورقة بعد: صورة في صحة النبات تؤكد أخطار الأمراض.', ja: '葉の写真がまだありません：「植物の健康」で撮影すると病害リスクを確認できます。' }));
+    if (!bm && (!ph || ph.status === 'none')) watch.push(W({ fr: 'Aucune photo de feuille : une photo dans Santé des plantes confirmerait les risques de maladie.', en: 'No leaf photo yet: a photo in Plant health would confirm the disease risks.', ar: 'لا صورة ورقة بعد: صورة في صحة النبات تؤكد أخطار الأمراض.', ja: '葉の写真がまだありません：「植物の健康」で撮影すると病害リスクを確認できます。' }));
 
     acts.sort(function (a, b) { return a.prio - b.prio || ((a.date || '9') < (b.date || '9') ? -1 : 1); });
     var situation = pr ? W({
@@ -377,7 +465,7 @@
       if (s.kind === 'thought') { ol.appendChild(el('li', { class: 'ag-step thought' }, [el('span', { class: 'ag-ico' }, ['💭']), el('div', null, [el('b', null, [t('ag_think') + ' · ']), s.text])])); return; }
       var res = s.result || {}, raw = res.data || res;
       ol.appendChild(el('li', { class: 'ag-step ' + s.status }, [
-        el('span', { class: 'ag-ico' }, [ICON[s.name] || '🔧']),
+        el('span', { class: 'ag-ico' }, [s.name === 'business_model' ? G.icon('cash', 16) : (ICON[s.name] || '🔧')]),
         el('div', { class: 'ag-body' }, [
           el('div', { class: 'ag-head' }, [el('code', null, [s.name + '(' + argText(s.args) + ')']),
             el('span', { class: 'ag-st' }, [s.status === 'running' ? t('ag_running') : s.status === 'error' ? t('ag_err') : (s.ms + ' ' + t('ag_ms'))])]),

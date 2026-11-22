@@ -37,7 +37,7 @@ def _env(name: str, default: Optional[str] = None) -> Optional[str]:
     v = os.environ.get(name, "").strip()
     if v:
         return v
-    f = Path(__file__).resolve().parent.parent / ".env"
+    f = Path(os.environ.get("GAIA_ENV_FILE") or Path(__file__).resolve().parent.parent / ".env")
     try:
         for line in f.read_text(encoding="utf-8").splitlines():
             line = line.strip()
