@@ -72,7 +72,8 @@ def _conn() -> sqlite3.Connection:
         created_at REAL NOT NULL, expires_at REAL NOT NULL)""")
     # the farm linked to the account (added after the first version: add the columns when missing)
     have = {r["name"] for r in c.execute("PRAGMA table_info(users)")}
-    for col, typ in (("lat", "REAL"), ("lon", "REAL"), ("crop", "TEXT"), ("water", "TEXT"), ("share", "INTEGER DEFAULT 0")):
+    for col, typ in (("lat", "REAL"), ("lon", "REAL"), ("crop", "TEXT"), ("water", "TEXT"), ("share", "INTEGER DEFAULT 0"),
+                     ("is_admin", "INTEGER DEFAULT 0")):      # given on the server only (gaia/admin.py)
         if col not in have:
             c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
     c.execute("""CREATE TABLE IF NOT EXISTS reset_codes (
@@ -80,6 +81,8 @@ def _conn() -> sqlite3.Connection:
     c.execute("""CREATE TABLE IF NOT EXISTS share_requests (
         from_id INTEGER NOT NULL, to_id INTEGER NOT NULL, status TEXT NOT NULL, created_at REAL NOT NULL,
         PRIMARY KEY (from_id, to_id))""")
+    c.execute("""CREATE TABLE IF NOT EXISTS admin_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, at REAL NOT NULL, action TEXT NOT NULL)""")
     return c
 
 
@@ -108,7 +111,7 @@ def _public(row: sqlite3.Row) -> dict:
         # the owner sees their own coordinates; neighbours never do (see neighbours())
         farm = {"lat": row["lat"], "lon": row["lon"], "crop": row["crop"], "water": row["water"], "share": bool(row["share"])}
     return {"id": row["id"], "name": row["name"], "role": row["role"], "region": row["region"],
-            "identifier": row["identifier"], "created_at": row["created_at"], "farm": farm}
+            "identifier": row["identifier"], "created_at": row["created_at"], "farm": farm, "admin": bool(row["is_admin"])}
 
 
 CROPS = {"olive", "palm", "citrus", "cereal", "veg", "other"}
@@ -200,6 +203,14 @@ def _require(c: sqlite3.Connection, token: Optional[str]) -> sqlite3.Row:
     if not row:
         raise AuthError(401, "no_session", "Not signed in.")
     return row
+
+
+def require_admin(c: sqlite3.Connection, token: Optional[str]) -> sqlite3.Row:
+    """The signed-in administrator, read from the database at each call. Never trust what the browser says."""
+    me = _require(c, token)
+    if not me["is_admin"]:
+        raise AuthError(403, "not_admin", "Administrators only.")
+    return me
 
 
 def set_farm(token: Optional[str], farm: Optional[dict]) -> dict:

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -28,7 +28,7 @@ def _load_env_file() -> None:
 
 _load_env_file()
 
-from . import (agent, assistant, auth, business, engine, farm_monitor, farm_state, guard, irrigation, irrigation_agent, leaf,
+from . import (admin, agent, assistant, auth, business, engine, farm_monitor, farm_state, guard, irrigation, irrigation_agent, leaf,
                nexus, planner, plantnet, solar, vision)
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -130,6 +130,13 @@ def auth_forgot(body: ForgotIn, request: Request) -> dict:
 def auth_reset(body: ResetIn) -> dict:
     """Code + new password: sets the password, closes every other session, signs in."""
     return _auth_call(auth.confirm_reset, body.identifier, body.code, body.password)
+
+
+@app.get("/admin/overview")
+def admin_overview(response: Response, authorization: Optional[str] = Header(None)) -> dict:
+    """Admin dashboard (read only). 401 without a session, 403 for an account that is not an administrator."""
+    response.headers["Cache-Control"] = "no-store"
+    return _auth_call(admin.overview, _bearer(authorization))
 
 
 @app.put("/auth/farm")

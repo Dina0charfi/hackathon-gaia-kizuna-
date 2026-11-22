@@ -84,7 +84,7 @@
       nav_home: 'Accueil', nav_land: 'Land Intelligence', nav_engine: 'Compatibilité', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Santé des plantes', nav_nexus: 'Eau & énergie', nav_biz: 'Modèle économique', nav_farm: 'Tableau de bord', nav_season: 'Ma saison', nav_agv: 'Agrivoltaïsme', nav_lib: 'Bibliothèque',
       parcel_none: 'Aucune parcelle', parcel_pick: 'Choisir une parcelle',
-      skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte',
+      skip: 'Aller au contenu', acc_signin: 'Se connecter', acc_signout: 'Se déconnecter', acc_menu: 'Mon compte', acc_admin: 'Administration',
       foot_line: "GAIA n'impose pas la technologie à la terre. GAIA adapte la technologie à la terre.",
       foot_honest: "Données ouvertes citées à chaque valeur. Les modules non connectés le disent.",
       verdict_ok: 'Faisable', verdict_adapt: 'Faisable avec adaptation', verdict_no: 'Non recommandé', verdict_unk: 'Preuves insuffisantes',
@@ -104,7 +104,7 @@
       nav_home: 'الرئيسية', nav_land: 'ذكاء الأرض', nav_engine: 'التوافق', nav_lab: 'مختبر الذكاء', nav_agent: 'الوكيل',
       nav_health: 'صحة النبات', nav_nexus: 'الماء والطاقة', nav_biz: 'النموذج الاقتصادي', nav_farm: 'لوحة المتابعة', nav_season: 'موسمي', nav_agv: 'الطاقة الزراعية الشمسية', nav_lib: 'المكتبة',
       parcel_none: 'لا توجد قطعة', parcel_pick: 'اختر قطعة أرض',
-      skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي',
+      skip: 'انتقل إلى المحتوى', acc_signin: 'تسجيل الدخول', acc_signout: 'تسجيل الخروج', acc_menu: 'حسابي', acc_admin: 'الإدارة',
       foot_line: 'غايا لا تفرض التكنولوجيا على الأرض، بل تكيّف التكنولوجيا مع الأرض.',
       foot_honest: 'كل قيمة مصحوبة بمصدرها. والوحدات غير المتصلة تصرّح بذلك.',
       verdict_ok: 'ممكن', verdict_adapt: 'ممكن مع التكييف', verdict_no: 'غير موصى به', verdict_unk: 'أدلة غير كافية',
@@ -124,7 +124,7 @@
       nav_home: 'Home', nav_land: 'Land Intelligence', nav_engine: 'Compatibility', nav_lab: 'AI Lab', nav_agent: 'Agent',
       nav_health: 'Plant health', nav_nexus: 'Water & energy', nav_biz: 'Business model', nav_farm: 'Dashboard', nav_season: 'My season', nav_agv: 'Agrivoltaics', nav_lib: 'Library',
       parcel_none: 'No plot', parcel_pick: 'Choose a plot',
-      skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account',
+      skip: 'Skip to content', acc_signin: 'Sign in', acc_signout: 'Sign out', acc_menu: 'My account', acc_admin: 'Administration',
       foot_line: 'GAIA does not impose technology on the land. GAIA adapts technology to the land.',
       foot_honest: 'Open data, cited for every value. Modules that are not connected say so.',
       verdict_ok: 'Feasible', verdict_adapt: 'Feasible with adaptation', verdict_no: 'Not recommended', verdict_unk: 'Not enough evidence',
@@ -144,7 +144,7 @@
       nav_home: 'ホーム', nav_land: 'ランド・インテリジェンス', nav_engine: '適合性', nav_lab: 'AIラボ', nav_agent: 'エージェント',
       nav_health: '植物の健康', nav_nexus: '水とエネルギー', nav_biz: 'ビジネスモデル', nav_farm: 'ダッシュボード', nav_season: 'わたしの季節', nav_agv: '営農型太陽光', nav_lib: 'ライブラリ',
       parcel_none: '区画なし', parcel_pick: '区画を選ぶ',
-      skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント',
+      skip: '本文へ移動', acc_signin: 'ログイン', acc_signout: 'ログアウト', acc_menu: 'マイアカウント', acc_admin: '管理',
       foot_line: 'GAIAは技術を土地に押しつけません。技術を土地に合わせます。',
       foot_honest: 'すべての値にオープンデータの出典を表示。未接続のモジュールはそう明示します。',
       verdict_ok: '実施可能', verdict_adapt: '調整すれば実施可能', verdict_no: '推奨しない', verdict_unk: '根拠不足',
@@ -256,7 +256,7 @@
   function authSend(path, opts) {
     var s = session(), h = { 'Content-Type': 'application/json' };
     if (s && s.token) h.Authorization = 'Bearer ' + s.token;
-    var url = path.indexOf('/share/') === 0 ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
+    var url = /^\/(share|admin)\//.test(path) ? CONFIG.authEndpoint.replace(/\/auth$/, '') + path : CONFIG.authEndpoint + path;
     return fetch(url, Object.assign({ headers: h }, opts || {})).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (b) {
         if (!r.ok) throw Object.assign({ status: r.status }, (b && b.detail) || {});
@@ -283,6 +283,7 @@
     setFarm: function (farm) {
       return authCall('/farm', { method: 'PUT', body: farm ? JSON.stringify(farm) : null }).then(function (r) { var s = session(); s.user = r.user; setSession(s); return r.user; });
     },
+    adminOverview: function () { return authCall('/admin/overview'); },   // 403 unless the server says this account is an administrator
     neighbours: function (radiusKm) { return authCall('/share/neighbours?radius_km=' + encodeURIComponent(radiusKm || 5)); },
     requestShare: function (id) { return authCall('/share/request', { method: 'POST', body: JSON.stringify({ to: id }) }); },
     respondShare: function (id, accept) { return authCall('/share/respond', { method: 'POST', body: JSON.stringify({ from_id: id, accept: !!accept }) }); },
@@ -303,6 +304,7 @@
         el('span', { class: 'gp-acc-av', 'aria-hidden': 'true' }, [initials(u.name)]),
         el('span', { class: 'gp-acc-name' }, [u.name.split(/\s+/)[0]])
       ]));
+      if (u.admin) box.appendChild(el('a', { class: 'gp-acc-out', style: 'color:#DCE3D2', href: 'admin.html', title: t('acc_admin'), 'aria-label': t('acc_admin') }, [icon('chart', 16)]));
       box.appendChild(el('button', { type: 'button', class: 'gp-acc-out', title: t('acc_signout'), 'aria-label': t('acc_signout'),
         onclick: function () { auth.logout().then(function () { if (/account\.html$/.test(global.location.pathname)) global.location.reload(); }); } }, [icon('logout', 16)]));
     } else {
@@ -353,6 +355,7 @@
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/>',
     play: '<path d="M7 4.5l12 7.5-12 7.5z"/>',
     pause: '<path d="M8 5v14M16 5v14"/>',
+    chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     star: '<path d="M12 3l2.7 5.8 6.3.8-4.6 4.3 1.2 6.2-5.6-3.1-5.6 3.1 1.2-6.2L3 9.6l6.3-.8z"/>',
     network: '<circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="19" cy="17" r="2"/><path d="M7 7.8l3.2 3M7 16.2l3.2-3M13.8 11l3.4-3.2M13.8 13l3.4 3.2"/>'
   };
