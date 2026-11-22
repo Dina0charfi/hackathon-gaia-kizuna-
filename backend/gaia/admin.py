@@ -46,7 +46,7 @@ def _records() -> list[dict[str, Any]]:
     out = []
     for s in farm_state.all_parcels():
         log, alerts = s.get("irrigation_log") or [], s.get("alerts") or []
-        out.append({"lat": s.get("lat"), "lon": s.get("lon"), "crop": (s.get("settings") or {}).get("crop"), "area_ha": (s.get("settings") or {}).get("area_ha"),
+        out.append({"owner": s.get("owner"), "lat": s.get("lat"), "lon": s.get("lon"), "crop": (s.get("settings") or {}).get("crop"), "area_ha": (s.get("settings") or {}).get("area_ha"),
                     "planned_days": sum(1 for d in s.get("plan") or [] if not d.get("done")), "irrigations": len(log),
                     "last_irrigation": max((e.get("date", "") for e in log), default=None),
                     "monitoring": bool((s.get("monitoring") or {}).get("enabled")), "unread_alerts": sum(1 for a in alerts if not a.get("read")),
@@ -69,11 +69,14 @@ def overview(token: Optional[str]) -> dict[str, Any]:
         log = [dict(r) for r in c.execute("""SELECT l.at, l.action, u.name FROM admin_log l LEFT JOIN users u ON u.id = l.user_id
                                              ORDER BY l.id DESC LIMIT 20""")]
     records = _records()
-    by_plot = {farm_state.key(r["lat"], r["lon"]): r for r in records if r["lat"] is not None}
+    own: dict[int, int] = {}
+    for r in records:
+        if r["owner"] is not None:
+            own[r["owner"]] = own.get(r["owner"], 0) + r["irrigations"]
     for u in users:
         u["share"], u["is_admin"] = bool(u["share"]), bool(u["is_admin"])
         u["last_sign_in"] = seen.get(u["id"])
-        u["record"] = by_plot.get(farm_state.key(u["lat"], u["lon"])) if u["lat"] is not None else None
+        u["record"] = {"irrigations": own[u["id"]]} if u["id"] in own else None
     return {"generated_at": now, "users": users, "shares": shares, "records": records, "feedback": _feedback(), "log": log}
 
 

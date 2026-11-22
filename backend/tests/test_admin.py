@@ -59,7 +59,7 @@ def test_overview_content_and_no_secret(api):
     a, ua = signup(c, "a@example.com", name="Karim", farm={"lat": 35.68, "lon": 10.1, "crop": "olive", "water": "well", "share": True})
     b, ub = signup(c, "+216 98 123 456", name="Sami", farm={"lat": 35.69, "lon": 10.11, "crop": "cereal", "water": "well", "share": True})
     c.post("/share/request", json={"to": ub["id"]}, headers=H(a))
-    farm_state.apply(35.68, 10.1, {"type": "log_irrigation", "params": {"mm": 8}})
+    assert c.post("/farm/action", json={"lat": 35.68, "lon": 10.1, "action": {"type": "log_irrigation", "params": {"mm": 8}}}, headers=H(a)).status_code == 200
     c.post("/feedback", json={"kind": "diagnosis", "text": "Ce n'est pas la bonne maladie"})
     admin.set_admin("boss@example.com", True)
     r = c.get("/admin/overview", headers=H(boss))

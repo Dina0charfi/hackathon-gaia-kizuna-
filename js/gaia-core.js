@@ -283,6 +283,7 @@
     setFarm: function (farm) {
       return authCall('/farm', { method: 'PUT', body: farm ? JSON.stringify(farm) : null }).then(function (r) { var s = session(); s.user = r.user; setSession(s); return r.user; });
     },
+    headers: function () { var s = session(); return s && s.token ? { Authorization: 'Bearer ' + s.token } : {}; },   // for the other routes of the GAIA server
     adminOverview: function () { return authCall('/admin/overview'); },   // 403 unless the server says this account is an administrator
     neighbours: function (radiusKm) { return authCall('/share/neighbours?radius_km=' + encodeURIComponent(radiusKm || 5)); },
     requestShare: function (id) { return authCall('/share/request', { method: 'POST', body: JSON.stringify({ to: id }) }); },

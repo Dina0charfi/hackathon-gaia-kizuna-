@@ -151,9 +151,8 @@
     var filtered = rows.length !== D.users.length;
     var recent = rows.filter(function (u) { return D.generated_at - u.created_at < 30 * 86400; }).length;
     // records and requests follow the filter through their account
-    var keyOf = function (r) { return r.lat.toFixed(3) + '_' + r.lon.toFixed(3); }, owner = {};
-    D.users.forEach(function (u) { if (u.lat !== null) owner[keyOf(u)] = u; });
-    var recs = D.records.filter(function (r) { var o = owner[keyOf(r)]; return !filtered || (o && ids[o.id]); });
+    var owner = {}; D.users.forEach(function (u) { owner[u.id] = u; });
+    var recs = D.records.filter(function (r) { var o = owner[r.owner]; return !filtered || (o && ids[o.id]); });
     var shares = D.shares.filter(function (s) { return ids[s.from_id] || ids[s.to_id]; });
     var sum = function (k) { return recs.reduce(function (s, r) { return s + (+r[k] || 0); }, 0); };
 
@@ -179,7 +178,7 @@
       }))])));
 
     box.appendChild(card(t('ad_rec'), null, recs.length ? table([t('ad_th_owner'), t('ad_th_plot'), t('ad_crop'), t('ad_th_plan'), t('ad_th_irr'), t('ad_th_lastirr'), t('ad_th_mon'), t('ad_th_alert')], recs.map(function (r) {
-      var o = owner[keyOf(r)], a = r.last_alert, tx = a && a.text ? (typeof a.text === 'string' ? a.text : a.text[G.lang()] || a.text.fr || a.text.en) : null;
+      var o = owner[r.owner], a = r.last_alert, tx = a && a.text ? (typeof a.text === 'string' ? a.text : a.text[G.lang()] || a.text.fr || a.text.en) : null;
       return [o ? o.name : null, plot(r), r.crop ? lab('c_', r.crop) : null, fmt(r.planned_days, 0), fmt(r.irrigations, 0), iso(r.last_irrigation), t(r.monitoring ? 'ad_yes' : 'ad_no'), tx ? G.noEmoji(tx).slice(0, 140) : null];
     })) : el('p', { class: 'small muted', style: 'margin-top:8px' }, [t('ad_rec_none')])));
 
